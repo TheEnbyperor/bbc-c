@@ -58,6 +58,8 @@ class ScopedSymbolTable(object):
 
     def _init_builtins(self):
         self.define(BuiltinTypeSymbol(INT, 0x2))
+        self.define(BuiltinTypeSymbol(CHAR, 0x2))
+        self.define(BuiltinTypeSymbol(VOID, 0x2))
 
     def __str__(self):
         h1 = 'SCOPE (SCOPED SYMBOL TABLE)'
@@ -133,6 +135,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
             enclosing_scope=self.scope,
         )
         self.scope = procedure_scope
+        if ast.Return not in [type(n) for n in node.body.items] and type_symbol.name != VOID:
+            raise SyntaxError("No return in function")
         self.visit(node.body)
         print(procedure_scope)
         self.scope = self.scope.enclosing_scope
