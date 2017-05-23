@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="fbd7ba0c-3615-481f-ae44-4aa6a57659a7" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/__init__.py" afterPath="$PROJECT_DIR$/bbcc/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/symbols.py" afterPath="$PROJECT_DIR$/bbcc/symbols.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/asm.py" afterPath="$PROJECT_DIR$/bbcc/asm.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/interpreter.py" afterPath="$PROJECT_DIR$/bbcc/interpreter.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -51,11 +51,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="symbols.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="symbols.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1236">
-              <caret line="91" column="32" lean-forward="false" selection-start-line="91" selection-start-column="32" selection-end-line="91" selection-end-column="32" />
+            <state relative-caret-position="320">
+              <caret line="160" column="4" lean-forward="false" selection-start-line="160" selection-start-column="4" selection-end-line="326" selection-end-column="30" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -63,14 +63,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-80">
-              <caret line="5" column="18" lean-forward="false" selection-start-line="5" selection-start-column="18" selection-end-line="5" selection-end-column="18" />
+            <state relative-caret-position="2100">
+              <caret line="105" column="68" lean-forward="false" selection-start-line="105" selection-start-column="68" selection-end-line="105" selection-end-column="68" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="asm.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/bbcc/asm.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="320">
+              <caret line="16" column="23" lean-forward="true" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -128,8 +138,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>CompilerError</find>
-      <find>self.arg</find>
       <find>current_token</find>
       <find>\t</find>
       <find>STA #</find>
@@ -156,6 +164,10 @@
       <find>.kind</find>
       <find>.Function</find>
       <find>.FuncCall</find>
+      <find>[0-9]+ ([A-z.0-9]+)</find>
+      <find>&amp;&quot;&quot;&quot; \+</find>
+      <find>to_hex</find>
+      <find>self.num2</find>
     </findStrings>
     <replaceStrings>
       <replace>current_char</replace>
@@ -171,6 +183,10 @@
       <replace>SyntaxError:</replace>
       <replace>ast</replace>
       <replace>.type</replace>
+      <replace>self.asm.add_inst(&quot;$1&quot;</replace>
+      <replace>&quot;&amp;&quot; +</replace>
+      <replace>asm.to_hex</replace>
+      <replace>self.asm.num2</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -204,7 +220,6 @@
         <option value="$PROJECT_DIR$/bbcc/asm_gen.py" />
         <option value="$PROJECT_DIR$/bbcc/il_gen.py" />
         <option value="$PROJECT_DIR$/bbcc/ctypes.py" />
-        <option value="$PROJECT_DIR$/bbcc/asm.py" />
         <option value="$PROJECT_DIR$/bbcc/lexer.py" />
         <option value="$PROJECT_DIR$/bbcc/decl_ast.py" />
         <option value="$PROJECT_DIR$/bbcc/parser.py" />
@@ -214,9 +229,10 @@
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/bbcc/tokens.py" />
-        <option value="$PROJECT_DIR$/bbcc/interpreter.py" />
         <option value="$PROJECT_DIR$/bbcc/__init__.py" />
         <option value="$PROJECT_DIR$/bbcc/symbols.py" />
+        <option value="$PROJECT_DIR$/bbcc/asm.py" />
+        <option value="$PROJECT_DIR$/bbcc/interpreter.py" />
       </list>
     </option>
   </component>
@@ -504,7 +520,14 @@
       <option name="project" value="LOCAL" />
       <updated>1495563784560</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Output symbol table">
+      <created>1495565328718</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1495565328718</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -545,7 +568,8 @@
     <MESSAGE value="Check for return in function" />
     <MESSAGE value="Memeory allocation for variables" />
     <MESSAGE value="Duplicate identifier checking" />
-    <option name="LAST_COMMIT_MESSAGE" value="Duplicate identifier checking" />
+    <MESSAGE value="Output symbol table" />
+    <option name="LAST_COMMIT_MESSAGE" value="Output symbol table" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -586,14 +610,6 @@
     <entry file="file://$PROJECT_DIR$/bbcc/il_gen.py" />
     <entry file="file://$PROJECT_DIR$/bbcc/asm_gen.py" />
     <entry file="file://$PROJECT_DIR$/bbcc/tokens_list.py" />
-    <entry file="file://$PROJECT_DIR$/bbcc/asm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="526">
-          <caret line="121" column="22" lean-forward="false" selection-start-line="121" selection-start-column="22" selection-end-line="121" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/ctypes.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
@@ -644,24 +660,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4464">
-          <caret line="256" column="20" lean-forward="false" selection-start-line="256" selection-start-column="20" selection-end-line="256" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-80">
-          <caret line="5" column="18" lean-forward="false" selection-start-line="5" selection-start-column="18" selection-end-line="5" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/lexer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="746">
@@ -690,10 +688,36 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1236">
-          <caret line="91" column="32" lean-forward="false" selection-start-line="91" selection-start-column="32" selection-end-line="91" selection-end-column="32" />
+        <state relative-caret-position="320">
+          <caret line="160" column="4" lean-forward="false" selection-start-line="160" selection-start-column="4" selection-end-line="326" selection-end-column="30" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4464">
+          <caret line="256" column="20" lean-forward="false" selection-start-line="256" selection-start-column="20" selection-end-line="256" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/asm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="320">
+          <caret line="16" column="23" lean-forward="true" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2100">
+          <caret line="105" column="68" lean-forward="false" selection-start-line="105" selection-start-column="68" selection-end-line="105" selection-end-column="68" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
