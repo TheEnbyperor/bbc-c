@@ -22,11 +22,12 @@ class BuiltinTypeSymbol(Symbol):
 
 
 class VarSymbol(Symbol):
-    def __init__(self, name, type):
+    def __init__(self, name, type, location):
         super(VarSymbol, self).__init__(name, type)
+        self.location = location
 
     def __str__(self):
-        return '<VAR({name}:{type})>'.format(name=self.name, type=self.type)
+        return '<VAR({name}:{type}:{loc})>'.format(name=self.name, type=self.type, loc=self.location)
 
     __repr__ = __str__
 
@@ -100,6 +101,8 @@ class ScopedSymbolTable(object):
 
 
 class SymbolTableBuilder(ast.NodeVisitor):
+    memstart = 0x2FFF
+
     def __init__(self):
         self.scope = None
 
@@ -115,7 +118,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
             type_symbol = self.scope.lookup(type_name)
             if type(d.child) == decl_tree.Identifier:
                 var_name = d.child.identifier.value
-                self.scope.define(VarSymbol(var_name, type_symbol))
+                self.scope.define(VarSymbol(var_name, type_symbol, self.memstart))
+                self.memstart -= type_symbol.size
                 if node.inits[i] is not None:
                     self.visit(node.inits[i])
             elif type(d.child) == decl_tree.Function:

@@ -13,7 +13,7 @@ def main(text):
     p = Parser(token_list)
     ast_out = p.parse()
 
-    pdb.set_trace()
+    # pdb.set_trace()
 
     # casm = ASM()
     # interp = Interpreter(casm)

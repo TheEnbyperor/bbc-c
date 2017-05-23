@@ -1,11 +1,9 @@
 from .tokens import *
 from . import ast
-from .ctypes import CTypes
 
 
 class Interpreter(ast.NodeVisitor):
     variables = {}
-    memstart = 0x2FFF
 
     def __init__(self, asm):
         self.asm = asm
