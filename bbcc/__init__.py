@@ -20,7 +20,8 @@ def main(text):
     #
     # asm_out = interp.interpret(ast_out)
 
-    symbol_table = SymbolTableBuilder()
-    symbol_table.visit(ast_out)
+    symbol_table_b = SymbolTableBuilder()
+    symbol_table_b.visit(ast_out)
+    symbol_table = symbol_table_b.scope_out
 
     print(symbol_table)

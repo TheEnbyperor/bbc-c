@@ -50,7 +50,7 @@ class FunctionSymbol(Symbol):
 
 class ScopedSymbolTable(object):
     def __init__(self, scope_name, scope_level, enclosing_scope=None):
-        self._symbols = collections.OrderedDict()
+        self.symbols = collections.OrderedDict()
         self.scope_name = scope_name
         self.scope_level = scope_level
         self.enclosing_scope = enclosing_scope
@@ -77,7 +77,7 @@ class ScopedSymbolTable(object):
         lines.extend([h2, '-' * len(h2)])
         lines.extend(
             ('%7s: %r' % (key, value))
-            for key, value in self._symbols.items()
+            for key, value in self.symbols.items()
         )
         lines.append('\n')
         s = '\n'.join(lines)
@@ -86,12 +86,10 @@ class ScopedSymbolTable(object):
     __repr__ = __str__
 
     def define(self, symbol):
-        print('Define: %s' % symbol)
-        self._symbols[symbol.name] = symbol
+        self.symbols[symbol.name] = symbol
 
     def lookup(self, name, current_scope_only=False):
-        print('Lookup: %s. (Scope name: %s)' % (name, self.scope_name))
-        symbol = self._symbols.get(name)
+        symbol = self.symbols.get(name)
         # 'symbol' is either an instance of the Symbol class or 'None'
         if symbol is not None:
             return symbol
@@ -104,17 +102,68 @@ class ScopedSymbolTable(object):
             return self.enclosing_scope.lookup(name)
 
 
+class SymbolTable(object):
+    def __init__(self, scope):
+        self.name = scope.scope_name
+        self.symbols = scope.symbols
+        self.sub_scopes = []
+
+    def set_symbols(self, scope):
+        self.symbols = scope.symbols
+
+    def add_scope(self, scope):
+        self.sub_scopes.append(SymbolTable(scope))
+
+    def __str__(self):
+        h1 = 'SYMBOL TABLE: ' + self.name
+        lines = [h1, '=' * len(h1)]
+        h2 = 'Symbol table contents'
+        lines.extend([h2, '-' * len(h2)])
+        lines.extend(
+            ('%7s: %r' % (key, value))
+            for key, value in self.symbols.items()
+        )
+        h3 = 'Sub symbol tables'
+        lines.extend([h3, '-' * len(h3)])
+        lines.extend([
+            "\n".join([("\t" + l) for l in str(table).splitlines()])
+            for table in self.sub_scopes
+        ])
+        lines.append('\n')
+        s = '\n'.join(lines)
+        return s
+
+    __repr__ = __str__
+
+    def lookup(self, name, scope_name=""):
+        if scope_name == "":
+            scope = self
+        else:
+            scope = None
+            for s in self.sub_scopes:
+                if s.name == scope_name:
+                    scope = s
+                    break
+        r = scope.symbols.get(name)
+        if r is not None:
+            return r
+
+        return self.symbols.get(name)
+
+
 class SymbolTableBuilder(ast.NodeVisitor):
     memstart = 0x2FFF
 
     def __init__(self):
         self.scope = None
+        self.scope_out = None
 
     def visit_Root(self, node):
         self.scope = ScopedSymbolTable(scope_name='global', scope_level=1)
+        self.scope_out = SymbolTable(self.scope)
         for n in node.nodes:
             self.visit(n)
-        print(self.scope)
+        self.scope_out.set_symbols(self.scope)
 
     def visit_Declaration(self, node):
         for i, d in enumerate(node.decls):
@@ -140,7 +189,6 @@ class SymbolTableBuilder(ast.NodeVisitor):
         func_name = "main"
         func_symbol = FunctionSymbol(func_name, type_symbol)
         self.scope.define(func_symbol)
-        print('ENTER scope: %s' % func_name)
         procedure_scope = ScopedSymbolTable(
             scope_name=func_name,
             scope_level=self.scope.scope_level + 1,
@@ -150,9 +198,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
         if ast.Return not in [type(n) for n in node.body.items] and type_symbol.name != VOID:
             raise SyntaxError("No return in function")
         self.visit(node.body)
-        print(procedure_scope)
+        self.scope_out.add_scope(procedure_scope)
         self.scope = self.scope.enclosing_scope
-        print('LEAVE scope: %s' % func_name)
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
