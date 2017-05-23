@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/bbcc/symbols.py" line="116" mnemonic="9" />
+    <bookmark url="file://$PROJECT_DIR$/bbcc/symbols.py" line="120" mnemonic="9" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbd7ba0c-3615-481f-ae44-4aa6a57659a7" name="Default" comment="Check for return in function">
+    <list default="true" id="fbd7ba0c-3615-481f-ae44-4aa6a57659a7" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/__init__.py" afterPath="$PROJECT_DIR$/bbcc/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/interpreter.py" afterPath="$PROJECT_DIR$/bbcc/interpreter.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/symbols.py" afterPath="$PROJECT_DIR$/bbcc/symbols.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -55,8 +53,8 @@
       <file leaf-file-name="symbols.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="460">
-              <caret line="121" column="49" lean-forward="false" selection-start-line="121" selection-start-column="49" selection-end-line="121" selection-end-column="49" />
+            <state relative-caret-position="600">
+              <caret line="140" column="60" lean-forward="true" selection-start-line="140" selection-start-column="60" selection-end-line="140" selection-end-column="60" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -67,7 +65,7 @@
       <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="100">
+            <state relative-caret-position="-80">
               <caret line="5" column="18" lean-forward="false" selection-start-line="5" selection-start-column="18" selection-end-line="5" selection-end-column="18" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
@@ -216,8 +214,8 @@
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/bbcc/tokens.py" />
         <option value="$PROJECT_DIR$/bbcc/interpreter.py" />
-        <option value="$PROJECT_DIR$/bbcc/symbols.py" />
         <option value="$PROJECT_DIR$/bbcc/__init__.py" />
+        <option value="$PROJECT_DIR$/bbcc/symbols.py" />
       </list>
     </option>
   </component>
@@ -491,7 +489,14 @@
       <option name="project" value="LOCAL" />
       <updated>1495562354468</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Memeory allocation for variables">
+      <created>1495563096101</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1495563096101</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -530,11 +535,12 @@
     <MESSAGE value="gitignore" />
     <MESSAGE value="README" />
     <MESSAGE value="Check for return in function" />
-    <option name="LAST_COMMIT_MESSAGE" value="Check for return in function" />
+    <MESSAGE value="Memeory allocation for variables" />
+    <option name="LAST_COMMIT_MESSAGE" value="Memeory allocation for variables" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="8" />
+      <option name="time" value="11" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -645,16 +651,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="100">
-          <caret line="5" column="18" lean-forward="false" selection-start-line="5" selection-start-column="18" selection-end-line="5" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/lexer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="746">
@@ -673,10 +669,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-80">
+          <caret line="5" column="18" lean-forward="false" selection-start-line="5" selection-start-column="18" selection-end-line="5" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="460">
-          <caret line="121" column="49" lean-forward="false" selection-start-line="121" selection-start-column="49" selection-end-line="121" selection-end-column="49" />
+        <state relative-caret-position="600">
+          <caret line="140" column="60" lean-forward="true" selection-start-line="140" selection-start-column="60" selection-end-line="140" selection-end-column="60" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

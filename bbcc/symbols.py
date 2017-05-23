@@ -89,12 +89,16 @@ class ScopedSymbolTable(object):
         print('Define: %s' % symbol)
         self._symbols[symbol.name] = symbol
 
-    def lookup(self, name):
+    def lookup(self, name, current_scope_only=False):
         print('Lookup: %s. (Scope name: %s)' % (name, self.scope_name))
         symbol = self._symbols.get(name)
         # 'symbol' is either an instance of the Symbol class or 'None'
         if symbol is not None:
             return symbol
+
+        if current_scope_only:
+            return None
+
         # recursively go up the chain and lookup the name
         if self.enclosing_scope is not None:
             return self.enclosing_scope.lookup(name)
@@ -118,12 +122,16 @@ class SymbolTableBuilder(ast.NodeVisitor):
             type_symbol = self.scope.lookup(type_name)
             if type(d.child) == decl_tree.Identifier:
                 var_name = d.child.identifier.value
+                if self.scope.lookup(var_name, current_scope_only=True):
+                    raise SyntaxError("Duplicate identifier '%s' found" % var_name)
                 self.scope.define(VarSymbol(var_name, type_symbol, self.memstart))
                 self.memstart -= type_symbol.size
                 if node.inits[i] is not None:
                     self.visit(node.inits[i])
             elif type(d.child) == decl_tree.Function:
                 func_name = d.child.child.identifier.value
+                if self.scope.lookup(func_name, current_scope_only=True):
+                    raise SyntaxError("Duplicate identifier '%s' found" % func_name)
                 print(d.child.args[0].child)
                 self.scope.define(FunctionSymbol(func_name, type_symbol, d.child.args))
 
