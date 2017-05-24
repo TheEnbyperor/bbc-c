@@ -4,9 +4,8 @@ if __name__ == "__main__":
     text = """
     // Comment
     int main() {
-     int a = 2;
-     int b = a==2;
-     return a*b;
+     char a = 'a';
+     return a;
     }
     """
     bbcc.main(text)

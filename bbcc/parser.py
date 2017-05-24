@@ -367,14 +367,14 @@ class Parser:
             index = self.eat(index, RPAREM)
             return ast.ParenExpr(node), index
         elif self.token_is(index, INTEGER):
-            return ast.Number(self.tokens[index]), index + 1
+            return ast.Number(self.tokens[index].value), index + 1
         elif self.token_is(index, ID):
             return ast.Identifier(self.tokens[index]), index + 1
         elif self.token_is(index, STRING):
             return ast.String(self.tokens[index].content), index + 1
         elif self.token_is(index, CHARACTER):
             chars = self.tokens[index].value
-            return ast.Number(chars[0]), index + 1
+            return ast.Number(ord(chars[0])), index + 1
         else:
             self.error()
 
