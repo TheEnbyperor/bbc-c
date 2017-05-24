@@ -13,7 +13,7 @@ def main(text):
     p = Parser(token_list)
     ast_out = p.parse()
     
-    pdb.set_trace()
+    # pdb.set_trace()
 
     symbol_table_b = SymbolTableBuilder()
     symbol_table_b.visit(ast_out)

@@ -1,9 +1,12 @@
 class ASM:
     num1 = 0x8F
-    num2 = 0x8D
-    result = 0x8B
-    ret = 0x87
-    loc = 0x85
+    num2 = num1 - 2
+    result = num2 - 2
+    ret = result - 4
+    loc1 = ret - 2
+    loc2 = loc1 - 2
+    loc3 = loc2 - 2
+    loc4 = loc3 - 2
 
     def __init__(self):
         self.asm = "NEW\n"
