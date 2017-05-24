@@ -36,7 +36,7 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("ROR", "&" + self.asm.to_hex(self.asm.result))
         self.asm.add_inst("DEX")
         self.asm.add_inst("BNE", "mul1")
-        self.asm.add_inst("JSR" "movres")
+        self.asm.add_inst("JSR", "movres")
         self.asm.add_inst("RTS")
         self.asm.add_inst("LDA", "#0", "div")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result))
@@ -113,8 +113,8 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("]")
         self.asm.add_inst("NEXT", "opt%")
         self.asm.add_inst("CALL", "main")
-        self.asm.add_inst("RL=&" + self.asm.asm.to_hex(self.asm.ret))
-        self.asm.add_inst("RH=&" + self.asm.asm.to_hex(self.asm.ret - 1))
+        self.asm.add_inst("RL=&" + self.asm.to_hex(self.asm.ret))
+        self.asm.add_inst("RH=&" + self.asm.to_hex(self.asm.ret - 1))
         self.asm.add_inst("PRINT", "~?RH,~?RL")
 
     def visit_Declaration(self, node):
@@ -136,9 +136,9 @@ class Interpreter(ast.NodeVisitor):
     def visit_Main(self, node):
         func_name = "main"
         self.current_scope = func_name
-        self.asm.add_inst("", label=func_name)
-        self.asm.add_inst("JSR", "reset")
+        self.asm.add_inst("JSR", "reset", label=func_name)
         self.visit(node.body)
+        self.asm.add_inst("RTS")
         self.current_scope = ""
 
     def visit_Identifier(self, node):
@@ -185,7 +185,10 @@ class Interpreter(ast.NodeVisitor):
         self.visit(node.right)
 
     def visit_Number(self, node):
-        pass
+        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(node.number.value, 4)[2:4])
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(node.number.value, 4)[0:2])
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2-1))
 
     def visit_String(self, node):
         pass
@@ -303,12 +306,6 @@ class Interpreter(ast.NodeVisitor):
         elif op == MINUS:
             self.visit(node.expr)
             self.asm.add_inst("JSR", "neg")
-
-    def visit_Num(self, node):
-        self.asm.add_inst("LDA", "#&" + ('%04x' % node.value).upper()[2:4])
-        self.asm.add_inst("STA", "&" + ('%02x' % self.asm.num2).upper())
-        self.asm.add_inst("LDA", "#&" + ('%04x' % node.value).upper()[0:2])
-        self.asm.add_inst("STA", "&" + ('%02x' % (self.asm.num2-1)).upper())
 
     def interpret(self, ast_root):
         self.visit(ast_root)

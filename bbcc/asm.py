@@ -5,17 +5,17 @@ class ASM:
     ret = 0x87
 
     def __init__(self):
-        self.asm = """NEW"""
+        self.asm = "NEW\n"
         self.line = 10
 
     @staticmethod
-    def to_hex(num):
-        return ('%02x' % num).upper()
+    def to_hex(num, leng=2):
+        return (('%0' + str(leng) + 'x') % num).upper()
 
     def add_inst(self, isnt, op="", label=""):
         self.asm += str(self.line) + " "
         if label != "":
-            self.asm += "." + label
+            self.asm += "." + label + " "
         self.asm += isnt.upper()
         if op != "":
             self.asm += " " + str(op)

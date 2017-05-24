@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fbd7ba0c-3615-481f-ae44-4aa6a57659a7" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.gitignore" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/__init__.py" afterPath="$PROJECT_DIR$/bbcc/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/asm.py" afterPath="$PROJECT_DIR$/bbcc/asm.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/interpreter.py" afterPath="$PROJECT_DIR$/bbcc/interpreter.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -22,8 +25,8 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+            <state relative-caret-position="120">
+              <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -42,8 +45,8 @@
       <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="19" column="45" lean-forward="false" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
+            <state relative-caret-position="480">
+              <caret line="24" column="0" lean-forward="true" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
               <folding>
                 <element signature="e#0#24#0" expanded="true" />
               </folding>
@@ -66,8 +69,8 @@
       <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2471">
-              <caret line="236" column="38" lean-forward="false" selection-start-line="236" selection-start-column="38" selection-end-line="236" selection-end-column="38" />
+            <state relative-caret-position="624">
+              <caret line="159" column="30" lean-forward="true" selection-start-line="159" selection-start-column="30" selection-end-line="159" selection-end-column="30" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -78,8 +81,8 @@
       <file leaf-file-name="asm.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/asm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="320">
-              <caret line="16" column="23" lean-forward="true" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
+            <state relative-caret-position="340">
+              <caret line="17" column="32" lean-forward="false" selection-start-line="17" selection-start-column="32" selection-end-line="17" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -88,7 +91,7 @@
       <file leaf-file-name="ast.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2544">
+            <state relative-caret-position="3560">
               <caret line="256" column="20" lean-forward="false" selection-start-line="256" selection-start-column="20" selection-end-line="256" selection-end-column="20" />
               <folding />
             </state>
@@ -138,7 +141,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>current_token</find>
       <find>\t</find>
       <find>STA #</find>
       <find>LDA #</find>
@@ -168,6 +170,7 @@
       <find>&amp;&quot;&quot;&quot; \+</find>
       <find>to_hex</find>
       <find>self.num2</find>
+      <find>self.asm.to_hex(node.number)</find>
     </findStrings>
     <replaceStrings>
       <replace>current_char</replace>
@@ -227,11 +230,11 @@
         <option value="$PROJECT_DIR$/bbcc/ast.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/bbcc/tokens.py" />
         <option value="$PROJECT_DIR$/bbcc/symbols.py" />
-        <option value="$PROJECT_DIR$/bbcc/asm.py" />
+        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/bbcc/__init__.py" />
+        <option value="$PROJECT_DIR$/bbcc/asm.py" />
         <option value="$PROJECT_DIR$/bbcc/interpreter.py" />
       </list>
     </option>
@@ -534,7 +537,14 @@
       <option name="project" value="LOCAL" />
       <updated>1495566451702</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Interpreter: variables, main function, arithmetic ops">
+      <created>1495569120748</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1495569120748</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -577,7 +587,8 @@
     <MESSAGE value="Duplicate identifier checking" />
     <MESSAGE value="Output symbol table" />
     <MESSAGE value="Interpreter output supporting routines" />
-    <option name="LAST_COMMIT_MESSAGE" value="Interpreter output supporting routines" />
+    <MESSAGE value="Interpreter: variables, main function, arithmetic ops" />
+    <option name="LAST_COMMIT_MESSAGE" value="Interpreter: variables, main function, arithmetic ops" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -636,14 +647,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/decl_tree.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1100">
-          <caret line="55" column="0" lean-forward="false" selection-start-line="55" selection-start-column="0" selection-end-line="55" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -668,6 +671,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/lexer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="746">
@@ -676,28 +687,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="19" column="45" lean-forward="false" selection-start-line="19" selection-start-column="45" selection-end-line="19" selection-end-column="45" />
+        <state relative-caret-position="480">
+          <caret line="24" column="0" lean-forward="true" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="e#0#24#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/asm.py">
+    <entry file="file://$PROJECT_DIR$/bbcc/decl_tree.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="16" column="23" lean-forward="true" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
+        <state relative-caret-position="1100">
+          <caret line="55" column="0" lean-forward="false" selection-start-line="55" selection-start-column="0" selection-end-line="55" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -714,16 +717,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2544">
+        <state relative-caret-position="3560">
           <caret line="256" column="20" lean-forward="false" selection-start-line="256" selection-start-column="20" selection-end-line="256" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/asm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="17" column="32" lean-forward="false" selection-start-line="17" selection-start-column="32" selection-end-line="17" selection-end-column="32" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2471">
-          <caret line="236" column="38" lean-forward="false" selection-start-line="236" selection-start-column="38" selection-end-line="236" selection-end-column="38" />
+        <state relative-caret-position="624">
+          <caret line="159" column="30" lean-forward="true" selection-start-line="159" selection-start-column="30" selection-end-line="159" selection-end-column="30" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
