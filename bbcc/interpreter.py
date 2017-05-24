@@ -10,6 +10,7 @@ class Interpreter(ast.NodeVisitor):
         self.asm = asm
         self.scope = scope
         self.current_scope = ""
+        self.branch_count = 1
 
     def visit_Root(self, node):
         self.asm.add_inst("FOR", "opt%=0 TO 2 STEP 2")
@@ -318,19 +319,61 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Equality(self, node):
         self.visit(node.left)
+        self.asm.add_inst("JSR", "movres")
         self.visit(node.right)
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("CMP", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("CMP", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "#1")
+        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2), label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.branch_count += 2
 
     def visit_Inequality(self, node):
         self.visit(node.left)
+        self.asm.add_inst("JSR", "movres")
         self.visit(node.right)
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("CMP", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("CMP", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "#1")
+        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2), label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.branch_count += 2
 
     def visit_BoolAnd(self, node):
         self.visit(node.left)
+        self.asm.add_inst("JSR", "movres")
         self.visit(node.right)
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("AND", "&" + self.asm.to_hex(self.asm.num2))
+        sefl.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("AND", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        sefl.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
 
     def visit_BoolOr(self, node):
         self.visit(node.left)
+        self.asm.add_inst("JSR", "movres")
         self.visit(node.right)
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("ORA", "&" + self.asm.to_hex(self.asm.num2))
+        sefl.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("ORA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        sefl.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
 
     def visit_PreIncr(self, node):
         self.visit(node.expr)
@@ -345,7 +388,12 @@ class Interpreter(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_AddrOf(self, node):
-        self.visit(node.expr)
+        var_name = node.expr.identifier.value
+        var = self.scope.lookup(var_name, self.current_scope)
+        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(var.location, 4)[2:4])
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(var.location, 4)[0:2])
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2-1))
 
     def visit_Dref(self, node):
         self.visit(node.expr)
@@ -359,28 +407,6 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret))
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2-1))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret-1))
-
-    def visit_BinOp(self, node):
-        self.visit(node.left)
-        self.asm.add_inst("JSR", "movnum")
-        if type(node.right) == ast.BinOp:
-            self.asm.add_inst("LDA", "&" + ('%02x' % self.asm.num1).upper())
-            self.asm.add_inst("PHA")
-            self.asm.add_inst("LDA", "&" + ('%02x' % (self.asm.num1-1)).upper())
-            self.asm.add_inst("PHA")
-            self.visit(node.right)
-            self.asm.add_inst("PLA")
-            self.asm.add_inst("STA", "&" + ('%02x' % (self.asm.num1-1)).upper())
-            self.asm.add_inst("PLA")
-            self.asm.add_inst("STA", "&" + ('%02x' % self.asm.num1).upper())
-
-    def visit_UnaryOp(self, node):
-        op = node.op.type
-        if op == PLUS:
-            self.visit(node.expr)
-        elif op == MINUS:
-            self.visit(node.expr)
-            self.asm.add_inst("JSR", "neg")
 
     def interpret(self, ast_root):
         self.visit(ast_root)
