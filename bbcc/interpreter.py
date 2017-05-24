@@ -167,24 +167,85 @@ class Interpreter(ast.NodeVisitor):
             self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
     def visit_PlusEquals(self, node):
-        self.visit(node.right)
-        self.visit(node.left)
+        if type(node.left) == ast.Identifier:
+            var_name = node.left.identifier.value
+            var = self.scope.lookup(var_name, self.current_scope)
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("JSR", "movnum")
+            self.visit(node.right)
+            self.asm.add_inst("JSR", "add")
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
+        
 
     def visit_MinusEquals(self, node):
-        self.visit(node.right)
+        if type(node.left) == ast.Identifier:
+            var_name = node.left.identifier.value
+            var = self.scope.lookup(var_name, self.current_scope)
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("JSR", "movnum")
+            self.visit(node.right)
+            self.asm.add_inst("JSR", "sub")
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
     def visit_StarEquals(self, node):
-        self.visit(node.right)
-        self.visit(node.left)
-        self.visit(node.left)
+        if type(node.left) == ast.Identifier:
+            var_name = node.left.identifier.value
+            var = self.scope.lookup(var_name, self.current_scope)
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("JSR", "movnum")
+            self.visit(node.right)
+            self.asm.add_inst("JSR", "mul")
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
     def visit_DivEquals(self, node):
-        self.visit(node.right)
-        self.visit(node.left)
+        if type(node.left) == ast.Identifier:
+            var_name = node.left.identifier.value
+            var = self.scope.lookup(var_name, self.current_scope)
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("JSR", "movnum")
+            self.visit(node.right)
+            self.asm.add_inst("JSR", "div")
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
     def visit_ModEquals(self, node):
-        self.visit(node.right)
-        self.visit(node.left)
+        if type(node.left) == ast.Identifier:
+            var_name = node.left.identifier.value
+            var = self.scope.lookup(var_name, self.current_scope)
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(var.location - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("JSR", "movnum")
+            self.visit(node.right)
+            self.asm.add_inst("JSR", "mul")
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
     def visit_MultiExpr(self, node):
         self.visit(node.left)
