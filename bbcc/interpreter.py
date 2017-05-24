@@ -143,7 +143,7 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
-        val = self.scope.lookup(var_name)
+        val = self.scope.lookup(var_name, self.current_scope)
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(val.location))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(val.location - 1))
@@ -158,7 +158,13 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Equals(self, node):
         self.visit(node.right)
-        self.visit(node.left)
+        if type(node.left) == ast.Identifier:
+            var_name = node.left.identifier.value
+            var = self.scope.lookup(var_name, self.current_scope)
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+            self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
     def visit_PlusEquals(self, node):
         self.visit(node.right)
@@ -194,10 +200,18 @@ class Interpreter(ast.NodeVisitor):
         pass
 
     def visit_ParenExpr(self, node):
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("PHA")
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1-1))
+        self.asm.add_inst("PHA")
         self.visit(node.expr)
+        self.asm.add_inst("PLA")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1-1))
+        self.asm.add_inst("PLA")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
 
     def check_ArithOp(self, node):
-        if issubclass(node, ast._ArithBinOp):
+        if isinstance(node, ast._ArithBinOp):
             self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
             self.asm.add_inst("PHA")
             self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1-1))
