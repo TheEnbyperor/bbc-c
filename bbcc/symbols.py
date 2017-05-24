@@ -302,7 +302,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
     def visit_AddrOf(self, node):
         self.visit(node.expr)
 
-    def visit_Dref(self, node):
+    def visit_Deref(self, node):
         self.visit(node.expr)
 
     def visit_FuncCall(self, node):

@@ -3,6 +3,7 @@ class ASM:
     num2 = 0x8D
     result = 0x8B
     ret = 0x87
+    loc = 0x85
 
     def __init__(self):
         self.asm = "NEW\n"
