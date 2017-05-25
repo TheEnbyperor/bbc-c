@@ -4,9 +4,8 @@
     <bookmark url="file://$PROJECT_DIR$/bbcc/symbols.py" line="169" mnemonic="9" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbd7ba0c-3615-481f-ae44-4aa6a57659a7" name="Default" comment="Binary not">
+    <list default="true" id="fbd7ba0c-3615-481f-ae44-4aa6a57659a7" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/ast.py" afterPath="$PROJECT_DIR$/bbcc/ast.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/interpreter.py" afterPath="$PROJECT_DIR$/bbcc/interpreter.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bbcc/symbols.py" afterPath="$PROJECT_DIR$/bbcc/symbols.py" />
     </list>
@@ -55,8 +54,8 @@
       <file leaf-file-name="symbols.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="517">
-              <caret line="290" column="29" lean-forward="false" selection-start-line="290" selection-start-column="29" selection-end-line="290" selection-end-column="29" />
+            <state relative-caret-position="377">
+              <caret line="319" column="38" lean-forward="true" selection-start-line="319" selection-start-column="38" selection-end-line="319" selection-end-column="38" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -64,21 +63,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ast.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ast.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7060">
+            <state relative-caret-position="6820">
               <caret line="353" column="0" lean-forward="true" selection-start-line="353" selection-start-column="0" selection-end-line="353" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
-              <caret line="609" column="74" lean-forward="true" selection-start-line="609" selection-start-column="74" selection-end-line="609" selection-end-column="74" />
+            <state relative-caret-position="324">
+              <caret line="556" column="36" lean-forward="false" selection-start-line="556" selection-start-column="36" selection-end-line="556" selection-end-column="36" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -231,9 +230,9 @@
         <option value="$PROJECT_DIR$/bbcc/parser.py" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/bbcc/asm.py" />
+        <option value="$PROJECT_DIR$/bbcc/ast.py" />
         <option value="$PROJECT_DIR$/bbcc/symbols.py" />
         <option value="$PROJECT_DIR$/bbcc/interpreter.py" />
-        <option value="$PROJECT_DIR$/bbcc/ast.py" />
       </list>
     </option>
   </component>
@@ -577,7 +576,14 @@
       <option name="project" value="LOCAL" />
       <updated>1495691891551</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Binary not">
+      <created>1495692827929</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1495692827930</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -761,10 +767,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6820">
+          <caret line="353" column="0" lean-forward="true" selection-start-line="353" selection-start-column="0" selection-end-line="353" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="517">
-          <caret line="290" column="29" lean-forward="false" selection-start-line="290" selection-start-column="29" selection-end-line="290" selection-end-column="29" />
+        <state relative-caret-position="377">
+          <caret line="319" column="38" lean-forward="true" selection-start-line="319" selection-start-column="38" selection-end-line="319" selection-end-column="38" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -773,19 +787,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="609" column="74" lean-forward="true" selection-start-line="609" selection-start-column="74" selection-end-line="609" selection-end-column="74" />
+        <state relative-caret-position="324">
+          <caret line="556" column="36" lean-forward="false" selection-start-line="556" selection-start-column="36" selection-end-line="556" selection-end-column="36" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7060">
-          <caret line="353" column="0" lean-forward="true" selection-start-line="353" selection-start-column="0" selection-end-line="353" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>

@@ -1,6 +1,6 @@
-from .tokens import *
 from . import ast
 from . import decl_tree
+from .tokens import *
 
 
 class Interpreter(ast.NodeVisitor):
@@ -541,11 +541,25 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("AND", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("AND", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "#1")
+        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
+                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.branch_count += 2
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
@@ -568,11 +582,25 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("ORA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("ORA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "#0")
+        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#1", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
+                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.branch_count += 2
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
@@ -601,7 +629,7 @@ class Interpreter(ast.NodeVisitor):
                           label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
         self.asm.add_inst("LDA", "#0")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-
+        self.branch_count += 2
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))

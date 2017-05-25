@@ -1,7 +1,8 @@
 import collections
-from .tokens import *
+
 from . import ast
 from . import decl_tree
+from .tokens import *
 
 
 class Symbol:
@@ -307,6 +308,21 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Deref(self, node):
         self.visit(node.expr)
+
+    def visit_IfStatment(self, node):
+        self.visit(node.condititon)
+        self.visit(node.statement)
+        self.visit(node.else_statement)
+
+    def visit_WhileStatment(self, node):
+        self.visit(node.condititon)
+        self.visit(node.statement)
+
+    def visit_ForStatment(self, node):
+        self.visit(node.first)
+        self.visit(node.second)
+        self.visit(node.third)
+        self.visit(node.statement)
 
     def visit_FuncCall(self, node):
         func_name = node.func.identifier.value
