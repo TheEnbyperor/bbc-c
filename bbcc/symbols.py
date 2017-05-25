@@ -312,7 +312,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
     def visit_IfStatment(self, node):
         self.visit(node.condititon)
         self.visit(node.statement)
-        self.visit(node.else_statement)
+        if node.else_statement is not None:
+            self.visit(node.else_statement)
 
     def visit_WhileStatment(self, node):
         self.visit(node.condititon)

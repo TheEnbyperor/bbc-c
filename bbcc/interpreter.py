@@ -765,6 +765,27 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
 
+    def visit_IfStatement(self, node):
+        self.visit(node.condition)
+        self.asm.add_inst("LDY", "#0")
+        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.visit(node.statment)
+        if node.else_statement is not None:
+            self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+            self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
+            self.visit(node.else_statement)
+        self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.branch_count += 2
+
     def visit_NoOp(self, node):
         pass
 

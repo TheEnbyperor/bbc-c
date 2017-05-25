@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/bbcc/symbols.py" line="169" mnemonic="9" />
+    <bookmark url="file://$PROJECT_DIR$/bbcc/symbols.py" line="170" mnemonic="9" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fbd7ba0c-3615-481f-ae44-4aa6a57659a7" name="Default" comment="">
@@ -54,8 +54,8 @@
       <file leaf-file-name="symbols.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="377">
-              <caret line="319" column="38" lean-forward="true" selection-start-line="319" selection-start-column="38" selection-end-line="319" selection-end-column="38" />
+            <state relative-caret-position="317">
+              <caret line="314" column="33" lean-forward="false" selection-start-line="314" selection-start-column="33" selection-end-line="314" selection-end-column="33" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -66,7 +66,7 @@
       <file leaf-file-name="ast.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6820">
+            <state relative-caret-position="7060">
               <caret line="353" column="0" lean-forward="true" selection-start-line="353" selection-start-column="0" selection-end-line="353" selection-end-column="0" />
               <folding />
             </state>
@@ -76,10 +76,10 @@
       <file leaf-file-name="interpreter.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="324">
-              <caret line="556" column="36" lean-forward="false" selection-start-line="556" selection-start-column="36" selection-end-line="556" selection-end-column="36" />
+            <state relative-caret-position="404">
+              <caret line="781" column="33" lean-forward="false" selection-start-line="781" selection-start-column="33" selection-end-line="781" selection-end-column="33" />
               <folding>
-                <element signature="e#0#21#0" expanded="true" />
+                <element signature="e#0#17#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -98,8 +98,8 @@
       <file leaf-file-name="parser.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bbcc/parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-798">
-              <caret line="380" column="53" lean-forward="true" selection-start-line="380" selection-start-column="53" selection-end-line="380" selection-end-column="53" />
+            <state relative-caret-position="271">
+              <caret line="134" column="22" lean-forward="false" selection-start-line="134" selection-start-column="19" selection-end-line="134" selection-end-column="22" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -138,7 +138,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>LDA #</find>
       <find>LDA #&amp;</find>
       <find>#</find>
       <find>'%02x' %</find>
@@ -168,6 +167,7 @@
       <find>self.asm.to_hex(node.number)</find>
       <find>&amp;#</find>
       <find>#&amp;</find>
+      <find>IfS</find>
     </findStrings>
     <replaceStrings>
       <replace>current_char</replace>
@@ -190,6 +190,11 @@
     </replaceStrings>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Benjamin Misell &lt;beninjam174@gmail.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
@@ -583,7 +588,14 @@
       <option name="project" value="LOCAL" />
       <updated>1495692827930</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Logical || &amp;&amp; bug fixes">
+      <created>1495693627459</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1495693627459</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -628,6 +640,8 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <MESSAGE value="gitignore" />
     <MESSAGE value="README" />
     <MESSAGE value="Check for return in function" />
@@ -642,7 +656,11 @@
     <MESSAGE value="Interpreter: post and pre incr and decr" />
     <MESSAGE value="Interpreter: bug fixes" />
     <MESSAGE value="Binary not" />
-    <option name="LAST_COMMIT_MESSAGE" value="Binary not" />
+    <MESSAGE value="Logical || &amp;&amp; bug fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Logical || &amp;&amp; bug fixes" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -707,14 +725,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/tokens.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="344">
-          <caret line="41" column="29" lean-forward="false" selection-start-line="41" selection-start-column="29" selection-end-line="41" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/decl_tree.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1100">
@@ -741,16 +751,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bbcc/parser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-798">
-          <caret line="380" column="53" lean-forward="true" selection-start-line="380" selection-start-column="53" selection-end-line="380" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
@@ -769,16 +769,34 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/ast.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6820">
+        <state relative-caret-position="7060">
           <caret line="353" column="0" lean-forward="true" selection-start-line="353" selection-start-column="0" selection-end-line="353" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="271">
+          <caret line="134" column="22" lean-forward="false" selection-start-line="134" selection-start-column="19" selection-end-line="134" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bbcc/tokens.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="344">
+          <caret line="41" column="29" lean-forward="false" selection-start-line="41" selection-start-column="29" selection-end-line="41" selection-end-column="29" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/symbols.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="377">
-          <caret line="319" column="38" lean-forward="true" selection-start-line="319" selection-start-column="38" selection-end-line="319" selection-end-column="38" />
+        <state relative-caret-position="317">
+          <caret line="314" column="33" lean-forward="false" selection-start-line="314" selection-start-column="33" selection-end-line="314" selection-end-column="33" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -787,10 +805,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/bbcc/interpreter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="556" column="36" lean-forward="false" selection-start-line="556" selection-start-column="36" selection-end-line="556" selection-end-column="36" />
+        <state relative-caret-position="404">
+          <caret line="781" column="33" lean-forward="false" selection-start-line="781" selection-start-column="33" selection-end-line="781" selection-end-column="33" />
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#0#17#0" expanded="true" />
           </folding>
         </state>
       </provider>
