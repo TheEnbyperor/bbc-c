@@ -204,6 +204,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
+        if var_name.startswith("bbcc_"):
+            raise NameError("Identifier cannot start with bbcc_ (conflicts with compiler assembly routines)")
         val = self.scope.lookup(var_name)
         if val is None:
             raise NameError(repr(var_name))
@@ -216,26 +218,38 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_Equals(self, node):
+        if type(node.right) != ast.Identifier:
+            raise TypeError("Can only assign variables")
         self.visit(node.right)
         self.visit(node.left)
 
     def visit_PlusEquals(self, node):
+        if type(node.right) != ast.Identifier:
+            raise TypeError("Can only assign variables")
         self.visit(node.right)
         self.visit(node.left)
 
     def visit_MinusEquals(self, node):
-        self.visit(node.right)
-
-    def visit_StarEquals(self, node):
+        if type(node.right) != ast.Identifier:
+            raise TypeError("Can only assign variables")
         self.visit(node.right)
         self.visit(node.left)
+
+    def visit_StarEquals(self, node):
+        if type(node.right) != ast.Identifier:
+            raise TypeError("Can only assign variables")
+        self.visit(node.right)
         self.visit(node.left)
 
     def visit_DivEquals(self, node):
+        if type(node.right) != ast.Identifier:
+            raise TypeError("Can only assign variables")
         self.visit(node.right)
         self.visit(node.left)
 
     def visit_ModEquals(self, node):
+        if type(node.right) != ast.Identifier:
+            raise TypeError("Can only assign variables")
         self.visit(node.right)
         self.visit(node.left)
 
@@ -292,15 +306,23 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_PreIncr(self, node):
+        if type(node.expr) != ast.Identifier:
+            raise TypeError("Can only increment variables")
         self.visit(node.expr)
 
     def visit_PostIncr(self, node):
+        if type(node.expr) != ast.Identifier:
+            raise TypeError("Can only increment variables")
         self.visit(node.expr)
 
     def visit_PreDecr(self, node):
+        if type(node.expr) != ast.Identifier:
+            raise TypeError("Can only decrement variables")
         self.visit(node.expr)
 
     def visit_PostDecr(self, node):
+        if type(node.expr) != ast.Identifier:
+            raise TypeError("Can only deccrement variables")
         self.visit(node.expr)
 
     def visit_AddrOf(self, node):
