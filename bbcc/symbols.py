@@ -351,6 +351,12 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.third)
         self.visit(node.statement)
 
+    def visit_Break(self, node):
+        pass
+    
+    def visit_Continue(self, node):
+        pass
+        
     def visit_FuncCall(self, node):
         func_name = node.func.identifier.value
         func = self.scope.lookup(func_name)

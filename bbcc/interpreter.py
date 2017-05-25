@@ -827,6 +827,12 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
         self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
         self.branch_count += 2
+        
+    def visit_Break(self, node):
+        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        
+    def visit_Continue(self, node):
+        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
 
     def visit_NoOp(self, node):
         pass
