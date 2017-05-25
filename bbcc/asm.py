@@ -3,7 +3,8 @@ class ASM:
     num2 = num1 - 2
     result = num2 - 2
     ret = result - 4
-    loc1 = ret - 2
+    temp = ret - 2
+    loc1 = temp - 3
     loc2 = loc1 - 2
     loc3 = loc2 - 2
     loc4 = loc3 - 2
