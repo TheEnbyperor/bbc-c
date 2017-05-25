@@ -326,9 +326,13 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_AddrOf(self, node):
+        if type(node.expr) != ast.Identifier:
+            raise TypeError("Can only get address variables")
         self.visit(node.expr)
 
     def visit_Deref(self, node):
+        if type(node.expr) != ast.Identifier:
+            raise TypeError("Can only dereference variables")
         self.visit(node.expr)
 
     def visit_IfStatment(self, node):
@@ -352,8 +356,6 @@ class SymbolTableBuilder(ast.NodeVisitor):
         func = self.scope.lookup(func_name)
         if func is None:
             raise NameError(repr(func_name))
-
-        print(func, node.args)
         if len(func.params) != len(node.args):
             raise NameError("Calling " + str(func.name) + " with wrong number of params")
         for i, a in enumerate(node.args):
