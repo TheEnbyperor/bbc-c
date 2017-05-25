@@ -12,6 +12,7 @@ class Compound(AST):
         self.items = items
 
 
+# TODO: Implement
 class IfStatement(AST):
     def __init__(self, condition, statement, else_statement):
         self.condititon = condition
@@ -19,12 +20,14 @@ class IfStatement(AST):
         self.else_statement = else_statement
 
 
+# TODO: Implement
 class WhileStatement(AST):
     def __init__(self, condition, statement):
         self.condition = condition
         self.statement = statement
 
 
+# TODO: Implement
 class ForStatement(AST):
     def __init__(self, first, second, third, statement):
         self.statement = statement
@@ -49,10 +52,12 @@ class Return(AST):
         self.right = right
 
 
+# TODO: Implement
 class Break(AST):
     pass
 
 
+# TODO: Implement
 class Continue(AST):
     pass
 
@@ -371,6 +376,7 @@ class Deref(_LExprNode):
         self.expr = expr
 
 
+# TODO: Implement
 class ArraySubsc(_LExprNode):
     """Array subscript."""
 
@@ -381,6 +387,7 @@ class ArraySubsc(_LExprNode):
         self.op = op
 
 
+# TODO: Implement
 class FuncCall(_RExprNode):
     """Function call.
     func - Expression of type function pointer

@@ -287,6 +287,9 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.left)
         self.visit(node.right)
 
+    def visit_BoolNot(self, node):
+        self.visit(node.expr)
+
     def visit_PreIncr(self, node):
         self.visit(node.expr)
 

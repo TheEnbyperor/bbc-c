@@ -317,9 +317,11 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("LDA", "#0")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
 
+    # TODO: Implement
     def visit_String(self, node):
         pass
 
+    # TODO: Reimplementing
     def visit_ParenExpr(self, node):
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
         self.asm.add_inst("PHA")
@@ -331,6 +333,7 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("PLA")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
 
+    # TODO: Reimplementing
     def check_ArithOp(self, node):
         if isinstance(node, ast._ArithBinOp):
             self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
@@ -570,6 +573,35 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
         self.asm.add_inst("ORA", "&" + self.asm.to_hex(self.asm.num2 - 1))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
+        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
+        self.asm.add_inst("LDA", "#0")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+
+    def visit_BoolNot(self, node):
+        self.visit(node.expr)
+        self.asm.add_inst("LDY", "#0")
+        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
+        self.asm.add_inst("CMP", "#0")
+        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("LDA", "#1")
+        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
+                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst("LDA", "#0")
+        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
+
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
         self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
