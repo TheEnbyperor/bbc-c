@@ -107,6 +107,22 @@ class Lexer:
                 self.advance()
                 self.advance()
                 tokens.append(Token(BOOLNOT, "!="))
+            elif self.current_char == "<" and self.peek() == "=":
+                self.advance()
+                self.advance()
+                tokens.append(Token(LESSEQUAL, "<="))
+            elif self.current_char == ">" and self.peek() == "=":
+                self.advance()
+                self.advance()
+                tokens.append(Token(MOREEQUAL, ">="))
+            elif self.current_char == "<":
+                self.advance()
+                self.advance()
+                tokens.append(Token(LESSTHAN, "<"))
+            elif self.current_char == ">":
+                self.advance()
+                self.advance()
+                tokens.append(Token(MORETHAN, ">"))
 
             elif self.current_char == "+" and self.peek() == "+":
                 self.advance()

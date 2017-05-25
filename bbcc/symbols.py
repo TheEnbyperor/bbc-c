@@ -172,6 +172,18 @@ class SymbolTableBuilder(ast.NodeVisitor):
             type_symbol = self.scope.lookup(type_name)
             if type(d.child) == decl_tree.Identifier:
                 var_name = d.child.identifier.value
+                if var_name.startswith("bbcc_"):
+                    raise NameError("Identifier cannot start with bbcc_ (conflicts with compiler assembly routines)")
+                if self.scope.lookup(var_name, current_scope_only=True):
+                    raise SyntaxError("Duplicate identifier '%s' found" % var_name)
+                self.scope.define(VarSymbol(var_name, type_symbol, self.memstart))
+                self.memstart -= type_symbol.size
+                if node.inits[i] is not None:
+                    self.visit(node.inits[i])
+            elif type(d.child) == decl_tree.Array:
+                var_name = d.child.child.identifier.value
+                if var_name.startswith("bbcc_"):
+                    raise NameError("Identifier cannot start with bbcc_ (conflicts with compiler assembly routines)")
                 if self.scope.lookup(var_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % var_name)
                 self.scope.define(VarSymbol(var_name, type_symbol, self.memstart))
@@ -204,11 +216,12 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
-        if var_name.startswith("bbcc_"):
-            raise NameError("Identifier cannot start with bbcc_ (conflicts with compiler assembly routines)")
         val = self.scope.lookup(var_name)
         if val is None:
             raise NameError(repr(var_name))
+
+    def visit_Array(self, node):
+        pass
 
     def visit_Compound(self, node):
         for n in node.items:
@@ -299,6 +312,22 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.right)
 
     def visit_BoolOr(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_LessThan(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_MoreThan(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_LessEqual(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_MoreEqual(self, node):
         self.visit(node.left)
         self.visit(node.right)
 

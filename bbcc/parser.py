@@ -1,6 +1,6 @@
-from .tokens import *
 from . import ast
 from . import decl_tree
+from .tokens import *
 
 
 class Parser:
@@ -269,11 +269,19 @@ class Parser:
 
     def parse_equality(self, index):
         """Parse equality expression."""
-        # TODO: Implement relational and shift expressions here.
+        # TODO: Implement shift expressions here.
         return self.parse_series(
-            index, self.parse_additive,
+            index, self.parse_relational,
             {BOOLEQUALS: ast.Equality,
              BOOLNOT: ast.Inequality})
+
+    def parse_relational(self, index):
+        return self.parse_series(
+            index, self.parse_additive,
+            {LESSTHAN: ast.LessThan,
+             MORETHAN: ast.MoreThan,
+             LESSEQUAL: ast.LessEqual,
+             MOREEQUAL: ast.MoreEqual})
 
     def parse_additive(self, index):
         """Parse additive expression."""
@@ -557,7 +565,7 @@ class Parser:
             first = self.tokens[end - 3].type == LBRACK
             number = self.tokens[end - 2].type == INTEGER
             if first and number:
-                return decl_tree.Array(int(self.tokens[end - 2].content), self.parse_declarator(start, end - 3))
+                return decl_tree.Array(int(self.tokens[end - 2].value), self.parse_declarator(start, end - 3))
 
         self.error()
 

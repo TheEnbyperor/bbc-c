@@ -12,7 +12,6 @@ class Compound(AST):
         self.items = items
 
 
-# TODO: Implement
 class IfStatement(AST):
     def __init__(self, condition, statement, else_statement):
         self.condititon = condition
@@ -20,14 +19,12 @@ class IfStatement(AST):
         self.else_statement = else_statement
 
 
-# TODO: Implement
 class WhileStatement(AST):
     def __init__(self, condition, statement):
         self.condition = condition
         self.statement = statement
 
 
-# TODO: Implement
 class ForStatement(AST):
     def __init__(self, first, second, third, statement):
         self.statement = statement
@@ -52,12 +49,10 @@ class Return(AST):
         self.right = right
 
 
-# TODO: Implement
 class Break(AST):
     pass
 
 
-# TODO: Implement
 class Continue(AST):
     pass
 
@@ -220,6 +215,38 @@ class Equality(_Equality):
 
 class Inequality(_Equality):
     """Expression that checks inequality of two expressions."""
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
+class LessThan(_Equality):
+    """Expression that checks relation of two expressions."""
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
+class MoreThan(_Equality):
+    """Expression that checks relation of two expressions."""
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
+class LessEqual(_Equality):
+    """Expression that checks relation of two expressions."""
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
+class MoreEqual(_Equality):
+    """Expression that checks relation of two expressions."""
 
     def __init__(self, left, right, op):
         """Initialize node."""

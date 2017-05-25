@@ -4,8 +4,8 @@ if __name__ == "__main__":
     text = """
     // Comment
     int main() {
-     char a = 'a';
-     int b = a++;
+     char a;
+     int c[5];
      return a;
     }
     """
