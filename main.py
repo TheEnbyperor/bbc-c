@@ -1,4 +1,5 @@
 import bbcc
+import bbcasm
 
 if __name__ == "__main__":
     text = """
@@ -9,4 +10,6 @@ if __name__ == "__main__":
      return a;
     }
     """
-    bbcc.main(text)
+    asm = bbcc.main(text)
+    basic = bbcasm.asm_to_basic(asm)
+    print(basic)

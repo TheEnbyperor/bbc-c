@@ -24,4 +24,4 @@ def main(text):
 
     asm_out = interp.interpret(ast_out)
 
-    print(asm_out)
+    retrun asm_out

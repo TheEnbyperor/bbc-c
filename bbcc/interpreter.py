@@ -13,9 +13,6 @@ class Interpreter(ast.NodeVisitor):
         self.branch_count = 1
 
     def visit_Root(self, node):
-        self.asm.add_inst("FOR", "opt%=0 TO 2 STEP 2")
-        self.asm.add_inst("P%=&E00")
-        self.asm.add_inst("[")
         self.asm.add_inst("OPT", "opt%")
         self.asm.add_inst("LDA", "#0", "mul")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 2))
@@ -138,12 +135,6 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("RTS")
         for n in node.nodes:
             self.visit(n)
-        self.asm.add_inst("]")
-        self.asm.add_inst("NEXT", "opt%")
-        self.asm.add_inst("CALL", "main")
-        self.asm.add_inst("RL=&" + self.asm.to_hex(self.asm.ret))
-        self.asm.add_inst("RH=&" + self.asm.to_hex(self.asm.ret - 1))
-        self.asm.add_inst("PRINT", "~?RH,~?RL")
 
     def visit_Declaration(self, node):
         for i, d in enumerate(node.decls):

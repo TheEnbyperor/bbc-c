@@ -10,15 +10,13 @@ class ASM:
     loc4 = loc3 - 2
 
     def __init__(self):
-        self.asm = "NEW\n"
-        self.line = 10
+        self.asm = ""
 
     @staticmethod
     def to_hex(num, leng=2):
         return (('%0' + str(leng) + 'x') % num).upper()
 
     def add_inst(self, isnt, op="", label=""):
-        self.asm += str(self.line) + " "
         if label != "":
             self.asm += "." + label + " "
         self.asm += isnt.upper()
@@ -28,6 +26,4 @@ class ASM:
         self.line += 10
 
     def get_asm(self):
-        asm = self.asm
-        asm += "RUN\n"
-        return asm
+        return self.asm

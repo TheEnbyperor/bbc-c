@@ -202,6 +202,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
         func_name = "main"
         func_symbol = FunctionSymbol(func_name, type_symbol)
         self.scope.define(func_symbol)
+        memstart = self.memstart
         procedure_scope = ScopedSymbolTable(
             scope_name=func_name,
             scope_level=self.scope.scope_level + 1,
@@ -213,6 +214,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.body)
         self.scope_out.add_scope(procedure_scope)
         self.scope = self.scope.enclosing_scope
+        self.memstart = memstart
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
