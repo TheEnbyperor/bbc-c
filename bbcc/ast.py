@@ -12,10 +12,15 @@ class Compound(AST):
         self.items = items
 
 
+class TranslationUnit(AST):
+    def __init__(self, items):
+        self.items = items
+
+
 class IfStatement(AST):
     def __init__(self, condition, statement, else_statement):
-        self.condititon = condition
-        self.statment = statement
+        self.condition = condition
+        self.statement = statement
         self.else_statement = else_statement
 
 
@@ -31,6 +36,14 @@ class ForStatement(AST):
         self.first = first
         self.second = second
         self.third = third
+
+
+class Function(AST):
+    def __init__(self, type_specifiers, name, params, nodes):
+        self.type = type_specifiers
+        self.name = name
+        self.params = params
+        self.nodes = nodes
 
 
 class ExprStatement(AST):

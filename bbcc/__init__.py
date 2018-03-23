@@ -6,14 +6,12 @@ from .symbols import SymbolTableBuilder
 import pdb
 
 
-def main(text):
-    l = Lexer(text)
-    token_list = l.tokenize()
+def main(text: str):
+    lexer_inst = Lexer(text)
+    token_list = lexer_inst.tokenize()
 
     p = Parser(token_list)
     ast_out = p.parse()
-    
-    # pdb.set_trace()
 
     symbol_table_b = SymbolTableBuilder()
     symbol_table_b.visit(ast_out)
@@ -24,4 +22,4 @@ def main(text):
 
     asm_out = interp.interpret(ast_out)
 
-    retrun asm_out
+    return asm_out

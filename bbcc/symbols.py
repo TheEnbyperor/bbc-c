@@ -55,13 +55,13 @@ class ScopedSymbolTable(object):
         self.scope_name = scope_name
         self.scope_level = scope_level
         self.enclosing_scope = enclosing_scope
-        if self.enclosing_scope == None:
+        if self.enclosing_scope is None:
             self._init_builtins()
 
     def _init_builtins(self):
         self.define(BuiltinTypeSymbol(INT, 0x2))
-        self.define(BuiltinTypeSymbol(CHAR, 0x2))
-        self.define(BuiltinTypeSymbol(VOID, 0x2))
+        self.define(BuiltinTypeSymbol(CHAR, 0x1))
+        self.define(BuiltinTypeSymbol(VOID, 0x0))
 
     def __str__(self):
         h1 = 'SCOPE (SCOPED SYMBOL TABLE)'
@@ -70,8 +70,8 @@ class ScopedSymbolTable(object):
                 ('Scope name', self.scope_name),
                 ('Scope level', self.scope_level),
                 ('Enclosing scope',
-                    self.enclosing_scope.scope_name if self.enclosing_scope else None
-                )
+                 self.enclosing_scope.scope_name if self.enclosing_scope else None
+                 )
         ):
             lines.append('%-15s: %s' % (header_name, header_value))
         h2 = 'Scope (Scoped symbol table) contents'
@@ -159,10 +159,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.scope = None
         self.scope_out = None
 
-    def visit_Root(self, node):
+    def visit_TranslationUnit(self, node):
         self.scope = ScopedSymbolTable(scope_name='global', scope_level=1)
         self.scope_out = SymbolTable(self.scope)
-        for n in node.nodes:
+        for n in node.items:
             self.visit(n)
         self.scope_out.set_symbols(self.scope)
 
@@ -192,15 +192,16 @@ class SymbolTableBuilder(ast.NodeVisitor):
                     self.visit(node.inits[i])
             elif type(d.child) == decl_tree.Function:
                 func_name = d.child.child.identifier.value
+                if func_name.startswith("bbcc_"):
+                    raise NameError("Identifier cannot start with bbcc_ (conflicts with compiler assembly routines)")
                 if self.scope.lookup(func_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % func_name)
-                print(d.child.args[0].child)
                 self.scope.define(FunctionSymbol(func_name, type_symbol, d.child.args))
 
-    def visit_Main(self, node):
-        type_symbol = self.scope.lookup(INT)
-        func_name = "main"
-        func_symbol = FunctionSymbol(func_name, type_symbol)
+    def visit_Function(self, node):
+        type_symbol = self.scope.lookup(node.type[-1].type)
+        func_name = node.name.identifier.value
+        func_symbol = FunctionSymbol(func_name, type_symbol, node.params)
         self.scope.define(func_symbol)
         memstart = self.memstart
         procedure_scope = ScopedSymbolTable(
@@ -209,9 +210,18 @@ class SymbolTableBuilder(ast.NodeVisitor):
             enclosing_scope=self.scope,
         )
         self.scope = procedure_scope
-        if ast.Return not in [type(n) for n in node.body.items] and type_symbol.name != VOID:
-            raise SyntaxError("No return in function")
-        self.visit(node.body)
+        for param in node.params:
+            type_name = param.specs[-1].type
+            type_symbol = self.scope.lookup(type_name)
+            if type(param.child) == decl_tree.Identifier:
+                param_name = param.child.identifier.value
+                if param_name.startswith("bbcc_"):
+                    raise NameError("Identifier cannot start with bbcc_ (conflicts with compiler assembly routines)")
+                if self.scope.lookup(param_name, current_scope_only=True):
+                    raise SyntaxError("Duplicate identifier '%s' found" % param_name)
+                self.scope.define(VarSymbol(param_name, type_symbol, self.memstart))
+                self.memstart -= type_symbol.size
+        self.visit(node.nodes)
         self.scope_out.add_scope(procedure_scope)
         self.scope = self.scope.enclosing_scope
         self.memstart = memstart
@@ -226,6 +236,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
         pass
 
     def visit_Compound(self, node):
+        for n in node.items:
+            self.visit(n)
+
+    def visit_TranlationUnit(self, node):
         for n in node.items:
             self.visit(n)
 
@@ -366,8 +380,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
             raise TypeError("Can only dereference variables")
         self.visit(node.expr)
 
-    def visit_IfStatment(self, node):
-        self.visit(node.condititon)
+    def visit_IfStatement(self, node):
+        self.visit(node.condition)
         self.visit(node.statement)
         if node.else_statement is not None:
             self.visit(node.else_statement)
@@ -384,10 +398,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Break(self, node):
         pass
-    
+
     def visit_Continue(self, node):
         pass
-        
+
     def visit_FuncCall(self, node):
         func_name = node.func.identifier.value
         func = self.scope.lookup(func_name)
@@ -395,15 +409,11 @@ class SymbolTableBuilder(ast.NodeVisitor):
             raise NameError(repr(func_name))
         if len(func.params) != len(node.args):
             raise NameError("Calling " + str(func.name) + " with wrong number of params")
-        for i, a in enumerate(node.args):
-            arg_name = a.identifier.value
-            arg_type = self.scope.lookup(arg_name).type.name
-            if arg_type != func.params[i].specs[-1].type:
-                raise TypeError("Calling " + str(func.name) + " with wrong param type")
+        for a in node.args:
+            self.visit(a)
 
     def visit_NoOp(self, node):
         pass
 
     def visit_Return(self, node):
         self.visit(node.right)
-

@@ -12,8 +12,7 @@ class Interpreter(ast.NodeVisitor):
         self.current_scope = ""
         self.branch_count = 1
 
-    def visit_Root(self, node):
-        self.asm.add_inst("OPT", "opt%")
+    def visit_TranslationUnit(self, node):
         self.asm.add_inst("LDA", "#0", "mul")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 2))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 3))
@@ -133,7 +132,7 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc4))
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc4 + 1))
         self.asm.add_inst("RTS")
-        for n in node.nodes:
+        for n in node.items:
             self.visit(n)
 
     def visit_Declaration(self, node):
@@ -153,13 +152,24 @@ class Interpreter(ast.NodeVisitor):
                     self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
                     self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
-    def visit_Main(self, node):
-        func_name = "main"
+    def visit_Function(self, node):
+        func_name = node.name.identifier.value
         self.current_scope = func_name
-        self.asm.add_inst("JSR", "reset", label=func_name)
-        self.visit(node.body)
+        if func_name == "main":
+            self.asm.add_inst("JSR", "reset", label=func_name)
+        else:
+            self.asm.add_inst(label=func_name)
+        self.visit(node.nodes)
         self.asm.add_inst("RTS")
         self.current_scope = ""
+
+    # TODO: Implement
+    def visit_FuncCall(self, node):
+        self.asm.add_inst("LDY", "#0")
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.ret))
+        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
+        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.ret - 1))
+        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
@@ -899,16 +909,16 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
         self.asm.add_inst("CMP", "#0")
         self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.visit(node.statment)
+        self.visit(node.statement)
         if node.else_statement is not None:
             self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-            self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
+            self.asm.add_inst(label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
             self.visit(node.else_statement)
-        self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst(label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
         self.branch_count += 2
         
     def visit_WhileStatement(self, node):
-        self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.asm.add_inst(label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
         self.visit(node.condition)
         self.asm.add_inst("LDY", "#0")
         self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
@@ -965,6 +975,7 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret))
         self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret - 1))
+        self.asm.add_inst("RTS")
 
     def interpret(self, ast_root):
         self.visit(ast_root)

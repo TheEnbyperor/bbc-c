@@ -22,6 +22,40 @@ class Parser:
         else:
             return False
 
+    def parse_translation_unit(self, index):
+        # Read block items until there are no more.
+        items = []
+        while True:
+            try:
+                item, index = self.parse_external_deceleration(index)
+                items.append(item)
+                continue
+            except SyntaxError:
+                break
+
+        if self.tokens[index:][0].type == EOF:
+            return ast.TranslationUnit(items), index
+        else:
+            self.error()
+
+    def parse_external_deceleration(self, index):
+        try:
+            return self.parse_function_definition(index)
+        except SyntaxError:
+            pass
+
+        return self.parse_declaration(index)
+
+    def parse_function_definition(self, index):
+        type_specifier, index = self.parse_decl_specifiers(index)
+
+        open_parem = index
+        params, index = self.parse_parameter_list(open_parem+2)
+        name = self.parse_declarator(open_parem, open_parem+1)
+
+        node, index = self.parse_compound_statement(index+1)
+        return ast.Function(type_specifier, name, params, node), index
+
     def parse_statement(self, index):
         """Parse a statement.
         Try each possible type of statement, catching/logging exceptions upon
@@ -601,43 +635,5 @@ class Parser:
 
         return params, index
 
-    def parse_main(self, index):
-        index = self.eat(index, INT)
-        index = self.eat(index, MAIN)
-        index = self.eat(index, LPAREM)
-        index = self.eat(index, RPAREM)
-
-        node, index = self.parse_compound_statement(index)
-        return ast.Main(node), index
-
-    def parse_root(self, index):
-        """Parse the given tokens into an AST."""
-        items = []
-        while True:
-            try:
-                item, index = self.parse_main(index)
-                items.append(item)
-            except SyntaxError:
-                pass
-            else:
-                continue
-
-            try:
-                item, index = self.parse_declaration(index)
-                items.append(item)
-            except SyntaxError:
-                pass
-            else:
-                continue
-
-            # If neither parse attempt above worked, break
-            break
-
-        # If there are tokens that remain unparsed, complain
-        if self.tokens[index:][0].type == EOF:
-            return ast.Root(items), index
-        else:
-            self.error()
-
     def parse(self):
-        return self.parse_root(0)[0]
+        return self.parse_translation_unit(0)[0]
