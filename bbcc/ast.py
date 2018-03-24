@@ -420,11 +420,10 @@ class Deref(_LExprNode):
 class ArraySubsc(_LExprNode):
     """Array subscript."""
 
-    def __init__(self, head, arg, op):
+    def __init__(self, head, arg):
         """Initialize node."""
         self.head = head
         self.arg = arg
-        self.op = op
 
 
 # TODO: Implement
@@ -432,21 +431,19 @@ class FuncCall(_RExprNode):
     """Function call.
     func - Expression of type function pointer
     args - List of expressions for each argument
-    tok - Opening parenthesis of this function call, for error reporting
     """
 
-    def __init__(self, func, args, tok):
+    def __init__(self, func, args):
         """Initialize node."""
         self.func = func
         self.args = args
-        self.tok = tok
 
 
 class NodeVisitor:
     def visit(self, node):
         method_name = 'visit_' + type(node).__name__
         visitor = getattr(self, method_name, self.generic_visit)
-        visitor(node)
+        return visitor(node)
 
     @staticmethod
     def generic_visit(node):

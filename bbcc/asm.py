@@ -13,8 +13,8 @@ class ASM:
         self.asm = ""
 
     @staticmethod
-    def to_hex(num, leng=2):
-        return (('%0' + str(leng) + 'x') % num).upper()
+    def to_hex(num, length=2):
+        return (('%0' + str(length) + 'x') % num).upper()
 
     def add_inst(self, isnt="", op="", label=""):
         if label != "":

@@ -3,6 +3,7 @@ from .parser import Parser
 from .asm import ASM
 from .interpreter import Interpreter
 from .symbols import SymbolTableBuilder
+from .il import IL
 import pdb
 
 
@@ -13,13 +14,14 @@ def main(text: str):
     p = Parser(token_list)
     ast_out = p.parse()
 
-    symbol_table_b = SymbolTableBuilder()
-    symbol_table_b.visit(ast_out)
-    symbol_table = symbol_table_b.scope_out
+    symbol_table_builder = SymbolTableBuilder()
+    symbol_table_builder.visit(ast_out)
+    symbol_table = symbol_table_builder.scope_out
 
     casm = ASM()
-    interp = Interpreter(casm, symbol_table)
+    il = IL()
+    interp = Interpreter(casm, symbol_table, il)
 
-    asm_out = interp.interpret(ast_out)
+    il_out = interp.interpret(ast_out)
 
-    return asm_out
+    return il_out.commands

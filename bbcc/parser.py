@@ -368,7 +368,7 @@ class Parser:
             if self.token_is(index, LBRACK):
                 index += 1
                 arg, index = self.parse_expression(index)
-                cur = ast.ArraySubsc(cur, arg, tok)
+                cur = ast.ArraySubsc(cur, arg)
                 self.eat(index, RBRACK)
                 index += 1
 
@@ -377,7 +377,7 @@ class Parser:
                 index += 1
 
                 if self.token_is(index, RPAREM):
-                    return ast.FuncCall(cur, args, tok), index + 1
+                    return ast.FuncCall(cur, args), index + 1
 
                 while True:
                     arg, index = self.parse_assignment(index)
@@ -391,7 +391,7 @@ class Parser:
                 index = self.eat(
                     index, RPAREM)
 
-                return ast.FuncCall(cur, args, tok), index
+                return ast.FuncCall(cur, args), index
 
             elif self.token_is(index, INCR):
                 index += 1

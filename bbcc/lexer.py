@@ -30,12 +30,12 @@ class Lexer:
             self.advance()
 
     def skip_line_comment(self):
-        while self.current_char != '\n':
+        while self.current_char != '\n' and self.current_char is not None:
             self.advance()
         self.advance()
 
     def skip_comment(self):
-        while self.current_char != '*' and self.peek() != "/":
+        while self.current_char != '*' and self.peek() != "/" and self.current_char is not None:
             self.advance()
         self.advance()
 
@@ -66,7 +66,7 @@ class Lexer:
 
     def tokenize(self):
         tokens = []
-        while self.pos < len(self.text):
+        while self.current_char is not None:
 
             if self.current_char.isspace():
                 self.skip_whitespace()
