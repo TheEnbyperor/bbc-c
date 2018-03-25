@@ -26,6 +26,5 @@ if __name__ == "__main__":
     source = "".join(sourceFile.readlines())
 
     asm = bbcc.main(source)
-    print(asm)
-    # basic = bbcasm.asm_to_basic(asm)
-    # print(basic)
+    basic = bbcasm.asm_to_basic(asm)
+    print(basic)

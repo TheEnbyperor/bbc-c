@@ -18,10 +18,13 @@ def main(text: str):
     symbol_table_builder.visit(ast_out)
     symbol_table = symbol_table_builder.scope_out
 
-    casm = ASM()
+    asm_code = ASM()
     il = IL()
-    interp = Interpreter(casm, symbol_table, il)
+    interp = Interpreter(asm_code, symbol_table, il)
 
     il_out = interp.interpret(ast_out)
 
-    return il_out.commands
+    asm_code = ASM()
+    il_out.gen_asm(asm_code)
+
+    return asm_code.get_asm()

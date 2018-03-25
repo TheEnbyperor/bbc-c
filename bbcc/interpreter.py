@@ -15,125 +15,6 @@ class Interpreter(ast.NodeVisitor):
         self.branch_count = 1
 
     def visit_TranslationUnit(self, node):
-        self.asm.add_inst("LDA", "#0", "mul")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 3))
-        self.asm.add_inst("LDX", "#&10")
-        self.asm.add_inst("LSR", "&" + self.asm.to_hex(self.asm.num1 - 1), "mul1")
-        self.asm.add_inst("ROR", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("BCC", "mul2") 
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result - 2))
-        self.asm.add_inst("CLC")
-        self.asm.add_inst("ADC", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 2))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result - 3))
-        self.asm.add_inst("ADC", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("ROR", "A", "mul2")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 3))
-        self.asm.add_inst("ROR", "&" + self.asm.to_hex(self.asm.result - 2))
-        self.asm.add_inst("ROR", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("ROR", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("DEX")
-        self.asm.add_inst("BNE", "mul1")
-        self.asm.add_inst("JSR", "movres")
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("LDA", "#0", "div")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("LDX", "#16")
-        self.asm.add_inst("ASL", "&" + self.asm.to_hex(self.asm.num1), "div1")
-        self.asm.add_inst("ROL", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("ROL", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("ROL", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("SEC")
-        self.asm.add_inst("SBC", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("TAY")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("SBC", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("BCC", "div2")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("STY", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("INC", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("DEX", label="div2")
-        self.asm.add_inst("BNE", "div1")
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("CLC", label="add")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("ADC", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("ADC", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("JSR", "movres")
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("SEC", label="sub")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("SBC", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("SBC", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("JSR", "movres")
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2), "movnum")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num1), "movloc")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc3))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc4))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc3 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc4 - 1))
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result), "movres")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2), "neg")
-        self.asm.add_inst("EOR", "#&FF")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("EOR", "#&FF")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "#1")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("JSR", "add")
-        self.asm.add_inst("JSR", "movres")
-        self.asm.add_inst("RTS")
-        self.asm.add_inst("LDA", "#0", "reset")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.result - 3))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.temp))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.temp - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc3))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc3 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc4))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc4 + 1))
-        self.asm.add_inst("RTS")
         for n in node.items:
             self.visit(n)
 
@@ -158,12 +39,16 @@ class Interpreter(ast.NodeVisitor):
     def visit_Function(self, node):
         func_name = node.name.identifier.value
         self.current_scope = func_name
-        if func_name == "main":
-            self.asm.add_inst("JSR", "reset", label=func_name)
-        else:
-            self.asm.add_inst(label=func_name)
+        self.il.add(il.Label(func_name))
         self.visit(node.nodes)
-        self.asm.add_inst("RTS")
+        should_return = True
+        if node.nodes.items is not None:
+            if isinstance(node.nodes.items[-1], ast.Return):
+                should_return = False
+        if should_return:
+            il_value = il.ILValue('int')
+            self.il.register_literal_value(il_value, 0)
+            self.il.add(il.Return(il_value))
         self.current_scope = ""
 
     # TODO: Implement arguments
@@ -194,14 +79,10 @@ class Interpreter(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_Equals(self, node):
-        self.visit(node.right)
-        self.asm.add_inst("JSR", "movloc")
-        self.visit(node.left)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc3) + "),Y")
-        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc4) + "),Y")
-        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        self.il.add(il.Set(right, left))
+        return right
 
     def visit_PlusEquals(self, node):
         self.visit(node.left)
@@ -311,22 +192,11 @@ class Interpreter(ast.NodeVisitor):
         il_value = il.ILValue('int')
         self.il.register_literal_value(il_value, node.number)
         return il_value
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(node.number, 4)[2:4])
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        # self.asm.add_inst("LDA", "#0")
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(node.number, 4)[0:2])
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        # self.asm.add_inst("LDA", "#0")
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
 
-    # TODO: Implement
     def visit_String(self, node):
-        pass
+        il_value = il.ILValue('string')
+        self.il.register_literal_string(il_value, node.chars)
+        return il_value
 
     # TODO: Reimplementing
     def visit_ParenExpr(self, node):
@@ -339,21 +209,6 @@ class Interpreter(ast.NodeVisitor):
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1-1))
         self.asm.add_inst("PLA")
         self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-
-    # TODO: Reimplementing
-    def check_ArithOp(self, node):
-        if isinstance(node, ast._ArithBinOp):
-            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-            self.asm.add_inst("PHA")
-            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1-1))
-            self.asm.add_inst("PHA")
-            self.visit(node)
-            self.asm.add_inst("PLA")
-            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1-1))
-            self.asm.add_inst("PLA")
-            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        else:
-            self.visit(node)
 
     def visit_Plus(self, node):
         left = self.visit(node.left)
@@ -388,20 +243,6 @@ class Interpreter(ast.NodeVisitor):
         right = self.visit(node.right)
         output = il.ILValue('int')
         self.il.add(il.Mod(left, right, output))
-        return output
-
-    def visit_Equality(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
-        output = il.ILValue('int')
-        self.il.add(il.EqualCmp(left, right, output))
-        return output
-
-    def visit_Inequality(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
-        output = il.ILValue('int')
-        self.il.add(il.NotEqualCmp(left, right, output))
         return output
 
     def visit_BoolAnd(self, node):
@@ -457,163 +298,69 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_BoolNot(self, node):
-        self.visit(node.expr)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("CMP", "#0")
-        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("CMP", "#0")
-        self.asm.add_inst("BNE", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("LDA", "#1")
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#0", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
-                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.branch_count += 2
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        output = il.ILValue('int')
+
+        init = il.ILValue('int')
+        self.il.register_literal_var(init, 1)
+        other = il.ILValue('int')
+        self.il.register_literal_var(other, 0)
+
+        set_out = self.il.get_label()
+        end = self.il.get_label()
+
+        self.il.add(il.Set(init, output))
+
+        expr = self.visit(node.expr)
+        self.il.add(il.JmpNotZero(expr, set_out))
+        self.il.add(il.Jmp(end))
+
+        self.il.add(il.Label(set_out))
+        self.il.add(il.Set(other, output))
+        self.il.add(il.Label(end))
+
+        return output
+
+    def visit_Equality(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        output = il.ILValue('int')
+        self.il.add(il.EqualCmp(left, right, output))
+        return output
+
+    def visit_Inequality(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        output = il.ILValue('int')
+        self.il.add(il.NotEqualCmp(left, right, output))
+        return output
 
     def visit_LessThan(self, node):
-        self.visit(node.left)
-        self.asm.add_inst("JSR", "movloc")
-        self.check_ArithOp(node.right)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc3) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc4) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "sub")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 2))
-        self.asm.add_inst("BMI", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#1", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
-                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.branch_count += 2
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        output = il.ILValue('int')
+        self.il.add(il.LessThanCmp(left, right, output))
+        return output
 
     def visit_MoreThan(self, node):
-        self.visit(node.left)
-        self.asm.add_inst("JSR", "movloc")
-        self.check_ArithOp(node.right)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc3) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc4) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "sub")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 2))
-        self.asm.add_inst("SBC", "#1")
-        self.asm.add_inst("BPL", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#1", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
-                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.branch_count += 2
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        output = il.ILValue('int')
+        self.il.add(il.MoreThanCmp(left, right, output))
+        return output
 
     def visit_LessEqual(self, node):
-        self.visit(node.left)
-        self.asm.add_inst("JSR", "movloc")
-        self.check_ArithOp(node.right)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc3) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc4) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "sub")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 2))
-        self.asm.add_inst("SBC", "#1")
-        self.asm.add_inst("BMI", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#1", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
-                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.branch_count += 2
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        output = il.ILValue('int')
+        self.il.add(il.LessEqualCmp(left, right, output))
+        return output
 
     def visit_MoreEqual(self, node):
-        self.visit(node.left)
-        self.asm.add_inst("JSR", "movloc")
-        self.check_ArithOp(node.right)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc3) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc4) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "sub")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 2))
-        self.asm.add_inst("BPL", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#1", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2),
-                          label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.branch_count += 2
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        output = il.ILValue('int')
+        self.il.add(il.MoreEqualCmp(left, right, output))
+        return output
 
     def visit_PreIncr(self, node):
         self.visit(node.expr)
@@ -815,14 +562,9 @@ class Interpreter(ast.NodeVisitor):
         pass
 
     def visit_Return(self, node):
-        self.visit(node.right)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.ret - 1))
-        self.asm.add_inst("RTS")
+        value = self.visit(node.right)
+        self.il.add(il.Return(value))
 
-    def interpret(self, ast_root):
+    def interpret(self, ast_root) -> il.IL:
         self.visit(ast_root)
         return self.il
