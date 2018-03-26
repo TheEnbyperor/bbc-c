@@ -40,7 +40,7 @@ class Lexer:
         self.advance()
 
     def integer(self):
-        """Return a (multidigit) integer consumed from the input."""
+        """Return a integer consumed from the input."""
         result = ''
         while self.current_char is not None and self.current_char.isdigit():
             result += self.current_char
@@ -117,10 +117,8 @@ class Lexer:
                 tokens.append(Token(MOREEQUAL, ">="))
             elif self.current_char == "<":
                 self.advance()
-                self.advance()
                 tokens.append(Token(LESSTHAN, "<"))
             elif self.current_char == ">":
-                self.advance()
                 self.advance()
                 tokens.append(Token(MORETHAN, ">"))
 
