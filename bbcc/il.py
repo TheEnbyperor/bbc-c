@@ -369,59 +369,39 @@ class Mod(ILInst):
 
 
 class Inc(ILInst):
-    def __init__(self, value: ILValue, output: ILValue):
+    def __init__(self, value: ILValue):
         self.value = value
-        self.output = output
 
     def inputs(self):
         return [self.value]
 
-    def outputs(self):
-        return [self.output]
-
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         value = spotmap[self.value]
-        output = spotmap[self.output]
-
-        assembly.add_inst("LDA", value.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(0))
-        assembly.add_inst("LDA", value.asm_str(1))
-        assembly.add_inst("STA", output.asm_str(1))
 
         label = il.get_label()
 
-        assembly.add_inst("INC", output.asm_str(1))
+        assembly.add_inst("INC", value.asm_str(1))
         assembly.add_inst("BNE", label)
-        assembly.add_inst("INC", output.asm_str(0))
+        assembly.add_inst("INC", value.asm_str(0))
         assembly.add_inst(label=label)
 
 
 class Dec(ILInst):
-    def __init__(self, value: ILValue, output: ILValue):
+    def __init__(self, value: ILValue):
         self.value = value
-        self.output = output
 
     def inputs(self):
         return [self.value]
 
-    def outputs(self):
-        return [self.output]
-
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         value = spotmap[self.value]
-        output = spotmap[self.output]
-
-        assembly.add_inst("LDA", value.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(0))
-        assembly.add_inst("LDA", value.asm_str(1))
-        assembly.add_inst("STA", output.asm_str(1))
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", output.asm_str(1))
+        assembly.add_inst("LDA", value.asm_str(1))
         assembly.add_inst("BNE", label)
-        assembly.add_inst("DEC", output.asm_str(0))
-        assembly.add_inst("DEC", output.asm_str(1), label=label)
+        assembly.add_inst("DEC", value.asm_str(0))
+        assembly.add_inst("DEC", value.asm_str(1), label=label)
 
 
 # Comparison

@@ -447,4 +447,4 @@ class NodeVisitor:
 
     @staticmethod
     def generic_visit(node):
-        raise Exception('No visit_{} method'.format(type(node).__name__))
+        raise RuntimeError('No visit_{} method'.format(type(node).__name__))

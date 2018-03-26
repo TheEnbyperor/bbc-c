@@ -13,6 +13,10 @@ class Interpreter(ast.NodeVisitor):
         self.il = il
         self.current_scope = ""
         self.branch_count = 1
+        self.current_loop = {
+            "start": "",
+            "end": ""
+        }
 
     def visit_TranslationUnit(self, node):
         for n in node.items:
@@ -24,16 +28,18 @@ class Interpreter(ast.NodeVisitor):
                 var_name = d.child.identifier.value
                 var = self.scope.lookup(var_name, self.current_scope)
                 if var.type.name == INT or var.type.name == CHAR:
-                    self.asm.add_inst("LDA", "#0")
-                    self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
-                    self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
+                    pass
+                    # self.asm.add_inst("LDA", "#0")
+                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
                 if node.inits[i] is not None:
-                    self.visit(node.inits[i])
-                    self.asm.add_inst("LDY", "#0")
-                    self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-                    self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
-                    self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-                    self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
+                    pass
+                    # self.visit(node.inits[i])
+                    # self.asm.add_inst("LDY", "#0")
+                    # self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
+                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
+                    # self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
+                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
 
     # TODO: Implement arguments
     def visit_Function(self, node):
@@ -62,14 +68,15 @@ class Interpreter(ast.NodeVisitor):
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location, 4)[2:4])
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location, 4)[0:2])
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location - 1, 4)[2:4])
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location - 1, 4)[0:2])
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
+        return il.ILValue('int')
+        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location, 4)[2:4])
+        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
+        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location, 4)[0:2])
+        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location - 1, 4)[2:4])
+        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
+        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location - 1, 4)[0:2])
+        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
 
     def visit_Compound(self, node):
         for n in node.items:
@@ -230,9 +237,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 1)
+        self.il.register_literal_value(init, 1)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 0)
+        self.il.register_literal_value(other, 0)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -255,9 +262,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 0)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 1)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -279,9 +286,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 0)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 1)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -303,9 +310,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 0)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 1)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -327,9 +334,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 0)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 1)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -351,9 +358,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 0)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 1)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -375,9 +382,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 0)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 1)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -395,39 +402,30 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_PreIncr(self, node):
         value = self.visit(node.expr)
-        output = il.ILValue('int')
-
-        self.il.add(il.Inc(value, output))
-        self.il.add(il.Set(output, value))
-        return output
+        self.il.add(il.Inc(value))
+        return value
 
     def visit_PostIncr(self, node):
         value = self.visit(node.expr)
-        return_out = il.ILValue('int')
         output = il.ILValue('int')
 
-        self.il.add(il.Set(value, return_out))
-        self.il.add(il.Inc(value, output))
-        self.il.add(il.Set(output, value))
-        return return_out
+        self.il.add(il.Set(value, output))
+        self.il.add(il.Inc(value))
+        return output
 
     def visit_PreDecr(self, node):
         value = self.visit(node.expr)
-        output = il.ILValue('int')
 
-        self.il.add(il.Dec(value, output))
-        self.il.add(il.Set(output, value))
-        return output
+        self.il.add(il.Dec(value))
+        return value
 
     def visit_PostDecr(self, node):
         value = self.visit(node.expr)
-        return_out = il.ILValue('int')
         output = il.ILValue('int')
 
-        self.il.add(il.Set(value, return_out))
-        self.il.add(il.Dec(value, output))
-        self.il.add(il.Set(output, value))
-        return return_out
+        self.il.add(il.Set(value, output))
+        self.il.add(il.Dec(value))
+        return output
 
     def visit_AddrOf(self, node):
         self.visit(node.expr)
@@ -480,52 +478,50 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Label(end_label))
         
     def visit_WhileStatement(self, node):
-        self.asm.add_inst(label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.visit(node.condition)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("CMP", "#0")
-        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("CMP", "#0")
-        self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.visit(node.statment)
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.branch_count += 2
+        start_label = self.il.get_label()
+        end_label = self.il.get_label()
+
+        self.il.add(il.Label(start_label))
+        condition = self.visit(node.condition)
+
+        self.il.add(il.JmpZero(condition, end_label))
+        self.visit(node.statement)
+        self.il.add(il.Jmp(start_label))
+
+        self.il.add(il.Label(end_label))
         
     def visit_ForStatement(self, node):
+        start_label = self.il.get_label()
+        end_label = self.il.get_label()
+
         self.visit(node.first)
-        self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        self.il.add(il.Label(start_label))
+
         if node.second is not None:
-            self.visit(node.second)
-            self.asm.add_inst("LDY", "#0")
-            self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-            self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-            self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-            self.asm.add_inst("CMP", "#0")
-            self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-            self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-            self.asm.add_inst("CMP", "#0")
-            self.asm.add_inst("BEQ", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.visit(node.statment)
+            condition = self.visit(node.second)
+            self.il.add(il.JmpZero(condition, end_label))
+
+        self.current_loop["start"] = start_label
+        self.current_loop["end"] = end_label
+        self.visit(node.statement)
+
         if node.third is not None:
             self.visit(node.third)
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
-        self.asm.add_inst("", label="bbcc_" + self.current_scope + "_" + str(self.branch_count))
-        self.branch_count += 2
+
+        self.il.add(il.Jmp(start_label))
+        self.il.add(il.Label(end_label))
         
     def visit_Break(self, node):
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count))
+        if self.current_loop["end"] is "":
+            raise SyntaxError("Break outside loop")
+        else:
+            self.il.add(il.Jmp(self.current_loop["end"]))
         
     def visit_Continue(self, node):
-        self.asm.add_inst("JMP", "bbcc_" + self.current_scope + "_" + str(self.branch_count + 1))
+        if self.current_loop["start"] is "":
+            raise SyntaxError("Continue outside loop")
+        else:
+            self.il.add(il.Jmp(self.current_loop["start"]))
 
     def visit_NoOp(self, node):
         pass
