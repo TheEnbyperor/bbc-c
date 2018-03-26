@@ -42,10 +42,11 @@ class Set(ILInst):
         value = spotmap[self.value]
         output = spotmap[self.output]
 
-        assembly.add_inst("LDA", value.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(0))
-        assembly.add_inst("LDA", value.asm_str(1))
-        assembly.add_inst("STA", output.asm_str(1))
+        if output.has_address():
+            assembly.add_inst("LDA", value.asm_str(0))
+            assembly.add_inst("STA", output.asm_str(0))
+            assembly.add_inst("LDA", value.asm_str(1))
+            assembly.add_inst("STA", output.asm_str(1))
 
 
 class Label(ILInst):
@@ -365,6 +366,62 @@ class Mod(ILInst):
         assembly.add_inst("INC", left.asm_str(1))
         assembly.add_inst("DEX", label=label2)
         assembly.add_inst("BNE", label1)
+
+
+class Inc(ILInst):
+    def __init__(self, value: ILValue, output: ILValue):
+        self.value = value
+        self.output = output
+
+    def inputs(self):
+        return [self.value]
+
+    def outputs(self):
+        return [self.output]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+        output = spotmap[self.output]
+
+        assembly.add_inst("LDA", value.asm_str(0))
+        assembly.add_inst("STA", output.asm_str(0))
+        assembly.add_inst("LDA", value.asm_str(1))
+        assembly.add_inst("STA", output.asm_str(1))
+
+        label = il.get_label()
+
+        assembly.add_inst("INC", output.asm_str(1))
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("INC", output.asm_str(0))
+        assembly.add_inst(label=label)
+
+
+class Dec(ILInst):
+    def __init__(self, value: ILValue, output: ILValue):
+        self.value = value
+        self.output = output
+
+    def inputs(self):
+        return [self.value]
+
+    def outputs(self):
+        return [self.output]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+        output = spotmap[self.output]
+
+        assembly.add_inst("LDA", value.asm_str(0))
+        assembly.add_inst("STA", output.asm_str(0))
+        assembly.add_inst("LDA", value.asm_str(1))
+        assembly.add_inst("STA", output.asm_str(1))
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", output.asm_str(1))
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("DEC", output.asm_str(0))
+        assembly.add_inst("DEC", output.asm_str(1), label=label)
 
 
 # Comparison

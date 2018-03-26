@@ -349,109 +349,85 @@ class Interpreter(ast.NodeVisitor):
         left = self.visit(node.left)
         right = self.visit(node.right)
         output = il.ILValue('int')
-        self.il.add(il.LessEqualCmp(left, right, output))
+
+        init = il.ILValue('int')
+        self.il.register_literal_var(init, 0)
+        other = il.ILValue('int')
+        self.il.register_literal_var(other, 1)
+
+        set_out = self.il.get_label()
+        end = self.il.get_label()
+
+        self.il.add(il.Set(init, output))
+
+        self.il.add(il.LessEqualCmp(left, right, set_out))
+        self.il.add(il.Jmp(end))
+
+        self.il.add(il.Label(set_out))
+        self.il.add(il.Set(other, output))
+        self.il.add(il.Label(end))
+
         return output
 
     def visit_MoreEqual(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
         output = il.ILValue('int')
-        self.il.add(il.MoreEqualCmp(left, right, output))
+
+        init = il.ILValue('int')
+        self.il.register_literal_var(init, 0)
+        other = il.ILValue('int')
+        self.il.register_literal_var(other, 1)
+
+        set_out = self.il.get_label()
+        end = self.il.get_label()
+
+        self.il.add(il.Set(init, output))
+
+        self.il.add(il.MoreEqualCmp(left, right, set_out))
+        self.il.add(il.Jmp(end))
+
+        self.il.add(il.Label(set_out))
+        self.il.add(il.Set(other, output))
+        self.il.add(il.Label(end))
+
         return output
 
     def visit_PreIncr(self, node):
-        self.visit(node.expr)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "#1")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "add")
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        value = self.visit(node.expr)
+        output = il.ILValue('int')
+
+        self.il.add(il.Inc(value, output))
+        self.il.add(il.Set(output, value))
+        return output
 
     def visit_PostIncr(self, node):
-        self.visit(node.expr)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.temp))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.temp - 1))
-        self.asm.add_inst("LDA", "#1")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "add")
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.temp))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.temp - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        value = self.visit(node.expr)
+        return_out = il.ILValue('int')
+        output = il.ILValue('int')
+
+        self.il.add(il.Set(value, return_out))
+        self.il.add(il.Inc(value, output))
+        self.il.add(il.Set(output, value))
+        return return_out
 
     def visit_PreDecr(self, node):
-        self.visit(node.expr)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "#1")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "sub")
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        value = self.visit(node.expr)
+        output = il.ILValue('int')
+
+        self.il.add(il.Dec(value, output))
+        self.il.add(il.Set(output, value))
+        return output
 
     def visit_PostDecr(self, node):
-        self.visit(node.expr)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.temp))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.temp - 1))
-        self.asm.add_inst("LDA", "#1")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "sub")
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.temp))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.temp - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        value = self.visit(node.expr)
+        return_out = il.ILValue('int')
+        output = il.ILValue('int')
+
+        self.il.add(il.Set(value, return_out))
+        self.il.add(il.Dec(value, output))
+        self.il.add(il.Set(output, value))
+        return return_out
 
     def visit_AddrOf(self, node):
         self.visit(node.expr)
