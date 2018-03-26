@@ -32,6 +32,21 @@ class Set(ILInst):
         self.value = value
         self.output = output
 
+    def inputs(self):
+        return [self.value]
+
+    def outputs(self):
+        return [self.output]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+        output = spotmap[self.output]
+
+        assembly.add_inst("LDA", value.asm_str(0))
+        assembly.add_inst("STA", output.asm_str(0))
+        assembly.add_inst("LDA", value.asm_str(1))
+        assembly.add_inst("STA", output.asm_str(1))
+
 
 class Label(ILInst):
     def __init__(self, label: str):
@@ -54,11 +69,36 @@ class JmpZero(ILInst):
         self.value = value
         self.label = label
 
+    def inputs(self):
+        return [self.value]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", value.asm_str(0))
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("LDA", value.asm_str(1))
+        assembly.add_inst("BEQ", self.label)
+        assembly.add_inst(label=label)
+
 
 class JmpNotZero(ILInst):
     def __init__(self, value: ILValue, label: str):
         self.value = value
         self.label = label
+
+    def inputs(self):
+        return [self.value]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+
+        assembly.add_inst("LDA", value.asm_str(0))
+        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("LDA", value.asm_str(1))
+        assembly.add_inst("BNE", self.label)
 
 
 class Return(ILInst):
@@ -200,6 +240,68 @@ class Div(ILInst):
         self.left = left
         self.right = right
         self.output = output
+        self.scratch1 = ILValue('int')
+        self.scratch2 = ILValue('int')
+        self.scratch3 = ILValue('int')
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def outputs(self):
+        return [self.output]
+
+    def scratch_spaces(self):
+        return [self.scratch1, self.scratch2, self.scratch3]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+        output = spotmap[self.output]
+        scratch3 = spotmap[self.scratch3]
+
+        if not left.has_address():
+            scratch1 = spotmap[self.scratch1]
+            assembly.add_inst("LDA", left.asm_str(0))
+            assembly.add_inst("STA", scratch1.asm_str(0))
+            assembly.add_inst("LDA", left.asm_str(1))
+            assembly.add_inst("STA", scratch1.asm_str(1))
+            left = scratch1
+
+        if not right.has_address():
+            scratch2 = spotmap[self.scratch2]
+            assembly.add_inst("LDA", right.asm_str(0))
+            assembly.add_inst("STA", scratch2.asm_str(0))
+            assembly.add_inst("LDA", right.asm_str(1))
+            assembly.add_inst("STA", scratch2.asm_str(1))
+            right = scratch2
+
+        label1 = il.get_label()
+        label2 = il.get_label()
+
+        assembly.add_inst("LDA", "#0")
+        assembly.add_inst("STA", scratch3.asm_str(0))
+        assembly.add_inst("STA", scratch3.asm_str(1))
+        assembly.add_inst("LDX", "#16")
+        assembly.add_inst("ASL", left.asm_str(1), label1)
+        assembly.add_inst("ROL", left.asm_str(0))
+        assembly.add_inst("ROL", scratch3.asm_str(1))
+        assembly.add_inst("ROL", scratch3.asm_str(0))
+        assembly.add_inst("SEC")
+        assembly.add_inst("LDA", scratch3.asm_str(1))
+        assembly.add_inst("SBC", right.asm_str(1))
+        assembly.add_inst("TAY")
+        assembly.add_inst("LDA", scratch3.asm_str(0))
+        assembly.add_inst("SBC", right.asm_str(0))
+        assembly.add_inst("BCC", label2)
+        assembly.add_inst("STA", scratch3.asm_str(0))
+        assembly.add_inst("STY", scratch3.asm_str(1))
+        assembly.add_inst("INC", left.asm_str(1))
+        assembly.add_inst("DEX", label=label2)
+        assembly.add_inst("BNE", label1)
+        assembly.add_inst("LDA", left.asm_str(0))
+        assembly.add_inst("STA", output.asm_str(0))
+        assembly.add_inst("LDA", left.asm_str(1))
+        assembly.add_inst("STA", output.asm_str(1))
 
 
 class Mod(ILInst):
@@ -207,21 +309,111 @@ class Mod(ILInst):
         self.left = left
         self.right = right
         self.output = output
+        self.scratch1 = ILValue('int')
+        self.scratch2 = ILValue('int')
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def outputs(self):
+        return [self.output]
+
+    def scratch_spaces(self):
+        return [self.scratch1, self.scratch2]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+        output = spotmap[self.output]
+
+        if not left.has_address():
+            scratch1 = spotmap[self.scratch1]
+            assembly.add_inst("LDA", left.asm_str(0))
+            assembly.add_inst("STA", scratch1.asm_str(0))
+            assembly.add_inst("LDA", left.asm_str(1))
+            assembly.add_inst("STA", scratch1.asm_str(1))
+            left = scratch1
+
+        if not right.has_address():
+            scratch2 = spotmap[self.scratch2]
+            assembly.add_inst("LDA", right.asm_str(0))
+            assembly.add_inst("STA", scratch2.asm_str(0))
+            assembly.add_inst("LDA", right.asm_str(1))
+            assembly.add_inst("STA", scratch2.asm_str(1))
+            right = scratch2
+
+        label1 = il.get_label()
+        label2 = il.get_label()
+
+        assembly.add_inst("LDA", "#0")
+        assembly.add_inst("STA", output.asm_str(0))
+        assembly.add_inst("STA", output.asm_str(1))
+        assembly.add_inst("LDX", "#16")
+        assembly.add_inst("ASL", left.asm_str(1), label1)
+        assembly.add_inst("ROL", left.asm_str(0))
+        assembly.add_inst("ROL", output.asm_str(1))
+        assembly.add_inst("ROL", output.asm_str(0))
+        assembly.add_inst("SEC")
+        assembly.add_inst("LDA", output.asm_str(1))
+        assembly.add_inst("SBC", right.asm_str(1))
+        assembly.add_inst("TAY")
+        assembly.add_inst("LDA", output.asm_str(0))
+        assembly.add_inst("SBC", right.asm_str(0))
+        assembly.add_inst("BCC", label2)
+        assembly.add_inst("STA", output.asm_str(0))
+        assembly.add_inst("STY", output.asm_str(1))
+        assembly.add_inst("INC", left.asm_str(1))
+        assembly.add_inst("DEX", label=label2)
+        assembly.add_inst("BNE", label1)
 
 
 # Comparison
 class EqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+    def __init__(self, left: ILValue, right: ILValue, label: str):
         self.left = left
         self.right = right
-        self.output = output
+        self.label = label
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", left.asm_str(0))
+        assembly.add_inst("CMP", right.asm_str(0))
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("LDA", left.asm_str(1))
+        assembly.add_inst("CMP", right.asm_str(1))
+        assembly.add_inst("BEQ", self.label)
+        assembly.add_inst(label=label)
 
 
 class NotEqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+    def __init__(self, left: ILValue, right: ILValue, label: str):
         self.left = left
         self.right = right
-        self.output = output
+        self.label = label
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", left.asm_str(0))
+        assembly.add_inst("CMP", right.asm_str(0))
+        assembly.add_inst("BEQ", label)
+        assembly.add_inst("LDA", left.asm_str(1))
+        assembly.add_inst("CMP", right.asm_str(1))
+        assembly.add_inst("BNE", self.label)
+        assembly.add_inst(label=label)
 
 
 class LessThanCmp(ILInst):
@@ -280,7 +472,7 @@ class IL:
             spotmap[i] = spots.LiteralSpot(v, i.type)
 
         for i, c in enumerate(self.commands):
-            for v in c.outputs() + c.scratch_spaces():
+            for v in (c.outputs() + c.scratch_spaces())[::-1]:
                 if v not in spotmap:
                     reg = self._find_register(spotmap, i, v)
                     if reg is None:
@@ -288,6 +480,7 @@ class IL:
                     spotmap[v] = spots.Pseudo16RegisterSpot(reg, v.type)
 
         for c in self.commands:
+            assembly.add_comment(str(type(c).__name__))
             c.gen_asm(assembly, spotmap, self)
             
     def _find_register(self, spotmap,  command_i: int, il_value: ILValue):

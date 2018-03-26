@@ -2,7 +2,7 @@
 //int Fibonacci(int);
 
 int main() {
-    return 2 * 1-3;
+    return 1 || 0;
 }
 
 //int Fibonacci(int n) {

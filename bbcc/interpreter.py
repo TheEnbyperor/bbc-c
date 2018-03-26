@@ -198,17 +198,9 @@ class Interpreter(ast.NodeVisitor):
         self.il.register_literal_string(il_value, node.chars)
         return il_value
 
-    # TODO: Reimplementing
     def visit_ParenExpr(self, node):
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("PHA")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num1-1))
-        self.asm.add_inst("PHA")
-        self.visit(node.expr)
-        self.asm.add_inst("PLA")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1-1))
-        self.asm.add_inst("PLA")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
+        il_value = self.visit(node.expr)
+        return il_value
 
     def visit_Plus(self, node):
         left = self.visit(node.left)
@@ -225,6 +217,7 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Mult(self, node):
+        print(node.left, node.right)
         left = self.visit(node.left)
         right = self.visit(node.right)
         output = il.ILValue('int')
@@ -249,9 +242,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 1)
+        self.il.register_literal_value(init, 1)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 0)
+        self.il.register_literal_value(other, 0)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -275,9 +268,9 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
 
         init = il.ILValue('int')
-        self.il.register_literal_var(init, 0)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue('int')
-        self.il.register_literal_var(other, 1)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
@@ -324,21 +317,72 @@ class Interpreter(ast.NodeVisitor):
         left = self.visit(node.left)
         right = self.visit(node.right)
         output = il.ILValue('int')
-        self.il.add(il.EqualCmp(left, right, output))
+
+        init = il.ILValue('int')
+        self.il.register_literal_var(init, 0)
+        other = il.ILValue('int')
+        self.il.register_literal_var(other, 1)
+
+        set_out = self.il.get_label()
+        end = self.il.get_label()
+
+        self.il.add(il.Set(init, output))
+
+        self.il.add(il.EqualCmp(left, right, set_out))
+        self.il.add(il.Jmp(end))
+
+        self.il.add(il.Label(set_out))
+        self.il.add(il.Set(other, output))
+        self.il.add(il.Label(end))
+
         return output
 
     def visit_Inequality(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
         output = il.ILValue('int')
-        self.il.add(il.NotEqualCmp(left, right, output))
+
+        init = il.ILValue('int')
+        self.il.register_literal_var(init, 0)
+        other = il.ILValue('int')
+        self.il.register_literal_var(other, 1)
+
+        set_out = self.il.get_label()
+        end = self.il.get_label()
+
+        self.il.add(il.Set(init, output))
+
+        self.il.add(il.NotEqualCmp(left, right, set_out))
+        self.il.add(il.Jmp(end))
+
+        self.il.add(il.Label(set_out))
+        self.il.add(il.Set(other, output))
+        self.il.add(il.Label(end))
+
         return output
 
     def visit_LessThan(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
         output = il.ILValue('int')
-        self.il.add(il.LessThanCmp(left, right, output))
+
+        init = il.ILValue('int')
+        self.il.register_literal_var(init, 0)
+        other = il.ILValue('int')
+        self.il.register_literal_var(other, 1)
+
+        set_out = self.il.get_label()
+        end = self.il.get_label()
+
+        self.il.add(il.Set(init, output))
+
+        self.il.add(il.LessThanCmp(left, right, set_out))
+        self.il.add(il.Jmp(end))
+
+        self.il.add(il.Label(set_out))
+        self.il.add(il.Set(other, output))
+        self.il.add(il.Label(end))
+
         return output
 
     def visit_MoreThan(self, node):
