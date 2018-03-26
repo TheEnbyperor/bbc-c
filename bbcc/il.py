@@ -417,31 +417,105 @@ class NotEqualCmp(ILInst):
 
 
 class LessThanCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+    def __init__(self, left: ILValue, right: ILValue, label: str):
         self.left = left
         self.right = right
-        self.output = output
+        self.label = label
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", left.asm_str(0))
+        assembly.add_inst("CMP", right.asm_str(0))
+        assembly.add_inst("BCC", self.label)
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("LDA", left.asm_str(1))
+        assembly.add_inst("CMP", right.asm_str(1))
+        assembly.add_inst("BCC", self.label)
+        assembly.add_inst(label=label)
 
 
 class LessEqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+    def __init__(self, left: ILValue, right: ILValue, label: str):
         self.left = left
         self.right = right
-        self.output = output
+        self.label = label
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", left.asm_str(0))
+        assembly.add_inst("CMP", right.asm_str(0))
+        assembly.add_inst("BCC", self.label)
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("LDA", left.asm_str(1))
+        assembly.add_inst("CMP", right.asm_str(1))
+        assembly.add_inst("BCC", self.label)
+        assembly.add_inst("BEQ", self.label)
+        assembly.add_inst(label=label)
 
 
 class MoreThanCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+    def __init__(self, left: ILValue, right: ILValue, label: str):
         self.left = left
         self.right = right
-        self.output = output
+        self.label = label
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", left.asm_str(0))
+        assembly.add_inst("CMP", right.asm_str(0))
+        assembly.add_inst("BCC", label)
+        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("LDA", left.asm_str(1))
+        assembly.add_inst("CMP", right.asm_str(1))
+        assembly.add_inst("BEQ", label)
+        assembly.add_inst("BCS", self.label)
+        assembly.add_inst(label=label)
 
 
 class MoreEqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+    def __init__(self, left: ILValue, right: ILValue, label: str):
         self.left = left
         self.right = right
-        self.output = output
+        self.label = label
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+
+        label = il.get_label()
+
+        assembly.add_inst("LDA", left.asm_str(0))
+        assembly.add_inst("CMP", right.asm_str(0))
+        assembly.add_inst("BCC", label)
+        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("LDA", left.asm_str(1))
+        assembly.add_inst("CMP", right.asm_str(1))
+        assembly.add_inst("BCS", self.label)
+        assembly.add_inst(label=label)
 
 
 class IL:
