@@ -13,6 +13,7 @@ class Interpreter(ast.NodeVisitor):
         self.il = il
         self.current_scope = ""
         self.branch_count = 1
+        self.current_function = None
         self.current_loop = {
             "start": "",
             "end": ""
@@ -29,12 +30,12 @@ class Interpreter(ast.NodeVisitor):
 
         stack_start = il.ILValue('int')
         stack_register = il.ILValue('char')
-        self.il.register_literal_value(stack_start, 0x0020)
+        self.il.register_literal_value(stack_start, 0x0018)
         self.il.register_spot_value(stack_register, il.stack_register)
         self.il.add(il.Set(stack_start, stack_register))
 
         self.il.add(il.CallFunction("main", [], ret_val))
-        self.il.add(il.Return(ret_val))
+        self.il.add(il.Return(ret_val, "_start", epilouge=False))
 
     def visit_Declaration(self, node):
         for i, d in enumerate(node.decls):
@@ -62,17 +63,12 @@ class Interpreter(ast.NodeVisitor):
                 var = self.scope.lookup(var_name, self.current_scope)
                 var.il_value.stack_offset = i*2
                 params.append(var)
-        self.il.add(il.FunctionPrologue(params))
+        self.il.add(il.FunctionPrologue(params, "__{}".format(func_name)))
+        self.current_function = "__{}".format(func_name)
         self.visit(node.nodes)
-        should_return = True
-        if node.nodes.items is not None:
-            if isinstance(node.nodes.items[-1], ast.Return):
-                should_return = False
-        if should_return:
-            il_value = il.ILValue('int')
-            self.il.register_literal_value(il_value, 0)
-            self.il.add(il.FunctionEpilogue())
-            self.il.add(il.Return(il_value))
+        il_value = il.ILValue('int')
+        self.il.register_literal_value(il_value, 0)
+        self.il.add(il.Return(il_value, "__{}".format(func_name)))
         self.current_scope = ""
 
     # TODO: Implement arguments
@@ -543,8 +539,7 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Return(self, node):
         value = self.visit(node.right)
-        self.il.add(il.FunctionEpilogue())
-        self.il.add(il.Return(value))
+        self.il.add(il.Return(value, self.current_function))
 
     def interpret(self, ast_root) -> il.IL:
         self.visit(ast_root)

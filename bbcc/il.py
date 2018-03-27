@@ -46,13 +46,11 @@ class ILInst:
 class Routines(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         assembly.add_inst("PHA", label="_bbcc_pusha")
-        assembly.add_inst("SEC")
         stack_register.asm(assembly, "LDA", 0)
-        assembly.add_inst("SBC", "#2")
-        stack_register.asm(assembly, "STA", 0)
-        assembly.add_inst("BCS", "_bbcc_pushax_1")
+        assembly.add_inst("BNE", "_bbcc_pusha_1")
         stack_register.asm(assembly, "DEC", 1)
-        assembly.add_inst("LDY", "#0",  label="_bbcc_pushax_1")
+        assembly.add_inst(label="_bbcc_pusha_1")
+        stack_register.asm(assembly, "DEC", 0)
         assembly.add_inst("PLA")
         stack_register.asm(assembly, "STA", 0, "({}),Y")
         assembly.add_inst("RTS")
@@ -151,8 +149,10 @@ class JmpNotZero(ILInst):
 
 
 class Return(ILInst):
-    def __init__(self, value):
+    def __init__(self, value, func_name=None, epilouge=True):
         self.value = value
+        self.epilouge = epilouge
+        self.func_name = func_name
 
     def inputs(self):
         return [self.value]
@@ -161,11 +161,33 @@ class Return(ILInst):
         value = spotmap[self.value]
         ret_reg = spots.Pseudo16RegisterSpot(return_register, value.type)
 
+        used = []
+        if self.epilouge:
+            found_start = False
+            for c in il.commands[::-1]:
+                if isinstance(c, Return):
+                    if c.func_name == self.func_name:
+                        found_start = True
+                        continue
+                if found_start:
+                    if type(c) == FunctionPrologue:
+                        break
+                    for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
+                        if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
+                            if s.loc in pseudo_registers and s.loc != return_register:
+                                used.append(s)
+
         if value != ret_reg:
             value.asm(assembly, "LDA", 1)
             ret_reg.asm(assembly, "STA", 1)
             value.asm(assembly, "LDA", 0)
             ret_reg.asm(assembly, "STA", 0)
+
+        for reg in used[::-1]:
+            assembly.add_inst("PLA")
+            reg.asm(assembly, "STA", 1)
+            assembly.add_inst("PLA")
+            reg.asm(assembly, "STA", 0)
 
         assembly.add_inst("RTS")
 
@@ -191,16 +213,10 @@ class CallFunction(ILInst):
             spot = spotmap[a]
             spot.asm(assembly, "LDA", 1)
             assembly.add_inst("JSR", "_bbcc_pusha")
+            offset += 1
             spot.asm(assembly, "LDA", 0)
             assembly.add_inst("JSR", "_bbcc_pusha")
-            offset += 2
-        assembly.add_inst("SEC")
-        stack_register.asm(assembly, "LDA", 0)
-        assembly.add_inst("SBC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
-        stack_register.asm(assembly, "STA", 0)
-        stack_register.asm(assembly, "LDA", 1)
-        assembly.add_inst("SBC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
-        stack_register.asm(assembly, "STA", 1)
+            offset += 1
 
         assembly.add_inst("JSR", "__{}".format(self.name))
 
@@ -220,8 +236,9 @@ class CallFunction(ILInst):
 
 
 class FunctionPrologue(ILInst):
-    def __init__(self, params):
+    def __init__(self, params, func_name):
         self.params = params
+        self.func_name = func_name
 
     def inputs(self):
         return [v.il_value for v in self.params]
@@ -234,11 +251,12 @@ class FunctionPrologue(ILInst):
                 found_self = True
                 continue
             if found_self:
-                if type(c) == FunctionEpilogue:
-                    break
+                if type(c) == Return:
+                    if c.func_name != self.func_name:
+                        break
                 for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
                     if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
-                        if s.loc in pseudo_registers:
+                        if s.loc in pseudo_registers and s.loc != return_register:
                             used.append(s)
 
         for reg in used[::-1]:
@@ -246,32 +264,6 @@ class FunctionPrologue(ILInst):
             assembly.add_inst("PHA")
             reg.asm(assembly, "LDA", 1)
             assembly.add_inst("PHA")
-
-
-class FunctionEpilogue(ILInst):
-    def __init__(self):
-        pass
-
-    def gen_asm(self, assembly: asm.ASM, spotmap, il):
-        used = []
-        found_self = False
-        for c in il.commands[::-1]:
-            if c == self:
-                found_self = True
-                continue
-            if found_self:
-                if type(c) == FunctionPrologue:
-                    break
-                for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
-                    if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
-                        if s.loc in pseudo_registers:
-                            used.append(s)
-
-        for reg in used[::-1]:
-            assembly.add_inst("PLA")
-            reg.asm(assembly, "STA", 1)
-            assembly.add_inst("PLA")
-            reg.asm(assembly, "STA", 0)
 
 
 # Arithmetic
@@ -753,7 +745,6 @@ class IL:
         for i, c in enumerate(self.commands):
             for v in (c.inputs() + c.outputs() + c.scratch_spaces())[::-1]:
                 if v not in spotmap:
-                    print(v.stack_offset)
                     if v.stack_offset is None:
                         reg = self._find_register(spotmap, i, v)
                         if reg is None:
