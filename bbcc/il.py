@@ -719,7 +719,7 @@ class IL:
     def gen_asm(self, assembly: asm.ASM):
         self._print_commands()
 
-        spotmap = {}
+        spotmap = self.spotmap
 
         for i, v in self.literals.items():
             spotmap[i] = spots.LiteralSpot(v, i.type)

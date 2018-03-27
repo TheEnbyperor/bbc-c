@@ -71,8 +71,8 @@ class Interpreter(ast.NodeVisitor):
         if should_return:
             il_value = il.ILValue('int')
             self.il.register_literal_value(il_value, 0)
+            self.il.add(il.FunctionEpilogue())
             self.il.add(il.Return(il_value))
-        self.il.add(il.FunctionEpilogue())
         self.current_scope = ""
 
     # TODO: Implement arguments
@@ -543,6 +543,7 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Return(self, node):
         value = self.visit(node.right)
+        self.il.add(il.FunctionEpilogue())
         self.il.add(il.Return(value))
 
     def interpret(self, ast_root) -> il.IL:
