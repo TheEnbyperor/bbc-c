@@ -47,22 +47,23 @@ class Routines(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         assembly.add_inst("PHA", label="_bbcc_pusha")
         assembly.add_inst("SEC")
-        assembly.add_inst("LDA", stack_register.asm_str(0))
+        stack_register.asm(assembly, "LDA", 0)
         assembly.add_inst("SBC", "#2")
-        assembly.add_inst("STA", stack_register.asm_str(0))
+        stack_register.asm(assembly, "STA", 0)
         assembly.add_inst("BCS", "_bbcc_pushax_1")
-        assembly.add_inst("DEC", stack_register.asm_str(1))
+        stack_register.asm(assembly, "DEC", 1)
         assembly.add_inst("LDY", "#0",  label="_bbcc_pushax_1")
         assembly.add_inst("PLA")
-        assembly.add_inst("STA", "({}),Y".format(stack_register.asm_str(0)))
+        stack_register.asm(assembly, "STA", 0, "({}),Y")
         assembly.add_inst("RTS")
 
         assembly.add_inst("LDY", "#0", label="_bbcc_pulla")
-        assembly.add_inst("LDA", "({}),Y".format(stack_register.asm_str(0)))
-        assembly.add_inst("INC", stack_register.asm_str(0))
+        stack_register.asm(assembly, "LDA", 0, "({}),Y")
+        stack_register.asm(assembly, "INC", 0)
         assembly.add_inst("BEQ", "_bbcc_pulla_1")
         assembly.add_inst("RTS")
-        assembly.add_inst("INC", stack_register.asm_str(1), label="_bbcc_pulla_1")
+        assembly.add_inst(label="_bbcc_pulla_1")
+        stack_register.asm(assembly, "INC", 1)
         assembly.add_inst("RTS")
 
 
@@ -82,10 +83,10 @@ class Set(ILInst):
         output = spotmap[self.output]
 
         if output.has_address():
-            assembly.add_inst("LDA", value.asm_str(0))
-            assembly.add_inst("STA", output.asm_str(0))
-            assembly.add_inst("LDA", value.asm_str(1))
-            assembly.add_inst("STA", output.asm_str(1))
+            value.asm(assembly,"LDA", 0)
+            output.asm(assembly, "STA", 0)
+            value.asm(assembly, "LDA", 1)
+            output.asm(assembly, "STA", 1)
 
 
 class Label(ILInst):
@@ -125,9 +126,9 @@ class JmpZero(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", value.asm_str(0))
+        value.asm(assembly, "LDA", 0)
         assembly.add_inst("BNE", label)
-        assembly.add_inst("LDA", value.asm_str(1))
+        value.asm(assembly, "LDA", 1)
         assembly.add_inst("BEQ", self.label)
         assembly.add_inst(label=label)
 
@@ -143,9 +144,9 @@ class JmpNotZero(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         value = spotmap[self.value]
 
-        assembly.add_inst("LDA", value.asm_str(0))
+        value.asm(assembly, "LDA", 0)
         assembly.add_inst("BNE", self.label)
-        assembly.add_inst("LDA", value.asm_str(1))
+        value.asm(assembly, "LDA", 1)
         assembly.add_inst("BNE", self.label)
 
 
@@ -161,17 +162,18 @@ class Return(ILInst):
         ret_reg = spots.Pseudo16RegisterSpot(return_register, value.type)
 
         if value != ret_reg:
-            assembly.add_inst("LDA", value.asm_str(1))
-            assembly.add_inst("STA", ret_reg.asm_str(1))
-            assembly.add_inst("LDA", value.asm_str(0))
-            assembly.add_inst("STA", ret_reg.asm_str(0))
+            value.asm(assembly, "LDA", 1)
+            ret_reg.asm(assembly, "STA", 1)
+            value.asm(assembly, "LDA", 0)
+            ret_reg.asm(assembly, "STA", 0)
 
         assembly.add_inst("RTS")
 
 
 class CallFunction(ILInst):
-    def __init__(self, name: str, output: ILValue):
+    def __init__(self, name: str, args, output: ILValue):
         self.name = name
+        self.args = args
         self.output = output
 
     def outputs(self):
@@ -184,12 +186,36 @@ class CallFunction(ILInst):
         output = spotmap[self.output]
         ret_reg = spots.Pseudo16RegisterSpot(return_register, output.type)
 
+        offset = 0
+        for a in self.args:
+            a.asm(assembly, "LDA", 1)
+            assembly.add_inst("JSR", "_bbc_pusha")
+            a.asm(assembly, "LDA", 0)
+            assembly.add_inst("JSR", "_bbc_pusha")
+            offset += 2
+        assembly.add_inst("SEC")
+        stack_register.asm(assembly, "LDA", 0)
+        assembly.add_inst("SBC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
+        stack_register.asm(assembly, "STA", 0)
+        stack_register.asm(assembly, "LDA", 1)
+        assembly.add_inst("SBC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
+        stack_register.asm(assembly, "STA", 1)
+
         assembly.add_inst("JSR", "__{}".format(self.name))
+
+        assembly.add_inst("CLC")
+        stack_register.asm(assembly, "LDA", 0)
+        assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
+        stack_register.asm(assembly, "STA", 0)
+        stack_register.asm(assembly, "LDA", 1)
+        assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
+        stack_register.asm(assembly, "STA", 1)
+
         if output != ret_reg:
-            assembly.add_inst("LDA", ret_reg.asm_str(1))
-            assembly.add_inst("STA", output.asm_str(1))
-            assembly.add_inst("LDA", ret_reg.asm_str(0))
-            assembly.add_inst("STA", output.asm_str(0))
+            ret_reg.asm(assembly, "LDA", 1)
+            output.asm(assembly, "STA", 1)
+            ret_reg.asm(assembly, "LDA", 0)
+            output.asm(assembly, "STA", 0)
 
 
 class FunctionPrologue(ILInst):
@@ -202,9 +228,9 @@ class FunctionPrologue(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         for r in pseudo_registers[::-1]:
             reg = spots.Pseudo16RegisterSpot(r, '')
-            assembly.add_inst("LDA", reg.asm_str(0))
+            reg.asm(assembly, "LDA", 0)
             assembly.add_inst("PHA")
-            assembly.add_inst("LDA", reg.asm_str(1))
+            reg.asm(assembly, "LDA", 1)
             assembly.add_inst("PHA")
 
 
@@ -216,9 +242,9 @@ class FunctionEpilogue(ILInst):
         for r in pseudo_registers:
             reg = spots.Pseudo16RegisterSpot(r, '')
             assembly.add_inst("PLA")
-            assembly.add_inst("STA", reg.asm_str(1))
+            reg.asm(assembly, "STA", 1)
             assembly.add_inst("PLA")
-            assembly.add_inst("STA", reg.asm_str(0))
+            reg.asm(assembly, "STA", 0)
 
 
 # Arithmetic
@@ -240,12 +266,12 @@ class Add(ILInst):
         output = spotmap[self.output]
 
         assembly.add_inst("CLC")
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("ADC", right.asm_str(1))
-        assembly.add_inst("STA", output.asm_str(1))
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("ADC", right.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(0))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "ADC", 1)
+        output.asm(assembly, "STA", 1)
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "ADC", 0)
+        output.asm(assembly, "STA", 0)
 
 
 class Sub(ILInst):
@@ -266,12 +292,12 @@ class Sub(ILInst):
         output = spotmap[self.output]
 
         assembly.add_inst("SEC")
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("SBC", right.asm_str(1))
-        assembly.add_inst("STA", output.asm_str(1))
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("SBC", right.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(0))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "SBC", 1)
+        output.asm(assembly, "STA", 1)
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "SBC", 0)
+        output.asm(assembly, "STA", 0)
 
 
 class Mult(ILInst):
@@ -298,39 +324,40 @@ class Mult(ILInst):
 
         if not left.has_address():
             scratch1 = spotmap[self.scratch1]
-            assembly.add_inst("LDA", left.asm_str(0))
-            assembly.add_inst("STA", scratch1.asm_str(0))
-            assembly.add_inst("LDA", left.asm_str(1))
-            assembly.add_inst("STA", scratch1.asm_str(1))
+            left.asm(assembly, "LDA", 0)
+            scratch1.asm(assembly, "STA", 0)
+            left.asm(assembly, "LDA", 1)
+            scratch1.asm(assembly, "STA", 1)
             left = scratch1
 
         if not right.has_address():
             scratch2 = spotmap[self.scratch2]
-            assembly.add_inst("LDA", right.asm_str(0))
-            assembly.add_inst("STA", scratch2.asm_str(0))
-            assembly.add_inst("LDA", right.asm_str(1))
-            assembly.add_inst("STA", scratch2.asm_str(1))
+            right.asm(assembly, "LDA", 0)
+            scratch2.asm(assembly, "STA", 0)
+            right.asm(assembly, "LDA", 1)
+            scratch2.asm(assembly, "STA", 1)
             right = scratch2
 
         label1 = il.get_label()
         label2 = il.get_label()
 
         assembly.add_inst("LDA", "#0")
-        assembly.add_inst("STA", output.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(1))
+        output.asm(assembly, "STA", 0)
+        output.asm(assembly, "STA", 1)
         assembly.add_inst("LDX", "#16")
-        assembly.add_inst("LSR", right.asm_str(0), label1)
-        assembly.add_inst("ROR", right.asm_str(1))
+        assembly.add_inst(label=label1)
+        right.asm(assembly, "LSR", 0)
+        right.asm(assembly, "ROR", 1)
         assembly.add_inst("BCC", label2)
         assembly.add_inst("CLC")
-        assembly.add_inst("ASL", left.asm_str(1))
-        assembly.add_inst("ROL", left.asm_str(0))
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("ADC", output.asm_str(1))
-        assembly.add_inst("STA", output.asm_str(1))
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("ADC", output.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(0))
+        left.asm(assembly, "ASL", 1)
+        left.asm(assembly, "ROL", 0)
+        left.asm(assembly, "LDA", 1)
+        output.asm(assembly, "ADC", 1)
+        output.asm(assembly, "STA", 1)
+        left.asm(assembly, "LDA", 0)
+        output.asm(assembly, "ADC", 0)
+        output.asm(assembly, "STA", 0)
         assembly.add_inst("DEX", label=label2)
         assembly.add_inst("BNE", label1)
 
@@ -361,47 +388,51 @@ class Div(ILInst):
 
         if not left.has_address():
             scratch1 = spotmap[self.scratch1]
-            assembly.add_inst("LDA", left.asm_str(0))
-            assembly.add_inst("STA", scratch1.asm_str(0))
-            assembly.add_inst("LDA", left.asm_str(1))
-            assembly.add_inst("STA", scratch1.asm_str(1))
+            left.asm(assembly, "LDA", 0)
+            scratch1.asm(assembly, "STA", 0)
+            left.asm(assembly, "LDA", 1)
+            scratch1.asm(assembly, "STA", 1)
             left = scratch1
 
         if not right.has_address():
             scratch2 = spotmap[self.scratch2]
-            assembly.add_inst("LDA", right.asm_str(0))
-            assembly.add_inst("STA", scratch2.asm_str(0))
-            assembly.add_inst("LDA", right.asm_str(1))
-            assembly.add_inst("STA", scratch2.asm_str(1))
+            right.asm(assembly, "LDA", 0)
+            scratch2.asm(assembly, "STA", 0)
+            right.asm(assembly, "LDA", 1)
+            scratch2.asm(assembly, "STA", 1)
             right = scratch2
 
         label1 = il.get_label()
         label2 = il.get_label()
 
         assembly.add_inst("LDA", "#0")
-        assembly.add_inst("STA", scratch3.asm_str(0))
-        assembly.add_inst("STA", scratch3.asm_str(1))
+        scratch3.asm(assembly, "STA", 0)
+        scratch3.asm(assembly, "STA", 1)
         assembly.add_inst("LDX", "#16")
-        assembly.add_inst("ASL", left.asm_str(1), label1)
-        assembly.add_inst("ROL", left.asm_str(0))
-        assembly.add_inst("ROL", scratch3.asm_str(1))
-        assembly.add_inst("ROL", scratch3.asm_str(0))
+        assembly.add_inst(label=label1)
+        left.asm(assembly, "ASL", 1)
+        left.asm(assembly, "ROL", 0)
+        scratch3.asm(assembly, "ROL", 1)
+        scratch3.asm(assembly, "ROL", 0)
         assembly.add_inst("SEC")
-        assembly.add_inst("LDA", scratch3.asm_str(1))
-        assembly.add_inst("SBC", right.asm_str(1))
-        assembly.add_inst("TAY")
-        assembly.add_inst("LDA", scratch3.asm_str(0))
-        assembly.add_inst("SBC", right.asm_str(0))
+        scratch3.asm(assembly, "LDA", 1)
+        right.asm(assembly, "SBC", 1)
+        assembly.add_inst("PHA")
+        scratch3.asm(assembly, "LDA", 0)
+        right.asm(assembly, "SBC", 0)
         assembly.add_inst("BCC", label2)
-        assembly.add_inst("STA", scratch3.asm_str(0))
-        assembly.add_inst("STY", scratch3.asm_str(1))
-        assembly.add_inst("INC", left.asm_str(1))
+        scratch3.asm(assembly, "STA", 0)
+        assembly.add_inst("PLA")
+        scratch3.asm(assembly, "STA", 1)
+        left.asm(assembly, "INC", 1)
         assembly.add_inst("DEX", label=label2)
         assembly.add_inst("BNE", label1)
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(0))
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("STA", output.asm_str(1))
+
+        if left != output:
+            left.asm(assembly, "LDA", 0)
+            output.asm(assembly, "STA", 0)
+            left.asm(assembly, "LDA", 1)
+            output.asm(assembly, "STA", 1)
 
 
 class Mod(ILInst):
@@ -428,41 +459,43 @@ class Mod(ILInst):
 
         if not left.has_address():
             scratch1 = spotmap[self.scratch1]
-            assembly.add_inst("LDA", left.asm_str(0))
-            assembly.add_inst("STA", scratch1.asm_str(0))
-            assembly.add_inst("LDA", left.asm_str(1))
-            assembly.add_inst("STA", scratch1.asm_str(1))
+            left.asm(assembly, "LDA", 0)
+            scratch1.asm(assembly, "STA", 0)
+            left.asm(assembly, "LDA", 1)
+            scratch1.asm(assembly, "STA", 1)
             left = scratch1
 
         if not right.has_address():
             scratch2 = spotmap[self.scratch2]
-            assembly.add_inst("LDA", right.asm_str(0))
-            assembly.add_inst("STA", scratch2.asm_str(0))
-            assembly.add_inst("LDA", right.asm_str(1))
-            assembly.add_inst("STA", scratch2.asm_str(1))
+            right.asm(assembly, "LDA", 0)
+            scratch2.asm(assembly, "STA", 0)
+            right.asm(assembly, "LDA", 1)
+            scratch2.asm(assembly, "STA", 1)
             right = scratch2
 
         label1 = il.get_label()
         label2 = il.get_label()
 
         assembly.add_inst("LDA", "#0")
-        assembly.add_inst("STA", output.asm_str(0))
-        assembly.add_inst("STA", output.asm_str(1))
+        output.asm(assembly, "STA", 0)
+        output.asm(assembly, "STA", 1)
         assembly.add_inst("LDX", "#16")
-        assembly.add_inst("ASL", left.asm_str(1), label1)
-        assembly.add_inst("ROL", left.asm_str(0))
-        assembly.add_inst("ROL", output.asm_str(1))
-        assembly.add_inst("ROL", output.asm_str(0))
+        assembly.add_inst(label=label1)
+        left.asm(assembly, "ASL", 1)
+        left.asm(assembly, "ROL", 0)
+        output.asm(assembly, "ROL", 1)
+        output.asm(assembly, "ROL", 0)
         assembly.add_inst("SEC")
-        assembly.add_inst("LDA", output.asm_str(1))
-        assembly.add_inst("SBC", right.asm_str(1))
-        assembly.add_inst("TAY")
-        assembly.add_inst("LDA", output.asm_str(0))
-        assembly.add_inst("SBC", right.asm_str(0))
+        output.asm(assembly, "LDA", 1)
+        right.asm(assembly, "SBC", 1)
+        assembly.add_inst("PHA")
+        output.asm(assembly, "LDA", 0)
+        right.asm(assembly, "SBC", 0)
         assembly.add_inst("BCC", label2)
-        assembly.add_inst("STA", output.asm_str(0))
-        assembly.add_inst("STY", output.asm_str(1))
-        assembly.add_inst("INC", left.asm_str(1))
+        output.asm(assembly, "STA", 0)
+        assembly.add_inst("PLA")
+        output.asm(assembly, "STA", 1)
+        left.asm(assembly, "INC", 1)
         assembly.add_inst("DEX", label=label2)
         assembly.add_inst("BNE", label1)
 
@@ -479,10 +512,11 @@ class Inc(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("INC", value.asm_str(1))
-        assembly.add_inst("BNE", label)
-        assembly.add_inst("INC", value.asm_str(0))
-        assembly.add_inst(label=label)
+        if value.has_address():
+            value.asm(assembly, "INC", 1)
+            assembly.add_inst("BNE", label)
+            value.asm(assembly, "INC", 0)
+            assembly.add_inst(label=label)
 
 
 class Dec(ILInst):
@@ -497,10 +531,12 @@ class Dec(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", value.asm_str(1))
-        assembly.add_inst("BNE", label)
-        assembly.add_inst("DEC", value.asm_str(0))
-        assembly.add_inst("DEC", value.asm_str(1), label=label)
+        if value.has_address():
+            value.asm(assembly, "LDA", 1)
+            assembly.add_inst("BNE", label)
+            value.asm(assembly, "DEC", 0)
+            assembly.add_inst(label=label)
+            value.asm(assembly, "DEC", 1)
 
 
 # Comparison
@@ -519,11 +555,11 @@ class EqualCmp(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("CMP", right.asm_str(0))
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "CMP", 0)
         assembly.add_inst("BNE", label)
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("CMP", right.asm_str(1))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "CMP", 1)
         assembly.add_inst("BEQ", self.label)
         assembly.add_inst(label=label)
 
@@ -543,11 +579,11 @@ class NotEqualCmp(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("CMP", right.asm_str(0))
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "CMP", 0)
         assembly.add_inst("BEQ", label)
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("CMP", right.asm_str(1))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "CMP", 1)
         assembly.add_inst("BNE", self.label)
         assembly.add_inst(label=label)
 
@@ -567,12 +603,12 @@ class LessThanCmp(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("CMP", right.asm_str(0))
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "CMP", 0)
         assembly.add_inst("BCC", self.label)
         assembly.add_inst("BNE", label)
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("CMP", right.asm_str(1))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "CMP", 1)
         assembly.add_inst("BCC", self.label)
         assembly.add_inst(label=label)
 
@@ -592,12 +628,12 @@ class LessEqualCmp(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("CMP", right.asm_str(0))
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "CMP", 0)
         assembly.add_inst("BCC", self.label)
         assembly.add_inst("BNE", label)
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("CMP", right.asm_str(1))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "CMP", 1)
         assembly.add_inst("BCC", self.label)
         assembly.add_inst("BEQ", self.label)
         assembly.add_inst(label=label)
@@ -618,12 +654,12 @@ class MoreThanCmp(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("CMP", right.asm_str(0))
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "CMP", 0)
         assembly.add_inst("BCC", label)
         assembly.add_inst("BNE", self.label)
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("CMP", right.asm_str(1))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "CMP", 1)
         assembly.add_inst("BEQ", label)
         assembly.add_inst("BCS", self.label)
         assembly.add_inst(label=label)
@@ -644,12 +680,12 @@ class MoreEqualCmp(ILInst):
 
         label = il.get_label()
 
-        assembly.add_inst("LDA", left.asm_str(0))
-        assembly.add_inst("CMP", right.asm_str(0))
+        left.asm(assembly, "LDA", 0)
+        right.asm(assembly, "CMP", 0)
         assembly.add_inst("BCC", label)
         assembly.add_inst("BNE", self.label)
-        assembly.add_inst("LDA", left.asm_str(1))
-        assembly.add_inst("CMP", right.asm_str(1))
+        left.asm(assembly, "LDA", 1)
+        right.asm(assembly, "CMP", 1)
         assembly.add_inst("BCS", self.label)
         assembly.add_inst(label=label)
 

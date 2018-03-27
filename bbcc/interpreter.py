@@ -33,7 +33,7 @@ class Interpreter(ast.NodeVisitor):
         self.il.register_spot_value(stack_register, il.stack_register)
         self.il.add(il.Set(stack_register, stack_start))
 
-        self.il.add(il.CallFunction("main", ret_val))
+        self.il.add(il.CallFunction("main", [], ret_val))
         self.il.add(il.Return(ret_val))
 
     def visit_Declaration(self, node):
@@ -80,8 +80,12 @@ class Interpreter(ast.NodeVisitor):
         func_name = node.func.identifier.value
         func = self.scope.lookup(func_name, self.current_scope)
 
+        args = []
+        for a in node.args:
+            args.append(self.visit(a))
+
         output = il.ILValue(func.type)
-        self.il.add(il.CallFunction(func_name, output))
+        self.il.add(il.CallFunction(func_name, args, output))
         return output
 
     def visit_Identifier(self, node):
