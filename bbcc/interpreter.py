@@ -7,8 +7,7 @@ from . import il
 class Interpreter(ast.NodeVisitor):
     variables = {}
 
-    def __init__(self, asm, scope, il):
-        self.asm = asm
+    def __init__(self, scope, il):
         self.scope = scope
         self.il = il
         self.current_scope = ""
@@ -51,7 +50,6 @@ class Interpreter(ast.NodeVisitor):
                         val = self.visit(node.inits[i])
                         self.il.add(il.Set(val, var.il_value))
 
-    # TODO: Implement arguments
     def visit_Function(self, node):
         func_name = node.name.identifier.value
         self.current_scope = func_name
@@ -71,7 +69,6 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Return(il_value, "__{}".format(func_name)))
         self.current_scope = ""
 
-    # TODO: Implement arguments
     def visit_FuncCall(self, node):
         func_name = node.func.identifier.value
         func = self.scope.lookup(func_name, self.current_scope)
@@ -439,37 +436,16 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_AddrOf(self, node):
-        self.visit(node.expr)
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
+        output = il.ILValue('int')
+        value = self.visit(node.expr)
+        self.il.add(il.AddrOf(value, output))
+        return value
 
     def visit_Deref(self, node):
-        self.visit(node.expr)
-        self.asm.add_inst("LDY", "#0")
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1))
-        self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num1 - 1))
-        self.asm.add_inst("LDA", "#1")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("LDA", "#0")
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("JSR", "sub")
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        self.asm.add_inst("LDA", "&" + self.asm.to_hex(self.asm.num2 - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
+        output = il.ILValue('int')
+        value = self.visit(node.expr)
+        self.il.add(il.Deref(value, output))
+        return output
 
     def visit_IfStatement(self, node):
         condition = self.visit(node.condition)

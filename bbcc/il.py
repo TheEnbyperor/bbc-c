@@ -81,9 +81,54 @@ class Set(ILInst):
         output = spotmap[self.output]
 
         if output.has_address():
-            value.asm(assembly,"LDA", 0)
+            value.asm(assembly, "LDA", 0)
             output.asm(assembly, "STA", 0)
             value.asm(assembly, "LDA", 1)
+            output.asm(assembly, "STA", 1)
+
+
+class AddrOf(ILInst):
+    def __init__(self, value: ILValue, output: ILValue):
+        self.value = value
+        self.output = output
+
+    def inputs(self):
+        return [self.value]
+
+    def outputs(self):
+        return [self.output]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+        output = spotmap[self.output]
+
+        if value.has_address():
+            value.asm(assembly, "LDA", 0, extra="#{}")
+            output.asm(assembly, "STA", 0)
+            value.asm(assembly, "LDA", 1, extra="#{}")
+            output.asm(assembly, "STA", 1)
+
+
+class Deref(ILInst):
+    def __init__(self, value: ILValue, output: ILValue):
+        self.value = value
+        self.output = output
+
+    def inputs(self):
+        return [self.value]
+
+    def outputs(self):
+        return [self.output]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+        output = spotmap[self.output]
+
+        if value.has_address():
+            assembly.add_inst("LDY", "#0")
+            value.asm(assembly, "LDA", 0, extra="({}),Y")
+            output.asm(assembly, "STA", 0)
+            value.asm(assembly, "LDA", 1, extra="({}),Y")
             output.asm(assembly, "STA", 1)
 
 

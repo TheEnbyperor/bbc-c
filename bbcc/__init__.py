@@ -17,10 +17,8 @@ def main(text: str):
     symbol_table_builder = SymbolTableBuilder()
     symbol_table_builder.visit(ast_out)
     symbol_table = symbol_table_builder.scope_out
-
-    asm_code = ASM()
     il = IL()
-    interp = Interpreter(asm_code, symbol_table, il)
+    interp = Interpreter(symbol_table, il)
 
     il_out = interp.interpret(ast_out)
 

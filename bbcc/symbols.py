@@ -363,7 +363,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_PostDecr(self, node):
         if type(node.expr) != ast.Identifier:
-            raise TypeError("Can only deccrement variables")
+            raise TypeError("Can only decrement variables")
         self.visit(node.expr)
 
     def visit_AddrOf(self, node):
