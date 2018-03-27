@@ -227,8 +227,21 @@ class FunctionPrologue(ILInst):
         return [v.il_value for v in self.params]
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
-        for r in pseudo_registers[::-1]:
-            reg = spots.Pseudo16RegisterSpot(r, '')
+        used = []
+        found_self = False
+        for c in il.commands:
+            if c == self:
+                found_self = True
+                continue
+            if found_self:
+                if type(c) == FunctionEpilogue:
+                    break
+                for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
+                    if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
+                        if s.loc in pseudo_registers:
+                            used.append(s)
+
+        for reg in used[::-1]:
             reg.asm(assembly, "LDA", 0)
             assembly.add_inst("PHA")
             reg.asm(assembly, "LDA", 1)
@@ -240,8 +253,21 @@ class FunctionEpilogue(ILInst):
         pass
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
-        for r in pseudo_registers:
-            reg = spots.Pseudo16RegisterSpot(r, '')
+        used = []
+        found_self = False
+        for c in il.commands[::-1]:
+            if c == self:
+                found_self = True
+                continue
+            if found_self:
+                if type(c) == FunctionPrologue:
+                    break
+                for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
+                    if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
+                        if s.loc in pseudo_registers:
+                            used.append(s)
+
+        for reg in used[::-1]:
             assembly.add_inst("PLA")
             reg.asm(assembly, "STA", 1)
             assembly.add_inst("PLA")
