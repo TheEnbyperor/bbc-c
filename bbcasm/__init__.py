@@ -1,7 +1,7 @@
 def asm_to_basic(asm):
     out = "NEW\n"
     start_lines = [
-        "FOR opt%=0 TO 3 STEP 3",
+        "FOR opt%=0 TO 2 STEP 2",
         "P%=&E00",
         "[",
         "OPT opt%",
@@ -9,7 +9,7 @@ def asm_to_basic(asm):
     end_lines = [
         "]",
         "NEXT opt%",
-        "CALL __start",
+        "CALL _start",
         "RH=&70",
         "RL=&71",
         "PRINT ~?RH,~?RL",

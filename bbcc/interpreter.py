@@ -31,7 +31,7 @@ class Interpreter(ast.NodeVisitor):
         stack_register = il.ILValue('char')
         self.il.register_literal_value(stack_start, 0x0020)
         self.il.register_spot_value(stack_register, il.stack_register)
-        self.il.add(il.Set(stack_register, stack_start))
+        self.il.add(il.Set(stack_start, stack_register))
 
         self.il.add(il.CallFunction("main", [], ret_val))
         self.il.add(il.Return(ret_val))

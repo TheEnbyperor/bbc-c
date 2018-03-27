@@ -78,7 +78,7 @@ class StackSpot(Spot):
 
     def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
         assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(self.offset+loc)))
-        assembly.add_inst(inst, "(#&{}),Y".format(assembly.to_hex(il.stack_register.loc)))
+        assembly.add_inst(inst, "(&{}),Y".format(assembly.to_hex(il.stack_register.loc)))
 
     def __eq__(self, other):
         if isinstance(other, StackSpot):

@@ -188,10 +188,11 @@ class CallFunction(ILInst):
 
         offset = 0
         for a in self.args:
-            a.asm(assembly, "LDA", 1)
-            assembly.add_inst("JSR", "_bbc_pusha")
-            a.asm(assembly, "LDA", 0)
-            assembly.add_inst("JSR", "_bbc_pusha")
+            spot = spotmap[a]
+            spot.asm(assembly, "LDA", 1)
+            assembly.add_inst("JSR", "_bbcc_pusha")
+            spot.asm(assembly, "LDA", 0)
+            assembly.add_inst("JSR", "_bbcc_pusha")
             offset += 2
         assembly.add_inst("SEC")
         stack_register.asm(assembly, "LDA", 0)
