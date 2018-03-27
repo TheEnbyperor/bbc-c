@@ -2,6 +2,7 @@ import collections
 
 from . import ast
 from . import decl_tree
+from . import il
 from .tokens import *
 
 
@@ -23,12 +24,12 @@ class BuiltinTypeSymbol(Symbol):
 
 
 class VarSymbol(Symbol):
-    def __init__(self, name, type, location):
-        super(VarSymbol, self).__init__(name, type)
-        self.location = location
+    def __init__(self, name, var_type):
+        super(VarSymbol, self).__init__(name, var_type)
+        self.il_value = il.ILValue(var_type)
 
     def __str__(self):
-        return '<VAR({name}:{type}:{loc})>'.format(name=self.name, type=self.type, loc=self.location)
+        return '<VAR({name}:{type}:{il_value})>'.format(name=self.name, type=self.type, il_value=self.il_value)
 
     __repr__ = __str__
 
@@ -174,18 +175,20 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 var_name = d.child.identifier.value
                 if self.scope.lookup(var_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % var_name)
-                self.scope.define(VarSymbol(var_name, type_symbol, self.memstart))
+                self.scope.define(VarSymbol(var_name, type_symbol))
                 self.memstart -= type_symbol.size
                 if node.inits[i] is not None:
                     self.visit(node.inits[i])
+
             elif type(d.child) == decl_tree.Array:
                 var_name = d.child.child.identifier.value
                 if self.scope.lookup(var_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % var_name)
-                self.scope.define(VarSymbol(var_name, type_symbol, self.memstart))
+                self.scope.define(VarSymbol(var_name, type_symbol))
                 self.memstart -= type_symbol.size
                 if node.inits[i] is not None:
                     self.visit(node.inits[i])
+
             elif type(d.child) == decl_tree.Function:
                 func_name = d.child.child.identifier.value
                 if self.scope.lookup(func_name, current_scope_only=True):
@@ -209,11 +212,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
             type_symbol = self.scope.lookup(type_name)
             if type(param.child) == decl_tree.Identifier:
                 param_name = param.child.identifier.value
-                if param_name.startswith("bbcc_"):
-                    raise NameError("Identifier cannot start with bbcc_ (conflicts with compiler assembly routines)")
                 if self.scope.lookup(param_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % param_name)
-                self.scope.define(VarSymbol(param_name, type_symbol, self.memstart))
+
+                self.scope.define(VarSymbol(param_name, type_symbol))
                 self.memstart -= type_symbol.size
         self.visit(node.nodes)
         self.scope_out.add_scope(procedure_scope)

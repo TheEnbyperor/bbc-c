@@ -19,8 +19,22 @@ class Interpreter(ast.NodeVisitor):
         }
 
     def visit_TranslationUnit(self, node):
+        self.il.add(il.Routines())
+
         for n in node.items:
             self.visit(n)
+
+        ret_val = il.ILValue('int')
+        self.il.add(il.Label("_start"))
+
+        stack_start = il.ILValue('int')
+        stack_register = il.ILValue('char')
+        self.il.register_literal_value(stack_start, 0x0020)
+        self.il.register_spot_value(stack_register, il.stack_register)
+        self.il.add(il.Set(stack_register, stack_start))
+
+        self.il.add(il.CallFunction("main", ret_val))
+        self.il.add(il.Return(ret_val))
 
     def visit_Declaration(self, node):
         for i, d in enumerate(node.decls):
@@ -28,24 +42,27 @@ class Interpreter(ast.NodeVisitor):
                 var_name = d.child.identifier.value
                 var = self.scope.lookup(var_name, self.current_scope)
                 if var.type.name == INT or var.type.name == CHAR:
-                    pass
-                    # self.asm.add_inst("LDA", "#0")
-                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
-                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
-                if node.inits[i] is not None:
-                    pass
-                    # self.visit(node.inits[i])
-                    # self.asm.add_inst("LDY", "#0")
-                    # self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc1) + "),Y")
-                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location))
-                    # self.asm.add_inst("LDA", "(&" + self.asm.to_hex(self.asm.loc2) + "),Y")
-                    # self.asm.add_inst("STA", "&" + self.asm.to_hex(var.location - 1))
+                    if node.inits[i] is None:
+                        val = il.ILValue('int')
+                        self.il.register_literal_value(val, 0)
+                        self.il.add(il.Set(val, var.il_value))
+                    else:
+                        val = self.visit(node.inits[i])
+                        self.il.add(il.Set(val, var.il_value))
 
     # TODO: Implement arguments
     def visit_Function(self, node):
         func_name = node.name.identifier.value
         self.current_scope = func_name
-        self.il.add(il.Label(func_name))
+        self.il.add(il.Label("__{}".format(func_name)))
+        params = []
+        for i, p in enumerate(node.params):
+            if type(p.child) == decl_tree.Identifier:
+                var_name = p.child.identifier.value
+                var = self.scope.lookup(var_name, self.current_scope)
+                var.il_value.stack_offset = i*2
+                params.append(var)
+        self.il.add(il.FunctionPrologue(params))
         self.visit(node.nodes)
         should_return = True
         if node.nodes.items is not None:
@@ -55,28 +72,22 @@ class Interpreter(ast.NodeVisitor):
             il_value = il.ILValue('int')
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value))
+        self.il.add(il.FunctionEpilogue())
         self.current_scope = ""
 
     # TODO: Implement arguments
     def visit_FuncCall(self, node):
-        self.asm.add_inst("JSR", node.func.identifier.value)
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.ret))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        self.asm.add_inst("LDA", "#&" + self.asm.to_hex(self.asm.ret - 1))
-        self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
+        func_name = node.func.identifier.value
+        func = self.scope.lookup(func_name, self.current_scope)
+
+        output = il.ILValue(func.type)
+        self.il.add(il.CallFunction(func_name, output))
+        return output
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
-        return il.ILValue('int')
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location, 4)[2:4])
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1))
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location, 4)[0:2])
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc1 + 1))
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location - 1, 4)[2:4])
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2))
-        # self.asm.add_inst("LDA", "#&" + self.asm.to_hex(val.location - 1, 4)[0:2])
-        # self.asm.add_inst("STA", "&" + self.asm.to_hex(self.asm.loc2 + 1))
+        return val.il_value
 
     def visit_Compound(self, node):
         for n in node.items:
