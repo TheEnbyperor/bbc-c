@@ -18,18 +18,6 @@ class ASM:
 
     def __init__(self):
         self.asm = ""
-        # self.add_inst("LDA", "&" + self.to_hex(self.num2), "neg")
-        # self.add_inst("EOR", "#&FF")
-        # self.add_inst("STA", "&" + self.to_hex(self.num2))
-        # self.add_inst("LDA", "&" + self.to_hex(self.num2 - 1))
-        # self.add_inst("EOR", "#&FF")
-        # self.add_inst("STA", "&" + self.to_hex(self.num2 - 1))
-        # self.add_inst("LDA", "#0")
-        # self.add_inst("STA", "&" + self.to_hex(self.num1 - 1))
-        # self.add_inst("LDA", "#1")
-        # self.add_inst("STA", "&" + self.to_hex(self.num1))
-        # self.add_inst("JSR", "add")
-        # self.add_inst("RTS")
 
     @classmethod
     def to_hex(cls, num, length=2):

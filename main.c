@@ -1,12 +1,11 @@
 // Comment
+void putchar(char);
 int Fibonacci(int);
 
-int n = 65518;
+int n = 20;
 
 int main() {
-//    Fibonacci(1);
-//    *n = 27;
-    return *n;
+    return putchar('a');
 }
 
 //int Fibonacci(int n) {
