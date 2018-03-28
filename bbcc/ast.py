@@ -459,7 +459,7 @@ class DirectLValue(LValue):
         self.il_value = il_value
 
     def set_to(self, rvalue, il_code: il.IL):
-        il_code.add(il.Set(self.il_value, rvalue))
+        il_code.add(il.Set(rvalue, self.il_value))
 
     def addr(self, il_code: il.IL):
         output = il.ILValue('int')

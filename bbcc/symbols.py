@@ -348,28 +348,24 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_PreIncr(self, node):
-        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
-            raise TypeError("Can only assign variables or pointers")
-        self.visit(node.left)
-        self.visit(node.right)
+        if type(node.expr) != ast.Identifier and type(node.expr) != ast.Deref:
+            raise TypeError("Can only increment variables or pointers")
+        self.visit(node.expr)
 
     def visit_PostIncr(self, node):
-        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
-            raise TypeError("Can only assign variables or pointers")
-        self.visit(node.left)
-        self.visit(node.right)
+        if type(node.expr) != ast.Identifier and type(node.expr) != ast.Deref:
+            raise TypeError("Can only increment variables or pointers")
+        self.visit(node.expr)
 
     def visit_PreDecr(self, node):
-        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
-            raise TypeError("Can only assign variables or pointers")
-        self.visit(node.left)
-        self.visit(node.right)
+        if type(node.expr) != ast.Identifier and type(node.expr) != ast.Deref:
+            raise TypeError("Can only decrement variables or pointers")
+        self.visit(node.expr)
 
     def visit_PostDecr(self, node):
-        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
-            raise TypeError("Can only assign variables or pointers")
-        self.visit(node.left)
-        self.visit(node.right)
+        if type(node.expr) != ast.Identifier and type(node.expr) != ast.Deref:
+            raise TypeError("Can only decrement variables or pointers")
+        self.visit(node.expr)
 
     def visit_AddrOf(self, node):
         if type(node.expr) != ast.Identifier and type(node.expr) != ast.Deref:

@@ -5,7 +5,13 @@ int Fibonacci(int);
 int n = 20;
 
 int main() {
-    return putchar('a');
+    char ch;
+
+    for(ch='A';ch<='Z';++ch) {
+        putchar(ch);
+    }
+
+    return ch;
 }
 
 //int Fibonacci(int n) {

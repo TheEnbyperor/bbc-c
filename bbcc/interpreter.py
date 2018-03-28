@@ -326,8 +326,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_LessThan(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
         init = il.ILValue('int')
@@ -350,8 +350,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_MoreThan(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
         init = il.ILValue('int')
@@ -374,8 +374,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_LessEqual(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
         init = il.ILValue('int')
@@ -398,8 +398,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_MoreEqual(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
         init = il.ILValue('int')
@@ -422,12 +422,12 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_PreIncr(self, node):
-        value = self.visit(node.expr)
+        value = self.visit(node.expr).val(self.il)
         self.il.add(il.Inc(value))
         return value
 
     def visit_PostIncr(self, node):
-        value = self.visit(node.expr)
+        value = self.visit(node.expr).val(self.il)
         output = il.ILValue('int')
 
         self.il.add(il.Set(value, output))
@@ -435,13 +435,13 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_PreDecr(self, node):
-        value = self.visit(node.expr)
+        value = self.visit(node.expr).val(self.il)
 
         self.il.add(il.Dec(value))
         return value
 
     def visit_PostDecr(self, node):
-        value = self.visit(node.expr)
+        value = self.visit(node.expr).val(self.il)
         output = il.ILValue('int')
 
         self.il.add(il.Set(value, output))
