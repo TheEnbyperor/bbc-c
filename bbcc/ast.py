@@ -1,3 +1,5 @@
+from . import il
+
 class AST:
     pass
 
@@ -72,14 +74,6 @@ class Continue(AST):
 
 class NoOp(AST):
     pass
-
-
-class Main(AST):
-    """Node for the main function."""
-
-    def __init__(self, body):
-        """Initialize node."""
-        self.body = body
 
 
 class _RExprNode(AST):
@@ -426,7 +420,6 @@ class ArraySubsc(_LExprNode):
         self.arg = arg
 
 
-# TODO: Implement
 class FuncCall(_RExprNode):
     """Function call.
     func - Expression of type function pointer
@@ -448,3 +441,46 @@ class NodeVisitor:
     @staticmethod
     def generic_visit(node):
         raise RuntimeError('No visit_{} method'.format(type(node).__name__))
+
+
+class LValue:
+    def set_to(self, rvalue, il_code: il.IL):
+        raise NotImplementedError
+
+    def addr(self, il_code: il.IL):
+        raise NotImplementedError
+
+    def val(self, il_code):
+        raise NotImplementedError
+
+
+class DirectLValue(LValue):
+    def __init__(self, il_value: il.ILValue):
+        self.il_value = il_value
+
+    def set_to(self, rvalue, il_code: il.IL):
+        il_code.add(il.Set(self.il_value, rvalue))
+
+    def addr(self, il_code: il.IL):
+        output = il.ILValue('int')
+        il_code.add(il.AddrOf(self.il_value, output))
+        return output
+
+    def val(self, il_code: il.IL):
+        return self.il_value
+
+
+class IndirectLValue(LValue):
+    def __init__(self, addr_val: il.ILValue):
+        self.addr_val = addr_val
+
+    def set_to(self, rvalue, il_code: il.IL):
+        il_code.add(il.SetAt(self.addr_val.val(il), rvalue))
+
+    def addr(self, il_code: il.IL):
+        return self.addr_val
+
+    def val(self, il_code: il.IL):
+        output = il.ILValue('int')
+        il_code.add(il.ReadAt(self.addr_val.val(il_code), output))
+        return output

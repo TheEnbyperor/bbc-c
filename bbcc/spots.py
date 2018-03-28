@@ -70,6 +70,12 @@ class AbsoluteMemorySpot(Spot):
                 return True
         return False
 
+    def __str__(self):
+        return '<AbsoluteMemorySpot({type}:{pos})>'.format(pos=asm.ASM.to_hex(self.loc), type=self.type)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class StackSpot(Spot):
     def __init__(self, offset, value_type):
@@ -88,6 +94,26 @@ class StackSpot(Spot):
 
     def __str__(self):
         return '<StackSpot({type}:{offset})>'.format(offset=self.offset, type=self.type)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class DerefSpot(Spot):
+    def __init__(self, spot):
+        self.spot = spot
+
+    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
+        pass
+
+    def __eq__(self, other):
+        if isinstance(other, DerefSpot):
+            if other.spot == self.spot:
+                return True
+        return False
+
+    def __str__(self):
+        return '<DerefSpot({spot})>'.format(spot=self.spot)
 
     def __repr__(self):
         return self.__str__()

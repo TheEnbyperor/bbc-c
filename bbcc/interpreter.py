@@ -21,8 +21,11 @@ class Interpreter(ast.NodeVisitor):
     def visit_TranslationUnit(self, node):
         self.il.add(il.Routines())
 
+        self.il.add(il.Label("_setup_global"))
         for n in node.items:
-            self.visit(n)
+            if isinstance(n, ast.Declaration):
+                self.visit(n)
+        self.il.add(il.Return(None, epilouge=False))
 
         ret_val = il.ILValue('int')
         self.il.add(il.Function([], "_start", prolouge=False))
@@ -33,8 +36,14 @@ class Interpreter(ast.NodeVisitor):
         self.il.register_spot_value(stack_register, il.stack_register)
         self.il.add(il.Set(stack_start, stack_register))
 
-        self.il.add(il.CallFunction("main", [], ret_val))
+        self.il.add(il.JmpSub("_setup_global"))
+
+        self.il.add(il.CallFunction("__main", [], ret_val))
         self.il.add(il.Return(ret_val, "_start", epilouge=False))
+
+        for n in node.items:
+            if isinstance(n, ast.Function):
+                self.visit(n)
 
     def visit_Declaration(self, node):
         for i, d in enumerate(node.decls):
@@ -63,9 +72,14 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Function(params, "__{}".format(func_name)))
         self.current_function = "__{}".format(func_name)
         self.visit(node.nodes)
-        il_value = il.ILValue('int')
-        self.il.register_literal_value(il_value, 0)
-        self.il.add(il.Return(il_value, "__{}".format(func_name)))
+        should_return = True
+        if node.nodes.items is not None:
+            if isinstance(node.nodes.items[-1], ast.Return):
+                should_return = False
+        if should_return:
+            il_value = il.ILValue('int')
+            self.il.register_literal_value(il_value, 0)
+            self.il.add(il.Return(il_value, "__{}".format(func_name)))
         self.current_scope = ""
 
     def visit_FuncCall(self, node):
@@ -74,7 +88,7 @@ class Interpreter(ast.NodeVisitor):
 
         args = []
         for a in node.args:
-            args.append(self.visit(a))
+            args.append(self.visit(a).val(self.il))
 
         output = il.ILValue(func.type)
         self.il.add(il.CallFunction("__{}".format(func_name), args, output))
@@ -83,7 +97,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
-        return val.il_value
+        return ast.DirectLValue(val.il_value)
 
     def visit_Compound(self, node):
         for n in node.items:
@@ -93,9 +107,9 @@ class Interpreter(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_Equals(self, node):
+        right = self.visit(node.right).val(self.il)
         left = self.visit(node.left)
-        right = self.visit(node.right)
-        self.il.add(il.Set(right, left))
+        left.set_to(right, self.il)
         return right
 
     def visit_PlusEquals(self, node):
@@ -160,8 +174,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Minus(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
         self.il.add(il.Sub(left, right, output))
         return output
@@ -264,8 +278,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Equality(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
         init = il.ILValue('int')
@@ -441,10 +455,9 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Deref(self, node):
-        output = il.ILValue('int')
         value = self.visit(node.expr)
-        self.il.add(il.Deref(value, output))
-        return output
+
+        return ast.IndirectLValue(value)
 
     def visit_IfStatement(self, node):
         condition = self.visit(node.condition)
@@ -513,7 +526,7 @@ class Interpreter(ast.NodeVisitor):
         pass
 
     def visit_Return(self, node):
-        value = self.visit(node.right)
+        value = self.visit(node.right).val(self.il)
         self.il.add(il.Return(value, self.current_function))
 
     def interpret(self, ast_root) -> il.IL:

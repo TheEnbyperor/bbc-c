@@ -243,40 +243,41 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_Equals(self, node):
-        if type(node.right) != ast.Identifier:
-            raise TypeError("Can only assign variables")
-        self.visit(node.right)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
         self.visit(node.left)
+        self.visit(node.right)
 
     def visit_PlusEquals(self, node):
-        if type(node.right) != ast.Identifier:
-            raise TypeError("Can only assign variables")
-        self.visit(node.right)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
         self.visit(node.left)
+        self.visit(node.right)
 
     def visit_MinusEquals(self, node):
-        if type(node.right) != ast.Identifier:
-            raise TypeError("Can only assign variables")
-        self.visit(node.right)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
         self.visit(node.left)
+        self.visit(node.right)
 
     def visit_StarEquals(self, node):
-        if type(node.right) != ast.Identifier:
-            raise TypeError("Can only assign variables")
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
+        self.visit(node.left)
         self.visit(node.right)
         self.visit(node.left)
 
     def visit_DivEquals(self, node):
-        if type(node.right) != ast.Identifier:
-            raise TypeError("Can only assign variables")
-        self.visit(node.right)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
         self.visit(node.left)
+        self.visit(node.right)
 
     def visit_ModEquals(self, node):
-        if type(node.right) != ast.Identifier:
-            raise TypeError("Can only assign variables")
-        self.visit(node.right)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
         self.visit(node.left)
+        self.visit(node.right)
 
     def visit_MultiExpr(self, node):
         self.visit(node.left)
@@ -347,33 +348,37 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.expr)
 
     def visit_PreIncr(self, node):
-        if type(node.expr) != ast.Identifier:
-            raise TypeError("Can only increment variables")
-        self.visit(node.expr)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
+        self.visit(node.left)
+        self.visit(node.right)
 
     def visit_PostIncr(self, node):
-        if type(node.expr) != ast.Identifier:
-            raise TypeError("Can only increment variables")
-        self.visit(node.expr)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
+        self.visit(node.left)
+        self.visit(node.right)
 
     def visit_PreDecr(self, node):
-        if type(node.expr) != ast.Identifier:
-            raise TypeError("Can only decrement variables")
-        self.visit(node.expr)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
+        self.visit(node.left)
+        self.visit(node.right)
 
     def visit_PostDecr(self, node):
-        if type(node.expr) != ast.Identifier:
-            raise TypeError("Can only decrement variables")
-        self.visit(node.expr)
+        if type(node.left) != ast.Identifier and type(node.left) != ast.Deref:
+            raise TypeError("Can only assign variables or pointers")
+        self.visit(node.left)
+        self.visit(node.right)
 
     def visit_AddrOf(self, node):
-        if type(node.expr) != ast.Identifier:
-            raise TypeError("Can only get address variables")
+        if type(node.expr) != ast.Identifier and type(node.expr) != ast.Deref:
+            raise TypeError("Can only get address of variables or pointers")
         self.visit(node.expr)
 
     def visit_Deref(self, node):
-        if type(node.expr) != ast.Identifier:
-            raise TypeError("Can only dereference variables")
+        if type(node.expr) != ast.Identifier and type(node.expr) != ast.Deref:
+            raise TypeError("Can only dereference variables or pointers")
         self.visit(node.expr)
 
     def visit_IfStatement(self, node):

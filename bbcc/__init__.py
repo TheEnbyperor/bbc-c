@@ -4,7 +4,6 @@ from .asm import ASM
 from .interpreter import Interpreter
 from .symbols import SymbolTableBuilder
 from .il import IL
-import pdb
 
 
 def main(text: str):

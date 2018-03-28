@@ -13,6 +13,9 @@ class ILValue:
         self.type = value_type
         self.stack_offset = None
 
+    def val(self, il_code):
+        return self
+
     def __str__(self):
         return str("{:X}".format(id(self) % 10000))
 
@@ -87,6 +90,71 @@ class Set(ILInst):
             output.asm(assembly, "STA", 1)
 
 
+class ReadAt(ILInst):
+    def __init__(self, value: ILValue, output: ILValue):
+        self.value = value
+        self.output = output
+        self.scratch = ILValue('int')
+
+    def inputs(self):
+        return [self.value]
+
+    def outputs(self):
+        return [self.output]
+
+    def scratch_spaces(self):
+        return [self.scratch]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+        output = spotmap[self.output]
+        scratch = spotmap[self.scratch]
+
+        if output.has_address():
+            assembly.add_inst("LDY", "#0")
+            value.asm(assembly, "LDA", 1)
+            scratch.asm(assembly, "STA", 0)
+            value.asm(assembly, "LDA", 0)
+            scratch.asm(assembly, "STA", 1)
+            scratch.asm(assembly, "LDA", 0, extra="({}),Y")
+            output.asm(assembly, "STA", 0)
+            assembly.add_inst("LDY", "#1")
+            scratch.asm(assembly, "LDA", 1, extra="({}),Y")
+            output.asm(assembly, "STA", 1)
+
+
+class SetAt(ILInst):
+    def __init__(self, value: ILValue, output: ILValue):
+        self.value = value
+        self.output = output
+        self.scratch = ILValue('int')
+
+    def inputs(self):
+        return [self.value]
+
+    def outputs(self):
+        return [self.output]
+
+    def scratch_spaces(self):
+        return [self.scratch]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        value = spotmap[self.value]
+        output = spotmap[self.output]
+        scratch = spotmap[self.scratch]
+
+        if value.has_address():
+            assembly.add_inst("LDY", "#0")
+            value.asm(assembly, "LDA", 0)
+            scratch.asm(assembly, "STA", 0)
+            output.asm(assembly, "LDA", 0)
+            scratch.asm(assembly, "STA", 0, extra="({}),Y")
+            value.asm(assembly, "LDA", 1)
+            scratch.asm(assembly, "STA", 1)
+            output.asm(assembly, "LDA", 1)
+            scratch.asm(assembly, "STA", 1, extra="({}),Y")
+
+
 class AddrOf(ILInst):
     def __init__(self, value: ILValue, output: ILValue):
         self.value = value
@@ -106,29 +174,6 @@ class AddrOf(ILInst):
             value.asm(assembly, "LDA", 0, extra="#{}")
             output.asm(assembly, "STA", 0)
             value.asm(assembly, "LDA", 1, extra="#{}")
-            output.asm(assembly, "STA", 1)
-
-
-class Deref(ILInst):
-    def __init__(self, value: ILValue, output: ILValue):
-        self.value = value
-        self.output = output
-
-    def inputs(self):
-        return [self.value]
-
-    def outputs(self):
-        return [self.output]
-
-    def gen_asm(self, assembly: asm.ASM, spotmap, il):
-        value = spotmap[self.value]
-        output = spotmap[self.output]
-
-        if value.has_address():
-            assembly.add_inst("LDY", "#0")
-            value.asm(assembly, "LDA", 0, extra="({}),Y")
-            output.asm(assembly, "STA", 0)
-            value.asm(assembly, "LDA", 1, extra="({}),Y")
             output.asm(assembly, "STA", 1)
 
 
@@ -200,12 +245,11 @@ class Return(ILInst):
         self.func_name = func_name
 
     def inputs(self):
-        return [self.value]
+        if self.value is not None:
+            return [self.value]
+        return []
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
-        value = spotmap[self.value]
-        ret_reg = spots.Pseudo16RegisterSpot(return_register, value.type)
-
         used = []
         if self.epilouge:
             found_start = False
@@ -222,11 +266,14 @@ class Return(ILInst):
                             if s.loc in pseudo_registers and s.loc != return_register:
                                 used.append(s)
 
-        if value != ret_reg:
-            value.asm(assembly, "LDA", 1)
-            ret_reg.asm(assembly, "STA", 1)
-            value.asm(assembly, "LDA", 0)
-            ret_reg.asm(assembly, "STA", 0)
+        if self.value is not None:
+            value = spotmap[self.value]
+            ret_reg = spots.Pseudo16RegisterSpot(return_register, value.type)
+            if value != ret_reg:
+                value.asm(assembly, "LDA", 1)
+                ret_reg.asm(assembly, "STA", 1)
+                value.asm(assembly, "LDA", 0)
+                ret_reg.asm(assembly, "STA", 0)
 
         for reg in used[::-1]:
             assembly.add_inst("PLA")
@@ -795,24 +842,27 @@ class IL:
         move_to_mem = []
         for c in self.commands:
             if isinstance(c, AddrOf):
-                if v in c.inputs():
+                for v in c.inputs():
                     move_to_mem.append(v)
 
         max_stack_offset = {}
         mem_start = 0x1000
         current_function = ""
 
-        print(move_to_mem)
-
         for i, c in enumerate(self.commands):
             if isinstance(c, Function):
                 current_function = c.func_name
             elif isinstance(c, Return):
                 for c2 in self.commands[i:]:
+                    if isinstance(c2, Return):
+                        if c2.func_name == c.func_name:
+                            break
                     if isinstance(c2, Function):
-                        current_function = ""
+                        if c2.func_name != c.func_name:
+                            current_function = ""
             for v in (c.inputs() + c.outputs() + c.scratch_spaces())[::-1]:
                 if v not in spotmap:
+                    # print(c, current_function)
                     if current_function == "":
                         spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
                         mem_start += 2
@@ -855,7 +905,7 @@ class IL:
     def _find_register(self, spotmap, command_i: int, il_value: ILValue):
         for r in pseudo_registers:
             possible = True
-            for c in self.commands[command_i+1:]:
+            for c in self.commands[command_i + 1:]:
                 for value in c.clobber():
                     if isinstance(value, spots.Pseudo16RegisterSpot):
                         if value.loc == r:
