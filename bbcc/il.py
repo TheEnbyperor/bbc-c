@@ -55,6 +55,7 @@ class Routines(ILInst):
         assembly.add_inst(label="_bbcc_pusha_1")
         stack_register.asm(assembly, "DEC", 0)
         assembly.add_inst("PLA")
+        assembly.add_inst("LDY", "#00")
         stack_register.asm(assembly, "STA", 0, "({}),Y")
         assembly.add_inst("RTS")
 

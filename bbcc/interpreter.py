@@ -114,38 +114,47 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_PlusEquals(self, node):
         left = self.visit(node.left)
-        right = self.visit(node.right)
-        self.il.add(il.Add(left, right, left))
+        right = self.visit(node.right).val(self.il)
+        output = il.ILValue('int')
+        left_val = left.val(self.il)
+        self.il.add(il.Sub(left_val, right, output))
+        left.set_to(output, self.il)
         return left
 
     def visit_MinusEquals(self, node):
         left = self.visit(node.left)
-        right = self.visit(node.right)
-        self.il.add(il.Sub(left, right, left))
+        right = self.visit(node.right).val(self.il)
+        output = il.ILValue('int')
+        left_val = left.val(self.il)
+        self.il.add(il.Sub(left_val, right, output))
+        left.set_to(output, self.il)
         return left
 
     def visit_StarEquals(self, node):
         left = self.visit(node.left)
-        right = self.visit(node.right)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
-        self.il.add(il.Mult(left, right, output))
-        self.il.add(il.Set(left, output))
+        left_val = left.val(self.il)
+        self.il.add(il.Mult(left_val, right, output))
+        left.set_to(output, self.il)
         return left
 
     def visit_DivEquals(self, node):
         left = self.visit(node.left)
-        right = self.visit(node.right)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
-        self.il.add(il.Div(left, right, output))
-        self.il.add(il.Set(left, output))
+        left_val = left.val(self.il)
+        self.il.add(il.Div(left_val, right, output))
+        left.set_to(output, self.il)
         return left
 
     def visit_ModEquals(self, node):
         left = self.visit(node.left)
-        right = self.visit(node.right)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
-        self.il.add(il.Mod(left, right, output))
-        self.il.add(il.Set(left, output))
+        left_val = left.val(self.il)
+        self.il.add(il.Mod(left_val, right, output))
+        left.set_to(output, self.il)
         return left
 
     def visit_MultiExpr(self, node):
@@ -167,8 +176,8 @@ class Interpreter(ast.NodeVisitor):
         return il_value
 
     def visit_Plus(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
         self.il.add(il.Add(left, right, output))
         return output
@@ -181,23 +190,22 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Mult(self, node):
-        print(node.left, node.right)
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
         self.il.add(il.Mult(left, right, output))
         return output
 
     def visit_Div(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
         self.il.add(il.Div(left, right, output))
         return output
 
     def visit_Mod(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
         self.il.add(il.Mod(left, right, output))
         return output
@@ -215,10 +223,10 @@ class Interpreter(ast.NodeVisitor):
 
         self.il.add(il.Set(init, output))
 
-        left = self.visit(node.left)
+        left = self.visit(node.left).val(self.il)
         self.il.add(il.JmpZero(left, set_out))
 
-        right = self.visit(node.right)
+        right = self.visit(node.right).val(self.il)
         self.il.add(il.JmpZero(right, set_out))
         self.il.add(il.Jmp(end))
 
@@ -241,10 +249,10 @@ class Interpreter(ast.NodeVisitor):
 
         self.il.add(il.Set(init, output))
 
-        left = self.visit(node.left)
+        left = self.visit(node.left).val(self.il)
         self.il.add(il.JmpNotZero(left, set_out))
 
-        right = self.visit(node.right)
+        right = self.visit(node.right).val(self.il)
         self.il.add(il.JmpNotZero(right, set_out))
         self.il.add(il.Jmp(end))
 
@@ -267,7 +275,7 @@ class Interpreter(ast.NodeVisitor):
 
         self.il.add(il.Set(init, output))
 
-        expr = self.visit(node.expr)
+        expr = self.visit(node.expr).val(self.il)
         self.il.add(il.JmpNotZero(expr, set_out))
         self.il.add(il.Jmp(end))
 
@@ -302,8 +310,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Inequality(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.visit(node.left).val(self.il)
+        right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
         init = il.ILValue('int')
@@ -451,7 +459,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_AddrOf(self, node):
         output = il.ILValue('int')
         value = self.visit(node.expr)
-        self.il.add(il.AddrOf(value, output))
+        value.addr_of(output, self.il)
         return output
 
     def visit_Deref(self, node):
@@ -460,7 +468,7 @@ class Interpreter(ast.NodeVisitor):
         return ast.IndirectLValue(value)
 
     def visit_IfStatement(self, node):
-        condition = self.visit(node.condition)
+        condition = self.visit(node.condition).val(self.il)
 
         end_label = self.il.get_label()
 
@@ -481,7 +489,7 @@ class Interpreter(ast.NodeVisitor):
         end_label = self.il.get_label()
 
         self.il.add(il.Label(start_label))
-        condition = self.visit(node.condition)
+        condition = self.visit(node.condition).val(self.il)
 
         self.il.add(il.JmpZero(condition, end_label))
         self.visit(node.statement)
@@ -497,7 +505,7 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Label(start_label))
 
         if node.second is not None:
-            condition = self.visit(node.second)
+            condition = self.visit(node.second).val(self.il)
             self.il.add(il.JmpZero(condition, end_label))
 
         self.current_loop["start"] = start_label
