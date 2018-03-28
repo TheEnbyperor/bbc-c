@@ -215,7 +215,7 @@ class Return(ILInst):
                         found_start = True
                         continue
                 if found_start:
-                    if type(c) == FunctionPrologue:
+                    if type(c) == Function:
                         break
                     for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
                         if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
@@ -263,7 +263,7 @@ class CallFunction(ILInst):
             assembly.add_inst("JSR", "_bbcc_pusha")
             offset += 1
 
-        assembly.add_inst("JSR", "__{}".format(self.name))
+        assembly.add_inst("JSR", self.name)
 
         assembly.add_inst("CLC")
         stack_register.asm(assembly, "LDA", 0)
@@ -280,29 +280,34 @@ class CallFunction(ILInst):
             output.asm(assembly, "STA", 0)
 
 
-class FunctionPrologue(ILInst):
-    def __init__(self, params, func_name):
+class Function(ILInst):
+    def __init__(self, params, func_name, prolouge=True):
         self.params = params
         self.func_name = func_name
+        self.prolouge = prolouge
 
     def inputs(self):
         return [v.il_value for v in self.params]
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         used = []
-        found_self = False
-        for c in il.commands:
-            if c == self:
-                found_self = True
-                continue
-            if found_self:
-                if type(c) == Return:
-                    if c.func_name != self.func_name:
-                        break
-                for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
-                    if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
-                        if s.loc in pseudo_registers and s.loc != return_register:
-                            used.append(s)
+
+        if self.prolouge:
+            found_self = False
+            for c in il.commands:
+                if c == self:
+                    found_self = True
+                    continue
+                if found_self:
+                    if type(c) == Return:
+                        if c.func_name != self.func_name:
+                            break
+                    for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
+                        if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
+                            if s.loc in pseudo_registers and s.loc != return_register:
+                                used.append(s)
+
+        assembly.add_inst(label=self.func_name)
 
         for reg in used[::-1]:
             reg.asm(assembly, "LDA", 0)
@@ -787,16 +792,46 @@ class IL:
         for i, v in self.literals.items():
             spotmap[i] = spots.LiteralSpot(v, i.type)
 
+        move_to_mem = []
+        for c in self.commands:
+            if isinstance(c, AddrOf):
+                if v in c.inputs():
+                    move_to_mem.append(v)
+
+        max_stack_offset = {}
+        mem_start = 0x1000
+        current_function = ""
+
+        print(move_to_mem)
+
         for i, c in enumerate(self.commands):
+            if isinstance(c, Function):
+                current_function = c.func_name
+            elif isinstance(c, Return):
+                for c2 in self.commands[i:]:
+                    if isinstance(c2, Function):
+                        current_function = ""
             for v in (c.inputs() + c.outputs() + c.scratch_spaces())[::-1]:
                 if v not in spotmap:
-                    if v.stack_offset is None:
-                        reg = self._find_register(spotmap, i, v)
-                        if reg is None:
-                            raise RuntimeError("Failed to find register if ILValue {}".format(v))
-                        spotmap[v] = spots.Pseudo16RegisterSpot(reg, v.type)
+                    if current_function == "":
+                        spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
+                        mem_start += 2
                     else:
-                        spotmap[v] = spots.StackSpot(v.stack_offset, v.type)
+                        if v.stack_offset is None and v not in move_to_mem:
+                            reg = self._find_register(spotmap, i, v)
+                            if reg is not None:
+                                spotmap[v] = spots.Pseudo16RegisterSpot(reg, v.type)
+                            else:
+                                spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
+                                mem_start += 2
+                        else:
+                            if isinstance(c, Function):
+                                if max_stack_offset.get(c.func_name) is None:
+                                    max_stack_offset[c.func_name] = v.stack_offset
+                                else:
+                                    if max_stack_offset[c.func_name] < v.stack_offset:
+                                        max_stack_offset[c.func_name] = v.stack_offset
+                            spotmap[v] = spots.StackSpot(v.stack_offset, v.type)
 
         self._print_spotmap(spotmap)
 

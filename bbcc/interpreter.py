@@ -25,7 +25,7 @@ class Interpreter(ast.NodeVisitor):
             self.visit(n)
 
         ret_val = il.ILValue('int')
-        self.il.add(il.Label("_start"))
+        self.il.add(il.Function([], "_start", prolouge=False))
 
         stack_start = il.ILValue('int')
         stack_register = il.ILValue('char')
@@ -53,7 +53,6 @@ class Interpreter(ast.NodeVisitor):
     def visit_Function(self, node):
         func_name = node.name.identifier.value
         self.current_scope = func_name
-        self.il.add(il.Label("__{}".format(func_name)))
         params = []
         for i, p in enumerate(node.params):
             if type(p.child) == decl_tree.Identifier:
@@ -61,7 +60,7 @@ class Interpreter(ast.NodeVisitor):
                 var = self.scope.lookup(var_name, self.current_scope)
                 var.il_value.stack_offset = i*2
                 params.append(var)
-        self.il.add(il.FunctionPrologue(params, "__{}".format(func_name)))
+        self.il.add(il.Function(params, "__{}".format(func_name)))
         self.current_function = "__{}".format(func_name)
         self.visit(node.nodes)
         il_value = il.ILValue('int')
@@ -78,7 +77,7 @@ class Interpreter(ast.NodeVisitor):
             args.append(self.visit(a))
 
         output = il.ILValue(func.type)
-        self.il.add(il.CallFunction(func_name, args, output))
+        self.il.add(il.CallFunction("__{}".format(func_name), args, output))
         return output
 
     def visit_Identifier(self, node):
@@ -439,7 +438,7 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue('int')
         value = self.visit(node.expr)
         self.il.add(il.AddrOf(value, output))
-        return value
+        return output
 
     def visit_Deref(self, node):
         output = il.ILValue('int')

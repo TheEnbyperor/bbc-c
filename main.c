@@ -1,8 +1,11 @@
 // Comment
 int Fibonacci(int);
 
+int n = 3;
+
 int main() {
-    return Fibonacci(3);
+    Fibonacci(n);
+    return &n;
 }
 
 int Fibonacci(int n) {
