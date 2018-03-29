@@ -218,7 +218,8 @@ class JmpZero(ILInst):
         value.asm(assembly, "LDA", 0)
         assembly.add_inst("BNE", label)
         value.asm(assembly, "LDA", 1)
-        assembly.add_inst("BEQ", self.label)
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("JMP", self.label)
         assembly.add_inst(label=label)
 
 
@@ -233,10 +234,15 @@ class JmpNotZero(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         value = spotmap[self.value]
 
+        label1 = il.get_label()
+        label2 = il.get_label()
+
         value.asm(assembly, "LDA", 0)
-        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("BNE", label1)
         value.asm(assembly, "LDA", 1)
-        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("BEQ", label2)
+        assembly.add_inst("JMP", self.label, label=label1)
+        assembly.add_inst(label=label2)
 
 
 class Return(ILInst):
@@ -313,13 +319,14 @@ class CallFunction(ILInst):
 
         assembly.add_inst("JSR", self.name)
 
-        assembly.add_inst("CLC")
-        stack_register.asm(assembly, "LDA", 0)
-        assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
-        stack_register.asm(assembly, "STA", 0)
-        stack_register.asm(assembly, "LDA", 1)
-        assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
-        stack_register.asm(assembly, "STA", 1)
+        if offset > 0:
+            assembly.add_inst("CLC")
+            stack_register.asm(assembly, "LDA", 0)
+            assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
+            stack_register.asm(assembly, "STA", 0)
+            stack_register.asm(assembly, "LDA", 1)
+            assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
+            stack_register.asm(assembly, "STA", 1)
 
         if output != ret_reg:
             ret_reg.asm(assembly, "LDA", 1)
@@ -439,21 +446,19 @@ class Mult(ILInst):
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        if not left.has_address():
-            scratch1 = spotmap[self.scratch1]
-            left.asm(assembly, "LDA", 0)
-            scratch1.asm(assembly, "STA", 0)
-            left.asm(assembly, "LDA", 1)
-            scratch1.asm(assembly, "STA", 1)
-            left = scratch1
+        scratch1 = spotmap[self.scratch1]
+        left.asm(assembly, "LDA", 0)
+        scratch1.asm(assembly, "STA", 0)
+        left.asm(assembly, "LDA", 1)
+        scratch1.asm(assembly, "STA", 1)
+        left = scratch1
 
-        if not right.has_address():
-            scratch2 = spotmap[self.scratch2]
-            right.asm(assembly, "LDA", 0)
-            scratch2.asm(assembly, "STA", 0)
-            right.asm(assembly, "LDA", 1)
-            scratch2.asm(assembly, "STA", 1)
-            right = scratch2
+        scratch2 = spotmap[self.scratch2]
+        right.asm(assembly, "LDA", 0)
+        scratch2.asm(assembly, "STA", 0)
+        right.asm(assembly, "LDA", 1)
+        scratch2.asm(assembly, "STA", 1)
+        right = scratch2
 
         label1 = il.get_label()
         label2 = il.get_label()
@@ -467,15 +472,16 @@ class Mult(ILInst):
         right.asm(assembly, "ROR", 1)
         assembly.add_inst("BCC", label2)
         assembly.add_inst("CLC")
-        left.asm(assembly, "ASL", 1)
-        left.asm(assembly, "ROL", 0)
         left.asm(assembly, "LDA", 1)
         output.asm(assembly, "ADC", 1)
         output.asm(assembly, "STA", 1)
         left.asm(assembly, "LDA", 0)
         output.asm(assembly, "ADC", 0)
         output.asm(assembly, "STA", 0)
-        assembly.add_inst("DEX", label=label2)
+        assembly.add_inst("CLC", label=label2)
+        left.asm(assembly, "ASL", 1)
+        left.asm(assembly, "ROL", 0)
+        assembly.add_inst("DEX")
         assembly.add_inst("BNE", label1)
 
 
@@ -503,24 +509,23 @@ class Div(ILInst):
         output = spotmap[self.output]
         scratch3 = spotmap[self.scratch3]
 
-        if not left.has_address():
-            scratch1 = spotmap[self.scratch1]
-            left.asm(assembly, "LDA", 0)
-            scratch1.asm(assembly, "STA", 0)
-            left.asm(assembly, "LDA", 1)
-            scratch1.asm(assembly, "STA", 1)
-            left = scratch1
+        scratch1 = spotmap[self.scratch1]
+        left.asm(assembly, "LDA", 0)
+        scratch1.asm(assembly, "STA", 0)
+        left.asm(assembly, "LDA", 1)
+        scratch1.asm(assembly, "STA", 1)
+        left = scratch1
 
-        if not right.has_address():
-            scratch2 = spotmap[self.scratch2]
-            right.asm(assembly, "LDA", 0)
-            scratch2.asm(assembly, "STA", 0)
-            right.asm(assembly, "LDA", 1)
-            scratch2.asm(assembly, "STA", 1)
-            right = scratch2
+        scratch2 = spotmap[self.scratch2]
+        right.asm(assembly, "LDA", 0)
+        scratch2.asm(assembly, "STA", 0)
+        right.asm(assembly, "LDA", 1)
+        scratch2.asm(assembly, "STA", 1)
+        right = scratch2
 
         label1 = il.get_label()
         label2 = il.get_label()
+        label3 = il.get_label()
 
         assembly.add_inst("LDA", "#0")
         scratch3.asm(assembly, "STA", 0)
@@ -542,7 +547,9 @@ class Div(ILInst):
         assembly.add_inst("PLA")
         scratch3.asm(assembly, "STA", 1)
         left.asm(assembly, "INC", 1)
-        assembly.add_inst("DEX", label=label2)
+        assembly.add_inst("JMP", label3)
+        assembly.add_inst("PLA", label=label2)
+        assembly.add_inst("DEX", label=label3)
         assembly.add_inst("BNE", label1)
 
         if left != output:
@@ -677,7 +684,8 @@ class EqualCmp(ILInst):
         assembly.add_inst("BNE", label)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BEQ", self.label)
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("JMP", self.label)
         assembly.add_inst(label=label)
 
 
@@ -701,7 +709,8 @@ class NotEqualCmp(ILInst):
         assembly.add_inst("BEQ", label)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("BEQ", label)
+        assembly.add_inst("JMP", self.label)
         assembly.add_inst(label=label)
 
 
@@ -719,14 +728,16 @@ class LessThanCmp(ILInst):
         right = spotmap[self.right]
 
         label = il.get_label()
+        label2 = il.get_label()
 
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", self.label)
+        assembly.add_inst("BCC", label2)
         assembly.add_inst("BNE", label)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCC", self.label)
+        assembly.add_inst("BCS", label)
+        assembly.add_inst("JMP", self.label, label=label2)
         assembly.add_inst(label=label)
 
 
@@ -744,15 +755,17 @@ class LessEqualCmp(ILInst):
         right = spotmap[self.right]
 
         label = il.get_label()
+        label2 = il.get_label()
 
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", self.label)
+        assembly.add_inst("BCC", label2)
         assembly.add_inst("BNE", label)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCC", self.label)
-        assembly.add_inst("BEQ", self.label)
+        assembly.add_inst("BCC", label2)
+        assembly.add_inst("BNE", label)
+        assembly.add_inst("JMP", self.label, label=label2)
         assembly.add_inst(label=label)
 
 
@@ -770,15 +783,17 @@ class MoreThanCmp(ILInst):
         right = spotmap[self.right]
 
         label = il.get_label()
+        label2 = il.get_label()
 
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
         assembly.add_inst("BCC", label)
-        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("BNE", label2)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
         assembly.add_inst("BEQ", label)
-        assembly.add_inst("BCS", self.label)
+        assembly.add_inst("BCC", label)
+        assembly.add_inst("JMP", self.label, label=label2)
         assembly.add_inst(label=label)
 
 
@@ -796,14 +811,16 @@ class MoreEqualCmp(ILInst):
         right = spotmap[self.right]
 
         label = il.get_label()
+        label2 = il.get_label()
 
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
         assembly.add_inst("BCC", label)
-        assembly.add_inst("BNE", self.label)
+        assembly.add_inst("BNE", label2)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCS", self.label)
+        assembly.add_inst("BCC", label)
+        assembly.add_inst("JMP", self.label, label=label2)
         assembly.add_inst(label=label)
 
 

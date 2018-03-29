@@ -384,7 +384,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
             self.visit(node.else_statement)
 
     def visit_WhileStatement(self, node):
-        self.visit(node.condititon)
+        self.visit(node.condition)
         self.visit(node.statement)
 
     def visit_ForStatement(self, node):

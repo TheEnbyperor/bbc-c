@@ -6,3 +6,25 @@ STA &71
 LDA #00
 STA &70
 RTS
+
+.__getchar
+JSR &FFE0
+STA &71
+LDA #00
+STA &70
+RTS
+
+.__osbyte
+LDY #05
+LDA (&8E),Y
+TAY
+LDY #03
+LDA (&8E),Y
+TAX
+LDY #01
+LDA (&8E),Y
+JSR &FFF4
+STX &71
+LDA #00
+STA &70
+RTS

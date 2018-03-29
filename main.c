@@ -1,11 +1,22 @@
 // Comment
-void putchar(char);
+int putchar(int);
+int getchar();
+int osbyte(int, int, int);
+
 int Fibonacci(int);
 
-int n = 20;
-
 int main() {
-    return 255+n;
+    char ch;
+    while (1) {
+        ch = getchar();
+        if (ch == 27) {
+            break;
+        }
+        putchar(ch);
+        if (ch == 13) {
+            putchar(10);
+        }
+    }
 }
 
 //int Fibonacci(int n) {

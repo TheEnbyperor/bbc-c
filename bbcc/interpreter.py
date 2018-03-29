@@ -492,7 +492,11 @@ class Interpreter(ast.NodeVisitor):
         condition = self.visit(node.condition).val(self.il)
 
         self.il.add(il.JmpZero(condition, end_label))
+
+        self.current_loop["start"] = start_label
+        self.current_loop["end"] = end_label
         self.visit(node.statement)
+
         self.il.add(il.Jmp(start_label))
 
         self.il.add(il.Label(end_label))

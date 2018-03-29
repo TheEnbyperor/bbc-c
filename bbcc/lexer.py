@@ -1,5 +1,5 @@
 from .tokens import *
-
+import string
 
 class Lexer:
     def __init__(self, text):
@@ -55,9 +55,8 @@ class Lexer:
         return result
 
     def id(self):
-        """Handle identifiers and reserved keywords"""
         result = ''
-        while self.current_char is not None and self.current_char.isalnum():
+        while self.current_char is not None and self.current_char in string.ascii_letters+string.digits+"_":
             result += self.current_char
             self.advance()
 
