@@ -290,23 +290,7 @@ class Interpreter(ast.NodeVisitor):
         right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
-        init = il.ILValue('int')
-        self.il.register_literal_value(init, 0)
-        other = il.ILValue('int')
-        self.il.register_literal_value(other, 1)
-
-        set_out = self.il.get_label()
-        end = self.il.get_label()
-
-        self.il.add(il.Set(init, output))
-
-        self.il.add(il.EqualCmp(left, right, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
-        self.il.add(il.Set(other, output))
-        self.il.add(il.Label(end))
-
+        self.il.add(il.EqualCmp(left, right, output))
         return output
 
     def visit_Inequality(self, node):
@@ -314,23 +298,7 @@ class Interpreter(ast.NodeVisitor):
         right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
-        init = il.ILValue('int')
-        self.il.register_literal_value(init, 0)
-        other = il.ILValue('int')
-        self.il.register_literal_value(other, 1)
-
-        set_out = self.il.get_label()
-        end = self.il.get_label()
-
-        self.il.add(il.Set(init, output))
-
-        self.il.add(il.NotEqualCmp(left, right, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
-        self.il.add(il.Set(other, output))
-        self.il.add(il.Label(end))
-
+        self.il.add(il.NotEqualCmp(left, right, output))
         return output
 
     def visit_LessThan(self, node):
@@ -338,47 +306,16 @@ class Interpreter(ast.NodeVisitor):
         right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
-        init = il.ILValue('int')
-        self.il.register_literal_value(init, 0)
-        other = il.ILValue('int')
-        self.il.register_literal_value(other, 1)
-
-        set_out = self.il.get_label()
-        end = self.il.get_label()
-
-        self.il.add(il.Set(init, output))
-
-        self.il.add(il.LessThanCmp(left, right, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
-        self.il.add(il.Set(other, output))
-        self.il.add(il.Label(end))
-
+        self.il.add(il.LessThanCmp(left, right, output))
         return output
 
     def visit_MoreThan(self, node):
+
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
-        init = il.ILValue('int')
-        self.il.register_literal_value(init, 0)
-        other = il.ILValue('int')
-        self.il.register_literal_value(other, 1)
-
-        set_out = self.il.get_label()
-        end = self.il.get_label()
-
-        self.il.add(il.Set(init, output))
-
-        self.il.add(il.MoreThanCmp(left, right, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
-        self.il.add(il.Set(other, output))
-        self.il.add(il.Label(end))
-
+        self.il.add(il.MoreThanCmp(left, right, output))
         return output
 
     def visit_LessEqual(self, node):
@@ -386,23 +323,7 @@ class Interpreter(ast.NodeVisitor):
         right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
-        init = il.ILValue('int')
-        self.il.register_literal_value(init, 0)
-        other = il.ILValue('int')
-        self.il.register_literal_value(other, 1)
-
-        set_out = self.il.get_label()
-        end = self.il.get_label()
-
-        self.il.add(il.Set(init, output))
-
-        self.il.add(il.LessEqualCmp(left, right, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
-        self.il.add(il.Set(other, output))
-        self.il.add(il.Label(end))
-
+        self.il.add(il.LessEqualCmp(left, right, output))
         return output
 
     def visit_MoreEqual(self, node):
@@ -410,23 +331,7 @@ class Interpreter(ast.NodeVisitor):
         right = self.visit(node.right).val(self.il)
         output = il.ILValue('int')
 
-        init = il.ILValue('int')
-        self.il.register_literal_value(init, 0)
-        other = il.ILValue('int')
-        self.il.register_literal_value(other, 1)
-
-        set_out = self.il.get_label()
-        end = self.il.get_label()
-
-        self.il.add(il.Set(init, output))
-
-        self.il.add(il.MoreEqualCmp(left, right, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
-        self.il.add(il.Set(other, output))
-        self.il.add(il.Label(end))
-
+        self.il.add(il.MoreEqualCmp(left, right, output))
         return output
 
     def visit_PreIncr(self, node):

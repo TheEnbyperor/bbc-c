@@ -665,163 +665,229 @@ class Dec(ILInst):
 
 # Comparison
 class EqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, label: str):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
         self.left = left
         self.right = right
-        self.label = label
+        self.output = output
 
     def inputs(self):
         return [self.left, self.right]
 
+    def outputs(self):
+        return [self.output]
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         left = spotmap[self.left]
         right = spotmap[self.right]
+        output = spotmap[self.output]
 
-        label = il.get_label()
+        label1 = il.get_label()
+        label2 = il.get_label()
 
+        assembly.add_inst("LDA", "#00")
+        output.asm(assembly, "STA", 0)
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BNE", label)
+        assembly.add_inst("BNE", label1)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BNE", label)
-        assembly.add_inst("JMP", self.label)
-        assembly.add_inst(label=label)
+        assembly.add_inst("BNE", label1)
+        assembly.add_inst("LDA", "#01")
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst("JMP", label2)
+        assembly.add_inst("LDA", "#00", label=label1)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst(label=label2)
 
 
 class NotEqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, label: str):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
         self.left = left
         self.right = right
-        self.label = label
+        self.output = output
 
     def inputs(self):
         return [self.left, self.right]
 
+    def outputs(self):
+        return [self.output]
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         left = spotmap[self.left]
         right = spotmap[self.right]
+        output = spotmap[self.output]
 
-        label = il.get_label()
+        label1 = il.get_label()
+        label2 = il.get_label()
 
+        assembly.add_inst("LDA", "#00")
+        output.asm(assembly, "STA", 0)
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BEQ", label)
+        assembly.add_inst("BEQ", label1)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BEQ", label)
-        assembly.add_inst("JMP", self.label)
-        assembly.add_inst(label=label)
+        assembly.add_inst("BEQ", label1)
+        assembly.add_inst("LDA", "#01")
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst("JMP", label2)
+        assembly.add_inst("LDA", "#00", label=label1)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst(label=label2)
 
 
 class LessThanCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, label: str):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
         self.left = left
         self.right = right
-        self.label = label
+        self.output = output
 
     def inputs(self):
         return [self.left, self.right]
 
+    def outputs(self):
+        return [self.output]
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         left = spotmap[self.left]
         right = spotmap[self.right]
+        output = spotmap[self.output]
 
-        label = il.get_label()
+        label1 = il.get_label()
         label2 = il.get_label()
+        label3 = il.get_label()
 
+        assembly.add_inst("LDA", "#00")
+        output.asm(assembly, "STA", 0)
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label2)
-        assembly.add_inst("BNE", label)
+        assembly.add_inst("BCC", label3)
+        assembly.add_inst("BNE", label1)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCS", label)
-        assembly.add_inst("JMP", self.label, label=label2)
-        assembly.add_inst(label=label)
+        assembly.add_inst("BCS", label1)
+        assembly.add_inst("LDA", "#01", label=label3)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst("JMP", label2)
+        assembly.add_inst("LDA", "#00", label=label1)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst(label=label2)
 
 
 class LessEqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, label: str):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
         self.left = left
         self.right = right
-        self.label = label
+        self.output = output
 
     def inputs(self):
         return [self.left, self.right]
 
+    def outputs(self):
+        return [self.output]
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         left = spotmap[self.left]
         right = spotmap[self.right]
+        output = spotmap[self.output]
 
-        label = il.get_label()
+        label1 = il.get_label()
         label2 = il.get_label()
+        label3 = il.get_label()
 
+        assembly.add_inst("LDA", "#00")
+        output.asm(assembly, "STA", 0)
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label2)
-        assembly.add_inst("BNE", label)
+        assembly.add_inst("BCC", label3)
+        assembly.add_inst("BNE", label1)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCC", label2)
-        assembly.add_inst("BNE", label)
-        assembly.add_inst("JMP", self.label, label=label2)
-        assembly.add_inst(label=label)
+        assembly.add_inst("BCC", label3)
+        assembly.add_inst("BNE", label1)
+        assembly.add_inst("LDA", "#01", label=label3)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst("JMP", label2)
+        assembly.add_inst("LDA", "#00", label=label1)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst(label=label2)
 
 
 class MoreThanCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, label: str):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
         self.left = left
         self.right = right
-        self.label = label
+        self.output = output
 
     def inputs(self):
         return [self.left, self.right]
 
+    def outputs(self):
+        return [self.output]
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         left = spotmap[self.left]
         right = spotmap[self.right]
+        output = spotmap[self.output]
 
-        label = il.get_label()
+        label1 = il.get_label()
         label2 = il.get_label()
+        label3 = il.get_label()
 
+        assembly.add_inst("LDA", "#00")
+        output.asm(assembly, "STA", 0)
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label)
-        assembly.add_inst("BNE", label2)
+        assembly.add_inst("BCC", label1)
+        assembly.add_inst("BNE", label3)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BEQ", label)
-        assembly.add_inst("BCC", label)
-        assembly.add_inst("JMP", self.label, label=label2)
-        assembly.add_inst(label=label)
+        assembly.add_inst("BEQ", label1)
+        assembly.add_inst("BCC", label1)
+        assembly.add_inst("LDA", "#01", label=label3)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst("JMP", label2)
+        assembly.add_inst("LDA", "#00", label=label1)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst(label=label2)
 
 
 class MoreEqualCmp(ILInst):
-    def __init__(self, left: ILValue, right: ILValue, label: str):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
         self.left = left
         self.right = right
-        self.label = label
+        self.output = output
 
     def inputs(self):
         return [self.left, self.right]
 
+    def outputs(self):
+        return [self.output]
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         left = spotmap[self.left]
         right = spotmap[self.right]
+        output = spotmap[self.output]
 
-        label = il.get_label()
+        label1 = il.get_label()
         label2 = il.get_label()
+        label3 = il.get_label()
 
+        assembly.add_inst("LDA", "#00")
+        output.asm(assembly, "STA", 0)
         left.asm(assembly, "LDA", 0)
         right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label)
-        assembly.add_inst("BNE", label2)
+        assembly.add_inst("BCC", label1)
+        assembly.add_inst("BNE", label3)
         left.asm(assembly, "LDA", 1)
         right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCC", label)
-        assembly.add_inst("JMP", self.label, label=label2)
-        assembly.add_inst(label=label)
+        assembly.add_inst("BCC", label1)
+        assembly.add_inst("LDA", "#01", label=label3)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst("JMP", label2)
+        assembly.add_inst("LDA", "#00", label=label1)
+        output.asm(assembly, "STA", 1)
+        assembly.add_inst(label=label2)
 
 
 class IL:
