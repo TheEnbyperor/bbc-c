@@ -56,7 +56,7 @@ class Interpreter(ast.NodeVisitor):
                         self.il.register_literal_value(val, 0)
                         self.il.add(il.Set(val, var.il_value))
                     else:
-                        val = self.visit(node.inits[i])
+                        val = self.visit(node.inits[i]).val(self.il)
                         self.il.add(il.Set(val, var.il_value))
 
     def visit_Function(self, node):
@@ -466,6 +466,14 @@ class Interpreter(ast.NodeVisitor):
         value = self.visit(node.expr)
 
         return ast.IndirectLValue(value)
+
+    def visit_ArraySubsc(self, node):
+        head = self.visit(node.head).val(self.il)
+        arg = self.visit(node.arg).val(self.il)
+
+        output = il.ILValue('int')
+        self.il.add(il.Add(head, arg, output))
+        return ast.IndirectLValue(output)
 
     def visit_IfStatement(self, node):
         condition = self.visit(node.condition).val(self.il)

@@ -377,6 +377,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
             raise TypeError("Can only dereference variables or pointers")
         self.visit(node.expr)
 
+    def visit_ArraySubsc(self, node):
+        self.visit(node.head)
+        self.visit(node.arg)
+
     def visit_IfStatement(self, node):
         self.visit(node.condition)
         self.visit(node.statement)

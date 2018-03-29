@@ -17,6 +17,7 @@ int main() {
             putchar(10);
         }
     }
+    char a = ch[0];
 }
 
 //int Fibonacci(int n) {

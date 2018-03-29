@@ -130,12 +130,7 @@ class Identifier(_LExprNode):
 
 
 class ParenExpr(AST):
-    """Expression in parentheses.
-    This is implemented a bit hackily. Rather than being an LExprNode or
-    RExprNode like all the other nodes, a paren expression can be either
-    depending on what's inside. So for all function calls to this function,
-    we simply dispatch to the expression inside.
-    """
+    """Expression in parentheses."""
 
     def __init__(self, expr):
         """Initialize node."""
