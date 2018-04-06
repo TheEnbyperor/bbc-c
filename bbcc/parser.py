@@ -1,5 +1,6 @@
 from . import ast
 from . import decl_tree
+from . import ctypes
 from .tokens import *
 
 
@@ -36,6 +37,7 @@ class Parser:
         if self.tokens[index:][0].type == EOF:
             return ast.TranslationUnit(items), index
         else:
+            print(self.tokens[index:])
             self.error()
 
     def parse_external_deceleration(self, index):
@@ -484,8 +486,8 @@ class Parser:
             const char
             typedef int
         """
-        decl_specifiers = ([i[1].type for i in TYPES.items()] +
-                           [i[1].type for i in MODIFIERS.items()])
+        decl_specifiers = (list(ctypes.simple_types.keys()) +
+                           [SIGNED, UNISGNED, AUTO, STATIC, CONST])
 
         specs = []
         while True:
@@ -495,7 +497,6 @@ class Parser:
                     index += 1
                     break
             else:
-                # If the for loop did not break, quit the while loop
                 break
 
         if specs:
