@@ -1,11 +1,12 @@
 from . import asm
 from . import spots
+from . import ctypes
 
 pseudo_registers = [asm.ASM.preg1, asm.ASM.preg2, asm.ASM.preg3, asm.ASM.preg4, asm.ASM.preg5,
                     asm.ASM.preg6, asm.ASM.preg7, asm.ASM.preg8, asm.ASM.preg9, asm.ASM.preg10,
                     asm.ASM.preg11, asm.ASM.preg12, asm.ASM.preg13, asm.ASM.preg14, asm.ASM.preg15]
 return_register = asm.ASM.preg1
-stack_register = spots.Pseudo16RegisterSpot(asm.ASM.cstck, 'int')
+stack_register = spots.Pseudo16RegisterSpot(asm.ASM.cstck, ctypes.integer)
 
 
 class ILValue:
@@ -95,7 +96,7 @@ class ReadAt(ILInst):
     def __init__(self, value: ILValue, output: ILValue):
         self.value = value
         self.output = output
-        self.scratch = ILValue('int')
+        self.scratch = ILValue(value.type)
 
     def inputs(self):
         return [self.value]
@@ -128,7 +129,7 @@ class SetAt(ILInst):
     def __init__(self, value: ILValue, output: ILValue):
         self.value = value
         self.output = output
-        self.scratch = ILValue('int')
+        self.scratch = ILValue(value.type)
 
     def inputs(self):
         return [self.value]
@@ -429,8 +430,8 @@ class Mult(ILInst):
         self.left = left
         self.right = right
         self.output = output
-        self.scratch1 = ILValue('int')
-        self.scratch2 = ILValue('int')
+        self.scratch1 = ILValue(left.type)
+        self.scratch2 = ILValue(right.type)
 
     def inputs(self):
         return [self.left, self.right]
@@ -490,9 +491,9 @@ class Div(ILInst):
         self.left = left
         self.right = right
         self.output = output
-        self.scratch1 = ILValue('int')
-        self.scratch2 = ILValue('int')
-        self.scratch3 = ILValue('int')
+        self.scratch1 = ILValue(left.type)
+        self.scratch2 = ILValue(right.type)
+        self.scratch3 = ILValue(output.type)
 
     def inputs(self):
         return [self.left, self.right]
@@ -564,8 +565,8 @@ class Mod(ILInst):
         self.left = left
         self.right = right
         self.output = output
-        self.scratch1 = ILValue('int')
-        self.scratch2 = ILValue('int')
+        self.scratch1 = ILValue(left.type)
+        self.scratch2 = ILValue(right.type)
 
     def inputs(self):
         return [self.left, self.right]

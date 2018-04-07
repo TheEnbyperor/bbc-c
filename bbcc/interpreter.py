@@ -1,7 +1,7 @@
 from . import ast
 from . import decl_tree
-from .tokens import *
 from . import il
+from . import ctypes
 
 
 class Interpreter(ast.NodeVisitor):
@@ -27,11 +27,11 @@ class Interpreter(ast.NodeVisitor):
                 self.visit(n)
         self.il.add(il.Return(None, epilouge=False))
 
-        ret_val = il.ILValue('int')
+        ret_val = il.ILValue(ctypes.integer)
         self.il.add(il.Function([], "_start", prolouge=False))
 
-        stack_start = il.ILValue('int')
-        stack_register = il.ILValue('char')
+        stack_start = il.ILValue(ctypes.unsig_int)
+        stack_register = il.ILValue(ctypes.unsig_char)
         self.il.register_literal_value(stack_start, 0x0018)
         self.il.register_spot_value(stack_register, il.stack_register)
         self.il.add(il.Set(stack_start, stack_register))
@@ -46,17 +46,19 @@ class Interpreter(ast.NodeVisitor):
                 self.visit(n)
 
     def visit_Declaration(self, node):
-        for i, d in enumerate(node.decls):
-            if type(d.child) == decl_tree.Identifier:
-                var_name = d.child.identifier.value
+        decl_infos = node.get_decls_info()
+
+        for d in decl_infos:
+            if type(d.ctype) != ctypes.FunctionCType:
+                var_name = d.identifier.value
                 var = self.scope.lookup(var_name, self.current_scope)
-                if var.type.name == INT or var.type.name == CHAR:
-                    if node.inits[i] is None:
-                        val = il.ILValue('int')
+                if type(var.type) == ctypes.IntegerCType:
+                    if d.init is None:
+                        val = il.ILValue(var.type)
                         self.il.register_literal_value(val, 0)
                         self.il.add(il.Set(val, var.il_value))
                     else:
-                        val = self.visit(node.inits[i]).val(self.il)
+                        val = self.visit(d.init).val(self.il)
                         self.il.add(il.Set(val, var.il_value))
 
     def visit_Function(self, node):
@@ -77,7 +79,8 @@ class Interpreter(ast.NodeVisitor):
             if isinstance(node.nodes.items[-1], ast.Return):
                 should_return = False
         if should_return:
-            il_value = il.ILValue('int')
+            ctype = node.make_ctype()
+            il_value = il.ILValue(ctype)
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value, "__{}".format(func_name)))
         self.current_scope = ""
@@ -90,7 +93,7 @@ class Interpreter(ast.NodeVisitor):
         for a in node.args:
             args.append(self.visit(a).val(self.il))
 
-        output = il.ILValue(func.type)
+        output = il.ILValue(func.type.ret)
         self.il.add(il.CallFunction("__{}".format(func_name), args, output))
         return output
 
@@ -115,7 +118,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_PlusEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         left_val = left.val(self.il)
         self.il.add(il.Sub(left_val, right, output))
         left.set_to(output, self.il)
@@ -124,7 +127,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_MinusEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         left_val = left.val(self.il)
         self.il.add(il.Sub(left_val, right, output))
         left.set_to(output, self.il)
@@ -133,7 +136,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_StarEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         left_val = left.val(self.il)
         self.il.add(il.Mult(left_val, right, output))
         left.set_to(output, self.il)
@@ -142,7 +145,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_DivEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         left_val = left.val(self.il)
         self.il.add(il.Div(left_val, right, output))
         left.set_to(output, self.il)
@@ -151,7 +154,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_ModEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         left_val = left.val(self.il)
         self.il.add(il.Mod(left_val, right, output))
         left.set_to(output, self.il)
@@ -162,7 +165,7 @@ class Interpreter(ast.NodeVisitor):
         self.visit(node.right)
 
     def visit_Number(self, node):
-        il_value = il.ILValue('int')
+        il_value = il.ILValue(ctypes.integer)
         self.il.register_literal_value(il_value, node.number)
         return il_value
 
@@ -178,44 +181,44 @@ class Interpreter(ast.NodeVisitor):
     def visit_Plus(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         self.il.add(il.Add(left, right, output))
         return output
 
     def visit_Minus(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         self.il.add(il.Sub(left, right, output))
         return output
 
     def visit_Mult(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         self.il.add(il.Mult(left, right, output))
         return output
 
     def visit_Div(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         self.il.add(il.Div(left, right, output))
         return output
 
     def visit_Mod(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.left.type)
         self.il.add(il.Mod(left, right, output))
         return output
 
     def visit_BoolAnd(self, node):
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
-        init = il.ILValue('int')
+        init = il.ILValue(ctypes.char)
         self.il.register_literal_value(init, 1)
-        other = il.ILValue('int')
+        other = il.ILValue(ctypes.char)
         self.il.register_literal_value(other, 0)
 
         set_out = self.il.get_label()
@@ -237,11 +240,11 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_BoolOr(self, node):
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
-        init = il.ILValue('int')
+        init = il.ILValue(ctypes.char)
         self.il.register_literal_value(init, 0)
-        other = il.ILValue('int')
+        other = il.ILValue(ctypes.char)
         self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
@@ -263,11 +266,11 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_BoolNot(self, node):
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
-        init = il.ILValue('int')
+        init = il.ILValue(ctypes.char)
         self.il.register_literal_value(init, 1)
-        other = il.ILValue('int')
+        other = il.ILValue(ctypes.char)
         self.il.register_literal_value(other, 0)
 
         set_out = self.il.get_label()
@@ -288,7 +291,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Equality(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
         self.il.add(il.EqualCmp(left, right, output))
         return output
@@ -296,7 +299,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Inequality(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
         self.il.add(il.NotEqualCmp(left, right, output))
         return output
@@ -304,7 +307,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_LessThan(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
         self.il.add(il.LessThanCmp(left, right, output))
         return output
@@ -313,7 +316,7 @@ class Interpreter(ast.NodeVisitor):
 
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
         self.il.add(il.MoreThanCmp(left, right, output))
         return output
@@ -321,7 +324,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_LessEqual(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
         self.il.add(il.LessEqualCmp(left, right, output))
         return output
@@ -329,7 +332,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_MoreEqual(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.char)
 
         self.il.add(il.MoreEqualCmp(left, right, output))
         return output
@@ -341,7 +344,7 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_PostIncr(self, node):
         value = self.visit(node.expr).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.expr.type)
 
         self.il.add(il.Set(value, output))
         self.il.add(il.Inc(value))
@@ -355,14 +358,14 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_PostDecr(self, node):
         value = self.visit(node.expr).val(self.il)
-        output = il.ILValue('int')
+        output = il.ILValue(node.expr.type)
 
         self.il.add(il.Set(value, output))
         self.il.add(il.Dec(value))
         return output
 
     def visit_AddrOf(self, node):
-        output = il.ILValue('int')
+        output = il.ILValue(ctypes.integer)
         value = self.visit(node.expr)
         value.addr_of(output, self.il)
         return output
@@ -376,7 +379,7 @@ class Interpreter(ast.NodeVisitor):
         head = self.visit(node.head).val(self.il)
         arg = self.visit(node.arg).val(self.il)
 
-        output = il.ILValue('int')
+        output = il.ILValue(head.type)
         self.il.add(il.Add(head, arg, output))
         return ast.IndirectLValue(output)
 

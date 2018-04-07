@@ -444,25 +444,36 @@ class Parser:
             cur = separators[s](cur, new, tok)
 
     def parse_declaration(self, index):
-        """Parse a declaration.
+        """Parse a declaration into a tree.nodes.Declaration node.
         Example:
             int *a, (*b)[], c
+        """
+        node,index = self.parse_decls_inits(index)
+        return ast.Declaration(node), index
+
+    def parse_decls_inits(self, index, parse_inits=True):
+        """Parse declarations and initializers into a decl_nodes.Root node.
+        The decl_nodes node is used by the caller to create a
+        tree.nodes.Declaration node, and the decl_nodes node is traversed during
+        the IL generation step to convert it into an appropriate ctype.
+        If `parse_inits` is false, do not permit initializers. This is useful
+        for parsing struct objects.
         """
         specs, index = self.parse_decl_specifiers(index)
 
         # If declaration specifiers are followed directly by semicolon
         if self.token_is(index, SEMI):
-            return ast.Declaration([], []), index + 1
+            return decl_tree.Root(specs, [], []), index + 1
 
         decls = []
         inits = []
+
         while True:
             end = self.find_decl_end(index)
-            t = decl_tree.Root(specs, self.parse_declarator(index, end))
-            decls.append(t)
+            decls.append(self.parse_declarator(index, end))
 
             index = end
-            if self.token_is(index, EQUALS):
+            if self.token_is(index, EQUALS) and parse_inits:
                 # Parse initializer expression
                 # Currently, only simple initializers are supported
                 expr, index = self.parse_assignment(index + 1)
@@ -477,7 +488,9 @@ class Parser:
                 break
 
         index = self.eat(index, SEMI)
-        return ast.Declaration(decls, inits), index
+
+        node = decl_tree.Root(specs, decls, inits)
+        return node, index
 
     def parse_decl_specifiers(self, index):
         """Parse a declaration specifier.
@@ -611,7 +624,7 @@ class Parser:
         parenthesis, but that check is left to the caller.
         index - index right past the opening parenthesis
         """
-        # List of decl_tree arguments
+        # List of decl_nodes arguments
         params = []
 
         # No arguments
@@ -623,8 +636,8 @@ class Parser:
             specs, index = self.parse_decl_specifiers(index)
 
             end = self.find_decl_end(index)
-            params.append(
-                decl_tree.Root(specs, self.parse_declarator(index, end)))
+            decl = self.parse_declarator(index, end)
+            params.append(decl_tree.Root(specs, [decl], [None]))
 
             index = end
 

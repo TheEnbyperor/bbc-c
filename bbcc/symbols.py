@@ -3,6 +3,7 @@ import collections
 from . import ast
 from . import decl_tree
 from . import il
+from . import ctypes
 from .tokens import *
 
 
@@ -35,17 +36,11 @@ class VarSymbol(Symbol):
 
 
 class FunctionSymbol(Symbol):
-    def __init__(self, name, rtype, params=None):
-        super(FunctionSymbol, self).__init__(name, rtype)
-        # a list of formal parameters
-        self.params = params if params is not None else []
+    def __init__(self, name, ctype):
+        super(FunctionSymbol, self).__init__(name, ctype)
 
     def __str__(self):
-        return '<{class_name}(name={name}, parameters={params})>'.format(
-            class_name=self.__class__.__name__,
-            name=self.name,
-            params=self.params,
-        )
+        return '<FUNCTION({name}:{type})>'.format(name=self.name, type=self.type)
 
     __repr__ = __str__
 
@@ -168,37 +163,26 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.scope_out.set_symbols(self.scope)
 
     def visit_Declaration(self, node):
-        for i, d in enumerate(node.decls):
-            type_name = d.specs[-1].type
-            type_symbol = self.scope.lookup(type_name)
-            if type(d.child) == decl_tree.Identifier:
-                var_name = d.child.identifier.value
-                if self.scope.lookup(var_name, current_scope_only=True):
-                    raise SyntaxError("Duplicate identifier '%s' found" % var_name)
-                self.scope.define(VarSymbol(var_name, type_symbol))
-                self.memstart -= type_symbol.size
-                if node.inits[i] is not None:
-                    self.visit(node.inits[i])
+        decl_infos = node.get_decls_info()
 
-            elif type(d.child) == decl_tree.Array:
-                var_name = d.child.child.identifier.value
-                if self.scope.lookup(var_name, current_scope_only=True):
-                    raise SyntaxError("Duplicate identifier '%s' found" % var_name)
-                self.scope.define(VarSymbol(var_name, type_symbol))
-                self.memstart -= type_symbol.size
-                if node.inits[i] is not None:
-                    self.visit(node.inits[i])
-
-            elif type(d.child) == decl_tree.Function:
-                func_name = d.child.child.identifier.value
+        for d in decl_infos:
+            if type(d.ctype) == ctypes.FunctionCType:
+                func_name = d.identifier.value
                 if self.scope.lookup(func_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % func_name)
-                self.scope.define(FunctionSymbol(func_name, type_symbol, d.child.args))
+                self.scope.define(FunctionSymbol(func_name, d.ctype))
+            else:
+                var_name = d.identifier.value
+                if self.scope.lookup(var_name, current_scope_only=True):
+                    raise SyntaxError("Duplicate identifier '%s' found" % var_name)
+                self.scope.define(VarSymbol(var_name, d.ctype))
+                self.memstart -= d.ctype.size
+                if d.init is not None:
+                    self.visit(d.init)
 
     def visit_Function(self, node):
-        type_symbol = self.scope.lookup(node.type[-1].type)
         func_name = node.name.identifier.value
-        func_symbol = FunctionSymbol(func_name, type_symbol, node.params)
+        func_symbol = FunctionSymbol(func_name, node.make_ctype())
         self.scope.define(func_symbol)
         memstart = self.memstart
         procedure_scope = ScopedSymbolTable(
@@ -408,7 +392,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
         func = self.scope.lookup(func_name)
         if func is None:
             raise NameError(repr(func_name))
-        if len(func.params) != len(node.args):
+        if len(func.type.args) != len(node.args):
             raise NameError("Calling " + str(func.name) + " with wrong number of params")
         for a in node.args:
             self.visit(a)

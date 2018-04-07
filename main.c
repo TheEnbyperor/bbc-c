@@ -1,6 +1,6 @@
 // Comment
-int putchar(int);
-int getchar();
+char putchar(char);
+char getchar();
 int osbyte(int, int, int);
 
 int Fibonacci(int);

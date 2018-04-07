@@ -31,6 +31,9 @@ class CType:
     def is_const(self):
         return self.const
 
+    def is_function(self):
+        return False
+
     def make_unsigned(self):
         raise NotImplementedError
 
@@ -58,6 +61,12 @@ class IntegerCType(CType):
         unsign_self = copy.copy(self)
         unsign_self.signed = False
         return unsign_self
+
+    def __str__(self):
+        return '<IntegerCType({size}:{signed})>'.format(size=self.size, signed=self.signed)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class VoidCType(CType):
@@ -100,6 +109,32 @@ class ArrayCType(CType):
 
     def is_array(self):
         return True
+
+    def __str__(self):
+        return '<ArrayCType({el}:{n})>'.format(el=self.el, n=self.n)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class FunctionCType(CType):
+    def __init__(self, args, ret):
+        """Initialize type."""
+        self.args = args
+        self.ret = ret
+        super().__init__(1)
+
+    def is_complete(self):
+        return False
+
+    def is_function(self):
+        return True
+
+    def __str__(self):
+        return '<FunctionCType({args}:{ret})>'.format(args=self.args, ret=self.ret)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 void = VoidCType()
