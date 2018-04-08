@@ -1,23 +1,21 @@
 // Comment
-char putchar(char);
-char getchar();
-int osbyte(int, int, int);
+#include <stdio.h>
+#define ARR_LEN 10
 //
 //int Fibonacci(int);
 
 int main() {
-    char ch[10];
+    char ch[ARR_LEN];
     while (1) {
         ch[0] = getchar();
-        if (ch == 27) {
+        if (ch[0] == 27) {
             break;
         }
-        putchar(ch);
-        if (ch == 12+1) {
+        putchar(ch[0]);
+        if (ch[0] == 13) {
             putchar(10);
         }
     }
-    char a = ch[0];
 //    return 1 + 2;
 }
 

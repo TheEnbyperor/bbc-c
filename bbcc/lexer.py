@@ -1,6 +1,7 @@
 from .tokens import *
 import string
 
+
 class Lexer:
     def __init__(self, text):
         self.text = text
@@ -54,6 +55,13 @@ class Lexer:
             self.advance()
         return result
 
+    def h_string(self):
+        result = ''
+        while self.current_char is not None and self.current_char != '>':
+            result += self.current_char
+            self.advance()
+        return result
+
     def id(self):
         result = ''
         while self.current_char is not None and self.current_char in string.ascii_letters+string.digits+"_":
@@ -67,9 +75,12 @@ class Lexer:
         tokens = []
         while self.current_char is not None:
 
-            if self.current_char.isspace():
+            if self.current_char.isspace() and self.current_char is not "\n":
                 self.skip_whitespace()
                 continue
+            elif self.current_char == "\n":
+                self.advance()
+                tokens.append(Token(NEWLINE, "\n"))
             elif self.current_char == "/" and self.peek() == "/":
                 self.skip_line_comment()
             elif self.current_char == "/" and self.peek() == "*":
@@ -88,6 +99,10 @@ class Lexer:
             elif self.current_char == '"':
                 self.advance()
                 tokens.append(Token(STRING, self.string()))
+                self.advance()
+            elif self.current_char == '<':
+                self.advance()
+                tokens.append(Token(STRING, self.h_string()))
                 self.advance()
 
             elif self.current_char == "|" and self.peek() == "|":
@@ -200,6 +215,10 @@ class Lexer:
             elif self.current_char == "!":
                 self.advance()
                 tokens.append(Token(NOT, "!"))
+
+            elif self.current_char == "#":
+                self.advance()
+                tokens.append(Token(HASH, "#"))
 
             else:
                 self.error()

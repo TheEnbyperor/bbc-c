@@ -4,11 +4,15 @@ from .asm import ASM
 from .interpreter import Interpreter
 from .symbols import SymbolTableBuilder
 from .il import IL
+from .preproc import Preproc
 
 
 def main(text: str):
     lexer_inst = Lexer(text)
     token_list = lexer_inst.tokenize()
+
+    pre = Preproc(token_list)
+    token_list = pre.process()
 
     p = Parser(token_list)
     ast_out = p.parse()
