@@ -387,8 +387,14 @@ class Interpreter(ast.NodeVisitor):
         head_val = head.val(self.il)
         arg = self.visit(node.arg).val(self.il)
 
+        type_len = il.ILValue(ctypes.unsig_char)
+        self.il.register_literal_value(type_len, head.type.el.size)
+
+        offset = il.ILValue(ctypes.unsig_int)
+        self.il.add(il.Mult(type_len, arg, offset))
+
         output = il.ILValue(head.type.el)
-        self.il.add(il.Add(head_val, arg, output))
+        self.il.add(il.Add(head_val, offset, output))
         return ast.IndirectLValue(output)
 
     def visit_IfStatement(self, node):

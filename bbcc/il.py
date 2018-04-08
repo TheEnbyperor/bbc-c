@@ -926,6 +926,9 @@ class IL:
 
         move_to_mem = []
         for c in self.commands:
+            for v in c.inputs() + c.outputs() + c.scratch_spaces():
+                if v.type.is_array():
+                    move_to_mem.append(v)
             if isinstance(c, AddrOf):
                 for v in c.inputs():
                     move_to_mem.append(v)
@@ -947,19 +950,18 @@ class IL:
                             current_function = ""
             for v in (c.inputs() + c.outputs() + c.scratch_spaces())[::-1]:
                 if v not in spotmap:
-                    # print(c, current_function)
                     if current_function == "":
                         spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
-                        mem_start += 2
+                        mem_start += v.type.size
                     else:
                         if v.stack_offset is None and v not in move_to_mem:
-                            reg = self._find_register(spotmap, i, v)
+                            reg = self._find_register(spotmap, i)
                             if reg is not None:
                                 spotmap[v] = spots.Pseudo16RegisterSpot(reg, v.type)
                             else:
                                 spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
                                 mem_start += 2
-                        else:
+                        elif v.stack_offset is not None:
                             if isinstance(c, Function):
                                 if max_stack_offset.get(c.func_name) is None:
                                     max_stack_offset[c.func_name] = v.stack_offset
@@ -967,6 +969,11 @@ class IL:
                                     if max_stack_offset[c.func_name] < v.stack_offset:
                                         max_stack_offset[c.func_name] = v.stack_offset
                             spotmap[v] = spots.StackSpot(v.stack_offset, v.type)
+                        else:
+                            if not isinstance(c, Function):
+                                if v.type.is_array():
+                                    spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
+                                    mem_start += v.type.size
 
         self._print_spotmap(spotmap)
 
@@ -987,7 +994,7 @@ class IL:
             print("{: <20} {: <20} {}".format(str(c), str(c.inputs()), c.outputs()))
         print("")
 
-    def _find_register(self, spotmap, command_i: int, il_value: ILValue):
+    def _find_register(self, spotmap, command_i: int):
         for r in pseudo_registers:
             possible = True
             for c in self.commands[command_i + 1:]:
