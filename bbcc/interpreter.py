@@ -112,6 +112,8 @@ class Interpreter(ast.NodeVisitor):
     def visit_Equals(self, node):
         right = self.visit(node.right).val(self.il)
         left = self.visit(node.left)
+        if not left.modable():
+            raise TypeError("{} is not modable".format(left.type))
         left.set_to(right, self.il)
         return right
 
@@ -191,7 +193,7 @@ class Interpreter(ast.NodeVisitor):
         left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
         output = il.ILValue(left.type)
-        self.il.add(il.Sub(left, right, output))
+        self.il.add(il.Sub(left_val, right, output))
         return output
 
     def visit_Mult(self, node):
@@ -199,7 +201,7 @@ class Interpreter(ast.NodeVisitor):
         left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
         output = il.ILValue(left.type)
-        self.il.add(il.Mult(left, right, output))
+        self.il.add(il.Mult(left_val, right, output))
         return output
 
     def visit_Div(self, node):
@@ -207,7 +209,7 @@ class Interpreter(ast.NodeVisitor):
         left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
         output = il.ILValue(left.type)
-        self.il.add(il.Div(left, right, output))
+        self.il.add(il.Div(left_val, right, output))
         return output
 
     def visit_Mod(self, node):
@@ -215,7 +217,7 @@ class Interpreter(ast.NodeVisitor):
         left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
         output = il.ILValue(left.type)
-        self.il.add(il.Mod(left, right, output))
+        self.il.add(il.Mod(left_val, right, output))
         return output
 
     def visit_BoolAnd(self, node):
@@ -381,11 +383,12 @@ class Interpreter(ast.NodeVisitor):
         return ast.IndirectLValue(value)
 
     def visit_ArraySubsc(self, node):
-        head = self.visit(node.head).val(self.il)
+        head = self.visit(node.head)
+        head_val = head.val(self.il)
         arg = self.visit(node.arg).val(self.il)
 
-        output = il.ILValue(head.type)
-        self.il.add(il.Add(head, arg, output))
+        output = il.ILValue(head.type.el)
+        self.il.add(il.Add(head_val, arg, output))
         return ast.IndirectLValue(output)
 
     def visit_IfStatement(self, node):

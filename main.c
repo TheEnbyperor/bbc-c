@@ -8,12 +8,12 @@ int osbyte(int, int, int);
 int main() {
     char ch[10];
     while (1) {
-        ch = getchar();
+        ch[0] = getchar();
         if (ch == 27) {
             break;
         }
         putchar(ch);
-        if (ch == 13) {
+        if (ch == 12+1) {
             putchar(10);
         }
     }

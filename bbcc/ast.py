@@ -19,7 +19,7 @@ class Compound(AST):
 
     def __repr__(self):
         return "Compound\n{}".format(
-            "\n".join(map(lambda x: "  "+"  ".join(str(x).splitlines(True)), self.items))
+            "\n".join(map(lambda x: "  " + "  ".join(str(x).splitlines(True)), self.items))
         )
 
 
@@ -29,7 +29,7 @@ class TranslationUnit(AST):
 
     def __repr__(self):
         return "TranslationUnit\n{}".format(
-            "\n".join(map(lambda x: "  "+"  ".join(str(x).splitlines(True)), self.items))
+            "\n".join(map(lambda x: "  " + "  ".join(str(x).splitlines(True)), self.items))
         )
 
 
@@ -40,9 +40,9 @@ class IfStatement(AST):
         self.else_statement = else_statement
 
     def __repr__(self):
-        return "IfStatement\n{}\n{}\n{}".format("  "+"  ".join(str(self.condition).splitlines(True)),
-                                                "  "+"  ".join(str(self.statement).splitlines(True)),
-                                                "  "+"  ".join(str(self.else_statement).splitlines(True)))
+        return "IfStatement\n{}\n{}\n{}".format("  " + "  ".join(str(self.condition).splitlines(True)),
+                                                "  " + "  ".join(str(self.statement).splitlines(True)),
+                                                "  " + "  ".join(str(self.else_statement).splitlines(True)))
 
 
 class WhileStatement(AST):
@@ -51,8 +51,8 @@ class WhileStatement(AST):
         self.statement = statement
 
     def __repr__(self):
-        return "WhileStatement\n{}\n{}".format("  "+"  ".join(str(self.condition).splitlines(True)),
-                                               "  "+"  ".join(str(self.statement).splitlines(True)))
+        return "WhileStatement\n{}\n{}".format("  " + "  ".join(str(self.condition).splitlines(True)),
+                                               "  " + "  ".join(str(self.statement).splitlines(True)))
 
 
 class ForStatement(AST):
@@ -73,7 +73,7 @@ class Function(AST):
     def __repr__(self):
         return "Function<{}:{}>({})\n{}".format(self.name, self.make_ctype(),
                                                 "\n".join(self.params),
-                                                "  "+"  ".join(str(self.nodes).splitlines(True)))
+                                                "  " + "  ".join(str(self.nodes).splitlines(True)))
 
     def make_ctype(self):
         all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNISGNED})
@@ -109,7 +109,7 @@ class ExprStatement(AST):
         self.expr = expr
 
     def __repr__(self):
-        return "ExprStatement\n{}".format("  "+"  ".join(str(self.expr).splitlines(True)))
+        return "ExprStatement\n{}".format("  " + "  ".join(str(self.expr).splitlines(True)))
 
 
 class DeclInfo:
@@ -137,7 +137,7 @@ class Declaration(AST):
         self.node = node
 
     def __repr__(self):
-        return "Declaration\n{}".format("  "+"  ".join(map(str, self.get_decls_info())))
+        return "Declaration\n{}".format("  " + "  ".join(map(str, self.get_decls_info())))
 
     def get_decls_info(self, node=None):
         if node is None:
@@ -254,7 +254,7 @@ class Return(AST):
         self.right = right
 
     def __repr__(self):
-        return "Return\n{}\n".format("  "+"  ".join(str(self.right).splitlines(True)))
+        return "Return\n{}\n".format("  " + "  ".join(str(self.right).splitlines(True)))
 
 
 class Break(AST):
@@ -352,7 +352,7 @@ class _ArithBinOp(_RExprNode):
 
     def __repr__(self):
         return "{}\n{}".format(self.__class__.__name__,
-                               "  "+"  ".join((str(self.left)+"\n"+str(self.right)).splitlines(True)))
+                               "  " + "  ".join((str(self.left) + "\n" + str(self.right)).splitlines(True)))
 
 
 class Plus(_ArithBinOp):
@@ -495,8 +495,8 @@ class Equals(_RExprNode):
         self.op = op
 
     def __repr__(self):
-        return "Equals\n{}\n{}".format("  "+"  ".join(str(self.left).splitlines(True)),
-                                       "  "+"  ".join(str(self.right).splitlines(True)))
+        return "Equals\n{}\n{}".format("  " + "  ".join(str(self.left).splitlines(True)),
+                                       "  " + "  ".join(str(self.right).splitlines(True)))
 
 
 class _CompoundPlusMinus(_RExprNode):
@@ -613,7 +613,6 @@ class Deref(_LExprNode):
         self.expr = expr
 
 
-# TODO: Implement
 class ArraySubsc(_LExprNode):
     """Array subscript."""
 
@@ -621,6 +620,10 @@ class ArraySubsc(_LExprNode):
         """Initialize node."""
         self.head = head
         self.arg = arg
+
+    def __repr__(self):
+        return "ArraySubsc\n{}\n{}".format("  " + str(self.head),
+                                           "  " + str(self.arg))
 
 
 class FuncCall(_RExprNode):
@@ -636,7 +639,7 @@ class FuncCall(_RExprNode):
 
     def __repr__(self):
         return "FuncCall\n{}\n{}".format("  " + str(self.func),
-                                         "\n".join(map(lambda x: "  "+"  ".join(str(x).splitlines(True)), self.args)))
+                                         "\n".join(map(lambda x: "  " + "  ".join(str(x).splitlines(True)), self.args)))
 
 
 class NodeVisitor:
@@ -651,6 +654,10 @@ class NodeVisitor:
 
 
 class LValue:
+    @property
+    def type(self) -> ctypes.CType:
+        raise NotImplementedError
+
     def set_to(self, rvalue, il_code: il.IL):
         raise NotImplementedError
 
@@ -660,10 +667,25 @@ class LValue:
     def val(self, il_code):
         raise NotImplementedError
 
+    def modable(self):
+        ctype = self.type
+        if ctype.is_array():
+            return False
+        if not ctype.is_complete():
+            return False
+        if ctype.is_const():
+            return False
+
+        return True
+
 
 class DirectLValue(LValue):
     def __init__(self, il_value: il.ILValue):
         self.il_value = il_value
+
+    @property
+    def type(self):
+        return self.il_value.type
 
     def set_to(self, rvalue, il_code: il.IL):
         il_code.add(il.Set(rvalue, self.il_value))
@@ -680,6 +702,10 @@ class DirectLValue(LValue):
 class IndirectLValue(LValue):
     def __init__(self, addr_val: il.ILValue):
         self.addr_val = addr_val
+
+    @property
+    def type(self):
+        return self.addr_val.type
 
     def set_to(self, rvalue, il_code: il.IL):
         il_code.add(il.SetAt(self.addr_val.val(il), rvalue))
