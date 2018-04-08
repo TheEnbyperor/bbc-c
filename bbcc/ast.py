@@ -17,10 +17,20 @@ class Compound(AST):
     def __init__(self, items):
         self.items = items
 
+    def __repr__(self):
+        return "Compound\n{}".format(
+            "\n".join(map(lambda x: "  "+"  ".join(str(x).splitlines(True)), self.items))
+        )
+
 
 class TranslationUnit(AST):
     def __init__(self, items):
         self.items = items
+
+    def __repr__(self):
+        return "TranslationUnit\n{}".format(
+            "\n".join(map(lambda x: "  "+"  ".join(str(x).splitlines(True)), self.items))
+        )
 
 
 class IfStatement(AST):
@@ -29,11 +39,20 @@ class IfStatement(AST):
         self.statement = statement
         self.else_statement = else_statement
 
+    def __repr__(self):
+        return "IfStatement\n{}\n{}\n{}".format("  "+"  ".join(str(self.condition).splitlines(True)),
+                                                "  "+"  ".join(str(self.statement).splitlines(True)),
+                                                "  "+"  ".join(str(self.else_statement).splitlines(True)))
+
 
 class WhileStatement(AST):
     def __init__(self, condition, statement):
         self.condition = condition
         self.statement = statement
+
+    def __repr__(self):
+        return "WhileStatement\n{}\n{}".format("  "+"  ".join(str(self.condition).splitlines(True)),
+                                               "  "+"  ".join(str(self.statement).splitlines(True)))
 
 
 class ForStatement(AST):
@@ -50,6 +69,11 @@ class Function(AST):
         self.name = name
         self.params = params
         self.nodes = nodes
+
+    def __repr__(self):
+        return "Function<{}:{}>({})\n{}".format(self.name, self.make_ctype(),
+                                                "\n".join(self.params),
+                                                "  "+"  ".join(str(self.nodes).splitlines(True)))
 
     def make_ctype(self):
         all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNISGNED})
@@ -84,6 +108,9 @@ class ExprStatement(AST):
     def __init__(self, expr):
         self.expr = expr
 
+    def __repr__(self):
+        return "ExprStatement\n{}".format("  "+"  ".join(str(self.expr).splitlines(True)))
+
 
 class DeclInfo:
     # Storage class specifiers for declarations
@@ -108,6 +135,9 @@ class DeclInfo:
 class Declaration(AST):
     def __init__(self, node):
         self.node = node
+
+    def __repr__(self):
+        return "Declaration\n{}".format("  "+"  ".join(map(str, self.get_decls_info())))
 
     def get_decls_info(self, node=None):
         if node is None:
@@ -223,9 +253,13 @@ class Return(AST):
     def __init__(self, right):
         self.right = right
 
+    def __repr__(self):
+        return "Return\n{}\n".format("  "+"  ".join(str(self.right).splitlines(True)))
+
 
 class Break(AST):
-    pass
+    def __repr__(self):
+        return "Break"
 
 
 class Continue(AST):
@@ -269,6 +303,9 @@ class Number(_RExprNode):
         """Initialize node."""
         self.number = number
 
+    def __repr__(self):
+        return "Number<{}>".format(self.number)
+
 
 class String(_LExprNode):
     """Expression that is a string.
@@ -287,6 +324,9 @@ class Identifier(_LExprNode):
     def __init__(self, identifier):
         """Initialize node."""
         self.identifier = identifier
+
+    def __repr__(self):
+        return "Identifier<{}>".format(self.identifier.value)
 
 
 class ParenExpr(AST):
@@ -309,6 +349,10 @@ class _ArithBinOp(_RExprNode):
         self.left = left
         self.right = right
         self.op = op
+
+    def __repr__(self):
+        return "{}\n{}".format(self.__class__.__name__,
+                               "  "+"  ".join((str(self.left)+"\n"+str(self.right)).splitlines(True)))
 
 
 class Plus(_ArithBinOp):
@@ -450,6 +494,10 @@ class Equals(_RExprNode):
         self.right = right
         self.op = op
 
+    def __repr__(self):
+        return "Equals\n{}\n{}".format("  "+"  ".join(str(self.left).splitlines(True)),
+                                       "  "+"  ".join(str(self.right).splitlines(True)))
+
 
 class _CompoundPlusMinus(_RExprNode):
     """Expression that is += or -=."""
@@ -585,6 +633,10 @@ class FuncCall(_RExprNode):
         """Initialize node."""
         self.func = func
         self.args = args
+
+    def __repr__(self):
+        return "FuncCall\n{}\n{}".format("  " + str(self.func),
+                                         "\n".join(map(lambda x: "  "+"  ".join(str(x).splitlines(True)), self.args)))
 
 
 class NodeVisitor:

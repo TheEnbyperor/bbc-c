@@ -118,7 +118,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_PlusEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Sub(left_val, right, output))
         left.set_to(output, self.il)
@@ -127,7 +127,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_MinusEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Sub(left_val, right, output))
         left.set_to(output, self.il)
@@ -136,7 +136,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_StarEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Mult(left_val, right, output))
         left.set_to(output, self.il)
@@ -154,7 +154,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_ModEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Mod(left_val, right, output))
         left.set_to(output, self.il)
@@ -179,37 +179,42 @@ class Interpreter(ast.NodeVisitor):
         return il_value
 
     def visit_Plus(self, node):
-        left = self.visit(node.left).val(self.il)
+        left = self.visit(node.left)
+        left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
-        self.il.add(il.Add(left, right, output))
+        output = il.ILValue(left.type)
+        self.il.add(il.Add(left_val, right, output))
         return output
 
     def visit_Minus(self, node):
-        left = self.visit(node.left).val(self.il)
+        left = self.visit(node.left)
+        left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         self.il.add(il.Sub(left, right, output))
         return output
 
     def visit_Mult(self, node):
-        left = self.visit(node.left).val(self.il)
+        left = self.visit(node.left)
+        left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         self.il.add(il.Mult(left, right, output))
         return output
 
     def visit_Div(self, node):
-        left = self.visit(node.left).val(self.il)
+        left = self.visit(node.left)
+        left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         self.il.add(il.Div(left, right, output))
         return output
 
     def visit_Mod(self, node):
-        left = self.visit(node.left).val(self.il)
+        left = self.visit(node.left)
+        left_val = left.val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         self.il.add(il.Mod(left, right, output))
         return output
 

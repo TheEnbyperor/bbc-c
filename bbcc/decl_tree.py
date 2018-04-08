@@ -55,3 +55,6 @@ class Identifier(Node):
     def __init__(self, identifier):
         """Generate identifier node from an identifier token."""
         self.identifier = identifier
+
+    def __repr__(self):
+        return self.identifier.value

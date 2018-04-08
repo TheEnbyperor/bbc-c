@@ -2,11 +2,11 @@
 char putchar(char);
 char getchar();
 int osbyte(int, int, int);
-
-int Fibonacci(int);
+//
+//int Fibonacci(int);
 
 int main() {
-    char ch;
+    char ch[10];
     while (1) {
         ch = getchar();
         if (ch == 27) {
@@ -18,6 +18,7 @@ int main() {
         }
     }
     char a = ch[0];
+//    return 1 + 2;
 }
 
 //int Fibonacci(int n) {
