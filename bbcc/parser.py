@@ -448,7 +448,7 @@ class Parser:
         Example:
             int *a, (*b)[], c
         """
-        node,index = self.parse_decls_inits(index)
+        node, index = self.parse_decls_inits(index)
         return ast.Declaration(node), index
 
     def parse_decls_inits(self, index, parse_inits=True):

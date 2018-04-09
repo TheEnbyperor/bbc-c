@@ -5,6 +5,7 @@ from . import lexer
 class Preproc:
     def __init__(self, tokens):
         self.tokens = tokens
+        self.if_depth = 0
         self.macros = {}
 
     def error(self):
@@ -33,8 +34,28 @@ class Preproc:
             return index
         except SyntaxError:
             pass
+        try:
+            index = self.parse_define(index)
+            return index
+        except SyntaxError:
+            pass
+        try:
+            index = self.parse_undef(index)
+            return index
+        except SyntaxError:
+            pass
+        try:
+            index = self.parse_ifdef(index)
+            return index
+        except SyntaxError:
+            pass
+        try:
+            index = self.parse_ifndef(index)
+            return index
+        except SyntaxError:
+            pass
+        index = self.parse_endif(index)
 
-        index = self.parse_define(index)
         return index
 
     def parse_include(self, index):
@@ -67,6 +88,87 @@ class Preproc:
 
         return index
 
+    def parse_undef(self, index):
+        if self.tokens[index].value != "undef":
+            self.error()
+        self.eat(index)
+
+        if not self.token_is(index, ID):
+            self.error()
+        macro_name = self.tokens[index].value
+        self.eat(index)
+
+        del self.macros[macro_name]
+        return index
+
+    def parse_ifdef(self, index):
+        if self.tokens[index].value != "ifdef":
+            self.error()
+        self.eat(index)
+
+        if not self.token_is(index, ID):
+            self.error()
+        macro_name = self.tokens[index].value
+        self.eat(index)
+
+        if self.macros.get(macro_name) is None:
+            self.if_depth += 1
+            while not self.token_is(index, EOF):
+                self.eat(index)
+                if self.token_is(index, HASH) and (self.token_is(index-1, NEWLINE) or index == 0):
+                    self.eat(index)
+                    if self.tokens[index].value.startswith("if"):
+                        self.eat(index)
+                        self.if_depth += 1
+                    if self.tokens[index].value == "endif":
+                        self.eat(index)
+                        self.if_depth -= 1
+
+                if self.if_depth == 0:
+                    break
+        else:
+            self.if_depth += 1
+
+        return index
+
+    def parse_ifndef(self, index):
+        if self.tokens[index].value != "ifndef":
+            self.error()
+        self.eat(index)
+
+        if not self.token_is(index, ID):
+            self.error()
+        macro_name = self.tokens[index].value
+        self.eat(index)
+
+        if self.macros.get(macro_name) is not None:
+            self.if_depth += 1
+            while not self.token_is(index, EOF):
+                self.eat(index)
+                if self.token_is(index, HASH) and (self.token_is(index-1, NEWLINE) or index == 0):
+                    self.eat(index)
+                    if self.tokens[index].value.startswith("if"):
+                        self.eat(index)
+                        self.if_depth += 1
+                    if self.tokens[index].value == "endif":
+                        self.eat(index)
+                        self.if_depth -= 1
+
+                if self.if_depth == 0:
+                    break
+        else:
+            self.if_depth += 1
+
+        return index
+
+    def parse_endif(self, index):
+        if self.tokens[index].value != "endif":
+            self.error()
+        self.eat(index)
+        self.if_depth -= 1
+
+        return index
+
     @staticmethod
     def read_file(file):
         f = open(file)
@@ -88,6 +190,9 @@ class Preproc:
                     index += 1
             else:
                 index += 1
+
+        if self.if_depth != 0:
+            self.error()
 
         index = 0
         while not self.token_is(index, EOF):
