@@ -4,24 +4,12 @@ from . import ast
 from . import decl_tree
 from . import il
 from . import ctypes
-from .tokens import *
 
 
 class Symbol:
     def __init__(self, name, stype=None):
         self.name = name
         self.type = stype
-
-
-class BuiltinTypeSymbol(Symbol):
-    def __init__(self, name, size):
-        super(BuiltinTypeSymbol, self).__init__(name)
-        self.size = size
-
-    def __str__(self):
-        return '<BUILTIN({name}:{type})>'.format(name=self.name, type=self.size)
-
-    __repr__ = __str__
 
 
 class VarSymbol(Symbol):
@@ -51,13 +39,6 @@ class ScopedSymbolTable(object):
         self.scope_name = scope_name
         self.scope_level = scope_level
         self.enclosing_scope = enclosing_scope
-        if self.enclosing_scope is None:
-            self._init_builtins()
-
-    def _init_builtins(self):
-        self.define(BuiltinTypeSymbol(INT, 0x2))
-        self.define(BuiltinTypeSymbol(CHAR, 0x1))
-        self.define(BuiltinTypeSymbol(VOID, 0x0))
 
     def __str__(self):
         h1 = 'SCOPE (SCOPED SYMBOL TABLE)'
@@ -101,7 +82,7 @@ class ScopedSymbolTable(object):
 
 class SymbolTable(object):
     def __init__(self, scope):
-        self.name = scope.scope_name
+        self.scope_name = scope.scope_name
         self.symbols = scope.symbols
         self.sub_scopes = []
 
@@ -109,10 +90,10 @@ class SymbolTable(object):
         self.symbols = scope.symbols
 
     def add_scope(self, scope):
-        self.sub_scopes.append(SymbolTable(scope))
+        self.sub_scopes.append(scope)
 
     def __str__(self):
-        h1 = 'SYMBOL TABLE: ' + self.name
+        h1 = 'SYMBOL TABLE: ' + self.scope_name
         lines = [h1, '=' * len(h1)]
         h2 = 'Symbol table contents'
         lines.extend([h2, '-' * len(h2)])
@@ -138,10 +119,10 @@ class SymbolTable(object):
         else:
             scope = None
             for s in self.sub_scopes:
-                if s.name == scope_name:
+                if s.scope_name == scope_name:
                     scope = s
                     break
-        r = scope.symbols.get(name)
+        r = scope.lookup(name)
         if r is not None:
             return r
 
@@ -149,8 +130,6 @@ class SymbolTable(object):
 
 
 class SymbolTableBuilder(ast.NodeVisitor):
-    memstart = 0x2FFF
-
     def __init__(self):
         self.scope = None
         self.scope_out = None
@@ -176,7 +155,6 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 if self.scope.lookup(var_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % var_name)
                 self.scope.define(VarSymbol(var_name, d.ctype))
-                self.memstart -= d.ctype.size
                 if d.init is not None:
                     self.visit(d.init)
 
@@ -184,13 +162,6 @@ class SymbolTableBuilder(ast.NodeVisitor):
         func_name = node.name.identifier.value
         func_symbol = FunctionSymbol(func_name, node.make_ctype())
         self.scope.define(func_symbol)
-        memstart = self.memstart
-        procedure_scope = ScopedSymbolTable(
-            scope_name=func_name,
-            scope_level=self.scope.scope_level + 1,
-            enclosing_scope=self.scope,
-        )
-        self.scope = procedure_scope
         for param in node.params:
             type_name = param.specs[-1].type
             type_symbol = self.scope.lookup(type_name)
@@ -198,13 +169,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 param_name = param.child.identifier.value
                 if self.scope.lookup(param_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % param_name)
-
                 self.scope.define(VarSymbol(param_name, type_symbol))
-                self.memstart -= type_symbol.size
         self.visit(node.nodes)
-        self.scope_out.add_scope(procedure_scope)
-        self.scope = self.scope.enclosing_scope
-        self.memstart = memstart
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
@@ -216,8 +182,16 @@ class SymbolTableBuilder(ast.NodeVisitor):
         pass
 
     def visit_Compound(self, node):
+        procedure_scope = ScopedSymbolTable(
+            scope_name=str(id(node)),
+            scope_level=self.scope.scope_level + 1,
+            enclosing_scope=self.scope,
+        )
+        self.scope = procedure_scope
         for n in node.items:
             self.visit(n)
+        self.scope_out.add_scope(procedure_scope)
+        self.scope = self.scope.enclosing_scope
 
     def visit_TranlationUnit(self, node):
         for n in node.items:

@@ -63,7 +63,6 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Function(self, node):
         func_name = node.name.identifier.value
-        self.current_scope = func_name
         params = []
         for i, p in enumerate(node.params):
             if type(p.child) == decl_tree.Identifier:
@@ -83,7 +82,6 @@ class Interpreter(ast.NodeVisitor):
             il_value = il.ILValue(ctype)
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value, "__{}".format(func_name)))
-        self.current_scope = ""
 
     def visit_FuncCall(self, node):
         func_name = node.func.identifier.value
@@ -103,8 +101,11 @@ class Interpreter(ast.NodeVisitor):
         return ast.DirectLValue(val.il_value)
 
     def visit_Compound(self, node):
+        old_scope = self.current_scope
+        self.current_scope = str(id(node))
         for n in node.items:
             self.visit(n)
+        self.current_scope = old_scope
 
     def visit_ExprStatement(self, node):
         self.visit(node.expr)
