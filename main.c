@@ -7,18 +7,8 @@
 //int Fibonacci(int);
 
 int main() {
-    char ch[ARR_LEN];
-    while (1) {
-        ch[0] = getchar();
-        if (ch[0] == 27) {
-            break;
-        }
-        putchar(ch[0]);
-        if (ch[0] == 13) {
-            putchar(10);
-        }
-    }
-//    return 1 + 2;
+    char a = ARR_LEN;
+    return 3 * a;
 }
 
 //int Fibonacci(int n) {

@@ -22,9 +22,8 @@ class LiteralSpot(Spot):
         return False
 
     def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
-        if loc > 1:
-            assembly.add_inst(inst, "#&00")
-        assembly.add_inst(inst, extra.format("#&" + asm.ASM.to_hex(self.value, 4)[loc*2:loc*2+2]))
+        hex = asm.ASM.to_hex(self.value, self.type.size*2)
+        assembly.add_inst(inst, extra.format("#&" + hex[len(hex)-loc*2-2:len(hex)-loc*2]))
 
     def __str__(self):
         return '<LiteralSpot({type}:{value})>'.format(value=self.value, type=self.type)

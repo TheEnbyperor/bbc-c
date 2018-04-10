@@ -9,6 +9,7 @@ def asm_to_basic(asm):
     end_lines = [
         "]",
         "NEXT opt%",
+        "PRINT ~_start",
         "CALL _start",
         "RH=&70",
         "RL=&71",
