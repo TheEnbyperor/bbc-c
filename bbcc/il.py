@@ -86,10 +86,12 @@ class Set(ILInst):
         output = spotmap[self.output]
 
         if output.has_address():
-            value.asm(assembly, "LDA", 0)
-            output.asm(assembly, "STA", 0)
-            value.asm(assembly, "LDA", 1)
-            output.asm(assembly, "STA", 1)
+            for i in range(output.type.size):
+                if i < value.type.size:
+                    value.asm(assembly, "LDA", i)
+                else:
+                    assembly.add_inst("LDA", "#0")
+                output.asm(assembly, "STA", i)
 
 
 class ReadAt(ILInst):
@@ -146,15 +148,15 @@ class SetAt(ILInst):
         scratch = spotmap[self.scratch]
 
         if value.has_address():
-            assembly.add_inst("LDY", "#0")
             value.asm(assembly, "LDA", 0)
             scratch.asm(assembly, "STA", 0)
-            output.asm(assembly, "LDA", 0)
-            scratch.asm(assembly, "STA", 0, extra="({}),Y")
             value.asm(assembly, "LDA", 1)
             scratch.asm(assembly, "STA", 1)
-            output.asm(assembly, "LDA", 1)
-            scratch.asm(assembly, "STA", 1, extra="({}),Y")
+
+            for i in range(output.type.size):
+                output.asm(assembly, "LDA", i)
+                assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(i)))
+                scratch.asm(assembly, "STA", 0, extra="({}),Y")
 
 
 class AddrOf(ILInst):
