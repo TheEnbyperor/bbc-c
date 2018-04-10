@@ -483,7 +483,7 @@ class Mult(ILInst):
         assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(right.type.size*8)))
         assembly.add_inst(label=label1)
         for i in reversed(range(right.type.size)):
-            if i == 0:
+            if i == right.type.size - 1:
                 right.asm(assembly, "LSR", i)
             else:
                 right.asm(assembly, "ROR", i)
@@ -498,7 +498,7 @@ class Mult(ILInst):
             output.asm(assembly, "STA", i)
         assembly.add_inst("CLC", label=label2)
         for i in range(left.type.size):
-            if i == left.type.size - 1:
+            if i == 0:
                 left.asm(assembly, "ASL", i)
             else:
                 left.asm(assembly, "ROL", i)
@@ -513,7 +513,7 @@ class Div(ILInst):
         self.output = output
         self.scratch1 = ILValue(left.type)
         self.scratch2 = ILValue(right.type)
-        self.scratch3 = ILValue(output.type)
+        self.scratch3 = ILValue(left.type)
 
     def inputs(self):
         return [self.left, self.right]
@@ -531,17 +531,16 @@ class Div(ILInst):
         scratch3 = spotmap[self.scratch3]
 
         scratch1 = spotmap[self.scratch1]
-        left.asm(assembly, "LDA", 0)
-        scratch1.asm(assembly, "STA", 0)
-        left.asm(assembly, "LDA", 1)
-        scratch1.asm(assembly, "STA", 1)
+        for i in range(scratch1.type.size):
+            left.asm(assembly, "LDA", i)
+            scratch1.asm(assembly, "STA", i)
+
         left = scratch1
 
         scratch2 = spotmap[self.scratch2]
-        right.asm(assembly, "LDA", 0)
-        scratch2.asm(assembly, "STA", 0)
-        right.asm(assembly, "LDA", 1)
-        scratch2.asm(assembly, "STA", 1)
+        for i in range(scratch2.type.size):
+            right.asm(assembly, "LDA", i)
+            scratch2.asm(assembly, "STA", i)
         right = scratch2
 
         label1 = il.get_label()
@@ -549,35 +548,42 @@ class Div(ILInst):
         label3 = il.get_label()
 
         assembly.add_inst("LDA", "#0")
-        scratch3.asm(assembly, "STA", 0)
-        scratch3.asm(assembly, "STA", 1)
-        assembly.add_inst("LDX", "#16")
+        for i in range(output.type.size):
+            scratch3.asm(assembly, "STA", i)
+        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(left.type.size*8)))
         assembly.add_inst(label=label1)
-        left.asm(assembly, "ASL", 1)
-        left.asm(assembly, "ROL", 0)
-        scratch3.asm(assembly, "ROL", 1)
-        scratch3.asm(assembly, "ROL", 0)
+        for i in range(left.type.size):
+            if i == 0:
+                left.asm(assembly, "ASL", i)
+            else:
+                left.asm(assembly, "ROL", i)
+        for i in range(scratch3.type.size):
+            scratch3.asm(assembly, "ROL", i)
         assembly.add_inst("SEC")
-        scratch3.asm(assembly, "LDA", 1)
-        right.asm(assembly, "SBC", 1)
-        assembly.add_inst("PHA")
-        scratch3.asm(assembly, "LDA", 0)
-        right.asm(assembly, "SBC", 0)
+        for i in range(scratch3.type.size):
+            scratch3.asm(assembly, "LDA", i)
+            right.asm(assembly, "SBC", i)
+            if i != scratch3.type.size - 1:
+                assembly.add_inst("PHA")
         assembly.add_inst("BCC", label2)
-        scratch3.asm(assembly, "STA", 0)
-        assembly.add_inst("PLA")
-        scratch3.asm(assembly, "STA", 1)
-        left.asm(assembly, "INC", 1)
+        for i in reversed(range(scratch3.type.size)):
+            if i != scratch3.type.size - 1:
+                assembly.add_inst("PLA")
+            scratch3.asm(assembly, "STA", i)
+        left.asm(assembly, "INC", 0)
         assembly.add_inst("JMP", label3)
-        assembly.add_inst("PLA", label=label2)
+        assembly.add_inst(label=label2)
+        for i in range(scratch3.type.size - 1):
+            assembly.add_inst("PLA")
         assembly.add_inst("DEX", label=label3)
         assembly.add_inst("BNE", label1)
 
-        if left != output:
-            left.asm(assembly, "LDA", 0)
-            output.asm(assembly, "STA", 0)
-            left.asm(assembly, "LDA", 1)
-            output.asm(assembly, "STA", 1)
+        for i in range(output.type.size):
+            if i < left.type.size:
+                left.asm(assembly, "LDA", i)
+            else:
+                assembly.add_inst("LDA", "#0")
+            output.asm(assembly, "STA", i)
 
 
 class Mod(ILInst):
@@ -602,46 +608,52 @@ class Mod(ILInst):
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        if not left.has_address():
-            scratch1 = spotmap[self.scratch1]
-            left.asm(assembly, "LDA", 0)
-            scratch1.asm(assembly, "STA", 0)
-            left.asm(assembly, "LDA", 1)
-            scratch1.asm(assembly, "STA", 1)
-            left = scratch1
+        scratch1 = spotmap[self.scratch1]
+        for i in range(scratch1.type.size):
+            left.asm(assembly, "LDA", i)
+            scratch1.asm(assembly, "STA", i)
 
-        if not right.has_address():
-            scratch2 = spotmap[self.scratch2]
-            right.asm(assembly, "LDA", 0)
-            scratch2.asm(assembly, "STA", 0)
-            right.asm(assembly, "LDA", 1)
-            scratch2.asm(assembly, "STA", 1)
-            right = scratch2
+        left = scratch1
+
+        scratch2 = spotmap[self.scratch2]
+        for i in range(scratch2.type.size):
+            right.asm(assembly, "LDA", i)
+            scratch2.asm(assembly, "STA", i)
+        right = scratch2
 
         label1 = il.get_label()
         label2 = il.get_label()
+        label3 = il.get_label()
 
         assembly.add_inst("LDA", "#0")
-        output.asm(assembly, "STA", 0)
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst("LDX", "#16")
+        for i in range(output.type.size):
+            output.asm(assembly, "STA", i)
+        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(left.type.size * 8)))
         assembly.add_inst(label=label1)
-        left.asm(assembly, "ASL", 1)
-        left.asm(assembly, "ROL", 0)
-        output.asm(assembly, "ROL", 1)
-        output.asm(assembly, "ROL", 0)
+        for i in range(left.type.size):
+            if i == 0:
+                left.asm(assembly, "ASL", i)
+            else:
+                left.asm(assembly, "ROL", i)
+        for i in range(output.type.size):
+            output.asm(assembly, "ROL", i)
         assembly.add_inst("SEC")
-        output.asm(assembly, "LDA", 1)
-        right.asm(assembly, "SBC", 1)
-        assembly.add_inst("PHA")
-        output.asm(assembly, "LDA", 0)
-        right.asm(assembly, "SBC", 0)
+        for i in range(output.type.size):
+            output.asm(assembly, "LDA", i)
+            right.asm(assembly, "SBC", i)
+            if i != output.type.size - 1:
+                assembly.add_inst("PHA")
         assembly.add_inst("BCC", label2)
-        output.asm(assembly, "STA", 0)
-        assembly.add_inst("PLA")
-        output.asm(assembly, "STA", 1)
-        left.asm(assembly, "INC", 1)
-        assembly.add_inst("DEX", label=label2)
+        for i in reversed(range(output.type.size)):
+            if i != output.type.size - 1:
+                assembly.add_inst("PLA")
+            output.asm(assembly, "STA", i)
+        left.asm(assembly, "INC", 0)
+        assembly.add_inst("JMP", label3)
+        assembly.add_inst(label=label2)
+        for i in range(output.type.size - 1):
+            assembly.add_inst("PLA")
+        assembly.add_inst("DEX", label=label3)
         assembly.add_inst("BNE", label1)
 
 
@@ -658,9 +670,10 @@ class Inc(ILInst):
         label = il.get_label()
 
         if value.has_address():
-            value.asm(assembly, "INC", 1)
-            assembly.add_inst("BNE", label)
-            value.asm(assembly, "INC", 0)
+            for i in range(value.type.size):
+                value.asm(assembly, "INC", i)
+                if i != value.type.size - 1:
+                    assembly.add_inst("BNE", label)
             assembly.add_inst(label=label)
 
 
@@ -674,14 +687,19 @@ class Dec(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il):
         value = spotmap[self.value]
 
-        label = il.get_label()
+        labels = []
 
         if value.has_address():
-            value.asm(assembly, "LDA", 1)
-            assembly.add_inst("BNE", label)
-            value.asm(assembly, "DEC", 0)
-            assembly.add_inst(label=label)
-            value.asm(assembly, "DEC", 1)
+            for i in range(value.type.size):
+                if i != value.type.size - 1:
+                    labels.insert(i, il.get_label())
+                    value.asm(assembly, "LDA", i)
+                    assembly.add_inst("BNE", labels[i])
+
+            for i in reversed(range(value.type.size)):
+                if i != value.type.size - 1:
+                    assembly.add_inst(label=labels[i])
+                value.asm(assembly, "DEC", i)
 
 
 # Comparison
@@ -702,23 +720,21 @@ class EqualCmp(ILInst):
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        label1 = il.get_label()
-        label2 = il.get_label()
+        label = il.get_label()
 
         assembly.add_inst("LDA", "#00")
-        output.asm(assembly, "STA", 0)
-        left.asm(assembly, "LDA", 0)
-        right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BNE", label1)
-        left.asm(assembly, "LDA", 1)
-        right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BNE", label1)
+        for i in range(output.type.size):
+            output.asm(assembly, "STA", i)
+        for i in range(left.type.size):
+            left.asm(assembly, "LDA", i)
+            if i < right.type.size:
+                right.asm(assembly, "CMP", i)
+            else:
+                assembly.add_inst("CMP", "#0")
+            assembly.add_inst("BNE", label)
         assembly.add_inst("LDA", "#01")
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst("JMP", label2)
-        assembly.add_inst("LDA", "#00", label=label1)
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst(label=label2)
+        output.asm(assembly, "STA", 0)
+        assembly.add_inst(label=label)
 
 
 class NotEqualCmp(ILInst):
@@ -738,23 +754,21 @@ class NotEqualCmp(ILInst):
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        label1 = il.get_label()
-        label2 = il.get_label()
+        label = il.get_label()
 
         assembly.add_inst("LDA", "#00")
-        output.asm(assembly, "STA", 0)
-        left.asm(assembly, "LDA", 0)
-        right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BEQ", label1)
-        left.asm(assembly, "LDA", 1)
-        right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BEQ", label1)
+        for i in range(output.type.size):
+            output.asm(assembly, "STA", i)
+        for i in range(left.type.size):
+            left.asm(assembly, "LDA", i)
+            if i < right.type.size:
+                right.asm(assembly, "CMP", i)
+            else:
+                assembly.add_inst("CMP", "#0")
+            assembly.add_inst("BEQ", label)
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 1)
-        assembly.add_inst("JMP", label2)
-        assembly.add_inst("LDA", "#00", label=label1)
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst(label=label2)
+        assembly.add_inst(label=label)
 
 
 class LessThanCmp(ILInst):
@@ -776,21 +790,22 @@ class LessThanCmp(ILInst):
 
         label1 = il.get_label()
         label2 = il.get_label()
-        label3 = il.get_label()
 
         assembly.add_inst("LDA", "#00")
-        output.asm(assembly, "STA", 0)
-        left.asm(assembly, "LDA", 0)
-        right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label3)
-        assembly.add_inst("BNE", label1)
-        left.asm(assembly, "LDA", 1)
-        right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCS", label1)
-        assembly.add_inst("LDA", "#01", label=label3)
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst("JMP", label2)
-        assembly.add_inst("LDA", "#00", label=label1)
+        for i in range(output.type.size):
+            output.asm(assembly, "STA", i)
+        for i in reversed(range(left.type.size)):
+            left.asm(assembly, "LDA", i)
+            if i < right.type.size:
+                right.asm(assembly, "CMP", i)
+            else:
+                assembly.add_inst("CMP", "#0")
+            if i != 0:
+                assembly.add_inst("BCC", label1)
+                assembly.add_inst("BNE", label2)
+            else:
+                assembly.add_inst("BCS", label2)
+        assembly.add_inst("LDA", "#01", label=label1)
         output.asm(assembly, "STA", 1)
         assembly.add_inst(label=label2)
 
@@ -814,22 +829,19 @@ class LessEqualCmp(ILInst):
 
         label1 = il.get_label()
         label2 = il.get_label()
-        label3 = il.get_label()
 
         assembly.add_inst("LDA", "#00")
-        output.asm(assembly, "STA", 0)
-        left.asm(assembly, "LDA", 0)
-        right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label3)
-        assembly.add_inst("BNE", label1)
-        left.asm(assembly, "LDA", 1)
-        right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCC", label3)
-        assembly.add_inst("BNE", label1)
-        assembly.add_inst("LDA", "#01", label=label3)
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst("JMP", label2)
-        assembly.add_inst("LDA", "#00", label=label1)
+        for i in range(output.type.size):
+            output.asm(assembly, "STA", i)
+        for i in reversed(range(left.type.size)):
+            left.asm(assembly, "LDA", i)
+            if i < right.type.size:
+                right.asm(assembly, "CMP", i)
+            else:
+                assembly.add_inst("CMP", "#0")
+            assembly.add_inst("BCC", label1)
+            assembly.add_inst("BNE", label2)
+        assembly.add_inst("LDA", "#01", label=label1)
         output.asm(assembly, "STA", 1)
         assembly.add_inst(label=label2)
 
@@ -853,22 +865,23 @@ class MoreThanCmp(ILInst):
 
         label1 = il.get_label()
         label2 = il.get_label()
-        label3 = il.get_label()
 
         assembly.add_inst("LDA", "#00")
-        output.asm(assembly, "STA", 0)
-        left.asm(assembly, "LDA", 0)
-        right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label1)
-        assembly.add_inst("BNE", label3)
-        left.asm(assembly, "LDA", 1)
-        right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BEQ", label1)
-        assembly.add_inst("BCC", label1)
-        assembly.add_inst("LDA", "#01", label=label3)
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst("JMP", label2)
-        assembly.add_inst("LDA", "#00", label=label1)
+        for i in range(output.type.size):
+            output.asm(assembly, "STA", i)
+        for i in reversed(range(left.type.size)):
+            left.asm(assembly, "LDA", i)
+            if i < right.type.size:
+                right.asm(assembly, "CMP", i)
+            else:
+                assembly.add_inst("CMP", "#0")
+            if i != 0:
+                assembly.add_inst("BCC", label2)
+                assembly.add_inst("BNE", label1)
+            else:
+                assembly.add_inst("BEQ", label2)
+                assembly.add_inst("BCC", label2)
+        assembly.add_inst("LDA", "#01", label=label1)
         output.asm(assembly, "STA", 1)
         assembly.add_inst(label=label2)
 
@@ -892,21 +905,22 @@ class MoreEqualCmp(ILInst):
 
         label1 = il.get_label()
         label2 = il.get_label()
-        label3 = il.get_label()
 
         assembly.add_inst("LDA", "#00")
-        output.asm(assembly, "STA", 0)
-        left.asm(assembly, "LDA", 0)
-        right.asm(assembly, "CMP", 0)
-        assembly.add_inst("BCC", label1)
-        assembly.add_inst("BNE", label3)
-        left.asm(assembly, "LDA", 1)
-        right.asm(assembly, "CMP", 1)
-        assembly.add_inst("BCC", label1)
-        assembly.add_inst("LDA", "#01", label=label3)
-        output.asm(assembly, "STA", 1)
-        assembly.add_inst("JMP", label2)
-        assembly.add_inst("LDA", "#00", label=label1)
+        for i in range(output.type.size):
+            output.asm(assembly, "STA", i)
+        for i in reversed(range(left.type.size)):
+            left.asm(assembly, "LDA", i)
+            if i < right.type.size:
+                right.asm(assembly, "CMP", i)
+            else:
+                assembly.add_inst("CMP", "#0")
+            if i != 0:
+                assembly.add_inst("BCC", label2)
+                assembly.add_inst("BNE", label1)
+            else:
+                assembly.add_inst("BCC", label2)
+        assembly.add_inst("LDA", "#01", label=label1)
         output.asm(assembly, "STA", 1)
         assembly.add_inst(label=label2)
 

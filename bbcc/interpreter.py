@@ -351,11 +351,12 @@ class Interpreter(ast.NodeVisitor):
         return value
 
     def visit_PostIncr(self, node):
-        value = self.visit(node.expr).val(self.il)
-        output = il.ILValue(node.expr.type)
+        value = self.visit(node.expr)
+        value_val = value.val(self.il)
+        output = il.ILValue(value.type)
 
-        self.il.add(il.Set(value, output))
-        self.il.add(il.Inc(value))
+        self.il.add(il.Set(value_val, output))
+        self.il.add(il.Inc(value_val))
         return output
 
     def visit_PreDecr(self, node):
@@ -365,11 +366,12 @@ class Interpreter(ast.NodeVisitor):
         return value
 
     def visit_PostDecr(self, node):
-        value = self.visit(node.expr).val(self.il)
-        output = il.ILValue(node.expr.type)
+        value = self.visit(node.expr)
+        value_val = value.val(self.il)
+        output = il.ILValue(value.type)
 
-        self.il.add(il.Set(value, output))
-        self.il.add(il.Dec(value))
+        self.il.add(il.Set(value_val, output))
+        self.il.add(il.Dec(value_val))
         return output
 
     def visit_AddrOf(self, node):

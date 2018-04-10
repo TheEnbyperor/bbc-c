@@ -11,8 +11,8 @@ def asm_to_basic(asm):
         "NEXT opt%",
         "PRINT ~_start",
         "CALL _start",
-        "RH=&70",
-        "RL=&71",
+        "RH=&71",
+        "RL=&70",
         "PRINT ~?RH,~?RL",
     ]
     for i, line in enumerate(start_lines + asm.splitlines() + end_lines):

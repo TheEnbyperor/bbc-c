@@ -8,6 +8,7 @@
 
 int main() {
     char a = ARR_LEN;
+    a--;
     return 3 * a;
 }
 
