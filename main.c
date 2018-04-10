@@ -1,10 +1,6 @@
 // Comment
 #include <stdio.h>
-#ifndef ARR_LEN
-#define ARR_LEN 10
-#endif
-//
-//int Fibonacci(int);
+#define BUF_LEN 10
 
 int main() {
     char a = ARR_LEN;

@@ -1,30 +1,65 @@
 .__putchar
-LDY #01
+LDY #00
 LDA (&8E),Y
 JSR &FFEE
-STA &71
-LDA #00
 STA &70
 RTS
 
 .__getchar
 JSR &FFE0
-STA &71
-LDA #00
 STA &70
 RTS
 
 .__osbyte
-LDY #05
+LDA &71
+PHA
+LDY #02
 LDA (&8E),Y
-TAY
-LDY #03
-LDA (&8E),Y
-TAX
+STA &71
 LDY #01
 LDA (&8E),Y
+TAX
+LDY #00
+LDA (&8E),Y
+LDY &71
 JSR &FFF4
-STX &71
-LDA #00
+PLA
+STA &71
 STA &70
 RTS
+
+.__fgets
+LDA #0
+STA &72
+STA &73
+.__fgets_1
+LDA &73
+LDY #3
+CMP (&8E),Y
+BCC __fgets_2
+BNE __fgets_3
+LDA &72
+LDY #2
+CMP (&8E),Y
+BCS __fgets_3
+.__fgets_2
+CALL __getchar
+LDA &70
+LDY #0
+STA (&8E),Y
+CLC
+LDA (&8E),Y
+ADC #1
+STA (&8E),Y
+LDY #1
+LDA (&8E),Y
+ADC #0
+STA (&8E),Y
+INC &72
+BNE .__fgets_4
+INC &73
+.__fgtes_4
+JMP .__fgets_1
+.__fegts_3
+RTS
+
