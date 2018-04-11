@@ -9,7 +9,7 @@ class Spot:
     def has_address(self):
         return True
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
+    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
         raise NotImplementedError
 
 
@@ -21,9 +21,9 @@ class LiteralSpot(Spot):
     def has_address(self):
         return False
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
+    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
         hex = asm.ASM.to_hex(self.value, self.type.size*2)
-        assembly.add_inst(inst, extra.format("#&" + hex[len(hex)-loc*2-2:len(hex)-loc*2]))
+        assembly.add_inst(inst, extra("#&" + hex[len(hex)-loc*2-2:len(hex)-loc*2]))
 
     def __str__(self):
         return '<LiteralSpot({type}:{value})>'.format(value=self.value, type=self.type)
@@ -37,10 +37,10 @@ class Pseudo16RegisterSpot(Spot):
         self.loc = loc
         self.type = value_type
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
+    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
         if loc not in [0, 1]:
             raise NotImplementedError("16-bit pseudo register cannot be accessed at offset {}".format(loc))
-        assembly.add_inst(inst, extra.format("&" + asm.ASM.to_hex(self.loc+loc, 2)))
+        assembly.add_inst(inst, extra("&" + asm.ASM.to_hex(self.loc+loc, 2)))
 
     def __eq__(self, other):
         if isinstance(other, Pseudo16RegisterSpot):
@@ -60,8 +60,8 @@ class AbsoluteMemorySpot(Spot):
         self.loc = loc
         self.type = value_type
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
-        assembly.add_inst(inst, extra.format("&" + asm.ASM.to_hex(self.loc+loc, 2)))
+    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
+        assembly.add_inst(inst, extra("&" + asm.ASM.to_hex(self.loc+loc, 2)))
 
     def __eq__(self, other):
         if isinstance(other, AbsoluteMemorySpot):
@@ -81,7 +81,7 @@ class StackSpot(Spot):
         self.offset = offset
         self.type = value_type
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra="{}"):
+    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
         assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(self.offset+loc)))
         assembly.add_inst(inst, "(&{}),Y".format(assembly.to_hex(il.stack_register.loc)))
 

@@ -43,7 +43,7 @@ LDY #2
 CMP (&8E),Y
 BCS __fgets_3
 .__fgets_2
-CALL __getchar
+JSR __getchar
 LDA &70
 LDY #0
 STA (&8E),Y

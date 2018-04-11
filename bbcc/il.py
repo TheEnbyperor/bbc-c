@@ -58,11 +58,11 @@ class Routines(ILInst):
         stack_register.asm(assembly, "DEC", 0)
         assembly.add_inst("PLA")
         assembly.add_inst("LDY", "#00")
-        stack_register.asm(assembly, "STA", 0, "({}),Y")
+        stack_register.asm(assembly, "STA", 0, lambda x: "({}),Y".format(x))
         assembly.add_inst("RTS")
 
         assembly.add_inst("LDY", "#0", label="_bbcc_pulla")
-        stack_register.asm(assembly, "LDA", 0, "({}),Y")
+        stack_register.asm(assembly, "LDA", 0, lambda x: "({}),Y".format(x))
         stack_register.asm(assembly, "INC", 0)
         assembly.add_inst("BEQ", "_bbcc_pulla_1")
         assembly.add_inst("RTS")
@@ -123,7 +123,7 @@ class ReadAt(ILInst):
 
             for i in range(output.type.size):
                 assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(i)))
-                scratch.asm(assembly, "LDA", 0, extra="({}),Y")
+                scratch.asm(assembly, "LDA", 0, lambda x: "({}),Y".format(x))
                 output.asm(assembly, "STA", i)
 
 
@@ -156,7 +156,7 @@ class SetAt(ILInst):
             for i in range(output.type.size):
                 output.asm(assembly, "LDA", i)
                 assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(i)))
-                scratch.asm(assembly, "STA", 0, extra="({}),Y")
+                scratch.asm(assembly, "STA", 0, lambda x: "({}),Y".format(x))
 
 
 class AddrOf(ILInst):
@@ -175,9 +175,9 @@ class AddrOf(ILInst):
         output = spotmap[self.output]
 
         if value.has_address():
-            value.asm(assembly, "LDA", 0, extra="#{}")
+            value.asm(assembly, "LDA", 0, extra=lambda x: "#&{}".format(x[3:5]))
             output.asm(assembly, "STA", 1)
-            value.asm(assembly, "LDA", 1, extra="#{}")
+            value.asm(assembly, "LDA", 1, extra=lambda x: "#{}".format(x[:3]))
             output.asm(assembly, "STA", 0)
 
 
