@@ -62,11 +62,8 @@ class IntegerCType(CType):
         unsign_self.signed = False
         return unsign_self
 
-    def __str__(self):
-        return '<IntegerCType({size}:{signed})>'.format(size=self.size, signed=self.signed)
-
     def __repr__(self):
-        return self.__str__()
+        return '<IntegerCType({size}:{signed})>'.format(size=self.size, signed=self.signed)
 
 
 class VoidCType(CType):
@@ -78,6 +75,9 @@ class VoidCType(CType):
 
     def is_void(self):
         return True
+
+    def __repr__(self):
+        return '<VoidCType>'
 
 
 class PointerCType(CType):
@@ -93,6 +93,9 @@ class PointerCType(CType):
 
     def is_pointer(self):
         return True
+
+    def __repr__(self):
+        return '<PointerCType({arg})>'.format(arg=self.arg)
 
 
 class ArrayCType(CType):
@@ -110,11 +113,8 @@ class ArrayCType(CType):
     def is_array(self):
         return True
 
-    def __str__(self):
-        return '<ArrayCType({el}:{n})>'.format(el=self.el, n=self.n)
-
     def __repr__(self):
-        return self.__str__()
+        return '<ArrayCType({el}:{n})>'.format(el=self.el, n=self.n)
 
 
 class FunctionCType(CType):
@@ -130,11 +130,8 @@ class FunctionCType(CType):
     def is_function(self):
         return True
 
-    def __str__(self):
-        return '<FunctionCType({args}:{ret})>'.format(args=self.args, ret=self.ret)
-
     def __repr__(self):
-        return self.__str__()
+        return '<FunctionCType({args}:{ret})>'.format(args=self.args, ret=self.ret)
 
 
 void = VoidCType()

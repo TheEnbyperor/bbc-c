@@ -331,9 +331,10 @@ class CallFunction(ILInst):
             assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
             stack_register.asm(assembly, "STA", 1)
 
-        for i in range(output.type.size):
-            ret_reg.asm(assembly, "LDA", i)
-            output.asm(assembly, "STA", i)
+        if not output.type.is_void():
+            for i in range(output.type.size):
+                ret_reg.asm(assembly, "LDA", i)
+                output.asm(assembly, "STA", i)
 
 
 class Function(ILInst):

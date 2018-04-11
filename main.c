@@ -3,9 +3,9 @@
 #define BUF_LEN 10
 
 int main() {
-    char a = ARR_LEN;
-    a--;
-    return 3 * a;
+    char a[BUF_LEN];
+    fgets(a, 2);
+    return 3 * a[0];
 }
 
 //int Fibonacci(int n) {

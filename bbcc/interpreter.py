@@ -88,8 +88,13 @@ class Interpreter(ast.NodeVisitor):
         func = self.scope.lookup(func_name, self.current_scope)
 
         args = []
-        for a in node.args:
-            args.append(self.visit(a).val(self.il))
+        for a, fa in zip(node.args, func.type.args):
+            arg = self.visit(a)
+            print(fa)
+            if fa.is_pointer():
+                arg = arg.addr(self.il)
+
+            args.append(arg.val(self.il))
 
         output = il.ILValue(func.type.ret)
         self.il.add(il.CallFunction("__{}".format(func_name), args, output))
