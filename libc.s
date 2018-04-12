@@ -56,10 +56,10 @@ LDA (&8E),Y
 ADC #0
 STA (&8E),Y
 INC &72
-BNE .__fgets_4
+BNE __fgets_4
 INC &73
-.__fgtes_4
-JMP .__fgets_1
-.__fegts_3
+.__fgets_4
+JMP __fgets_1
+.__fgets_3
 RTS
 

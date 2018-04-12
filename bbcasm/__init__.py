@@ -1,8 +1,10 @@
 def asm_to_basic(asm):
+    asm = asm.splitlines()
     out = "NEW\n"
     start_lines = [
+        "DIM MC% {}".format(len(asm)*3),
         "FOR opt%=0 TO 2 STEP 2",
-        "P%=&E00",
+        "P%=MC%",
         "[",
         "OPT opt%",
     ]
@@ -15,7 +17,7 @@ def asm_to_basic(asm):
         "RL=&70",
         "PRINT ~?RH,~?RL",
     ]
-    for i, line in enumerate(start_lines + asm.splitlines() + end_lines):
+    for i, line in enumerate(start_lines + asm + end_lines):
         out += str(i) + " " + line.strip() + "\n"
 
     return out
