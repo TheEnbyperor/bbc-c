@@ -1,10 +1,14 @@
 from .lexer import Lexer
+from .parser import Parser
 
 
 def asm_to_object(asm):
     lexer_inst = Lexer(asm)
     token_list = lexer_inst.tokenize()
-    return token_list
+
+    parser = Parser(token_list)
+    insts = parser.parse()
+    return insts
 
 
 def asm_to_basic(asm):
