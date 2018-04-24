@@ -65,6 +65,10 @@ class Lexer:
             elif self.current_char == "\n":
                 self.advance()
 
+            elif self.current_char == "/":
+                self.advance()
+                self.skip_line_comment()
+
             elif self.current_char == "." and not self.peek().isspace():
                 self.advance()
                 tokens.append(Token(LABEL, self.string()))
@@ -89,7 +93,7 @@ class Lexer:
                 self.advance()
                 tokens.append(Token(COMMA, ","))
 
-            elif self.current_char.isalpha():
+            elif not self.current_char.isspace():
                 tokens.append(Token(ID, self.string()))
 
             else:
