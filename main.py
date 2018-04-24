@@ -32,5 +32,7 @@ if __name__ == "__main__":
 
     asm = libc_asm + "\n" + asm
 
-    basic = bbcasm.asm_to_basic(asm)
-    print(basic)
+    print(asm)
+
+    out = bbcasm.asm_to_object(asm)
+    print(out)

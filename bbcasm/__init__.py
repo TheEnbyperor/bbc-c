@@ -1,8 +1,18 @@
+from .lexer import Lexer
+
+
+def asm_to_object(asm):
+    lexer_inst = Lexer(asm)
+    token_list = lexer_inst.tokenize()
+    return token_list
+
+
 def asm_to_basic(asm):
     asm = asm.splitlines()
     out = "NEW\n"
     start_lines = [
-        "DIM MC% {}".format(len(asm)*3),
+        "DIM MC% {}".format(
+            len([line for line in asm if line != "" and not line.startswith(".") and not line.startswith("\\")]) * 3),
         "FOR opt%=0 TO 2 STEP 2",
         "P%=MC%",
         "[",

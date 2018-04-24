@@ -74,7 +74,6 @@ class Lexer:
     def tokenize(self):
         tokens = []
         while self.current_char is not None:
-
             if self.current_char.isspace() and self.current_char is not "\n":
                 self.skip_whitespace()
                 continue
