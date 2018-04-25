@@ -216,6 +216,17 @@ class Branch(Inst):
     def __len__(self):
         return 2
 
+    def gen(self, addr):
+        inst = None
+        for m in self.modes:
+            if isinstance(self.value, m[0]):
+                inst = m[1]
+                break
+
+        pos = self.value.loc
+        jmp = pos-addr
+        return [inst] + list(struct.pack("<b", jmp))
+
 
 class BPL(Branch):
     modes = [(MemVal, 0x10)]
