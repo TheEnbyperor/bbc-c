@@ -55,6 +55,16 @@ class WhileStatement(AST):
                                                "  " + "  ".join(str(self.statement).splitlines(True)))
 
 
+class DoWhileStatement(AST):
+    def __init__(self, condition, statement):
+        self.condition = condition
+        self.statement = statement
+
+    def __repr__(self):
+        return "DoWhileStatement\n{}\n{}".format("  " + "  ".join(str(self.condition).splitlines(True)),
+                                                 "  " + "  ".join(str(self.statement).splitlines(True)))
+
+
 class ForStatement(AST):
     def __init__(self, first, second, third, statement):
         self.statement = statement

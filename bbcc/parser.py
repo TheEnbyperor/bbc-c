@@ -37,7 +37,7 @@ class Parser:
         if self.tokens[index:][0].type == EOF:
             return ast.TranslationUnit(items), index
         else:
-            print(self.tokens[index:])
+            # print(self.tokens[index:])
             self.error()
 
     def parse_external_deceleration(self, index):
@@ -90,6 +90,11 @@ class Parser:
 
         try:
             return self.parse_while_statement(index)
+        except SyntaxError:
+            pass
+
+        try:
+            return self.parse_do_while_statement(index)
         except SyntaxError:
             pass
 
@@ -179,6 +184,18 @@ class Parser:
         statement, index = self.parse_statement(index)
 
         return ast.WhileStatement(conditional, statement), index
+
+    def parse_do_while_statement(self, index):
+        """Parse a do while statement."""
+        index = self.eat(index, DO)
+        statement, index = self.parse_statement(index)
+        index = self.eat(index, WHILE)
+        index = self.eat(index, LPAREM)
+        conditional, index = self.parse_expression(index)
+        index = self.eat(index, RPAREM)
+        index = self.eat(index, SEMI)
+
+        return ast.DoWhileStatement(conditional, statement), index
 
     def parse_for_statement(self, index):
         """Parse a for statement."""
@@ -281,6 +298,7 @@ class Parser:
 
         if kind in node_types:
             right, index = self.parse_assignment(index + 1)
+            print(self.tokens[index])
             return node_types[kind](left, right, op), index
         else:
             return left, index
@@ -610,10 +628,12 @@ class Parser:
 
         # Last element indicates an array type
         elif self.tokens[end - 1].type == RBRACK:
-            first = self.tokens[end - 3].type == LBRACK
+            first = self.tokens[end - 3].type == LBRACK or self.tokens[end - 2].type == LBRACK
             number = self.tokens[end - 2].type == INTEGER
             if first and number:
                 return decl_tree.Array(int(self.tokens[end - 2].value), self.parse_declarator(start, end - 3))
+            elif first:
+                return decl_tree.Array(None, self.parse_declarator(start, end - 2))
 
         self.error()
 

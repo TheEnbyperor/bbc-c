@@ -27,7 +27,7 @@ class Interpreter(ast.NodeVisitor):
                 self.visit(n)
         self.il.add(il.Return(None, epilouge=False))
 
-        ret_val = il.ILValue(ctypes.integer)
+        ret_val = il.ILValue(ctypes.char)
         self.il.add(il.Function([], "_start", prolouge=False))
 
         stack_start = il.ILValue(ctypes.unsig_int)

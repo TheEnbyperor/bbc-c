@@ -57,4 +57,4 @@ class Identifier(Node):
         self.identifier = identifier
 
     def __repr__(self):
-        return self.identifier.value
+        return str(self.identifier)

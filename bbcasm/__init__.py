@@ -18,12 +18,12 @@ def asm_to_object(asm, lda):
     return bytes(out), exa
 
 
-def object_to_disk(obj, lda, exa):
+def object_to_disk(name, obj, lda, exa):
     disk = makedfs.Disk()
     disk.new()
 
     cat = disk.catalogue()
-    files = [makedfs.File("$.MAIN", obj, lda, exa)]
+    files = [makedfs.File(name, obj, lda, exa)]
     cat.write("", files)
 
     disk.file.seek(0, 0)

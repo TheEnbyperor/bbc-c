@@ -280,12 +280,10 @@ class Return(ILInst):
             value = spotmap[self.value]
             ret_reg = spots.Pseudo16RegisterSpot(return_register, value.type)
 
-            for i in range(ret_reg.type.size):
-                if i < value.type.size:
+            if value != ret_reg:
+                for i in range(ret_reg.type.size):
                     value.asm(assembly, "LDA", i)
-                else:
-                    assembly.add_inst("LDA", "#0")
-                ret_reg.asm(assembly, "STA", i)
+                    ret_reg.asm(assembly, "STA", i)
 
         for reg in used[::-1]:
             assembly.add_inst("PLA")
@@ -332,9 +330,10 @@ class CallFunction(ILInst):
             stack_register.asm(assembly, "STA", 1)
 
         if not output.type.is_void():
-            for i in range(output.type.size):
-                ret_reg.asm(assembly, "LDA", i)
-                output.asm(assembly, "STA", i)
+            if ret_reg != output:
+                for i in range(output.type.size):
+                    ret_reg.asm(assembly, "LDA", i)
+                    output.asm(assembly, "STA", i)
 
 
 class Function(ILInst):

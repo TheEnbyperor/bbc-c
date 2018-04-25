@@ -36,8 +36,9 @@ class Lexer:
         self.advance()
 
     def skip_comment(self):
-        while self.current_char != '*' and self.peek() != "/" and self.current_char is not None:
+        while not (self.current_char == '*' and self.peek() == "/") and self.current_char is not None:
             self.advance()
+        self.advance()
         self.advance()
 
     def integer(self):
@@ -47,6 +48,12 @@ class Lexer:
             result += self.current_char
             self.advance()
         return int(result)
+
+    def char(self):
+        if self.current_char == '\\':
+            self.advance()
+            return bytes([int(self.current_char)]).decode()
+        return self.current_char
 
     def string(self):
         result = ''
@@ -92,16 +99,12 @@ class Lexer:
                 tokens.append(self.id())
             elif self.current_char == "'":
                 self.advance()
-                tokens.append(Token(CHARACTER, self.current_char))
+                tokens.append(Token(CHARACTER, self.char()))
                 self.advance()
                 self.advance()
             elif self.current_char == '"':
                 self.advance()
                 tokens.append(Token(STRING, self.string()))
-                self.advance()
-            elif self.current_char == '<':
-                self.advance()
-                tokens.append(Token(STRING, self.h_string()))
                 self.advance()
 
             elif self.current_char == "|" and self.peek() == "|":

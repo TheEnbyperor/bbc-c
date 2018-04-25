@@ -1,5 +1,28 @@
 // Comment
-#include <stdio.h>
+#include "stdio.h"
+
+void reverse(char *s) {
+  int i, j;
+  char c;
+
+  for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+    c = s[i];
+    s[i] = s[j];
+    s[j] = c;
+  }
+}
+
+void itoa(int n, char *s) {
+  int i;
+
+  i = 0;
+  do {       /* generate digits in reverse order */
+    s[i++] = n % 10 + '0';   /* get next digit */
+  } while ((n /= 10) > 0);     /* delete it */
+  s[i] = '\0';
+  reverse(s);
+ }
+
 #define BUF_LEN 10
 
 int main() {

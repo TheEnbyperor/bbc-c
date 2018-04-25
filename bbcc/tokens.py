@@ -5,7 +5,7 @@ INTEGER, CHARACTER, STRING, \
     ID, INT, CHAR, VOID, BOOL, RETURN, LBRACE, RBRACE, LBRACK, RBRACK, COMMA, BREAK, CONTINUE, \
     SIGNED, UNISGNED, STATIC, AUTO, CONST, \
     INCR, DECR, AMP, STAR, NOT, \
-    IF, ELSE, WHILE, FOR, EOF, \
+    IF, ELSE, WHILE, DO, FOR, EOF, \
     HASH, NEWLINE = \
     "INTEGER", "CHAR", "STRING", \
     "PLUS", "MINUS", "DIVIDE", "MOD", "LRAPEM", "RPAREM", "SEMI", \
@@ -14,7 +14,7 @@ INTEGER, CHARACTER, STRING, \
     "ID", "int", "char", "void", "bool", "RETURN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", "COMMA", "BREAK", "CONTINUE", \
     "signed", "unsigned", "static", "auto", "const", \
     "INCR", "DECR", "AMP", "STAR", "NOT", \
-    "IF", "ELSE", "WHILE", "FOR", "EOF", \
+    "IF", "ELSE", "WHILE", "DO", "FOR", "EOF", \
     "HASH", "NEWLINE"
 
 
@@ -61,5 +61,6 @@ RESERVED_KEYWORDS = dict(TYPES, **dict(MODIFIERS, **{
     'if': Token(IF, 'if'),
     'else': Token(ELSE, 'else'),
     'while': Token(WHILE, 'while'),
+    'do': Token(DO, 'do'),
     'for': Token(FOR, 'for')
 }))
