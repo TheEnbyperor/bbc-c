@@ -6,8 +6,6 @@ def asm_to_object(asm):
     lexer_inst = Lexer(asm)
     token_list = lexer_inst.tokenize()
 
-    print(token_list)
-
     parser = Parser(token_list)
     insts = parser.parse()
     return insts

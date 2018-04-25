@@ -10,6 +10,11 @@ class LiteralVal(Value):
         return "LiteralVal({})".format(self.value)
 
 
+class AccumulatorVal(Value):
+    def __repr__(self):
+        return "AccumulatorVal"
+
+
 class ZpVal(Value):
     def __init__(self, loc):
         self.loc = loc
@@ -66,6 +71,14 @@ class ZpYVal(Value):
         return "ZpYVal({})".format(self.loc)
 
 
+class IndirectVal(Value):
+    def __init__(self, loc):
+        self.loc = loc
+
+    def __repr__(self):
+        return "IndirectVal({})".format(self.loc)
+
+
 class IndirectXVal(Value):
     def __init__(self, loc):
         self.loc = loc
@@ -83,15 +96,18 @@ class IndirectYVal(Value):
 
 
 class Inst:
-    pass
+    modes = []
 
 
 class NOP(Inst):
+
     def __repr__(self):
         return "<NOP>"
 
 
 class LDA(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -100,6 +116,8 @@ class LDA(Inst):
 
 
 class STA(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -108,6 +126,8 @@ class STA(Inst):
 
 
 class LDX(Inst):
+    modes = [LiteralVal, ZpVal, ZpYVal, MemVal, MemYVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -116,6 +136,8 @@ class LDX(Inst):
 
 
 class LDY(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -124,6 +146,8 @@ class LDY(Inst):
 
 
 class JSR(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -132,6 +156,8 @@ class JSR(Inst):
 
 
 class JMP(Inst):
+    modes = [MemVal, IndirectVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -205,6 +231,8 @@ class INY(Inst):
 
 
 class INC(Inst):
+    modes = [AccumulatorVal, ZpVal, ZpXVal, MemVal, MemXVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -213,6 +241,8 @@ class INC(Inst):
 
 
 class DEC(Inst):
+    modes = [AccumulatorVal, ZpVal, ZpXVal, MemVal, MemXVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -221,6 +251,8 @@ class DEC(Inst):
 
 
 class ADC(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -229,6 +261,8 @@ class ADC(Inst):
 
 
 class SBC(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -237,6 +271,8 @@ class SBC(Inst):
 
 
 class LSR(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -245,6 +281,8 @@ class LSR(Inst):
 
 
 class ASL(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -253,6 +291,8 @@ class ASL(Inst):
 
 
 class ROL(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -261,6 +301,8 @@ class ROL(Inst):
 
 
 class ROR(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -269,6 +311,8 @@ class ROR(Inst):
 
 
 class CMP(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -277,6 +321,8 @@ class CMP(Inst):
 
 
 class BCC(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -285,6 +331,8 @@ class BCC(Inst):
 
 
 class BCS(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -293,6 +341,8 @@ class BCS(Inst):
 
 
 class BNE(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -301,6 +351,8 @@ class BNE(Inst):
 
 
 class BEQ(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -309,6 +361,8 @@ class BEQ(Inst):
 
 
 class BPL(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -317,6 +371,8 @@ class BPL(Inst):
 
 
 class BMI(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -325,6 +381,8 @@ class BMI(Inst):
 
 
 class BVC(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
@@ -333,6 +391,8 @@ class BVC(Inst):
 
 
 class BVS(Inst):
+    modes = [MemVal]
+
     def __init__(self, value):
         self.value = value
 
