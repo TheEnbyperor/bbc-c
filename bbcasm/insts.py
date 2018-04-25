@@ -1,5 +1,9 @@
+import struct
+
+
 class Value:
-    pass
+    def val(self):
+        raise NotImplementedError
 
 
 class LiteralVal(Value):
@@ -9,10 +13,16 @@ class LiteralVal(Value):
     def __repr__(self):
         return "LiteralVal({})".format(self.value)
 
+    def val(self):
+        return struct.pack("<b", self.value)
+
 
 class AccumulatorVal(Value):
     def __repr__(self):
         return "AccumulatorVal"
+
+    def val(self):
+        raise NotImplementedError
 
 
 class ZpVal(Value):
@@ -22,6 +32,9 @@ class ZpVal(Value):
     def __repr__(self):
         return "ZpVal(0x{:x})".format(self.loc)
 
+    def val(self):
+        return struct.pack("<b", self.loc)
+
 
 class MemVal(Value):
     def __init__(self, loc):
@@ -29,6 +42,9 @@ class MemVal(Value):
 
     def __repr__(self):
         return "MemVal(0x{:x})".format(self.loc)
+
+    def val(self):
+        return struct.pack("<h", self.loc)
 
 
 class LabelVal(Value):
@@ -38,6 +54,9 @@ class LabelVal(Value):
     def __repr__(self):
         return "LabelVal({})".format(self.label)
 
+    def val(self):
+        raise NotImplementedError
+
 
 class MemXVal(Value):
     def __init__(self, loc):
@@ -45,6 +64,9 @@ class MemXVal(Value):
 
     def __repr__(self):
         return "MemXVal(0x{:x})".format(self.loc)
+
+    def val(self):
+        return struct.pack("<h", self.loc)
 
 
 class MemYVal(Value):
@@ -54,6 +76,9 @@ class MemYVal(Value):
     def __repr__(self):
         return "MemYVal(0x{:x})".format(self.loc)
 
+    def val(self):
+        return struct.pack("<h", self.loc)
+
 
 class ZpXVal(Value):
     def __init__(self, loc):
@@ -61,6 +86,9 @@ class ZpXVal(Value):
 
     def __repr__(self):
         return "ZpXVal({})".format(self.loc)
+
+    def val(self):
+        return struct.pack("<b", self.loc)
 
 
 class ZpYVal(Value):
@@ -70,6 +98,9 @@ class ZpYVal(Value):
     def __repr__(self):
         return "ZpYVal({})".format(self.loc)
 
+    def val(self):
+        return struct.pack("<b", self.loc)
+
 
 class IndirectVal(Value):
     def __init__(self, loc):
@@ -77,6 +108,9 @@ class IndirectVal(Value):
 
     def __repr__(self):
         return "IndirectVal({})".format(self.loc)
+
+    def val(self):
+        return struct.pack("<h", self.loc)
 
 
 class IndirectXVal(Value):
@@ -86,6 +120,9 @@ class IndirectXVal(Value):
     def __repr__(self):
         return "IndirectXVal({})".format(self.loc)
 
+    def val(self):
+        return struct.pack("<b", self.loc)
+
 
 class IndirectYVal(Value):
     def __init__(self, loc):
@@ -93,6 +130,9 @@ class IndirectYVal(Value):
 
     def __repr__(self):
         return "IndirectYVal({})".format(self.loc)
+
+    def val(self):
+        return struct.pack("<b", self.loc)
 
 
 class Inst:
