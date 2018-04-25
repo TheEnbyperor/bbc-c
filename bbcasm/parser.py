@@ -94,48 +94,13 @@ class Parser:
                 return insts.IndirectXVal(value), self.eat(index + 1, RPAREM)
         self.error()
 
+    def parse_default(self, index):
+        self.error()
+
     def parse_INST(self, index):
-        if self.tokens[index].value == "LDX":
-            return self.parse_LDX(index + 1)
-        elif self.tokens[index].value == "LDY":
-            return self.parse_LDY(index + 1)
-        elif self.tokens[index].value == "LDA":
-            return self.parse_LDA(index + 1)
-        elif self.tokens[index].value == "STA":
-            return self.parse_STA(index + 1)
-
-        elif self.tokens[index].value == "JSR":
-            return self.parse_JSR(index + 1)
-        elif self.tokens[index].value == "RTS":
-            return self.parse_RTS(index + 1)
-
-        elif self.tokens[index].value == "PHA":
-            return self.parse_PHA(index + 1)
-        elif self.tokens[index].value == "PLA":
-            return self.parse_PLA(index + 1)
-        elif self.tokens[index].value == "PHP":
-            return self.parse_PHP(index + 1)
-        elif self.tokens[index].value == "PLP":
-            return self.parse_PLP(index + 1)
-
-        elif self.tokens[index].value == "TAX":
-            return self.parse_TAX(index + 1)
-        elif self.tokens[index].value == "TXA":
-            return self.parse_TXA(index + 1)
-        elif self.tokens[index].value == "DEX":
-            return self.parse_DEX(index + 1)
-        elif self.tokens[index].value == "INX":
-            return self.parse_INX(index + 1)
-
-        elif self.tokens[index].value == "TAY":
-            return self.parse_TAY(index + 1)
-        elif self.tokens[index].value == "TYA":
-            return self.parse_TYA(index + 1)
-        elif self.tokens[index].value == "DEY":
-            return self.parse_DEY(index + 1)
-        elif self.tokens[index].value == "INY":
-            return self.parse_INY(index + 1)
-        return insts.NOP(), index + 1
+        inst = self.tokens[index].value
+        parse_inst = getattr(self, "parse_{}".format(inst.upper()), self.parse_default)
+        return parse_inst(index+1)
 
     def parse_LDX(self, index):
         try:
@@ -225,6 +190,11 @@ class Parser:
 
         return insts.JSR(value), index
 
+    def parse_JMP(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.JMP(value), index
+
     def parse_RTS(self, index):
         return insts.RTS(), index
 
@@ -263,6 +233,232 @@ class Parser:
 
     def parse_INY(self, index):
         return insts.INY(), index
+
+    def parse_DEC(self, index):
+        try:
+            value, index = self.parse_zero_page(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_zp_x(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_mem(index)
+                except SyntaxError:
+                    value, index = self.parse_mem_x(index)
+
+        return insts.DEC(value), index
+
+    def parse_INC(self, index):
+        try:
+            value, index = self.parse_zero_page(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_zp_x(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_mem(index)
+                except SyntaxError:
+                    value, index = self.parse_mem_x(index)
+
+        return insts.INC(value), index
+
+    def parse_ADC(self, index):
+        try:
+            value, index = self.parse_x_indirect(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_y_indirect(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_immediate(index)
+                except SyntaxError:
+                    try:
+                        value, index = self.parse_zero_page(index)
+                    except SyntaxError:
+                        try:
+                            value, index = self.parse_zp_x(index)
+                        except SyntaxError:
+                            try:
+                                value, index = self.parse_mem(index)
+                            except SyntaxError:
+                                try:
+                                    value, index = self.parse_mem_x(index)
+                                except SyntaxError:
+                                    value, index = self.parse_mem_y(index)
+
+        return insts.ADC(value), index
+
+    def parse_SBC(self, index):
+        try:
+            value, index = self.parse_x_indirect(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_y_indirect(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_immediate(index)
+                except SyntaxError:
+                    try:
+                        value, index = self.parse_zero_page(index)
+                    except SyntaxError:
+                        try:
+                            value, index = self.parse_zp_x(index)
+                        except SyntaxError:
+                            try:
+                                value, index = self.parse_mem(index)
+                            except SyntaxError:
+                                try:
+                                    value, index = self.parse_mem_x(index)
+                                except SyntaxError:
+                                    value, index = self.parse_mem_y(index)
+
+        return insts.SBC(value), index
+
+    def parse_ASL(self, index):
+        try:
+            value, index = self.parse_zero_page(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_zp_x(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_mem(index)
+                except SyntaxError:
+                    value, index = self.parse_mem_x(index)
+
+        return insts.ASL(value), index
+
+    def parse_LSR(self, index):
+        try:
+            value, index = self.parse_zero_page(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_zp_x(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_mem(index)
+                except SyntaxError:
+                    value, index = self.parse_mem_x(index)
+
+        return insts.LSR(value), index
+
+    def parse_ROL(self, index):
+        try:
+            value, index = self.parse_zero_page(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_zp_x(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_mem(index)
+                except SyntaxError:
+                    value, index = self.parse_mem_x(index)
+
+        return insts.ROL(value), index
+
+    def parse_ROR(self, index):
+        try:
+            value, index = self.parse_zero_page(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_zp_x(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_mem(index)
+                except SyntaxError:
+                    value, index = self.parse_mem_x(index)
+
+        return insts.ROR(value), index
+
+    def parse_CMP(self, index):
+        try:
+            value, index = self.parse_x_indirect(index)
+        except SyntaxError:
+            try:
+                value, index = self.parse_y_indirect(index)
+            except SyntaxError:
+                try:
+                    value, index = self.parse_immediate(index)
+                except SyntaxError:
+                    try:
+                        value, index = self.parse_zero_page(index)
+                    except SyntaxError:
+                        try:
+                            value, index = self.parse_zp_x(index)
+                        except SyntaxError:
+                            try:
+                                value, index = self.parse_mem(index)
+                            except SyntaxError:
+                                try:
+                                    value, index = self.parse_mem_x(index)
+                                except SyntaxError:
+                                    value, index = self.parse_mem_y(index)
+
+        return insts.CMP(value), index
+
+    def parse_BCC(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BCS(value), index
+
+    def parse_BCS(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BCS(value), index
+
+    def parse_BNE(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BNE(value), index
+
+    def parse_BEQ(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BEQ(value), index
+
+    def parse_BMI(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BMI(value), index
+
+    def parse_BPL(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BPL(value), index
+
+    def parse_BVS(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BVS(value), index
+
+    def parse_BVC(self, index):
+        value, index = self.parse_mem(index)
+
+        return insts.BVC(value), index
+
+    def parse_CLC(self, index):
+        return insts.CLC(), index
+
+    def parse_SEC(self, index):
+        return insts.SEC(), index
+
+    def parse_CLD(self, index):
+        return insts.CLD(), index
+
+    def parse_SED(self, index):
+        return insts.SED(), index
+
+    def parse_CLV(self, index):
+        return insts.CLV(), index
+
+    def parse_SEI(self, index):
+        return insts.SEI(), index
+
+    def parse_CLI(self, index):
+        return insts.CLI(), index
+
+    def parse_NOP(self, index):
+        return insts.NOP(), index
 
     def parse(self):
         index = 0

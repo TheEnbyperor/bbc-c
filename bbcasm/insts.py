@@ -131,6 +131,14 @@ class JSR(Inst):
         return "<JSR({})>".format(self.value)
 
 
+class JMP(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<JMP({})>".format(self.value)
+
+
 class RTS(Inst):
     def __repr__(self):
         return "<RTS>"
@@ -194,3 +202,174 @@ class DEY(Inst):
 class INY(Inst):
     def __repr__(self):
         return "<INY>"
+
+
+class INC(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<INC({})>".format(self.value)
+
+
+class DEC(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<DEC({})>".format(self.value)
+
+
+class ADC(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<ADC({})>".format(self.value)
+
+
+class SBC(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<SBC({})>".format(self.value)
+
+
+class LSR(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<LSR({})>".format(self.value)
+
+
+class ASL(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<ASL({})>".format(self.value)
+
+
+class ROL(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<ROL({})>".format(self.value)
+
+
+class ROR(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<ROR({})>".format(self.value)
+
+
+class CMP(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<CMP({})>".format(self.value)
+
+
+class BCC(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BCC({})>".format(self.value)
+
+
+class BCS(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BCS({})>".format(self.value)
+
+
+class BNE(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BNE({})>".format(self.value)
+
+
+class BEQ(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BEQ({})>".format(self.value)
+
+
+class BPL(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BPL({})>".format(self.value)
+
+
+class BMI(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BMI({})>".format(self.value)
+
+
+class BVC(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BVC({})>".format(self.value)
+
+
+class BVS(Inst):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BVS({})>".format(self.value)
+
+
+class CLC(Inst):
+    def __repr__(self):
+        return "<CLC>"
+
+
+class SEC(Inst):
+    def __repr__(self):
+        return "<SEC>"
+
+
+class CLI(Inst):
+    def __repr__(self):
+        return "<CLI>"
+
+
+class SEI(Inst):
+    def __repr__(self):
+        return "<SEI>"
+
+
+class CLV(Inst):
+    def __repr__(self):
+        return "<CLV>"
+
+
+class CLD(Inst):
+    def __repr__(self):
+        return "<CLD>"
+
+
+class SED(Inst):
+    def __repr__(self):
+        return "<SED>"
