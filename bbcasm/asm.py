@@ -16,3 +16,12 @@ class Assemble:
         for n, i in enumerate(self.insts):
             if isinstance(i.value, insts.LabelVal):
                 self.insts[n].value = insts.MemVal(self.labels[i.value.label])
+
+    def assemble(self):
+        out = []
+        addr = self.addr
+        for i in self.insts:
+            out.extend(i.gen(addr))
+            addr += len(i)
+
+        return out

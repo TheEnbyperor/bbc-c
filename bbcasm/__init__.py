@@ -12,7 +12,9 @@ def asm_to_object(asm):
 
     assembler = Assemble(insts, 0xE00)
     assembler.fill_labels()
-    return insts
+
+    out = assembler.assemble()
+    return out
 
 
 def asm_to_basic(asm):

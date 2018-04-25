@@ -66,7 +66,7 @@ class Parser:
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
             if self.tokens[index].value == "X":
-                return insts.ZpXVal(value), index + 1
+                return insts.ZpXVal(value.loc), index + 1
         self.error()
 
     def parse_ZpYVal(self, index):
@@ -74,7 +74,7 @@ class Parser:
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
             if self.tokens[index].value == "X":
-                return insts.ZpXVal(value), index + 1
+                return insts.ZpXVal(value.loc), index + 1
         self.error()
 
     def parse_MemXVal(self, index):
@@ -82,7 +82,7 @@ class Parser:
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
             if self.tokens[index].value == "X":
-                return insts.MemXVal(value), index + 1
+                return insts.MemXVal(value.loc), index + 1
         self.error()
         self.error()
 
@@ -91,14 +91,14 @@ class Parser:
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
             if self.tokens[index].value == "Y":
-                return insts.MemYVal(value), index + 1
+                return insts.MemYVal(value.loc), index + 1
         self.error()
 
     def parse_IndirectVal(self, index):
         index = self.eat(index, LPAREM)
         value, index = self.parse_MemVal(index)
         index = self.eat(index, RPAREM)
-        return insts.IndirectVal(value), index
+        return insts.IndirectVal(value.loc), index
 
     def parse_IndirectYVal(self, index):
         index = self.eat(index, LPAREM)
@@ -107,7 +107,7 @@ class Parser:
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
             if self.tokens[index].value == "Y":
-                return insts.IndirectYVal(value), index + 1
+                return insts.IndirectYVal(value.loc), index + 1
         self.error()
 
     def parse_IndirectXVal(self, index):
@@ -116,7 +116,7 @@ class Parser:
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
             if self.tokens[index].value == "X":
-                return insts.IndirectXVal(value), self.eat(index + 1, RPAREM)
+                return insts.IndirectXVal(value.loc), self.eat(index + 1, RPAREM)
         self.error()
 
     def parse_default(self, index):
@@ -130,7 +130,7 @@ class Parser:
             value = None
             for m in op.modes:
                 try:
-                    parser = getattr(self, "parse_{}".format(m.__name__), self.parse_default)
+                    parser = getattr(self, "parse_{}".format(m[0].__name__), self.parse_default)
                     value, index = parser(index+1)
                     break
                 except SyntaxError:
