@@ -159,4 +159,4 @@ class Parser:
             else:
                 index += 1
 
-        return self.insts, [i.label for i in self.insts]
+        return self.insts

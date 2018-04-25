@@ -35,4 +35,4 @@ if __name__ == "__main__":
     print(asm)
 
     out = bbcasm.asm_to_object(asm)
-    print(out)
+    # print(out)

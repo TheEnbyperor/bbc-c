@@ -1,5 +1,6 @@
 from .lexer import Lexer
 from .parser import Parser
+from .asm import Assemble
 
 
 def asm_to_object(asm):
@@ -8,6 +9,9 @@ def asm_to_object(asm):
 
     parser = Parser(token_list)
     insts = parser.parse()
+
+    assembler = Assemble(insts, 0xE00)
+    assembler.fill_labels()
     return insts
 
 

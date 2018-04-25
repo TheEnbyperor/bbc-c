@@ -98,6 +98,18 @@ class IndirectYVal(Value):
 class Inst:
     label = None
     modes = []
+    value = None
+
+    def __len__(self):
+        if self.value is None:
+            return 2
+        else:
+            if type(self.value) in [AccumulatorVal]:
+                return 1
+            elif type(self.value) in [LiteralVal, ZpVal, ZpXVal, ZpYVal, IndirectXVal, IndirectYVal]:
+                return 2
+            elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal]:
+                return 3
 
 
 class ADC(Inst):
@@ -139,6 +151,9 @@ class BIT(Inst):
     def __repr__(self):
         return "<BIT({})>".format(self.value)
 
+    def __len__(self):
+        return 2
+
 
 class BPL(Inst):
     modes = [MemVal]
@@ -148,6 +163,9 @@ class BPL(Inst):
 
     def __repr__(self):
         return "<BPL({})>".format(self.value)
+
+    def __len__(self):
+        return 2
 
 
 class BMI(Inst):
@@ -159,6 +177,9 @@ class BMI(Inst):
     def __repr__(self):
         return "<BMI({})>".format(self.value)
 
+    def __len__(self):
+        return 2
+
 
 class BVC(Inst):
     modes = [MemVal]
@@ -168,6 +189,9 @@ class BVC(Inst):
 
     def __repr__(self):
         return "<BVC({})>".format(self.value)
+
+    def __len__(self):
+        return 2
 
 
 class BVS(Inst):
@@ -179,6 +203,9 @@ class BVS(Inst):
     def __repr__(self):
         return "<BVS({})>".format(self.value)
 
+    def __len__(self):
+        return 2
+
 
 class BCC(Inst):
     modes = [MemVal]
@@ -188,6 +215,9 @@ class BCC(Inst):
 
     def __repr__(self):
         return "<BCC({})>".format(self.value)
+
+    def __len__(self):
+        return 2
 
 
 class BCS(Inst):
@@ -199,6 +229,9 @@ class BCS(Inst):
     def __repr__(self):
         return "<BCS({})>".format(self.value)
 
+    def __len__(self):
+        return 2
+
 
 class BNE(Inst):
     modes = [MemVal]
@@ -209,6 +242,9 @@ class BNE(Inst):
     def __repr__(self):
         return "<BNE({})>".format(self.value)
 
+    def __len__(self):
+        return 2
+
 
 class BEQ(Inst):
     modes = [MemVal]
@@ -218,6 +254,9 @@ class BEQ(Inst):
 
     def __repr__(self):
         return "<BEQ({})>".format(self.value)
+
+    def __len__(self):
+        return 2
 
 
 class BRK(Inst):
@@ -329,6 +368,9 @@ class JMP(Inst):
     def __repr__(self):
         return "<JMP({})>".format(self.value)
 
+    def __len__(self):
+        return 3
+
 
 class JSR(Inst):
     modes = [MemVal]
@@ -338,6 +380,9 @@ class JSR(Inst):
 
     def __repr__(self):
         return "<JSR({})>".format(self.value)
+
+    def __len__(self):
+        return 3
 
 
 class LDA(Inst):
