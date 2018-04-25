@@ -122,7 +122,7 @@ class Parser:
     def parse_default(self, index):
         self.error()
 
-    def parse_INST(self, index):
+    def parse_inst(self, index):
         inst = self.tokens[index].value
         op = self.ops.get(inst.upper())
 
@@ -148,7 +148,7 @@ class Parser:
         while self.tokens[index].type != EOF:
             t = self.tokens[index]
             if t.type == ID:
-                inst, index = self.parse_INST(index)
+                inst, index = self.parse_inst(index)
                 if self.cur_label is not None:
                     inst.label = self.cur_label
                     self.cur_label = None
@@ -159,4 +159,4 @@ class Parser:
             else:
                 index += 1
 
-        return self.insts
+        return self.insts, [i.label for i in self.insts]

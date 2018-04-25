@@ -1,5 +1,5 @@
 class Value:
-    label = None
+    pass
 
 
 class LiteralVal(Value):
@@ -96,158 +96,8 @@ class IndirectYVal(Value):
 
 
 class Inst:
+    label = None
     modes = []
-
-
-class NOP(Inst):
-
-    def __repr__(self):
-        return "<NOP>"
-
-
-class LDA(Inst):
-    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<LDA({})>".format(self.value)
-
-
-class STA(Inst):
-    modes = [ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<STA({})>".format(self.value)
-
-
-class LDX(Inst):
-    modes = [LiteralVal, ZpVal, ZpYVal, MemVal, MemYVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<LDX({})>".format(self.value)
-
-
-class LDY(Inst):
-    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<LDY({})>".format(self.value)
-
-
-class JSR(Inst):
-    modes = [MemVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<JSR({})>".format(self.value)
-
-
-class JMP(Inst):
-    modes = [MemVal, IndirectVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<JMP({})>".format(self.value)
-
-
-class RTS(Inst):
-    def __repr__(self):
-        return "<RTS>"
-
-
-class PHA(Inst):
-    def __repr__(self):
-        return "<PHA>"
-
-
-class PLA(Inst):
-    def __repr__(self):
-        return "<PLA>"
-
-
-class PHP(Inst):
-    def __repr__(self):
-        return "<PHP>"
-
-
-class PLP(Inst):
-    def __repr__(self):
-        return "<PLP>"
-
-
-class TAX(Inst):
-    def __repr__(self):
-        return "<TAX>"
-
-
-class TXA(Inst):
-    def __repr__(self):
-        return "<TXA>"
-
-
-class DEX(Inst):
-    def __repr__(self):
-        return "<DEX>"
-
-
-class INX(Inst):
-    def __repr__(self):
-        return "<INX>"
-
-
-class TAY(Inst):
-    def __repr__(self):
-        return "<TAY>"
-
-
-class TYA(Inst):
-    def __repr__(self):
-        return "<TYA>"
-
-
-class DEY(Inst):
-    def __repr__(self):
-        return "<DEY>"
-
-
-class INY(Inst):
-    def __repr__(self):
-        return "<INY>"
-
-
-class INC(Inst):
-    modes = [AccumulatorVal, ZpVal, ZpXVal, MemVal, MemXVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<INC({})>".format(self.value)
-
-
-class DEC(Inst):
-    modes = [AccumulatorVal, ZpVal, ZpXVal, MemVal, MemXVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<DEC({})>".format(self.value)
 
 
 class ADC(Inst):
@@ -260,26 +110,6 @@ class ADC(Inst):
         return "<ADC({})>".format(self.value)
 
 
-class SBC(Inst):
-    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<SBC({})>".format(self.value)
-
-
-class LSR(Inst):
-    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<LSR({})>".format(self.value)
-
-
 class ASL(Inst):
     modes = [ZpVal, ZpXVal, MemVal, MemXVal]
 
@@ -290,74 +120,24 @@ class ASL(Inst):
         return "<ASL({})>".format(self.value)
 
 
-class ROL(Inst):
-    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<ROL({})>".format(self.value)
-
-
-class ROR(Inst):
-    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<ROR({})>".format(self.value)
-
-
-class CMP(Inst):
+class AND(Inst):
     modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
 
     def __init__(self, value):
         self.value = value
 
     def __repr__(self):
-        return "<CMP({})>".format(self.value)
+        return "<AND({})>".format(self.value)
 
 
-class BCC(Inst):
-    modes = [MemVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<BCC({})>".format(self.value)
-
-
-class BCS(Inst):
-    modes = [MemVal]
+class BIT(Inst):
+    modes = [LiteralVal, MemVal]
 
     def __init__(self, value):
         self.value = value
 
     def __repr__(self):
-        return "<BCS({})>".format(self.value)
-
-
-class BNE(Inst):
-    modes = [MemVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<BNE({})>".format(self.value)
-
-
-class BEQ(Inst):
-    modes = [MemVal]
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return "<BEQ({})>".format(self.value)
+        return "<BIT({})>".format(self.value)
 
 
 class BPL(Inst):
@@ -400,6 +180,101 @@ class BVS(Inst):
         return "<BVS({})>".format(self.value)
 
 
+class BCC(Inst):
+    modes = [MemVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BCC({})>".format(self.value)
+
+
+class BCS(Inst):
+    modes = [MemVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BCS({})>".format(self.value)
+
+
+class BNE(Inst):
+    modes = [MemVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BNE({})>".format(self.value)
+
+
+class BEQ(Inst):
+    modes = [MemVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<BEQ({})>".format(self.value)
+
+
+class BRK(Inst):
+    def __repr__(self):
+        return "<BRK>"
+
+
+class CMP(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<CMP({})>".format(self.value)
+
+
+class CPX(Inst):
+    modes = [LiteralVal, ZpVal, MemVal, ]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<CPX({})>".format(self.value)
+
+
+class CPY(Inst):
+    modes = [LiteralVal, ZpVal, MemVal, ]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<CPY({})>".format(self.value)
+
+
+class DEC(Inst):
+    modes = [AccumulatorVal, ZpVal, ZpXVal, MemVal, MemXVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<DEC({})>".format(self.value)
+
+
+class EOR(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<EOR({})>".format(self.value)
+
+
 class CLC(Inst):
     def __repr__(self):
         return "<CLC>"
@@ -433,3 +308,229 @@ class CLD(Inst):
 class SED(Inst):
     def __repr__(self):
         return "<SED>"
+
+
+class INC(Inst):
+    modes = [AccumulatorVal, ZpVal, ZpXVal, MemVal, MemXVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<INC({})>".format(self.value)
+
+
+class JMP(Inst):
+    modes = [MemVal, IndirectVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<JMP({})>".format(self.value)
+
+
+class JSR(Inst):
+    modes = [MemVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<JSR({})>".format(self.value)
+
+
+class LDA(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<LDA({})>".format(self.value)
+
+
+class LDX(Inst):
+    modes = [LiteralVal, ZpVal, ZpYVal, MemVal, MemYVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<LDX({})>".format(self.value)
+
+
+class LDY(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<LDY({})>".format(self.value)
+
+
+class LSR(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<LSR({})>".format(self.value)
+
+
+class NOP(Inst):
+
+    def __repr__(self):
+        return "<NOP>"
+
+
+class ORA(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<STA({})>".format(self.value)
+
+
+class TAX(Inst):
+    def __repr__(self):
+        return "<TAX>"
+
+
+class TXA(Inst):
+    def __repr__(self):
+        return "<TXA>"
+
+
+class DEX(Inst):
+    def __repr__(self):
+        return "<DEX>"
+
+
+class INX(Inst):
+    def __repr__(self):
+        return "<INX>"
+
+
+class TAY(Inst):
+    def __repr__(self):
+        return "<TAY>"
+
+
+class TYA(Inst):
+    def __repr__(self):
+        return "<TYA>"
+
+
+class DEY(Inst):
+    def __repr__(self):
+        return "<DEY>"
+
+
+class INY(Inst):
+    def __repr__(self):
+        return "<INY>"
+
+
+class ROL(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<ROL({})>".format(self.value)
+
+
+class ROR(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<ROR({})>".format(self.value)
+
+
+class RTI(Inst):
+    def __repr__(self):
+        return "<RTI>"
+
+
+class RTS(Inst):
+    def __repr__(self):
+        return "<RTS>"
+
+
+class SBC(Inst):
+    modes = [LiteralVal, ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<SBC({})>".format(self.value)
+
+
+class STA(Inst):
+    modes = [ZpVal, ZpXVal, MemVal, MemXVal, MemYVal, IndirectXVal, IndirectYVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<STA({})>".format(self.value)
+
+
+class TXS(Inst):
+    def __repr__(self):
+        return "<TXS>"
+
+
+class TSX(Inst):
+    def __repr__(self):
+        return "<TSX>"
+
+
+class PHA(Inst):
+    def __repr__(self):
+        return "<PHA>"
+
+
+class PLA(Inst):
+    def __repr__(self):
+        return "<PLA>"
+
+
+class PHP(Inst):
+    def __repr__(self):
+        return "<PHP>"
+
+
+class PLP(Inst):
+    def __repr__(self):
+        return "<PLP>"
+
+
+class STX(Inst):
+    modes = [ZpVal, ZpYVal, MemVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<STX({})>".format(self.value)
+
+
+class STY(Inst):
+    modes = [ZpVal, ZpXVal, MemVal]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return "<STY({})>".format(self.value)
