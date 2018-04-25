@@ -1,20 +1,33 @@
 from .lexer import Lexer
 from .parser import Parser
 from .asm import Assemble
+from .tools import makedfs
 
 
-def asm_to_object(asm):
+def asm_to_object(asm, lda):
     lexer_inst = Lexer(asm)
     token_list = lexer_inst.tokenize()
 
     parser = Parser(token_list)
     insts = parser.parse()
 
-    assembler = Assemble(insts, 0xE00)
+    assembler = Assemble(insts, lda)
     assembler.fill_labels()
 
-    out = assembler.assemble()
-    return out
+    out, exa = assembler.assemble()
+    return bytes(out), exa
+
+
+def object_to_disk(obj, lda, exa):
+    disk = makedfs.Disk()
+    disk.new()
+
+    cat = disk.catalogue()
+    files = [makedfs.File("$.MAIN", obj, lda, exa)]
+    cat.write("", files)
+
+    disk.file.seek(0, 0)
+    return disk.file.read()
 
 
 def asm_to_basic(asm):
@@ -24,7 +37,7 @@ def asm_to_basic(asm):
         "DIM MC% {}".format(
             len([line for line in asm if line != "" and not line.startswith(".") and not line.startswith("\\")]) * 3),
         "FOR opt%=0 TO 2 STEP 2",
-        "P%=MC%",
+        "P%=&E00",
         "[",
         "OPT opt%",
     ]

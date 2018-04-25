@@ -24,4 +24,4 @@ class Assemble:
             out.extend(i.gen(addr))
             addr += len(i)
 
-        return out
+        return out, self.labels["_start"]

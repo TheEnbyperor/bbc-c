@@ -32,7 +32,12 @@ if __name__ == "__main__":
 
     asm = libc_asm + "\n" + asm
 
-    print(asm)
+    basic = bbcasm.asm_to_basic(asm)
+    # print(basic)
 
-    out = bbcasm.asm_to_object(asm)
-    print(out)
+    out, exa = bbcasm.asm_to_object(asm, 0xE00)
+
+    disk = bbcasm.object_to_disk(out, 0xE00, exa)
+
+    out_file = open("main.ssd", "wb")
+    out_file.write(disk)

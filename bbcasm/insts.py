@@ -224,7 +224,7 @@ class Branch(Inst):
                 break
 
         pos = self.value.loc
-        jmp = pos-addr
+        jmp = pos-addr-2
         return [inst] + list(struct.pack("<b", jmp))
 
 
