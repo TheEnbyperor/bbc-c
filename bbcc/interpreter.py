@@ -1,5 +1,4 @@
 from . import ast
-from . import decl_tree
 from . import il
 from . import ctypes
 
@@ -63,25 +62,33 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Function(self, node):
         func_name = node.name.identifier.value
+        old_scope = self.current_scope
+        self.current_scope = str(id(node))
+
         params = []
-        for i, p in enumerate(node.params):
-            if type(p.child) == decl_tree.Identifier:
-                var_name = p.child.identifier.value
-                var = self.scope.lookup(var_name, self.current_scope)
-                var.il_value.stack_offset = i*2
-                params.append(var)
+        offset = 0
+        for param in node.params:
+            param = ast.Declaration(param)
+            param = param.get_decls_info()[0]
+            param_name = param.identifier.value
+            param = self.scope.lookup(param_name, self.current_scope)
+            param.il_value.stack_offset = offset
+            offset += param.type.size
+            params.append(param)
         self.il.add(il.Function(params, "__{}".format(func_name)))
         self.current_function = "__{}".format(func_name)
-        self.visit(node.nodes)
+        for n in node.nodes.items:
+            self.visit(n)
         should_return = True
         if node.nodes.items is not None:
             if isinstance(node.nodes.items[-1], ast.Return):
                 should_return = False
         if should_return:
-            ctype = node.make_ctype()
+            ctype = node.make_ctype().ret
             il_value = il.ILValue(ctype)
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value, "__{}".format(func_name)))
+        self.current_scope = old_scope
 
     def visit_FuncCall(self, node):
         func_name = node.func.identifier.value
@@ -90,8 +97,7 @@ class Interpreter(ast.NodeVisitor):
         args = []
         for a, fa in zip(node.args, func.type.args):
             arg = self.visit(a)
-            print(fa)
-            if fa.is_pointer():
+            if fa.ctype.is_pointer():
                 arg = arg.addr(self.il)
 
             args.append(arg.val(self.il))
@@ -153,7 +159,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_DivEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(node.left.type)
+        output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Div(left_val, right, output))
         left.set_to(output, self.il)
@@ -435,6 +441,22 @@ class Interpreter(ast.NodeVisitor):
         self.current_loop["end"] = end_label
         self.visit(node.statement)
 
+        self.il.add(il.Jmp(start_label))
+
+        self.il.add(il.Label(end_label))
+
+    def visit_DoWhileStatement(self, node):
+        start_label = self.il.get_label()
+        end_label = self.il.get_label()
+
+        self.il.add(il.Label(start_label))
+
+        self.current_loop["start"] = start_label
+        self.current_loop["end"] = end_label
+        self.visit(node.statement)
+
+        condition = self.visit(node.condition).val(self.il)
+        self.il.add(il.JmpZero(condition, end_label))
         self.il.add(il.Jmp(start_label))
 
         self.il.add(il.Label(end_label))

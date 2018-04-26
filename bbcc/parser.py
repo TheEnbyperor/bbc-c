@@ -37,7 +37,6 @@ class Parser:
         if self.tokens[index:][0].type == EOF:
             return ast.TranslationUnit(items), index
         else:
-            # print(self.tokens[index:])
             self.error()
 
     def parse_external_deceleration(self, index):
@@ -298,7 +297,6 @@ class Parser:
 
         if kind in node_types:
             right, index = self.parse_assignment(index + 1)
-            print(self.tokens[index])
             return node_types[kind](left, right, op), index
         else:
             return left, index

@@ -82,7 +82,7 @@ class Function(AST):
 
     def __repr__(self):
         return "Function<{}:{}>({})\n{}".format(self.name, self.make_ctype(),
-                                                "\n".join(self.params),
+                                                "\n".join([str(p) for p in self.params]),
                                                 "  " + "  ".join(str(self.nodes).splitlines(True)))
 
     def make_ctype(self):
@@ -109,7 +109,11 @@ class Function(AST):
 
         if specs_str in specs:
             ctype = specs[specs_str]
-            return ctype
+            args = []
+            for p in self.params:
+                decl = Declaration(p)
+                args.append(decl.get_decls_info()[0])
+            return ctypes.FunctionCType(args, ctype)
 
         raise SyntaxError("Unrecognised type: {}".format(specs_str))
 
@@ -178,10 +182,7 @@ class Declaration(AST):
                     err = "storage class specified for function parameter"
                     raise SyntaxError(err)
 
-            args = [
-                self.get_decls_info(decl)[0].ctype
-                for decl in decl.args
-            ]
+            args = [self.get_decls_info(decl)[0].ctype for decl in decl.args]
             has_void = False
             for i in range(len(args)):
                 ctype = args[i]

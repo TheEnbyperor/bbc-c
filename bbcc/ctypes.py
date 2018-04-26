@@ -102,7 +102,7 @@ class ArrayCType(CType):
     def __init__(self, el, n):
         self.el = el
         self.n = n
-        super().__init__(n * self.el.size)
+        super().__init__((n or 1) * self.el.size)
 
     def is_complete(self):
         return self.n is not None

@@ -143,7 +143,6 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Declaration(self, node):
         decl_infos = node.get_decls_info()
-
         for d in decl_infos:
             if type(d.ctype) == ctypes.FunctionCType:
                 func_name = d.identifier.value
@@ -162,15 +161,23 @@ class SymbolTableBuilder(ast.NodeVisitor):
         func_name = node.name.identifier.value
         func_symbol = FunctionSymbol(func_name, node.make_ctype())
         self.scope.define(func_symbol)
+        procedure_scope = ScopedSymbolTable(
+            scope_name=str(id(node)),
+            scope_level=self.scope.scope_level + 1,
+            enclosing_scope=self.scope,
+        )
+        self.scope = procedure_scope
         for param in node.params:
-            type_name = param.specs[-1].type
-            type_symbol = self.scope.lookup(type_name)
-            if type(param.child) == decl_tree.Identifier:
-                param_name = param.child.identifier.value
-                if self.scope.lookup(param_name, current_scope_only=True):
-                    raise SyntaxError("Duplicate identifier '%s' found" % param_name)
-                self.scope.define(VarSymbol(param_name, type_symbol))
-        self.visit(node.nodes)
+            param = ast.Declaration(param)
+            param = param.get_decls_info()[0]
+            param_name = param.identifier.value
+            if self.scope.lookup(param_name, current_scope_only=True):
+                raise SyntaxError("Duplicate identifier '%s' found" % param_name)
+            self.scope.define(VarSymbol(param_name, param.ctype))
+        for n in node.nodes.items:
+            self.visit(n)
+        self.scope_out.add_scope(procedure_scope)
+        self.scope = self.scope.enclosing_scope
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
@@ -324,6 +331,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
     def visit_WhileStatement(self, node):
         self.visit(node.condition)
         self.visit(node.statement)
+
+    def visit_DoWhileStatement(self, node):
+        self.visit(node.statement)
+        self.visit(node.condition)
 
     def visit_ForStatement(self, node):
         self.visit(node.first)
