@@ -139,7 +139,7 @@ class IndirectYVal(Value):
 
 
 class Inst:
-    label = None
+    labels = []
     modes = []
     value = None
     inst = None

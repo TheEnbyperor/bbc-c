@@ -179,106 +179,20 @@ LDA #00
 STA &76
 LDA &73
 CMP &75
-BCC __bbcc_00000004
-BNE __bbcc_00000005
+BCC __bbcc_00000008
+BNE __bbcc_00000009
 LDA &72
 CMP &74
-BCS __bbcc_00000005
-.__bbcc_00000004 LDA #01
+BCS __bbcc_00000009
+.__bbcc_00000008 LDA #01
 STA &77
-.__bbcc_00000005 
+.__bbcc_00000009 
 
 \ JmpZero
 LDA &76
-BNE __bbcc_00000006
+BNE __bbcc_0000000a
 JMP __bbcc_00000001
-.__bbcc_00000006 
-
-\ Mult
-LDA #&01
-STA &78
-LDA &72
-STA &76
-LDA &73
-STA &77
-LDA #0
-STA &7A
-STA &7B
-LDX #&10
-.__bbcc_00000007 
-LSR &77
-ROR &76
-BCC __bbcc_00000008
-CLC
-LDA &78
-ADC &7A
-STA &7A
-LDA #0
-ADC &7B
-STA &7B
-.__bbcc_00000008 CLC
-ASL &78
-DEX
-BNE __bbcc_00000007
-
-\ Add
-CLC
-LDA #0
-STA &76
-
-\ ReadAt
-LDA &77
-STA &79
-LDA &76
-STA &78
-LDY #&00
-LDA (&78),Y
-STA &7A
-
-\ Set
-LDA &7A
-STA &76
-
-\ Mult
-LDA #&01
-STA &78
-LDA &74
-STA &76
-LDA &75
-STA &77
-LDA #0
-STA &7A
-STA &7B
-LDX #&10
-.__bbcc_00000009 
-LSR &77
-ROR &76
-BCC __bbcc_0000000a
-CLC
-LDA &78
-ADC &7A
-STA &7A
-LDA #0
-ADC &7B
-STA &7B
-.__bbcc_0000000a CLC
-ASL &78
-DEX
-BNE __bbcc_00000009
-
-\ Add
-CLC
-LDA #0
-STA &76
-
-\ ReadAt
-LDA &77
-STA &79
-LDA &76
-STA &78
-LDY #&00
-LDA (&78),Y
-STA &7A
+.__bbcc_0000000a 
 
 \ Mult
 LDA #&01
@@ -312,14 +226,18 @@ CLC
 LDA #0
 STA &76
 
-\ SetAt
-LDA &76
-STA &78
+\ ReadAt
 LDA &77
 STA &79
-LDA &7A
+LDA &76
+STA &78
 LDY #&00
-STA (&78),Y
+LDA (&78),Y
+STA &7A
+
+\ Set
+LDA &7A
+STA &76
 
 \ Mult
 LDA #&01
@@ -353,6 +271,88 @@ CLC
 LDA #0
 STA &76
 
+\ ReadAt
+LDA &77
+STA &79
+LDA &76
+STA &78
+LDY #&00
+LDA (&78),Y
+STA &7A
+
+\ Mult
+LDA #&01
+STA &78
+LDA &72
+STA &76
+LDA &73
+STA &77
+LDA #0
+STA &7A
+STA &7B
+LDX #&10
+.__bbcc_0000000f 
+LSR &77
+ROR &76
+BCC __bbcc_00000010
+CLC
+LDA &78
+ADC &7A
+STA &7A
+LDA #0
+ADC &7B
+STA &7B
+.__bbcc_00000010 CLC
+ASL &78
+DEX
+BNE __bbcc_0000000f
+
+\ Add
+CLC
+LDA #0
+STA &76
+
+\ SetAt
+LDA &76
+STA &78
+LDA &77
+STA &79
+LDA &7A
+LDY #&00
+STA (&78),Y
+
+\ Mult
+LDA #&01
+STA &78
+LDA &74
+STA &76
+LDA &75
+STA &77
+LDA #0
+STA &7A
+STA &7B
+LDX #&10
+.__bbcc_00000011 
+LSR &77
+ROR &76
+BCC __bbcc_00000012
+CLC
+LDA &78
+ADC &7A
+STA &7A
+LDA #0
+ADC &7B
+STA &7B
+.__bbcc_00000012 CLC
+ASL &78
+DEX
+BNE __bbcc_00000011
+
+\ Add
+CLC
+LDA #0
+STA &76
+
 \ SetAt
 LDA &76
 STA &78
@@ -370,9 +370,9 @@ STA &77
 
 \ Inc
 INC &72
-BNE __bbcc_0000000f
+BNE __bbcc_00000013
 INC &73
-.__bbcc_0000000f 
+.__bbcc_00000013 
 
 \ Set
 LDA &74
@@ -382,9 +382,9 @@ STA &73
 
 \ Dec
 LDA &74
-BNE __bbcc_00000010
+BNE __bbcc_00000014
 DEC &75
-.__bbcc_00000010 
+.__bbcc_00000014 
 DEC &74
 
 \ Jmp
@@ -471,7 +471,7 @@ LDA #0
 STA &78
 STA &79
 LDX #&10
-.__bbcc_00000011 
+.__bbcc_00000015 
 ASL &76
 ROL &77
 ROL &78
@@ -482,16 +482,16 @@ SBC &74
 PHA
 LDA &79
 SBC &75
-BCC __bbcc_00000012
+BCC __bbcc_00000016
 STA &79
 PLA
 STA &78
 INC &76
-JMP __bbcc_00000013
-.__bbcc_00000012 
+JMP __bbcc_00000017
+.__bbcc_00000016 
 PLA
-.__bbcc_00000013 DEX
-BNE __bbcc_00000011
+.__bbcc_00000017 DEX
+BNE __bbcc_00000015
 
 \ Add
 CLC
@@ -508,9 +508,9 @@ STA &75
 
 \ Inc
 INC &72
-BNE __bbcc_00000014
+BNE __bbcc_00000018
 INC &73
-.__bbcc_00000014 
+.__bbcc_00000018 
 
 \ Mult
 LDA #&01
@@ -523,10 +523,10 @@ LDA #0
 STA &7A
 STA &7B
 LDX #&10
-.__bbcc_00000015 
+.__bbcc_00000019 
 LSR &77
 ROR &76
-BCC __bbcc_00000016
+BCC __bbcc_0000001a
 CLC
 LDA &78
 ADC &7A
@@ -534,10 +534,10 @@ STA &7A
 LDA #0
 ADC &7B
 STA &7B
-.__bbcc_00000016 CLC
+.__bbcc_0000001a CLC
 ASL &78
 DEX
-BNE __bbcc_00000015
+BNE __bbcc_00000019
 
 \ Add
 CLC
@@ -571,7 +571,7 @@ LDA #0
 STA &74
 STA &75
 LDX #&10
-.__bbcc_00000017 
+.__bbcc_0000001b 
 ASL &78
 ROL &79
 ROL &74
@@ -582,16 +582,16 @@ SBC &76
 PHA
 LDA &75
 SBC &77
-BCC __bbcc_00000018
+BCC __bbcc_0000001c
 STA &75
 PLA
 STA &74
 INC &78
-JMP __bbcc_00000019
-.__bbcc_00000018 
+JMP __bbcc_0000001d
+.__bbcc_0000001c 
 PLA
-.__bbcc_00000019 DEX
-BNE __bbcc_00000017
+.__bbcc_0000001d DEX
+BNE __bbcc_0000001b
 LDA &78
 STA &7A
 LDA &79
@@ -611,22 +611,22 @@ STA &74
 LDY #&01
 LDA (&8E),Y
 CMP #&00
-BCC __bbcc_0000001b
-BNE __bbcc_0000001a
+BCC __bbcc_0000001f
+BNE __bbcc_0000001e
 LDY #&00
 LDA (&8E),Y
 CMP #&00
-BEQ __bbcc_0000001b
-BCC __bbcc_0000001b
-.__bbcc_0000001a LDA #01
+BEQ __bbcc_0000001f
+BCC __bbcc_0000001f
+.__bbcc_0000001e LDA #01
 STA &75
-.__bbcc_0000001b 
+.__bbcc_0000001f 
 
 \ JmpZero
 LDA &74
-BNE __bbcc_0000001c
+BNE __bbcc_00000020
 JMP __bbcc_00000003
-.__bbcc_0000001c 
+.__bbcc_00000020 
 
 \ Jmp
 JMP __bbcc_00000002
@@ -645,10 +645,10 @@ LDA #0
 STA &78
 STA &79
 LDX #&10
-.__bbcc_0000001d 
+.__bbcc_00000021 
 LSR &75
 ROR &74
-BCC __bbcc_0000001e
+BCC __bbcc_00000022
 CLC
 LDA &76
 ADC &78
@@ -656,10 +656,10 @@ STA &78
 LDA #0
 ADC &79
 STA &79
-.__bbcc_0000001e CLC
+.__bbcc_00000022 CLC
 ASL &76
 DEX
-BNE __bbcc_0000001d
+BNE __bbcc_00000021
 
 \ Add
 CLC
@@ -711,13 +711,13 @@ STA &79
 PLA
 STA &78
 PLA
-STA &73
-PLA
-STA &72
-PLA
 STA &75
 PLA
 STA &74
+PLA
+STA &73
+PLA
+STA &72
 RTS
 
 \ Function
@@ -730,41 +730,233 @@ LDA &74
 PHA
 LDA &75
 PHA
+LDA &76
+PHA
+LDA &77
+PHA
 
 \ Mult
 LDA #&03
+STA &74
+LDA #&00
+STA &75
+LDA #&0A
 STA &72
 LDA #&00
 STA &73
-LDA #&0A
+LDA #0
+STA &76
+STA &77
+LDX #&10
+.__bbcc_00000023 
+LSR &73
+ROR &72
+BCC __bbcc_00000024
+CLC
+LDA &74
+ADC &76
+STA &76
+LDA &75
+ADC &77
+STA &77
+.__bbcc_00000024 CLC
+ASL &74
+ROL &75
+DEX
+BNE __bbcc_00000023
+
+\ Return
+LDA &76
+STA &70
+LDA &77
+STA &71
+PLA
+STA &73
+PLA
+STA &72
+PLA
+STA &75
+PLA
+STA &74
+PLA
+STA &77
+PLA
+STA &76
+RTS
+
+\ Function
+.__Fibonacci 
+LDA &74
+PHA
+LDA &75
+PHA
+LDA &72
+PHA
+LDA &73
+PHA
+
+\ EqualCmp
+LDA #00
+STA &72
+LDY #&00
+LDA (&8E),Y
+CMP #&00
+BNE __bbcc_00000025
+LDY #&01
+LDA (&8E),Y
+CMP #&00
+BNE __bbcc_00000025
+LDA #01
+STA &72
+.__bbcc_00000025 
+
+\ JmpZero
+LDA &72
+BNE __bbcc_00000026
+JMP __bbcc_00000004
+.__bbcc_00000026 
+
+\ Return
+LDA #&00
 STA &70
 LDA #&00
 STA &71
+PLA
+STA &73
+PLA
+STA &72
+PLA
+STA &75
+PLA
+STA &74
+RTS
+
+\ Jmp
+JMP __bbcc_00000005
+
+\ Label
+.__bbcc_00000004 
+
+\ EqualCmp
+LDA #00
+STA &72
+LDY #&00
+LDA (&8E),Y
+CMP #&01
+BNE __bbcc_00000027
+LDY #&01
+LDA (&8E),Y
+CMP #&00
+BNE __bbcc_00000027
+LDA #01
+STA &72
+.__bbcc_00000027 
+
+\ JmpZero
+LDA &72
+BNE __bbcc_00000028
+JMP __bbcc_00000006
+.__bbcc_00000028 
+
+\ Return
+LDA #&01
+STA &70
+LDA #&00
+STA &71
+PLA
+STA &73
+PLA
+STA &72
+PLA
+STA &75
+PLA
+STA &74
+RTS
+
+\ Jmp
+JMP __bbcc_00000007
+
+\ Label
+.__bbcc_00000006 
+
+\ Sub
+SEC
+LDA #0
+STA &72
+LDA #0
+STA &73
+
+\ CallFunction
+LDA &72
+JSR _bbcc_pusha
+LDA &73
+JSR _bbcc_pusha
+JSR __Fibonacci
+CLC
+LDA &8E
+ADC #&02
+STA &8E
+LDA &8F
+ADC #&00
+STA &8F
+LDA &70
+STA &72
+LDA &71
+STA &73
+
+\ Sub
+SEC
 LDA #0
 STA &74
+LDA #0
 STA &75
-LDX #&10
-.__bbcc_0000001f 
-LSR &71
-ROR &70
-BCC __bbcc_00000020
+
+\ CallFunction
+LDA &74
+JSR _bbcc_pusha
+LDA &75
+JSR _bbcc_pusha
+JSR __Fibonacci
 CLC
-LDA &72
-ADC &74
+LDA &8E
+ADC #&02
+STA &8E
+LDA &8F
+ADC #&00
+STA &8F
+
+\ Add
+CLC
+LDA #0
 STA &74
-LDA &73
-ADC &75
+LDA #0
 STA &75
-.__bbcc_00000020 CLC
-ASL &72
-ROL &73
-DEX
-BNE __bbcc_0000001f
 
 \ Return
 LDA &74
 STA &70
 LDA &75
+STA &71
+PLA
+STA &73
+PLA
+STA &72
+PLA
+STA &75
+PLA
+STA &74
+RTS
+
+\ Label
+.__bbcc_00000007 
+
+\ Label
+.__bbcc_00000005 
+
+\ Return
+LDA #&00
+STA &70
+LDA #&00
 STA &71
 PLA
 STA &73
