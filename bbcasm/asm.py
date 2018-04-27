@@ -10,8 +10,9 @@ class Assemble:
     def fill_labels(self):
         addr = self.addr
         for i in self.insts:
-            if i.label is not None:
-                self.labels[i.label] = addr
+            if len(i.labels) > 0:
+                for l in i.labels:
+                    self.labels[l] = addr
             addr += len(i)
         for n, i in enumerate(self.insts):
             if isinstance(i.value, insts.LabelVal):

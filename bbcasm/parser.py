@@ -7,7 +7,7 @@ import inspect
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
-        self.cur_label = None
+        self.cur_labels = []
         self.insts = []
         self.ops = {}
         clsmembers = inspect.getmembers(sys.modules[insts.__name__], inspect.isclass)
@@ -152,12 +152,12 @@ class Parser:
             t = self.tokens[index]
             if t.type == ID:
                 inst, index = self.parse_inst(index)
-                if self.cur_label is not None:
-                    inst.label = self.cur_label
-                    self.cur_label = None
+                if len(self.cur_labels) > 0:
+                    inst.labels = self.cur_labels
+                    self.cur_labels = []
                 self.insts.append(inst)
             elif t.type == LABEL:
-                self.cur_label = t.value
+                self.cur_labels.append(t.value)
                 index += 1
             else:
                 index += 1

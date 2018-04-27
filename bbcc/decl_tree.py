@@ -9,11 +9,18 @@ class Root(Node):
     child (Node) - child declaration node
     """
 
-    def __init__(self, specs, decls, inits):
+    def __init__(self, specs, decls, inits=None):
         """Generate root node."""
         self.specs = specs
         self.decls = decls
-        self.inits = inits
+
+        if inits:
+            self.inits = inits
+        else:
+            self.inits = [None] * len(self.decls)
+
+    def __repr__(self):
+        return str(self.decls)
 
 
 class Pointer(Node):
@@ -23,6 +30,9 @@ class Pointer(Node):
         """Generate pointer node."""
         self.child = child
         self.const = const
+
+    def __repr__(self):
+        return str(self.child)
 
 
 class Array(Node):

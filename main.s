@@ -216,4 +216,3 @@ L0023:	asl     a
 L002A:	rts
 
 .endproc
-

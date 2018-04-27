@@ -72,6 +72,9 @@ class Lexer:
             elif self.current_char == "#":
                 self.advance()
                 tokens.append(Token(HASH, "#"))
+            elif self.current_char == ".":
+                self.advance()
+                tokens.append(Token(PERIOD, "."))
 
             elif self.current_char == "&":
                 self.advance()
