@@ -51,7 +51,7 @@ class Lexer:
 
     def string(self):
         result = ''
-        while self.current_char is not None and not self.current_char.isspace():
+        while self.current_char is not None and not self.current_char.isspace() and not self.current_char == ":":
             result += self.current_char
             self.advance()
         return result
@@ -68,10 +68,6 @@ class Lexer:
             elif self.current_char == "\\":
                 self.advance()
                 self.skip_line_comment()
-
-            elif self.current_char == "." and not self.peek().isspace():
-                self.advance()
-                tokens.append(Token(LABEL, self.string()))
 
             elif self.current_char == "#":
                 self.advance()
@@ -94,7 +90,12 @@ class Lexer:
                 tokens.append(Token(COMMA, ","))
 
             elif not self.current_char.isspace():
-                tokens.append(Token(ID, self.string()))
+                string = self.string()
+                if self.current_char == ":":
+                    self.advance()
+                    tokens.append(Token(LABEL, string))
+                else:
+                    tokens.append(Token(ID, string))
 
             else:
                 self.advance()

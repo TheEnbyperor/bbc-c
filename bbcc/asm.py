@@ -28,7 +28,7 @@ class ASM:
 
     def add_inst(self, isnt="", op="", label=""):
         if label != "":
-            self.asm += "." + label + " "
+            self.asm += "{}: ".format(label)
         self.asm += isnt.upper()
         if op != "":
             self.asm += " " + str(op)

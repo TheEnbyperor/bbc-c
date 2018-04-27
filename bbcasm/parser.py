@@ -126,6 +126,9 @@ class Parser:
         inst = self.tokens[index].value
         op = self.ops.get(inst.upper())
 
+        if op is None:
+            self.error()
+
         if len(op.modes) > 0:
             value = None
             for m in op.modes:
