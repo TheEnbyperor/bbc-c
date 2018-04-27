@@ -9,9 +9,9 @@ def asm_to_object(asm, lda):
     token_list = lexer_inst.tokenize()
 
     parser = Parser(token_list)
-    insts = parser.parse()
+    prog = parser.parse()
 
-    assembler = Assemble(insts, lda)
+    assembler = Assemble(prog, lda)
     assembler.fill_labels()
 
     out, exa = assembler.assemble()

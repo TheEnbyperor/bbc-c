@@ -1,3 +1,5 @@
+.export _main
+
 __putchar:
 LDY #00
 LDA (&8E),Y

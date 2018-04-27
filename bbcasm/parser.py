@@ -4,16 +4,36 @@ import sys
 import inspect
 
 
+class Prog:
+    insts = []
+    imports = []
+    exports = []
+
+    def __int__(self, insts=None, imports=None, exports=None):
+        if exports is None:
+            exports = []
+        if imports is None:
+            imports = []
+        if insts is None:
+            insts = []
+
+        self.insts = insts
+        self.imports = imports
+        self.exports = exports
+
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
         self.cur_labels = []
-        self.insts = []
+
         self.ops = {}
         clsmembers = inspect.getmembers(sys.modules[insts.__name__], inspect.isclass)
         for c in clsmembers:
             if issubclass(c[1], insts.Inst):
                 self.ops[c[0]] = c[1]
+
+        self.prog = Prog()
 
     def error(self):
         raise SyntaxError("Invalid syntax")
@@ -146,6 +166,26 @@ class Parser:
 
         return op(), index+1
 
+    def parse_cmd(self, index):
+        cmd = self.tokens[index].value
+
+        parser = getattr(self, "parse_cmd_{}".format(cmd), self.parse_default)
+        index = parser(index + 1)
+
+        return index
+
+    def parse_cmd_export(self, index):
+        if self.token_is(index, ID):
+            self.prog.exports.append(self.tokens[index].value)
+            return index + 1
+        self.error()
+
+    def parse_cmd_import(self, index):
+        if self.token_is(index, ID):
+            self.prog.imports.append(self.tokens[index].value)
+            return index + 1
+        self.error()
+
     def parse(self):
         index = 0
         while self.tokens[index].type != EOF:
@@ -155,11 +195,16 @@ class Parser:
                 if len(self.cur_labels) > 0:
                     inst.labels = self.cur_labels
                     self.cur_labels = []
-                self.insts.append(inst)
+                self.prog.insts.append(inst)
+
             elif t.type == LABEL:
                 self.cur_labels.append(t.value)
                 index += 1
-            else:
-                index += 1
 
-        return self.insts
+            elif t.type == PERIOD:
+                index = self.parse_cmd(index+1)
+
+            else:
+                self.error()
+
+        return self.prog

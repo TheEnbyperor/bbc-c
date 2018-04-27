@@ -1,5 +1,5 @@
 // Comment
-#include <stdio.h>
+#include "stdio.h"
 
 void reverse(char s[], int len) {
   int i, j;
@@ -26,8 +26,6 @@ void itoa(int n, char s[]) {
 #define BUF_LEN 10
 
 int main() {
-
-	printf("Hello, world!\n");
     return 3 * BUF_LEN;
 }
 
