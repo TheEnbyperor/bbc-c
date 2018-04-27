@@ -1,4 +1,5 @@
 from . import asm
+from . import ast
 from . import spots
 from . import ctypes
 
@@ -10,9 +11,11 @@ stack_register = spots.Pseudo16RegisterSpot(asm.ASM.cstck, ctypes.integer)
 
 
 class ILValue:
-    def __init__(self, value_type, zp_needed=False):
+    def __init__(self, value_type, zp_needed=False, storage=None, name=None):
         self.type = value_type
         self.stack_offset = None
+        self.storage = storage
+        self.name = name
         self.zp_needed = zp_needed
 
     def val(self, il_code):
@@ -392,7 +395,7 @@ class Add(ILInst):
 
         assembly.add_inst("CLC")
         for i in range(output.type.size):
-            if i < left.type.size and i < right.type.size:
+            if i > left.type.size and i > right.type.size:
                 assembly.add_inst("LDA", "#0")
             else:
                 if i < left.type.size:
@@ -400,7 +403,7 @@ class Add(ILInst):
                 else:
                     assembly.add_inst("LDA", "#0")
                 if i < right.type.size:
-                    left.asm(assembly, "ADC", i)
+                    right.asm(assembly, "ADC", i)
                 else:
                     assembly.add_inst("LDA", "#0")
             output.asm(assembly, "STA", i)
@@ -926,12 +929,13 @@ class MoreEqualCmp(ILInst):
 
 
 class IL:
-    def __init__(self):
+    def __init__(self, symbol_table):
         self.commands = []
         self.literals = {}
         self.string_literals = {}
         self.label_count = 0
         self.spotmap = {}
+        self.symbol_table = symbol_table
 
     def register_literal_value(self, il_value: ILValue, value):
         self.literals[il_value] = value
@@ -951,6 +955,28 @@ class IL:
         self.commands.append(command)
 
     def gen_asm(self, assembly: asm.ASM):
+        exports = []
+        imports = []
+        for c in self.commands:
+            if isinstance(c, Function):
+                exports.append(c.func_name)
+        for c in self.commands:
+            if isinstance(c, CallFunction):
+                if c.name not in exports:
+                    imports.append(c.name)
+
+        for n, s in self.symbol_table.symbols.items():
+            if not s.type.is_function():
+                if s.storage == ast.DeclInfo.EXTERN:
+                    imports.append("__{}".format(n))
+                else:
+                    exports.append("__{}".format(n))
+
+        for e in exports:
+            assembly.add_inst(".export", e)
+        for i in imports:
+            assembly.add_inst(".import", i)
+
         self._print_commands()
 
         spotmap = self.spotmap
@@ -984,32 +1010,31 @@ class IL:
                             current_function = ""
             for v in (c.inputs() + c.outputs() + c.scratch_spaces())[::-1]:
                 if v not in spotmap:
-                    if current_function == "":
+                    if v.storage == ast.DeclInfo.EXTERN:
+                        spotmap[v] = spots.LabelMemorySpot("__{}".format(v.name), v.type)
+                    elif current_function == "":
                         spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
                         mem_start += v.type.size
-                    else:
-                        if v.stack_offset is None and v not in move_to_mem:
-                            reg = self._find_register(spotmap, i)
-                            if reg is not None:
-                                spotmap[v] = spots.Pseudo16RegisterSpot(reg, v.type)
-                            else:
-                                if v.zp_needed:
-                                    raise RuntimeError("Unable to find ZP location for {}".format(i))
-                                spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
-                                mem_start += 2
-                        elif v.stack_offset is not None:
-                            if isinstance(c, Function):
-                                if max_stack_offset.get(c.func_name) is None:
-                                    max_stack_offset[c.func_name] = v.stack_offset
-                                else:
-                                    if max_stack_offset[c.func_name] < v.stack_offset:
-                                        max_stack_offset[c.func_name] = v.stack_offset
-                            spotmap[v] = spots.StackSpot(v.stack_offset, v.type)
+                    elif v.stack_offset is None and v not in move_to_mem:
+                        reg = self._find_register(spotmap, i)
+                        if reg is not None:
+                            spotmap[v] = spots.Pseudo16RegisterSpot(reg, v.type)
                         else:
-                            if not isinstance(c, Function):
-                                if v.type.is_array():
-                                    spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
-                                    mem_start += v.type.size
+                            if v.zp_needed:
+                                raise RuntimeError("Unable to find ZP location for {}".format(i))
+                            spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
+                            mem_start += 2
+                    elif v.stack_offset is not None:
+                        if isinstance(c, Function):
+                            if max_stack_offset.get(c.func_name) is None:
+                                max_stack_offset[c.func_name] = v.stack_offset
+                            elif max_stack_offset[c.func_name] < v.stack_offset:
+                                max_stack_offset[c.func_name] = v.stack_offset
+                        spotmap[v] = spots.StackSpot(v.stack_offset, v.type)
+                    elif not isinstance(c, Function):
+                        if v.type.is_array():
+                            spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
+                            mem_start += v.type.size
 
         self._print_spotmap(spotmap)
 

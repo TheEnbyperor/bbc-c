@@ -247,7 +247,8 @@ class Declaration(AST):
 
     def get_storage(self, spec_kinds):
         storage_classes = {tokens.AUTO: DeclInfo.AUTO,
-                           tokens.STATIC: DeclInfo.STATIC}
+                           tokens.STATIC: DeclInfo.STATIC,
+                           tokens.EXTERN: DeclInfo.EXTERN}
 
         storage = None
         for kind in spec_kinds:

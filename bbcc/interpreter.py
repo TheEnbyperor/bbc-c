@@ -16,33 +16,25 @@ class Interpreter(ast.NodeVisitor):
             "start": "",
             "end": ""
         }
+        self.exports = []
 
     def visit_TranslationUnit(self, node):
         self.il.add(il.Routines())
-
-        self.il.add(il.Label("_setup_global"))
-        for n in node.items:
-            if isinstance(n, ast.Declaration):
-                self.visit(n)
-        self.il.add(il.Return(None, epilouge=False))
 
         ret_val = il.ILValue(ctypes.char)
         self.il.add(il.Function([], "_start", prolouge=False))
 
         stack_start = il.ILValue(ctypes.unsig_int)
         stack_register = il.ILValue(ctypes.unsig_char)
-        self.il.register_literal_value(stack_start, 0x0018)
+        self.il.register_literal_value(stack_start, 0x1800)
         self.il.register_spot_value(stack_register, il.stack_register)
         self.il.add(il.Set(stack_start, stack_register))
-
-        self.il.add(il.JmpSub("_setup_global"))
 
         self.il.add(il.CallFunction("__main", [], ret_val))
         self.il.add(il.Return(ret_val, "_start", epilouge=False))
 
         for n in node.items:
-            if isinstance(n, ast.Function):
-                self.visit(n)
+            self.visit(n)
 
     def visit_Declaration(self, node):
         decl_infos = node.get_decls_info()
@@ -50,15 +42,17 @@ class Interpreter(ast.NodeVisitor):
         for d in decl_infos:
             if type(d.ctype) != ctypes.FunctionCType:
                 var_name = d.identifier.value
-                var = self.scope.lookup(var_name, self.current_scope)
-                if type(var.type) == ctypes.IntegerCType:
-                    if d.init is None:
-                        val = il.ILValue(var.type)
-                        self.il.register_literal_value(val, 0)
-                        self.il.add(il.Set(val, var.il_value))
-                    else:
-                        val = self.visit(d.init).val(self.il)
-                        self.il.add(il.Set(val, var.il_value))
+                var_global = self.scope.lookup(var_name, "")
+                if var_global is None:
+                    var = self.scope.lookup(var_name, self.current_scope)
+                    if type(var.type) == ctypes.IntegerCType:
+                        if d.init is None:
+                            val = il.ILValue(var.type)
+                            self.il.register_literal_value(val, 0)
+                            self.il.add(il.Set(val, var.il_value))
+                        else:
+                            val = self.visit(d.init).val(self.il)
+                            self.il.add(il.Set(val, var.il_value))
 
     def visit_Function(self, node):
         func_name = node.name.identifier.value

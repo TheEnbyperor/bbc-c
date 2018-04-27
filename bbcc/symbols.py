@@ -1,7 +1,6 @@
 import collections
 
 from . import ast
-from . import decl_tree
 from . import il
 from . import ctypes
 
@@ -13,12 +12,14 @@ class Symbol:
 
 
 class VarSymbol(Symbol):
-    def __init__(self, name, var_type):
+    def __init__(self, name, var_type, storage):
         super(VarSymbol, self).__init__(name, var_type)
-        self.il_value = il.ILValue(var_type)
+        self.il_value = il.ILValue(var_type, storage=storage, name=name)
+        self.storage = storage
 
     def __str__(self):
-        return '<VAR({name}:{type}:{il_value})>'.format(name=self.name, type=self.type, il_value=self.il_value)
+        return '<VAR({name}:{type}:{il_value}:{storage})>'.format(name=self.name, type=self.type,
+                                                                  il_value=self.il_value, storage=self.storage)
 
     __repr__ = __str__
 
@@ -114,19 +115,17 @@ class SymbolTable(object):
     __repr__ = __str__
 
     def lookup(self, name, scope_name=""):
-        if scope_name == "":
-            scope = self
-        else:
+        if scope_name != "":
             scope = None
             for s in self.sub_scopes:
                 if s.scope_name == scope_name:
                     scope = s
                     break
-        r = scope.lookup(name)
-        if r is not None:
-            return r
-
-        return self.symbols.get(name)
+            r = scope.lookup(name)
+            if r is not None:
+                return r
+        else:
+            return self.symbols.get(name)
 
 
 class SymbolTableBuilder(ast.NodeVisitor):
@@ -153,7 +152,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 var_name = d.identifier.value
                 if self.scope.lookup(var_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % var_name)
-                self.scope.define(VarSymbol(var_name, d.ctype))
+                self.scope.define(VarSymbol(var_name, d.ctype, d.storage))
                 if d.init is not None:
                     self.visit(d.init)
 
@@ -173,7 +172,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
             param_name = param.identifier.value
             if self.scope.lookup(param_name, current_scope_only=True):
                 raise SyntaxError("Duplicate identifier '%s' found" % param_name)
-            self.scope.define(VarSymbol(param_name, param.ctype))
+            self.scope.define(VarSymbol(param_name, param.ctype, None))
         for n in node.nodes.items:
             self.visit(n)
         self.scope_out.add_scope(procedure_scope)

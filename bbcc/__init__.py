@@ -22,7 +22,8 @@ def main(text: str):
     symbol_table_builder = SymbolTableBuilder()
     symbol_table_builder.visit(ast_out)
     symbol_table = symbol_table_builder.scope_out
-    il = IL()
+
+    il = IL(symbol_table)
     interp = Interpreter(symbol_table, il)
 
     il_out = interp.interpret(ast_out)

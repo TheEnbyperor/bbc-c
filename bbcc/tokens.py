@@ -3,7 +3,7 @@ INTEGER, CHARACTER, STRING, \
     EQUALS, PLUSEQUALS, MINUSEQUALS, STAREQUALS, DIVEQUALS, MODEQUALS, \
     BOOLOR, BOOLAND, BOOLEQUALS, BOOLNOT, LESSTHAN, MORETHAN, LESSEQUAL, MOREEQUAL, \
     ID, INT, CHAR, VOID, BOOL, RETURN, LBRACE, RBRACE, LBRACK, RBRACK, COMMA, BREAK, CONTINUE, \
-    SIGNED, UNISGNED, STATIC, AUTO, CONST, \
+    SIGNED, UNISGNED, STATIC, AUTO, CONST, EXTERN, \
     INCR, DECR, AMP, STAR, NOT, \
     IF, ELSE, WHILE, DO, FOR, EOF, \
     HASH, NEWLINE = \
@@ -12,7 +12,7 @@ INTEGER, CHARACTER, STRING, \
     "EQUALS", "PLUSEQUALS", "MINUSEQUALS", "STAREQUALS", "DIVEQUALS", "MODEQUALS", \
     "BOOLOR", "BOOLAND", "BOOLEQUALS", "BOOLNOT", "LESSTHAN", "MORETHAN", "LESSEQUAL", "MOREEQUAL", \
     "ID", "int", "char", "void", "bool", "RETURN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", "COMMA", "BREAK", "CONTINUE", \
-    "signed", "unsigned", "static", "auto", "const", \
+    "signed", "unsigned", "static", "auto", "const", "extern", \
     "INCR", "DECR", "AMP", "STAR", "NOT", \
     "IF", "ELSE", "WHILE", "DO", "FOR", "EOF", \
     "HASH", "NEWLINE"
@@ -52,6 +52,7 @@ MODIFIERS = {
     'auto': Token(AUTO, 'auto'),
     'static': Token(STATIC, 'static'),
     'const': Token(CONST, 'const'),
+    'extern': Token(EXTERN, 'extern'),
 }
 
 RESERVED_KEYWORDS = dict(TYPES, **dict(MODIFIERS, **{

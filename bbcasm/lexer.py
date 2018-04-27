@@ -51,7 +51,7 @@ class Lexer:
 
     def string(self):
         result = ''
-        while self.current_char is not None and not self.current_char.isspace() and not self.current_char == ":":
+        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == "_"):
             result += self.current_char
             self.advance()
         return result
@@ -88,6 +88,12 @@ class Lexer:
             elif self.current_char == ")":
                 self.advance()
                 tokens.append(Token(RPAREM, ")"))
+            elif self.current_char == "<":
+                self.advance()
+                tokens.append(Token(LT, "<"))
+            elif self.current_char == ">":
+                self.advance()
+                tokens.append(Token(GT, ">"))
             elif self.current_char == ",":
                 self.advance()
                 tokens.append(Token(COMMA, ","))

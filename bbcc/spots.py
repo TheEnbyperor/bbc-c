@@ -76,6 +76,33 @@ class AbsoluteMemorySpot(Spot):
         return self.__str__()
 
 
+class LabelMemorySpot(Spot):
+    def __init__(self, label, value_type):
+        self.label = label
+        self.type = value_type
+
+    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
+        if loc == 0:
+            char = "<"
+        elif loc == 1:
+            char = ">"
+        else:
+            raise NotImplementedError("Label memory spot cannot be accessed at offset {}".format(loc))
+        assembly.add_inst(inst, extra("{}({})".format(char, self.label)))
+
+    def __eq__(self, other):
+        if isinstance(other, LabelMemorySpot):
+            if other.label == self.label:
+                return True
+        return False
+
+    def __str__(self):
+        return '<LabelMemorySpot({type}:{pos})>'.format(pos=self.label, type=self.type)
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class StackSpot(Spot):
     def __init__(self, offset, value_type):
         self.offset = offset

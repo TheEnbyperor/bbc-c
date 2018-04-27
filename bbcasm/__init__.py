@@ -4,14 +4,14 @@ from .asm import Assemble
 from .tools import makedfs
 
 
-def asm_to_object(asm, lda):
+def asm_to_object(asm):
     lexer_inst = Lexer(asm)
     token_list = lexer_inst.tokenize()
 
     parser = Parser(token_list)
     prog = parser.parse()
 
-    assembler = Assemble(prog, lda)
+    assembler = Assemble(prog)
     assembler.fill_labels()
 
     out, exa = assembler.assemble()

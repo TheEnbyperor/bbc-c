@@ -51,8 +51,9 @@ class MemVal(Value):
 
 
 class LabelVal(Value):
-    def __init__(self, label):
+    def __init__(self, label, offset=0):
         self.label = label
+        self.offset = offset
 
     def __repr__(self):
         return "LabelVal({})".format(self.label)
@@ -152,7 +153,7 @@ class Inst:
                 return 1
             elif type(self.value) in [LiteralVal, ZpVal, ZpXVal, ZpYVal, IndirectXVal, IndirectYVal]:
                 return 2
-            elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal]:
+            elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal, LabelVal]:
                 return 3
 
     def gen(self, addr):

@@ -37,6 +37,7 @@ class Parser:
         if self.tokens[index:][0].type == EOF:
             return ast.TranslationUnit(items), index
         else:
+            print(self.tokens[index:])
             self.error()
 
     def parse_external_deceleration(self, index):
@@ -515,8 +516,7 @@ class Parser:
             const char
             typedef int
         """
-        decl_specifiers = (list(ctypes.simple_types.keys()) +
-                           [SIGNED, UNISGNED, AUTO, STATIC, CONST])
+        decl_specifiers = (list(ctypes.simple_types.keys()) + list(MODIFIERS.keys()))
 
         specs = []
         while True:

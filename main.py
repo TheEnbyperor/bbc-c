@@ -27,10 +27,10 @@ if __name__ == "__main__":
 
     asm = bbcc.main(source)
 
-    libc = open("libc.s")
-    libc_asm = "".join(libc.readlines())
-
-    asm = libc_asm + "\n" + asm
+    # libc = open("libc.s")
+    # libc_asm = "".join(libc.readlines())
+    #
+    # asm = libc_asm + "\n" + asm
 
     asm_file = open("main.s", "w")
     asm_file.write(asm)
@@ -38,7 +38,10 @@ if __name__ == "__main__":
     basic = bbcasm.asm_to_basic(asm)
     # print(basic)
 
-    out, exa = bbcasm.asm_to_object(asm, 0xE00)
+    out, exa = bbcasm.asm_to_object(asm)
+
+    obj_file = open("main.o", "wb")
+    obj_file.write(out)
 
     disk = bbcasm.object_to_disk("$.MAIN", out, 0xE00, exa)
 
