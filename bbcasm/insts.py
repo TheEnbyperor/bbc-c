@@ -156,6 +156,9 @@ class Inst:
             elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal, LabelVal]:
                 return 3
 
+    def is_relative(self):
+        return False
+
     def gen(self, addr):
         if self.value is None:
             return [self.inst]
@@ -216,6 +219,9 @@ class BIT(Inst):
 class Branch(Inst):
     def __len__(self):
         return 2
+
+    def is_relative(self):
+        return True
 
     def gen(self, addr):
         inst = None

@@ -14,8 +14,8 @@ def asm_to_object(asm):
     assembler = Assemble(prog)
     assembler.fill_labels()
 
-    out, exa = assembler.assemble()
-    return bytes(out), exa
+    out = assembler.assemble()
+    return bytes(out)
 
 
 def object_to_disk(name, obj, lda, exa):

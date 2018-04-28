@@ -3,16 +3,20 @@ import struct
 
 
 class Symbol:
-    def __init__(self, name, addr, defined):
+    INTERNAL = 0
+    EXPORT = 1
+    IMPORT = 2
+
+    def __init__(self, name, addr, type):
         self.name = name
         self.addr = addr
-        self.defined = defined
+        self.type = type
 
     def make_bin(self):
-        return list(struct.pack("<?H", self.defined, self.addr) + self.name.encode()) + [0]
+        return list(struct.pack("<BH", self.type, self.addr) + self.name.encode()) + [0]
 
     def __repr__(self):
-        return "<Symbol({}:{}:{})>".format(self.name, self.addr, self.defined)
+        return "<Symbol({}:{}:{})>".format(self.name, self.addr, self.type)
 
 
 class Assemble:
@@ -28,16 +32,18 @@ class Assemble:
                 for l in i.labels:
                     self.labels[l] = addr
                     if l in self.prog.exports:
-                        self.symbols.append(Symbol(l, addr, True))
+                        self.symbols.append(Symbol(l, addr, Symbol.EXPORT))
             addr += len(i)
         addr = 0
         for n, i in enumerate(self.prog.insts):
             if isinstance(i.value, insts.LabelVal):
                 if i.value.label in self.prog.imports:
                     val = insts.MemVal(i.value.offset)
-                    self.symbols.append(Symbol(i.value.label, addr+1, False))
+                    self.symbols.append(Symbol(i.value.label, addr+1, Symbol.IMPORT))
                 else:
                     val = insts.MemVal(self.labels[i.value.label])
+                    if not i.is_relative():
+                        self.symbols.append(Symbol(i.value.label, addr + 1, Symbol.INTERNAL))
                 self.prog.insts[n].value = val
             addr += len(i)
 
@@ -51,7 +57,7 @@ class Assemble:
     def assemble(self):
         b = ord("B")
         c = ord("C")
-        out = [0xB, 0xB, 0xC, 0xC, b, b, c, c, 0]
+        out = [0xB, 0xB, 0xC, b, b, c, 0]
 
         header = self._make_header()
         out.extend(list(struct.pack("<H", len(header))))
@@ -64,4 +70,4 @@ class Assemble:
 
         print(self.symbols)
 
-        return out, self.labels["_start"]
+        return out
