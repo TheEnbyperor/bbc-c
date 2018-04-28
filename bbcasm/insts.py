@@ -354,7 +354,7 @@ class CPY(Inst):
 
 
 class DEC(Inst):
-    modes = [(ZpVal, 0xC4), (ZpXVal, 0xD6), (MemVal, 0xCE), (MemXVal, 0xDE)]
+    modes = [(ZpVal, 0xC6), (ZpXVal, 0xD6), (MemVal, 0xCE), (MemXVal, 0xDE)]
 
     def __init__(self, value):
         self.value = value
