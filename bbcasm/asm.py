@@ -55,9 +55,7 @@ class Assemble:
         return header
 
     def assemble(self):
-        b = ord("B")
-        c = ord("C")
-        out = [0xB, 0xB, 0xC, b, b, c, 0]
+        out = [0xB, 0xB, 0xC, 0x42, 0x42, 0x43, 0]
 
         header = self._make_header()
         out.extend(list(struct.pack("<H", len(header))))
@@ -67,7 +65,5 @@ class Assemble:
         for i in self.prog.insts:
             out.extend(i.gen(addr))
             addr += len(i)
-
-        print(self.symbols)
 
         return out

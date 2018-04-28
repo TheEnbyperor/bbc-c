@@ -1,7 +1,7 @@
 // Comment
 #include "stdio.h"
 
-extern int a;
+int a;
 
 //void reverse(char s[], int len) {
 //  int i, j;

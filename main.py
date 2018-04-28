@@ -1,51 +1,65 @@
 import bbcc
 import bbcasm
+import bbcld
 import sys
 import os
 
 
 def usage():
-    print("Usage: {} [source file]".format(sys.argv[0]))
+    print("Usage: {} [source files...]".format(sys.argv[0]))
     sys.exit(1)
 
 
-def compile_c(text: str):
+def compile_c(text: str, name: str):
     asm = bbcc.main(text)
     asm_file = open("{}.s".format(name), "w")
     asm_file.write(asm)
 
 
-def assemble_s(text: str):
+def assemble_s(text: str, name: str):
     out = bbcasm.asm_to_object(text)
     obj_file = open("{}.o".format(name), "wb")
     obj_file.write(out)
 
 
+def link_o(objs):
+    out, exa = bbcld.link_object_files(objs, 0xE00)
+
+    disk = bbcasm.object_to_disk("$.MAIN", out, 0xE00, exa)
+    out_file = open("out.ssd", "wb")
+    out_file.write(disk)
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         usage()
 
-    file_name = sys.argv[1]
+    file_names = sys.argv[1:]
 
-    if file_name == "":
-        usage()
+    source_files = []
 
-    try:
-        sourceFile = open(file_name)
-    except Exception as e:
-        print("Unable to load file {}".format(e))
-        sys.exit(1)
+    for f in file_names:
+        try:
+            sourceFile = open(f, "rb")
+        except FileNotFoundError as e:
+            print("Unable to load file {}".format(e))
+            sys.exit(1)
 
-    source = sourceFile.read()
+        source_files.append(sourceFile.read())
+        sourceFile.close()
 
-    name, extension = os.path.splitext(os.path.basename(file_name))
+    names = list(map(lambda f: os.path.splitext(os.path.basename(f)), file_names))
 
-    if extension == ".c":
-        compile_c(source)
-    elif extension == ".s":
-        assemble_s(source)
+    first_e = names[0][1]
+    for e in map(lambda n: n[1], names):
+        if e != first_e:
+            raise RuntimeError("All input files must be of same type")
 
-    # disk = bbcasm.object_to_disk("$.MAIN", out, 0xE00, exa)
-    #
-    # out_file = open("main.ssd", "wb")
-    # out_file.write(disk)
+    if first_e == ".c":
+        for s, n in zip(source_files, names):
+            compile_c(s.decode(), n[0])
+    elif first_e == ".s":
+        for s, n in zip(source_files, names):
+            assemble_s(s.decode(), n[0])
+    elif first_e == ".o":
+        link_o(source_files)

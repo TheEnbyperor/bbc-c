@@ -1,7 +1,7 @@
 .export _start
 .export __main
+.export __a
 .import __getchar
-.import __a
 
 \ Routines
 _bbcc_pusha: pha
@@ -89,10 +89,10 @@ bne __bbcc_00000000
 \ Add
 clc
 lda &74
-adc <(__a)
+adc &72
 sta &70
 lda &75
-adc >(__a)
+adc &73
 sta &71
 
 \ Return
