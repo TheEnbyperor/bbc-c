@@ -112,7 +112,7 @@ class Function(AST):
             args = []
             for p in self.params:
                 decl = Declaration(p)
-                args.append(decl.get_decls_info()[0])
+                args.append(decl.get_decls_info()[0].ctype)
             return ctypes.FunctionCType(args, ctype)
 
         raise SyntaxError("Unrecognised type: {}".format(specs_str))

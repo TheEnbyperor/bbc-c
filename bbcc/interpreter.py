@@ -91,7 +91,8 @@ class Interpreter(ast.NodeVisitor):
         args = []
         for a, fa in zip(node.args, func.type.args):
             arg = self.visit(a)
-            if fa.ctype.is_pointer():
+            print(a, fa)
+            if fa.is_pointer():
                 arg = arg.addr(self.il)
 
             args.append(arg.val(self.il))
@@ -103,7 +104,6 @@ class Interpreter(ast.NodeVisitor):
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
-        print(val)
         return ast.DirectLValue(val.il_value)
 
     def visit_Compound(self, node):
