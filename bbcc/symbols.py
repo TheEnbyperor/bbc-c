@@ -169,6 +169,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
         for param in node.params:
             param = ast.Declaration(param)
             param = param.get_decls_info()[0]
+
+            if param.ctype.is_array():
+                param.ctype = ctypes.PointerCType(param.ctype.el)
+
             param_name = param.identifier.value
             if self.scope.lookup(param_name, current_scope_only=True):
                 raise SyntaxError("Duplicate identifier '%s' found" % param_name)

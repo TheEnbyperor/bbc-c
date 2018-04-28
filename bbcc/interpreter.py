@@ -103,6 +103,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
+        print(val)
         return ast.DirectLValue(val.il_value)
 
     def visit_Compound(self, node):
@@ -388,22 +389,28 @@ class Interpreter(ast.NodeVisitor):
     def visit_Deref(self, node):
         value = self.visit(node.expr)
 
-        return ast.IndirectLValue(value)
+        return ast.IndirectLValue(value.val(self.il), value.type)
 
     def visit_ArraySubsc(self, node):
         head = self.visit(node.head)
         head_val = head.val(self.il)
         arg = self.visit(node.arg).val(self.il)
 
+        htype = None
+        if head.type.is_array():
+            htype = head.type.el
+        elif head.type.is_pointer():
+            htype = head.type.arg
+
         type_len = il.ILValue(ctypes.unsig_char)
-        self.il.register_literal_value(type_len, head.type.el.size)
+        self.il.register_literal_value(type_len, htype.size)
 
         offset = il.ILValue(ctypes.unsig_int)
         self.il.add(il.Mult(type_len, arg, offset))
 
-        output = il.ILValue(head.type.el)
+        output = il.ILValue(ctypes.unsig_int)
         self.il.add(il.Add(head_val, offset, output))
-        return ast.IndirectLValue(output)
+        return ast.IndirectLValue(output, htype)
 
     def visit_IfStatement(self, node):
         condition = self.visit(node.condition).val(self.il)

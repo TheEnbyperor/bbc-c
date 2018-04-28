@@ -25,9 +25,12 @@ def assemble_s(text: str, name: str):
 def link_o(objs):
     out, exa = bbcld.link_object_files(objs, 0xE00)
 
+    out_file = open("out", "wb")
+    out_file.write(out)
+
     disk = bbcasm.object_to_disk("$.MAIN", out, 0xE00, exa)
-    out_file = open("out.ssd", "wb")
-    out_file.write(disk)
+    disk_file = open("out.ssd", "wb")
+    disk_file.write(disk)
 
 
 if __name__ == "__main__":
