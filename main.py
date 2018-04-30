@@ -1,18 +1,15 @@
 import bbcc
 import bbcasm
 import bbcld
+import bbcdisk
 import sys
 import os
+import argparse
 
 
-def usage():
-    print("Usage: {} [source files...]".format(sys.argv[0]))
-    sys.exit(1)
-
-
-def compile_c(text: str, name: str):
+def compile_c(text: str, out: str):
     asm = bbcc.main(text)
-    asm_file = open("{}.s".format(name), "w")
+    asm_file = open(out, "w")
     asm_file.write(asm)
 
 
@@ -28,20 +25,28 @@ def link_o(objs):
     out_file = open("out", "wb")
     out_file.write(out)
 
-    disk = bbcasm.object_to_disk("$.MAIN", out, 0xE00, exa)
+
+def make_disk(files):
+    files = map(lambda f: bbcdisk.File(f[0], f[1], 0xE00, 0xE00), files)
+    disk = bbcdisk.files_to_disk(files)
     disk_file = open("out.ssd", "wb")
     disk_file.write(disk)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        usage()
+    parser = argparse.ArgumentParser(description='Compiler suite for the BBC Microcomputer')
+    parser.add_argument("-o", "--output", help="Output file name", type=str)
+    parser.add_argument("-Wa", nargs="*", help="Assembler options", type=str)
+    parser.add_argument("-Wl", nargs="*", help="Linker options", type=str)
+    parser.add_argument("-S", help="Compile only", action="store_true")
+    parser.add_argument("-c", help="Compile and assemble but do not link", action="store_true")
+    parser.add_argument("files", nargs="+", help="Input files", type=str)
 
-    file_names = sys.argv[1:]
+    args = parser.parse_args()
 
     source_files = []
 
-    for f in file_names:
+    for f in args.files:
         try:
             sourceFile = open(f, "rb")
         except FileNotFoundError as e:
@@ -51,7 +56,7 @@ if __name__ == "__main__":
         source_files.append(sourceFile.read())
         sourceFile.close()
 
-    names = list(map(lambda f: os.path.splitext(os.path.basename(f)), file_names))
+    names = list(map(lambda f: os.path.splitext(os.path.basename(f)), args.files))
 
     first_e = names[0][1]
     for e in map(lambda n: n[1], names):
@@ -60,7 +65,11 @@ if __name__ == "__main__":
 
     if first_e == ".c":
         for s, n in zip(source_files, names):
-            compile_c(s.decode(), n[0])
+            if args.output == "":
+                name = "{}.s".format(n[0])
+            else:
+                name = args.output
+            compile_c(s.decode(), name)
     elif first_e == ".s":
         for s, n in zip(source_files, names):
             assemble_s(s.decode(), n[0])

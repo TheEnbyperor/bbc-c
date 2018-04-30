@@ -91,7 +91,6 @@ class Interpreter(ast.NodeVisitor):
         args = []
         for a, fa in zip(node.args, func.type.args):
             arg = self.visit(a)
-            print(a, fa)
             if fa.is_pointer():
                 arg = arg.addr(self.il)
 
