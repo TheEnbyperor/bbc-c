@@ -1,46 +1,8 @@
-.export _start
 .export __main
+.import _bbcc_pusha
+.import _bbcc_pulla
 .import __getchar
 .import __putchar
-
-\ Routines
-_bbcc_pusha: pha
-lda &8E
-bne _bbcc_pusha_1
-dec &8F
-_bbcc_pusha_1: 
-dec &8E
-pla
-ldy #00
-sta (&8E),Y
-rts
-_bbcc_pulla: ldy #0
-lda (&8E),Y
-inc &8E
-beq _bbcc_pulla_1
-rts
-_bbcc_pulla_1: 
-inc &8F
-rts
-
-\ Function
-_start: 
-
-\ Set
-lda #&00
-sta &8E
-lda #&18
-sta &8F
-
-\ CallFunction
-jsr __main
-lda &70
-sta &72
-
-\ Return
-lda &72
-sta &70
-rts
 
 \ Function
 __main: 

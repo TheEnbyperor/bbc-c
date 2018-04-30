@@ -25,7 +25,7 @@ class Executable:
         self.pos = pos
 
     def __repr__(self):
-        return "<Executable({}:{})>".format(self.symbols, self.code)
+        return "<Executable({}:{}:{})>".format(self.symbols, self.pos, self.code)
 
 
 class Parser:

@@ -1,5 +1,6 @@
 from .tokens import *
 from . import lexer
+import os
 
 
 class Preproc:
@@ -171,9 +172,15 @@ class Preproc:
 
     @staticmethod
     def read_file(file):
-        f = open(file)
-        source = "".join(f.readlines())
-        lex = lexer.Lexer(source)
+        if os.path.exists(file):
+            f = open(file)
+        else:
+            lib = os.path.join(os.path.dirname(__file__), "..", "lib", file)
+            if os.path.exists(lib):
+                f = open(lib)
+            else:
+                raise FileNotFoundError("Unable to find {} for the preprocessor".format(file))
+        lex = lexer.Lexer(f.read())
         tokens = lex.tokenize()
         return tokens[:-1]
 

@@ -1,7 +1,6 @@
-.export _start
 .export __itoa
-.import __main
-.import __strre
+.import __strrev
+.import _bbcc_pusha
 
 \ Function
 __itoa: 

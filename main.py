@@ -62,7 +62,7 @@ if __name__ == "__main__":
             print("Unable to load file {}".format(e))
             sys.exit(1)
 
-        source_files.append((os.path.splitext(os.path.basename(f)), sourceFile.read()))
+        source_files.append((os.path.splitext(f), sourceFile.read()))
         sourceFile.close()
 
     first_e = source_files[0][0][1]

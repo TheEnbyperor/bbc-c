@@ -1,4 +1,7 @@
 .import __main
+.export _bbcc_pusha
+.export _bbcc_pulla
+.export _start
 
 _bbcc_pusha: pha
 lda &8E

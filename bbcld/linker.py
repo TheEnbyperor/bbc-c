@@ -25,10 +25,10 @@ class Linker:
                     return obj
 
     def _get_symbols(self, e, static):
-        e.pos = self.sta
-        self.sta += len(e.code)
+        symbols = []
         for s in filter(lambda symbol: symbol.type == parser.Symbol.EXPORT, e.symbols):
-            self.defined_symbols[s.name] = (s, self.sta)
+            self.defined_symbols[s.name] = (s, -1)
+            symbols.append(s.name)
 
         for s in filter(lambda symbol: symbol.type == parser.Symbol.IMPORT, e.symbols):
             if s.name not in self.defined_symbols and static:
@@ -37,6 +37,13 @@ class Linker:
                     raise LookupError("Symbol {} not exported anywhere".format(s.name))
                 lib = self._get_symbols(lib, static)
                 self.executables.append(lib)
+
+        for symbol in symbols:
+            s = self.defined_symbols[symbol]
+            if s[1] == -1:
+                self.defined_symbols[symbol] = (s[0], s[0].addr + self.sta)
+        e.pos = self.sta
+        self.sta += len(e.code)
         return e
 
     def _parse_obj(self, obj, static):
@@ -90,7 +97,7 @@ class Linker:
                 elif s.type == parser.Symbol.INTERNAL:
                     cur_val = struct.unpack("<H", bytes(e.code[s.addr:s.addr + 2]))[0]
                     e.code = e.code[:s.addr] + list(struct.pack("<H", cur_val + e.pos)) + e.code[s.addr + 2:]
-                    symbols.append(parser.Symbol(s.name, e.pos+s.addr, parser.Symbol.INTERNAL))
+                    symbols.append(parser.Symbol("", e.pos+s.addr, parser.Symbol.INTERNAL))
 
                 elif s.type == parser.Symbol.EXPORT:
                     symbols.append(parser.Symbol(s.name, e.pos+s.addr, parser.Symbol.EXPORT))
