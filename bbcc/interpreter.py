@@ -19,20 +19,6 @@ class Interpreter(ast.NodeVisitor):
         self.exports = []
 
     def visit_TranslationUnit(self, node):
-        self.il.add(il.Routines())
-
-        ret_val = il.ILValue(ctypes.char)
-        self.il.add(il.Function([], "_start", prolouge=False))
-
-        stack_start = il.ILValue(ctypes.unsig_int)
-        stack_register = il.ILValue(ctypes.unsig_char)
-        self.il.register_literal_value(stack_start, 0x1800)
-        self.il.register_spot_value(stack_register, il.stack_register)
-        self.il.add(il.Set(stack_start, stack_register))
-
-        self.il.add(il.CallFunction("__main", [], ret_val))
-        self.il.add(il.Return(ret_val, "_start", epilouge=False))
-
         for n in node.items:
             self.visit(n)
 

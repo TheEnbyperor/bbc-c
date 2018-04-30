@@ -956,7 +956,7 @@ class IL:
 
     def gen_asm(self, assembly: asm.ASM):
         exports = []
-        imports = []
+        imports = ["_bbcc_pusha", "_bbcc_pulla"]
         for c in self.commands:
             if isinstance(c, Function):
                 exports.append(c.func_name)

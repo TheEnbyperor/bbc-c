@@ -15,14 +15,21 @@ def compile_c(text: str, out: str):
 
 def assemble_s(text: str, name: str):
     out = bbcasm.asm_to_object(text)
-    obj_file = open("{}.o".format(name), "wb")
+    obj_file = open(name, "wb")
     obj_file.write(out)
 
 
-def link_o(objs):
-    out, exa = bbcld.link_object_files(objs, 0xE00)
+def link_o_static(objs, name: str):
+    out, exa = bbcld.link_object_files_static(objs, 0xE00)
 
-    out_file = open("out", "wb")
+    out_file = open(name, "wb")
+    out_file.write(out)
+
+
+def link_o_shared(objs, name: str):
+    out  = bbcld.link_object_files_shared(objs)
+
+    out_file = open(name, "wb")
     out_file.write(out)
 
 
@@ -40,6 +47,8 @@ if __name__ == "__main__":
     parser.add_argument("-Wl", nargs="*", help="Linker options", type=str)
     parser.add_argument("-S", help="Compile only", action="store_true")
     parser.add_argument("-c", help="Compile and assemble but do not link", action="store_true")
+    parser.add_argument("-shared", help="Create a shared library", action="store_true")
+    parser.add_argument("-static", help="Create a statically linked executable", action="store_true")
     parser.add_argument("files", nargs="+", help="Input files", type=str)
 
     args = parser.parse_args()
@@ -53,25 +62,84 @@ if __name__ == "__main__":
             print("Unable to load file {}".format(e))
             sys.exit(1)
 
-        source_files.append(sourceFile.read())
+        source_files.append((os.path.splitext(os.path.basename(f)), sourceFile.read()))
         sourceFile.close()
 
-    names = list(map(lambda f: os.path.splitext(os.path.basename(f)), args.files))
-
-    first_e = names[0][1]
-    for e in map(lambda n: n[1], names):
+    first_e = source_files[0][0][1]
+    for e in map(lambda name: name[0][1], source_files):
         if e != first_e:
             raise RuntimeError("All input files must be of same type")
 
     if first_e == ".c":
-        for s, n in zip(source_files, names):
-            if args.output == "":
+        for n, s in source_files:
+            if args.output == "" or not args.S:
                 name = "{}.s".format(n[0])
             else:
                 name = args.output
             compile_c(s.decode(), name)
+
+            if not args.S:
+                sourceFile = open(name, "r")
+                if args.output == "" or not args.c:
+                    name = "{}.o".format(n[0])
+                else:
+                    name = args.output
+                assemble_s(sourceFile.read(), name)
+                sourceFile.close()
+
+        if not args.c and not args.S:
+            files = []
+            for n, s in source_files:
+                name = "{}.o".format(n[0])
+                sourceFile = open(name, "rb")
+                files.append(sourceFile.read())
+                sourceFile.close()
+            if args.output is None:
+                name = "out"
+            else:
+                name = args.output
+
+            if args.static:
+                link_o_static(files, name)
+            elif args.shared:
+                link_o_shared(files, name)
+
     elif first_e == ".s":
-        for s, n in zip(source_files, names):
-            assemble_s(s.decode(), n[0])
+        if args.S:
+            raise RuntimeError("Cant just compile assembly")
+        for n, s in source_files:
+            if args.output == "" or not args.c:
+                name = "{}.o".format(n[0])
+            else:
+                name = args.output
+            assemble_s(s.decode(), name)
+
+        if not args.c and not args.S:
+            files = []
+            for n, s in source_files:
+                name = "{}.o".format(n[0])
+                sourceFile = open(name, "rb")
+                files.append(sourceFile.read())
+                sourceFile.close()
+            if args.output is None:
+                name = "out"
+            else:
+                name = args.output
+
+            if args.static:
+                link_o_static(files, name)
+            elif args.shared:
+                link_o_shared(files, name)
     elif first_e == ".o":
-        link_o(source_files)
+        if args.S or args.c:
+            raise RuntimeError("Cant just compile or assemble object file")
+
+        if args.output is None:
+            name = "out"
+        else:
+            name = args.output
+
+        if args.static:
+            link_o_static(map(lambda s: s[1], source_files), name)
+        elif args.shared:
+            link_o_shared(map(lambda s: s[1], source_files), name)

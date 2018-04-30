@@ -11,6 +11,9 @@ class Symbol:
         self.addr = addr
         self.type = type
 
+    def make_bin(self):
+        return list(struct.pack("<BH", self.type, self.addr) + self.name.encode()) + [0]
+
     def __repr__(self):
         return "<Symbol({}:{}:{})>".format(self.name, self.addr, self.type)
 

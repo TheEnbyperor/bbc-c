@@ -1,6 +1,7 @@
 .export _start
 .export __main
 .import __getchar
+.import __putchar
 
 \ Routines
 _bbcc_pusha: pha
@@ -43,17 +44,33 @@ rts
 
 \ Function
 __main: 
-lda &72
-pha
-lda &73
-pha
 lda &74
 pha
 lda &75
 pha
+lda &72
+pha
+lda &73
+pha
 
 \ CallFunction
 jsr __getchar
+lda &70
+sta &72
+
+\ CallFunction
+lda #&61
+jsr _bbcc_pusha
+lda #&00
+jsr _bbcc_pusha
+jsr __putchar
+clc
+lda &8E
+adc #&02
+sta &8E
+lda &8F
+adc #&00
+sta &8F
 
 \ Mult
 lda #&03

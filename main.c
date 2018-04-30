@@ -5,6 +5,7 @@
 
 int main() {
     getchar();
+    putchar('a');
     return 3 * BUF_LEN;
 }
 
