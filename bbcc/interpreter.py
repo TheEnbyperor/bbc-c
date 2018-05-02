@@ -469,19 +469,31 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Label(end_label))
         
     def visit_Break(self, node):
-        if self.current_loop["end"] is "":
+        if self.current_loop["end"] == "":
             raise SyntaxError("Break outside loop")
         else:
             self.il.add(il.Jmp(self.current_loop["end"]))
         
     def visit_Continue(self, node):
-        if self.current_loop["start"] is "":
+        if self.current_loop["start"] == "":
             raise SyntaxError("Continue outside loop")
         else:
             self.il.add(il.Jmp(self.current_loop["start"]))
 
     def visit_NoOp(self, node):
         pass
+
+    def visit_SizeofType(self, node):
+        ctype = node.make_ctype()
+        val = il.ILValue(ctypes.unsig_int)
+        self.il.register_literal_value(val, ctype.size)
+        return val
+
+    def visit_Sizeof(self, node):
+        node_val = self.visit(node.expr)
+        val = il.ILValue(ctypes.unsig_int)
+        self.il.register_literal_value(val, node_val.type.size)
+        return val
 
     def visit_Return(self, node):
         value = self.visit(node.right).val(self.il)

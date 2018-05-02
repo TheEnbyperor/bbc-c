@@ -364,5 +364,11 @@ class SymbolTableBuilder(ast.NodeVisitor):
     def visit_NoOp(self, node):
         pass
 
+    def visit_SizeofType(self, node):
+        pass
+
+    def visit_Sizeof(self, node):
+        self.visit(node.expr)
+
     def visit_Return(self, node):
         self.visit(node.right)

@@ -3,10 +3,11 @@
 
 #define BUF_LEN 10
 
+char buf[BUF_LEN];
+
 int main() {
-    getchar();
-    putchar('a');
-    return 3 * BUF_LEN;
+    sizeof buf;
+    return buf[0];
 }
 
 //int Fibonacci(int n) {

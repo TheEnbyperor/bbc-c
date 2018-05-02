@@ -349,6 +349,46 @@ class ParenExpr(AST):
         self.expr = expr
 
 
+class Sizeof(AST):
+    def __init__(self, expr):
+        """Initialize node."""
+        self.expr = expr
+
+
+class SizeofType(AST):
+    def __init__(self, expr):
+        """Initialize node."""
+        self.type = expr
+
+    def make_ctype(self):
+        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNISGNED})
+        type_specs = [str(spec.type) for spec in self.type
+                      if spec.type in all_type_specs]
+        specs_str = " ".join(sorted(type_specs))
+
+        specs = {
+            "void": ctypes.void,
+
+            "_Bool": ctypes.bool_t,
+
+            "char": ctypes.char,
+            "char signed": ctypes.char,
+            "char unsigned": ctypes.unsig_char,
+
+            "int": ctypes.integer,
+            "signed": ctypes.integer,
+            "int signed": ctypes.integer,
+            "unsigned": ctypes.unsig_int,
+            "int unsigned": ctypes.unsig_int,
+        }
+
+        if specs_str in specs:
+            ctype = specs[specs_str]
+            return ctype
+
+        raise SyntaxError("Unrecognised type: {}".format(specs_str))
+
+
 class _ArithBinOp(_RExprNode):
     """Base class for some binary operators.
     Binary operators like +, -, ==, etc. are similar in many respects. They

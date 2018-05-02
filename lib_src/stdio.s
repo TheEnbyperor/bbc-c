@@ -6,7 +6,7 @@
 __putchar:
 ldy #00
 lda (&8E),Y
-jsr &FFEE
+jsr &FFE3
 sta &70
 rts
 

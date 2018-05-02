@@ -24,6 +24,14 @@ class Linker:
                 if s.type == parser.Symbol.EXPORT and s.name == symbol_name:
                     return obj
 
+    def _get_symbol(self, s, static):
+        if s not in self.defined_symbols and static:
+            lib = self._find_lib(s)
+            if lib is None:
+                raise LookupError("Symbol {} not exported anywhere".format(s))
+            lib = self._get_symbols(lib, static)
+            self.executables.append(lib)
+
     def _get_symbols(self, e, static):
         symbols = []
         for s in filter(lambda symbol: symbol.type == parser.Symbol.EXPORT, e.symbols):
@@ -31,12 +39,7 @@ class Linker:
             symbols.append(s.name)
 
         for s in filter(lambda symbol: symbol.type == parser.Symbol.IMPORT, e.symbols):
-            if s.name not in self.defined_symbols and static:
-                lib = self._find_lib(s.name)
-                if lib is None:
-                    raise LookupError("Symbol {} not exported anywhere".format(s.name))
-                lib = self._get_symbols(lib, static)
-                self.executables.append(lib)
+            self._get_symbol(s.name, static)
 
         for symbol in symbols:
             s = self.defined_symbols[symbol]
@@ -55,6 +58,7 @@ class Linker:
     def link_static(self):
         for o in self.objects:
             self._parse_obj(o, True)
+        self._get_symbol("_start", True)
 
         out = []
         for e in self.executables:

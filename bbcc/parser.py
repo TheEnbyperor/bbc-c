@@ -373,6 +373,15 @@ class Parser:
         elif self.token_is(index, NOT):
             node, index = self.parse_cast(index + 1)
             return ast.BoolNot(node), index
+        elif self.token_is(index, SIZEOF):
+            try:
+                node, index = self.parse_unary(index + 1)
+                return ast.Sizeof(node), index
+            except SyntaxError:
+                index = self.eat(index+1, LPAREM)
+                node, index = self.parse_type_name(index)
+                index = self.eat(index, RPAREM)
+                return ast.SizeofType(node), index
         else:
             return self.parse_postfix(index)
 
@@ -381,9 +390,6 @@ class Parser:
         cur, index = self.parse_primary(index)
 
         while True:
-            if len(self.tokens) > index:
-                tok = self.tokens[index]
-
             if self.token_is(index, LBRACK):
                 index += 1
                 arg, index = self.parse_expression(index)
@@ -516,20 +522,79 @@ class Parser:
             const char
             typedef int
         """
-        decl_specifiers = (list(ctypes.simple_types.keys()) + list(MODIFIERS.keys()))
 
         specs = []
-        while True:
-            for spec in decl_specifiers:
-                if self.token_is(index, spec):
-                    specs.append(self.tokens[index])
-                    index += 1
-                    break
-            else:
-                break
+        try:
+            spec, index = self.parse_storage_class_specifier(index)
+            specs.append(spec)
+        except SyntaxError:
+            try:
+                spec, index = self.parse_type_specifier(index)
+                specs.append(spec)
+            except SyntaxError:
+                spec, index = self.parse_type_qualifier(index)
+                specs.append(spec)
+
+        try:
+            spec, index = self.parse_decl_specifiers(index)
+            specs.extend(spec)
+        except SyntaxError:
+            pass
 
         if specs:
             return specs, index
+        else:
+            self.error()
+
+    def parse_type_name(self, index):
+        # TODO: Abstract declarator
+
+        return self.parse_specifier_qualifier_list(index)
+
+    def parse_specifier_qualifier_list(self, index):
+        specs = []
+
+        try:
+            spec, index = self.parse_type_specifier(index)
+            specs.append(spec)
+        except SyntaxError:
+            spec, index = self.parse_type_qualifier(index)
+            specs.append(spec)
+
+        try:
+            spec, index = self.parse_specifier_qualifier_list(index)
+            specs.extend(spec)
+        except SyntaxError:
+            pass
+
+        if specs:
+            return specs, index
+        else:
+            self.error()
+
+    def parse_storage_class_specifier(self, index):
+        specifiers = list(STORAGE.keys())
+
+        for spec in specifiers:
+            if self.token_is(index, spec):
+                return self.tokens[index], index + 1
+        else:
+            self.error()
+
+    def parse_type_specifier(self, index):
+        specifiers = list(ctypes.simple_types.keys()) + list(TYPE_MODS.keys())
+        for spec in specifiers:
+            if self.token_is(index, spec):
+                return self.tokens[index], index + 1
+        else:
+            self.error()
+
+    def parse_type_qualifier(self, index):
+        specifiers = list(QUALIFIERS.keys())
+
+        for spec in specifiers:
+            if self.token_is(index, spec):
+                return self.tokens[index], index + 1
         else:
             self.error()
 
