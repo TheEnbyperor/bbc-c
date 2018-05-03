@@ -428,7 +428,7 @@ class Sub(ILInst):
 
         assembly.add_inst("SEC")
         for i in range(output.type.size):
-            if i < left.type.size and i < right.type.size:
+            if i > left.type.size and i > right.type.size:
                 assembly.add_inst("LDA", "#0")
             else:
                 if i < left.type.size:
