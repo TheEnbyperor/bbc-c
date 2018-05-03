@@ -81,15 +81,18 @@ class Function(AST):
         self.nodes = nodes
 
     def __repr__(self):
-        return "Function<{}:{}>({})\n{}".format(self.name, self.make_ctype(),
-                                                "\n".join([str(p) for p in self.params]),
-                                                "  " + "  ".join(str(self.nodes).splitlines(True)))
+        ctype, storage = self.make_ctype()
+        return "Function<{}:{}:{}>({})\n{}".format(self.name, ctype.ret, storage,
+                                                   "\n".join([str(p) for p in self.params]),
+                                                   "  " + "  ".join(str(self.nodes).splitlines(True)))
 
     def make_ctype(self):
         all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNISGNED})
         type_specs = [str(spec.type) for spec in self.type
                       if spec.type in all_type_specs]
         specs_str = " ".join(sorted(type_specs))
+
+        storage = self.get_storage([spec.type for spec in self.type])
 
         specs = {
             "void": ctypes.void,
@@ -113,9 +116,24 @@ class Function(AST):
             for p in self.params:
                 decl = Declaration(p)
                 args.append(decl.get_decls_info()[0].ctype)
-            return ctypes.FunctionCType(args, ctype)
+            return ctypes.FunctionCType(args, ctype), storage
 
         raise SyntaxError("Unrecognised type: {}".format(specs_str))
+
+    def get_storage(self, spec_kinds):
+        storage_classes = {tokens.AUTO: DeclInfo.AUTO,
+                           tokens.STATIC: DeclInfo.STATIC,
+                           tokens.EXTERN: DeclInfo.EXTERN}
+
+        storage = None
+        for kind in spec_kinds:
+            if kind in storage_classes and not storage:
+                storage = storage_classes[kind]
+            elif kind in storage_classes:
+                descrip = "too many storage classes in declaration specifiers"
+                raise SyntaxError(descrip)
+
+        return storage
 
 
 class ExprStatement(AST):
@@ -353,6 +371,9 @@ class Sizeof(AST):
     def __init__(self, expr):
         """Initialize node."""
         self.expr = expr
+
+    def __repr__(self):
+        return "SizeOf\n{}".format("  " + "  ".join(str(self.expr).splitlines(True)))
 
 
 class SizeofType(AST):

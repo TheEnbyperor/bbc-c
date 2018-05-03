@@ -957,20 +957,24 @@ class IL:
     def gen_asm(self, assembly: asm.ASM):
         exports = []
         imports = ["_bbcc_pusha", "_bbcc_pulla"]
+
+        funcs = []
         for c in self.commands:
             if isinstance(c, Function):
-                exports.append(c.func_name)
+                funcs.append(c.func_name)
+
         for c in self.commands:
             if isinstance(c, CallFunction):
-                if c.name not in exports:
+                if c.name not in funcs:
                     imports.append(c.name)
 
         for n, s in self.symbol_table.symbols.items():
-            if not s.type.is_function():
-                if s.storage == ast.DeclInfo.EXTERN:
-                    imports.append("__{}".format(n))
-                else:
-                    exports.append("__{}".format(n))
+            if s.storage == ast.DeclInfo.EXTERN:
+                imports.append("__{}".format(n))
+            elif s.storage != ast.DeclInfo.STATIC:
+                if s.type.is_function() and ("__{}".format(s.name) not in funcs):
+                    continue
+                exports.append("__{}".format(n))
 
         for e in exports:
             assembly.add_inst(".export", e)

@@ -6,16 +6,16 @@ from . import ctypes
 
 
 class Symbol:
-    def __init__(self, name, stype=None):
+    def __init__(self, name, storage, stype=None):
         self.name = name
         self.type = stype
+        self.storage = storage
 
 
 class VarSymbol(Symbol):
     def __init__(self, name, var_type, storage):
-        super(VarSymbol, self).__init__(name, var_type)
+        super(VarSymbol, self).__init__(name, storage, var_type)
         self.il_value = il.ILValue(var_type, storage=storage, name=name)
-        self.storage = storage
 
     def __str__(self):
         return '<VAR({name}:{type}:{il_value}:{storage})>'.format(name=self.name, type=self.type,
@@ -25,8 +25,8 @@ class VarSymbol(Symbol):
 
 
 class FunctionSymbol(Symbol):
-    def __init__(self, name, ctype):
-        super(FunctionSymbol, self).__init__(name, ctype)
+    def __init__(self, name, ctype, storage):
+        super(FunctionSymbol, self).__init__(name, storage, ctype)
 
     def __str__(self):
         return '<FUNCTION({name}:{type})>'.format(name=self.name, type=self.type)
@@ -147,7 +147,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 func_name = d.identifier.value
                 if self.scope.lookup(func_name, current_scope_only=True):
                     raise SyntaxError("Duplicate identifier '%s' found" % func_name)
-                self.scope.define(FunctionSymbol(func_name, d.ctype))
+                self.scope.define(FunctionSymbol(func_name, d.ctype, d.storage))
             else:
                 var_name = d.identifier.value
                 if self.scope.lookup(var_name, current_scope_only=True):
@@ -158,7 +158,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Function(self, node):
         func_name = node.name.identifier.value
-        func_symbol = FunctionSymbol(func_name, node.make_ctype())
+        ctype, storage = node.make_ctype()
+        func_symbol = FunctionSymbol(func_name, ctype, storage)
         self.scope.define(func_symbol)
         procedure_scope = ScopedSymbolTable(
             scope_name=str(id(node)),

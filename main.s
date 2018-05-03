@@ -1,5 +1,5 @@
-.export __main
 .export __buf
+.export __main
 .import _bbcc_pusha
 .import _bbcc_pulla
 
