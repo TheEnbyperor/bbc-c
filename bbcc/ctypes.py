@@ -83,7 +83,7 @@ class VoidCType(CType):
 class PointerCType(CType):
     def __init__(self, arg, const=False):
         self.arg = arg
-        super().__init__(8, const)
+        super().__init__(2, const)
 
     def is_complete(self):
         return True
