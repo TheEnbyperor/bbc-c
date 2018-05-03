@@ -31,14 +31,13 @@ class Interpreter(ast.NodeVisitor):
                 var_global = self.scope.lookup(var_name, "")
                 if var_global is None:
                     var = self.scope.lookup(var_name, self.current_scope)
-                    if type(var.type) == ctypes.IntegerCType:
-                        if d.init is None:
-                            val = il.ILValue(var.type)
-                            self.il.register_literal_value(val, 0)
-                            self.il.add(il.Set(val, var.il_value))
-                        else:
-                            val = self.visit(d.init).val(self.il)
-                            self.il.add(il.Set(val, var.il_value))
+                    if d.init is None:
+                        val = il.ILValue(var.type)
+                        self.il.register_literal_value(val, 0)
+                        self.il.add(il.Set(val, var.il_value))
+                    else:
+                        val = self.visit(d.init).val(self.il)
+                        self.il.add(il.Set(val, var.il_value))
 
     def visit_Function(self, node):
         func_name = node.name.identifier.value
@@ -112,15 +111,19 @@ class Interpreter(ast.NodeVisitor):
     def visit_PlusEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
+        if not left.modable():
+            raise TypeError("{} is not modable".format(left.type))
         output = il.ILValue(left.type)
         left_val = left.val(self.il)
-        self.il.add(il.Sub(left_val, right, output))
+        self.il.add(il.Add(left_val, right, output))
         left.set_to(output, self.il)
         return left
 
     def visit_MinusEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
+        if not left.modable():
+            raise TypeError("{} is not modable".format(left.type))
         output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Sub(left_val, right, output))
@@ -130,6 +133,8 @@ class Interpreter(ast.NodeVisitor):
     def visit_StarEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
+        if not left.modable():
+            raise TypeError("{} is not modable".format(left.type))
         output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Mult(left_val, right, output))
@@ -139,6 +144,8 @@ class Interpreter(ast.NodeVisitor):
     def visit_DivEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
+        if not left.modable():
+            raise TypeError("{} is not modable".format(left.type))
         output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Div(left_val, right, output))
@@ -148,6 +155,8 @@ class Interpreter(ast.NodeVisitor):
     def visit_ModEquals(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right).val(self.il)
+        if not left.modable():
+            raise TypeError("{} is not modable".format(left.type))
         output = il.ILValue(left.type)
         left_val = left.val(self.il)
         self.il.add(il.Mod(left_val, right, output))
