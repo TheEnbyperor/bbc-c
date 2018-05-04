@@ -1,12 +1,12 @@
 INTEGER, CHARACTER, STRING, \
-    PLUS, MINUS, DIVIDE, MOD, LPAREM, RPAREM, SEMI, \
-    EQUALS, PLUSEQUALS, MINUSEQUALS, STAREQUALS, DIVEQUALS, MODEQUALS, \
-    BOOLOR, BOOLAND, BOOLEQUALS, BOOLNOT, LESSTHAN, MORETHAN, LESSEQUAL, MOREEQUAL, \
-    ID, INT, CHAR, VOID, BOOL, RETURN, LBRACE, RBRACE, LBRACK, RBRACK, COMMA, BREAK, CONTINUE, \
-    SIGNED, UNISGNED, STATIC, AUTO, CONST, EXTERN, \
-    INCR, DECR, AMP, STAR, NOT, \
-    IF, ELSE, WHILE, DO, FOR, SIZEOF, EOF, \
-    HASH, NEWLINE = \
+PLUS, MINUS, DIVIDE, MOD, LPAREM, RPAREM, SEMI, \
+EQUALS, PLUSEQUALS, MINUSEQUALS, STAREQUALS, DIVEQUALS, MODEQUALS, \
+BOOLOR, BOOLAND, BOOLEQUALS, BOOLNOT, LESSTHAN, MORETHAN, LESSEQUAL, MOREEQUAL, \
+ID, INT, CHAR, VOID, BOOL, RETURN, LBRACE, RBRACE, LBRACK, RBRACK, COMMA, BREAK, CONTINUE, \
+SIGNED, UNSIGNED, STATIC, AUTO, CONST, EXTERN, \
+INCR, DECR, AMP, STAR, NOT, \
+IF, ELSE, WHILE, DO, FOR, SIZEOF, STRUCT, UNION, TYPEDEF, EOF, \
+HASH, NEWLINE = \
     "INTEGER", "CHAR", "STRING", \
     "PLUS", "MINUS", "DIVIDE", "MOD", "LRAPEM", "RPAREM", "SEMI", \
     "EQUALS", "PLUSEQUALS", "MINUSEQUALS", "STAREQUALS", "DIVEQUALS", "MODEQUALS", \
@@ -14,7 +14,7 @@ INTEGER, CHARACTER, STRING, \
     "ID", "int", "char", "void", "bool", "RETURN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", "COMMA", "BREAK", "CONTINUE", \
     "signed", "unsigned", "static", "auto", "const", "extern", \
     "INCR", "DECR", "AMP", "STAR", "NOT", \
-    "IF", "ELSE", "WHILE", "DO", "FOR", "SIZEOF", "EOF", \
+    "IF", "ELSE", "WHILE", "DO", "FOR", "SIZEOF", "STRUCT", "UNION", "TYPEDEF", "EOF", \
     "HASH", "NEWLINE"
 
 
@@ -58,7 +58,7 @@ QUALIFIERS = {
 
 TYPE_MODS = {
     'signed': Token(SIGNED, 'signed'),
-    'unsigned': Token(UNISGNED, 'unsigned'),
+    'unsigned': Token(UNSIGNED, 'unsigned'),
 }
 
 MODIFIERS = {**STORAGE, **QUALIFIERS, **TYPE_MODS}
@@ -72,5 +72,8 @@ RESERVED_KEYWORDS = {**TYPES, **{**MODIFIERS, **{
     'while': Token(WHILE, 'while'),
     'do': Token(DO, 'do'),
     'for': Token(FOR, 'for'),
-    'sizeof': Token(SIZEOF, 'sizeof')
+    'sizeof': Token(SIZEOF, 'sizeof'),
+    'struct': Token(STRUCT, 'struct'),
+    'union': Token(UNION, 'union'),
+    'typedef': Token(TYPEDEF, 'typedef'),
 }}}

@@ -87,7 +87,7 @@ class Function(AST):
                                                    "  " + "  ".join(str(self.nodes).splitlines(True)))
 
     def make_ctype(self):
-        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNISGNED})
+        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNSIGNED})
         type_specs = [str(spec.type) for spec in self.type
                       if spec.type in all_type_specs]
         specs_str = " ".join(sorted(type_specs))
@@ -231,7 +231,7 @@ class Declaration(AST):
         return self.make_ctype(decl.child, new_ctype)
 
     def make_specs_ctype(self, specs):
-        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNISGNED})
+        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNSIGNED})
         type_specs = [str(spec.type) for spec in specs
                       if spec.type in all_type_specs]
         specs_str = " ".join(sorted(type_specs))
@@ -382,7 +382,7 @@ class SizeofType(AST):
         self.type = expr
 
     def make_ctype(self):
-        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNISGNED})
+        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNSIGNED})
         type_specs = [str(spec.type) for spec in self.type
                       if spec.type in all_type_specs]
         specs_str = " ".join(sorted(type_specs))

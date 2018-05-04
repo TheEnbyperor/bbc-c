@@ -515,31 +515,71 @@ class Parser:
         node = decl_tree.Root(specs, decls, inits)
         return node, index
 
-    def parse_decl_specifiers(self, index):
-        """Parse a declaration specifier.
+    def parse_decl_specifiers(self, index, _spec_qual=False):
+        """Parse a declaration specifier list.
         Examples:
             int
             const char
             typedef int
+        If _spec_qual=True, produces a CompilerError if given any specifiers
+        that are neither type specifier nor type qualifier.
+        The returned `specs` list may contain two types of elements: tokens and
+        Node objects. A Node object will be included for a struct or union
+        declaration, and a token for all other declaration specifiers.
         """
+        type_specs = set(ctypes.simple_types.keys())
+        type_specs |= {SIGNED, UNSIGNED}
+
+        type_quals = {CONST}
+
+        storage_specs = {AUTO, STATIC,
+                         EXTERN, TYPEDEF}
 
         specs = []
-        try:
-            spec, index = self.parse_storage_class_specifier(index)
-            specs.append(spec)
-        except SyntaxError:
-            try:
-                spec, index = self.parse_type_specifier(index)
-                specs.append(spec)
-            except SyntaxError:
-                spec, index = self.parse_type_qualifier(index)
-                specs.append(spec)
 
-        try:
-            spec, index = self.parse_decl_specifiers(index)
-            specs.extend(spec)
-        except SyntaxError:
-            pass
+        SIMPLE = 1
+        STRUCT = 2
+        typedef = 3
+        type_spec_class = None
+
+        while True:
+            # Parse a struct specifier if there is one.
+            if not type_spec_class and self.token_is(index, STRUCT):
+                node, index = self.parse_struct_spec(index + 1)
+                specs.append(node)
+                type_spec_class = STRUCT
+
+            elif not type_spec_class and self.token_is(index, UNION):
+                node, index = self.parse_union_spec(index + 1)
+                specs.append(node)
+                type_spec_class = STRUCT
+
+            # Match a typedef name
+            elif (not type_spec_class
+                  and self.token_is(index, ID)
+                  and self.symbols.is_typedef(self.tokens[index])):
+                specs.append(self.tokens[index])
+                index += 1
+                type_spec_class = typedef
+
+            elif type_spec_class in {None, SIMPLE} and self.tokens[index] in type_specs:
+                specs.append(self.tokens[index])
+                index += 1
+                type_spec_class = SIMPLE
+
+            elif self.tokens[index] in type_quals:
+                specs.append(self.tokens[index])
+                index += 1
+
+            elif self.tokens[index] in storage_specs:
+                if not _spec_qual:
+                    specs.append(self.tokens[index])
+                else:
+                    self.error()
+                index += 1
+
+            else:
+                break
 
         if specs:
             return specs, index
@@ -588,6 +628,40 @@ class Parser:
                 return self.tokens[index], index + 1
         else:
             self.error()
+
+    def parse_struct_spec(self, index):
+        return self._parse_struct_union_spec(index, decl_nodes.Struct)
+
+    def parse_union_spec(self, index):
+        return self._parse_struct_union_spec(index, decl_nodes.Union)
+
+    def _parse_struct_union_spec(self, index, node_type):
+        start_r = self.tokens[index - 1].r
+
+        name = None
+        if self.token_is(index, ID):
+            name = self.tokens[index]
+            index += 1
+
+        members = None
+        if self.token_is(index, LBRACE):
+            members, index = self.parse_struct_union_members(index + 1)
+
+        if name is None and members is None:
+            self.error()
+
+        r = start_r + self.tokens[index - 1].r
+        return node_type(name, members, r), index
+
+    def parse_struct_union_members(self, index):
+        members = []
+
+        while True:
+            if self.token_is(index, RBRACE):
+                return members, index + 1
+
+            node, index = self.parse_decls_inits(index, False)
+            members.append(node)
 
     def parse_type_qualifier(self, index):
         specifiers = list(QUALIFIERS.keys())
