@@ -174,6 +174,9 @@ class Lexer:
             elif self.current_char == ';':
                 self.advance()
                 tokens.append(Token(SEMI, ';'))
+            elif self.current_char == ':':
+                self.advance()
+                tokens.append(Token(COLON, ':'))
             elif self.current_char == "{":
                 self.advance()
                 tokens.append(Token(LBRACE, "{"))

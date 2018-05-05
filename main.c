@@ -5,6 +5,10 @@
 
 char buf[BUF_LEN];
 
+union Bla {
+    unsigned int a : 1, b : 2;
+} bla;
+
 int main() {
     sizeof buf;
     return buf[0];

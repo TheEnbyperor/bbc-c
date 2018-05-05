@@ -515,73 +515,37 @@ class Parser:
         node = decl_tree.Root(specs, decls, inits)
         return node, index
 
-    def parse_decl_specifiers(self, index, _spec_qual=False):
+    def parse_decl_specifiers(self, index):
         """Parse a declaration specifier list.
         Examples:
             int
             const char
             typedef int
-        If _spec_qual=True, produces a CompilerError if given any specifiers
-        that are neither type specifier nor type qualifier.
-        The returned `specs` list may contain two types of elements: tokens and
-        Node objects. A Node object will be included for a struct or union
-        declaration, and a token for all other declaration specifiers.
         """
-        type_specs = set(ctypes.simple_types.keys())
-        type_specs |= {SIGNED, UNSIGNED}
-
-        type_quals = {CONST}
-
-        storage_specs = {AUTO, STATIC,
-                         EXTERN, TYPEDEF}
 
         specs = []
 
-        SIMPLE = 1
-        STRUCT = 2
-        typedef = 3
-        type_spec_class = None
-
-        while True:
-            # Parse a struct specifier if there is one.
-            if not type_spec_class and self.token_is(index, STRUCT):
-                node, index = self.parse_struct_spec(index + 1)
+        try:
+            node, index = self.parse_type_specifier(index)
+            specs.append(node)
+        except SyntaxError:
+            try:
+                node, index = self.parse_type_qualifier(index)
                 specs.append(node)
-                type_spec_class = STRUCT
-
-            elif not type_spec_class and self.token_is(index, UNION):
-                node, index = self.parse_union_spec(index + 1)
-                specs.append(node)
-                type_spec_class = STRUCT
-
-            # Match a typedef name
-            elif (not type_spec_class
-                  and self.token_is(index, ID)
-                  and self.symbols.is_typedef(self.tokens[index])):
-                specs.append(self.tokens[index])
-                index += 1
-                type_spec_class = typedef
-
-            elif type_spec_class in {None, SIMPLE} and self.tokens[index] in type_specs:
-                specs.append(self.tokens[index])
-                index += 1
-                type_spec_class = SIMPLE
-
-            elif self.tokens[index] in type_quals:
-                specs.append(self.tokens[index])
-                index += 1
-
-            elif self.tokens[index] in storage_specs:
-                if not _spec_qual:
-                    specs.append(self.tokens[index])
-                else:
-                    self.error()
-                index += 1
-
-            else:
-                break
+            except SyntaxError:
+                try:
+                    node, index = self.parse_storage_class_specifier(index)
+                    specs.append(node)
+                except SyntaxError:
+                    pass
 
         if specs:
+            try:
+                nodes, index = self.parse_decl_specifiers(index)
+                specs.extend(nodes)
+            except SyntaxError:
+                pass
+
             return specs, index
         else:
             self.error()
@@ -627,13 +591,98 @@ class Parser:
             if self.token_is(index, spec):
                 return self.tokens[index], index + 1
         else:
+            soru, name, members, index = self.parse_struct_or_union_specifier(index)
+            print(soru, name, members)
+            return name, index
+
+    def parse_struct_or_union_specifier(self, index):
+        soru, index = self.parse_struct_or_union(index)
+
+        name = None
+        if self.token_is(index, ID):
+            name = self.tokens[index]
+            index += 1
+
+        members = None
+        try:
+            index = self.eat(index, LBRACE)
+            members, index = self.parse_struct_declaration_list(index)
+            index = self.eat(index, RBRACE)
+        except SyntaxError:
+            pass
+
+        if name is None and members is None:
             self.error()
 
-    def parse_struct_spec(self, index):
-        return self._parse_struct_union_spec(index, decl_nodes.Struct)
+        return soru, name, members, index
 
-    def parse_union_spec(self, index):
-        return self._parse_struct_union_spec(index, decl_nodes.Union)
+    def parse_struct_or_union(self, index):
+        try:
+            index = self.eat(index, STRUCT)
+            return STRUCT, index
+        except SyntaxError:
+            index = self.eat(index, UNION)
+            return UNION, index
+
+    def parse_struct_declaration_list(self, index):
+        members = []
+
+        node, index = self.parse_struct_declaration(index)
+        members.append(node)
+
+        try:
+            nodes, index = self.parse_struct_declaration_list(index)
+            members.extend(nodes)
+        except SyntaxError:
+            pass
+
+        return members, index
+
+    def parse_struct_declaration(self, index):
+        specs, index = self.parse_specifier_qualifier_list(index)
+        decl, index = self.parse_struct_declarator_list(index)
+        index = self.eat(index, SEMI)
+        return (specs, decl), index
+
+    def parse_struct_declarator_list(self, index):
+        decls = []
+
+        decl, index = self.parse_struct_declarator(index)
+        decls.append(decl)
+
+        try:
+            index = self.eat(index, COMMA)
+            decl, index = self.parse_struct_declarator_list(index)
+            decls.extend(decl)
+        except SyntaxError:
+            pass
+
+        return decls, index
+
+    def parse_struct_declarator(self, index):
+        decl = None
+        try:
+            end = self.find_decl_end(index)
+            decl = self.parse_declarator(index, end)
+            index = end
+        except SyntaxError:
+            pass
+
+        bit = None
+        try:
+            index = self.eat(index, COLON)
+            if self.tokens[index].type == INTEGER:
+                bit = self.tokens[index].value
+                index += 1
+            else:
+                self.error()
+        except SyntaxError:
+            pass
+
+        if bit is None and decl is None:
+            self.error()
+
+        return (decl, bit), index
 
     def _parse_struct_union_spec(self, index, node_type):
         start_r = self.tokens[index - 1].r
