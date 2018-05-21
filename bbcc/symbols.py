@@ -3,6 +3,8 @@ import collections
 from . import ast
 from . import il
 from . import ctypes
+from . import decl_tree
+from . import tokens
 
 
 class Symbol:
@@ -37,6 +39,8 @@ class FunctionSymbol(Symbol):
 class ScopedSymbolTable(object):
     def __init__(self, scope_name, scope_level, enclosing_scope=None):
         self.symbols = collections.OrderedDict()
+        self.structs = collections.OrderedDict()
+        self.decl_infos = collections.OrderedDict()
         self.scope_name = scope_name
         self.scope_level = scope_level
         self.enclosing_scope = enclosing_scope
@@ -80,15 +84,36 @@ class ScopedSymbolTable(object):
         if self.enclosing_scope is not None:
             return self.enclosing_scope.lookup(name)
 
+    def lookup_struct_union(self, tag):
+        if tag in self.structs:
+            return self.structs[tag]
+
+    def add_struct_union(self, tag, ctype):
+        if tag not in self.structs:
+            self.structs[tag] = ctype
+
+        return self.structs[tag]
+
+    def lookup_decl(self, tag):
+        if tag in self.decl_infos:
+            return self.decl_infos[tag]
+
+    def add_decl(self, tag, decl):
+        self.decl_infos[tag] = decl
+
 
 class SymbolTable(object):
     def __init__(self, scope):
         self.scope_name = scope.scope_name
         self.symbols = scope.symbols
+        self.structs = scope.structs
+        self.decl_infos = scope.decl_infos
         self.sub_scopes = []
 
     def set_symbols(self, scope):
         self.symbols = scope.symbols
+        self.structs = scope.structs
+        self.decl_infos = scope.decl_infos
 
     def add_scope(self, scope):
         self.sub_scopes.append(scope)
@@ -127,11 +152,246 @@ class SymbolTable(object):
         else:
             return self.symbols.get(name)
 
+    def lookup_decl(self, name, scope_name=""):
+        if scope_name != "":
+            scope = None
+            for s in self.sub_scopes:
+                if s.scope_name == scope_name:
+                    scope = s
+                    break
+            r = scope.lookup_decl(name)
+            if r is not None:
+                return r
+        else:
+            return self.decl_infos.get(name)
+
 
 class SymbolTableBuilder(ast.NodeVisitor):
     def __init__(self):
         self.scope = None
         self.scope_out = None
+
+    def get_decl_infos(self, node):
+        any_dec = bool(node.decls)
+        base_type, storage = self.make_specs_ctype(node.specs, any_dec)
+
+        out = []
+        for decl, init in zip(node.decls, node.inits):
+            ctype, identifier = self.make_ctype(decl, base_type)
+
+            out.append(ast.DeclInfo(
+                identifier, ctype, storage, init))
+
+        return out
+
+    def make_ctype(self, decl, prev_ctype):
+        if isinstance(decl, decl_tree.Pointer):
+            new_ctype = ctypes.PointerCType(prev_ctype, decl.const)
+        elif isinstance(decl, decl_tree.Array):
+            new_ctype = self._generate_array_ctype(decl, prev_ctype)
+        elif isinstance(decl, decl_tree.Function):
+            new_ctype = self._generate_func_ctype(decl, prev_ctype)
+        elif isinstance(decl, decl_tree.Identifier):
+            return prev_ctype, decl.identifier
+
+        return self.make_ctype(decl.child, new_ctype)
+
+    def _generate_array_ctype(self, decl, prev_ctype):
+        if decl.n:
+            return ctypes.ArrayCType(prev_ctype, decl.n)
+        else:
+            return ctypes.ArrayCType(prev_ctype, None)
+
+    def _generate_func_ctype(self, decl, prev_ctype):
+        # Prohibit storage class specifiers in parameters.
+        for param in decl.args:
+            decl_info = self.get_decl_infos(param)[0]
+            if decl_info.storage:
+                err = "storage class specified for function parameter"
+                raise SyntaxError(err)
+
+        args = [
+            self.get_decl_infos(decl)[0].ctype
+            for decl in decl.args
+        ]
+
+        # adjust array and function parameters
+        has_void = False
+        for i in range(len(args)):
+            ctype = args[i]
+            if ctype.is_array():
+                args[i] = ctypes.PointerCType(ctype.el)
+            elif ctype.is_function():
+                args[i] = ctypes.PointerCType(ctype)
+            elif ctype.is_void():
+                has_void = True
+        if has_void and len(args) > 1:
+            err = "'void' must be the only parameter"
+            raise SyntaxError(err)
+        if prev_ctype.is_function():
+            err = "function cannot return function type"
+            raise SyntaxError(err)
+        if prev_ctype.is_array():
+            err = "function cannot return array type"
+            raise SyntaxError(err)
+
+        if not args:
+            new_ctype = ctypes.FunctionCType([], prev_ctype)
+        elif has_void:
+            new_ctype = ctypes.FunctionCType([], prev_ctype)
+        else:
+            new_ctype = ctypes.FunctionCType(args, prev_ctype)
+
+        return new_ctype
+
+    def make_specs_ctype(self, specs, any_dec):
+        storage = self.get_storage([spec.type for spec in specs])
+        const = tokens.CONST in {spec.type for spec in specs}
+
+        struct_union_specs = {tokens.STRUCT, tokens.UNION}
+        if any(s.type in struct_union_specs for s in specs):
+            node = [s for s in specs if s.type in struct_union_specs][0]
+
+            redec = not any_dec and storage is None
+            base_type = self.parse_struct_union_spec(node, redec)
+
+        # # is a typedef
+        # elif any(s.kind == token_kinds.identifier for s in specs):
+        #     ident = [s for s in specs if s.kind == token_kinds.identifier][0]
+        #     base_type = self.symbol_table.lookup_typedef(ident)
+        #
+        else:
+            base_type = self.get_base_ctype(specs)
+
+        if const:
+            base_type = base_type.make_const()
+        return base_type, storage
+
+    def parse_struct_union_spec(self, node, redec):
+        has_members = node.members is not None
+
+        if node.type == tokens.STRUCT:
+            ctype_req = ctypes.StructCType
+        else:
+            ctype_req = ctypes.UnionCType
+
+        if node.tag:
+            tag = str(node.tag)
+            ctype = self.scope.lookup_struct_union(tag)
+
+            if ctype and not isinstance(ctype, ctype_req):
+                err = f"defined as wrong kind of tag '{node.kind} {tag}'"
+                raise SyntaxError(err)
+
+            if not ctype or has_members or redec:
+                ctype = self.scope.add_struct_union(tag, ctype_req(tag))
+
+            if has_members and ctype.is_complete():
+                err = f"redefinition of '{node.kind} {tag}'"
+                raise SyntaxError(err)
+
+        else:  # anonymous struct/union
+            ctype = ctype_req(None)
+
+        if not has_members:
+            return ctype
+
+        # Struct or union does have members
+        members = []
+        members_set = set()
+        for member in node.members:
+            decl_infos = self.get_decl_infos(member)
+
+            for decl_info in decl_infos:
+                self._check_struct_member_decl_info(
+                    decl_info, node.type, members_set)
+
+                name = decl_info.identifier.value
+                members_set.add(name)
+                members.append((name, decl_info.ctype))
+
+        ctype.set_members(members)
+        return ctype
+
+    def _check_struct_member_decl_info(self, decl_info, kind, members):
+        if decl_info.identifier is None:
+            err = f"missing name of {kind} member"
+            raise SyntaxError(err)
+
+        if decl_info.storage is not None:
+            err = f"cannot have storage specifier on {kind} member"
+            raise SyntaxError(err)
+
+        if decl_info.ctype.is_function():
+            err = f"cannot have function type as {kind} member"
+            raise SyntaxError(err)
+
+        if not decl_info.ctype.is_complete():
+            err = f"cannot have incomplete type as {kind} member"
+            raise SyntaxError(err)
+
+        if decl_info.identifier.value in members:
+            err = f"duplicate member '{decl_info.identifier.value}'"
+            raise SyntaxError(err)
+
+    def get_base_ctype(self, specs):
+        base_specs = set(ctypes.simple_types)
+        base_specs |= {tokens.SIGNED, tokens.UNSIGNED}
+
+        our_base_specs = [str(spec.type) for spec in specs
+                          if spec.type in base_specs]
+        specs_str = " ".join(sorted(our_base_specs))
+        specs_str = specs_str.replace("long long", "long")
+
+        specs = {
+            "void": ctypes.void,
+
+            "_Bool": ctypes.bool_t,
+
+            "char": ctypes.char,
+            "char signed": ctypes.char,
+            "char unsigned": ctypes.unsig_char,
+
+            "short": ctypes.integer,
+            "short signed": ctypes.integer,
+            "int short": ctypes.integer,
+            "int short signed": ctypes.integer,
+            "short unsigned": ctypes.unsig_int,
+            "int short unsigned": ctypes.unsig_int,
+
+            "int": ctypes.integer,
+            "signed": ctypes.integer,
+            "int signed": ctypes.integer,
+            "unsigned": ctypes.unsig_int,
+            "int unsigned": ctypes.unsig_int,
+
+            "long": ctypes.longint,
+            "long signed": ctypes.longint,
+            "int long": ctypes.longint,
+            "int long signed": ctypes.longint,
+            "long unsigned": ctypes.unsig_longint,
+            "int long unsigned": ctypes.unsig_longint,
+        }
+
+        if specs_str in specs:
+            return specs[specs_str]
+
+        raise SyntaxError("Unrecognised type: {}".format(specs_str))
+
+    def get_storage(self, spec_kinds):
+        storage_classes = {tokens.AUTO: ast.DeclInfo.AUTO,
+                           tokens.STATIC: ast.DeclInfo.STATIC,
+                           tokens.EXTERN: ast.DeclInfo.EXTERN}
+
+        storage = None
+        for kind in spec_kinds:
+            if kind in storage_classes and not storage:
+                storage = storage_classes[kind]
+            elif kind in storage_classes:
+                descrip = "too many storage classes in declaration specifiers"
+                raise SyntaxError(descrip)
+
+        return storage
 
     def visit_TranslationUnit(self, node):
         self.scope = ScopedSymbolTable(scope_name='global', scope_level=1)
@@ -141,7 +401,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.scope_out.set_symbols(self.scope)
 
     def visit_Declaration(self, node):
-        decl_infos = node.get_decls_info()
+        decl_infos = self.get_decl_infos(node.node)
+        self.scope.add_decl(id(node), decl_infos)
         for d in decl_infos:
             if type(d.ctype) == ctypes.FunctionCType:
                 func_name = d.identifier.value
@@ -158,19 +419,19 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Function(self, node):
         func_name = node.name.identifier.value
-        ctype, storage = node.make_ctype()
+        params = [self.get_decl_infos(p)[0] for p in node.params]
+        ctype, storage = self.make_specs_ctype(node.type, True)
+        ctype = ctypes.FunctionCType([p.ctype for p in params], ctype)
         func_symbol = FunctionSymbol(func_name, ctype, storage)
         self.scope.define(func_symbol)
+        self.scope.add_decl(id(node), (params, ctype))
         procedure_scope = ScopedSymbolTable(
             scope_name=str(id(node)),
             scope_level=self.scope.scope_level + 1,
             enclosing_scope=self.scope,
         )
         self.scope = procedure_scope
-        for param in node.params:
-            param = ast.Declaration(param)
-            param = param.get_decls_info()[0]
-
+        for param in params:
             if param.ctype.is_array():
                 param.ctype = ctypes.PointerCType(param.ctype.el)
 

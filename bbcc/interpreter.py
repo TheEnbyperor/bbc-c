@@ -23,7 +23,7 @@ class Interpreter(ast.NodeVisitor):
             self.visit(n)
 
     def visit_Declaration(self, node):
-        decl_infos = node.get_decls_info()
+        decl_infos = self.scope.lookup_decl(id(node))
 
         for d in decl_infos:
             if type(d.ctype) != ctypes.FunctionCType:
@@ -44,11 +44,10 @@ class Interpreter(ast.NodeVisitor):
         old_scope = self.current_scope
         self.current_scope = str(id(node))
 
+        params_decl, ctype = self.scope.lookup_decl(id(node))
         params = []
         offset = 0
-        for param in node.params:
-            param = ast.Declaration(param)
-            param = param.get_decls_info()[0]
+        for param in params_decl:
             param_name = param.identifier.value
             param = self.scope.lookup(param_name, self.current_scope)
             param.il_value.stack_offset = offset
@@ -63,8 +62,7 @@ class Interpreter(ast.NodeVisitor):
             if isinstance(node.nodes.items[-1], ast.Return):
                 should_return = False
         if should_return:
-            ctype = node.make_ctype().ret
-            il_value = il.ILValue(ctype)
+            il_value = il.ILValue(ctype.ret)
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value, "__{}".format(func_name)))
         self.current_scope = old_scope

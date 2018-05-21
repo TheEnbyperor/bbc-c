@@ -81,61 +81,10 @@ class Function(AST):
         self.nodes = nodes
 
     def __repr__(self):
-        ctype, storage = self.make_ctype()
-        return "Function<{}:{}:{}>({})\n{}".format(self.name, ctype.ret, storage,
+        return "Function<{}:{}>({})\n{}".format(self.name, self.type,
                                                    "\n".join([str(p) for p in self.params]),
+
                                                    "  " + "  ".join(str(self.nodes).splitlines(True)))
-
-    def make_ctype(self):
-        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNSIGNED})
-        type_specs = [str(spec.type) for spec in self.type
-                      if spec.type in all_type_specs]
-        specs_str = " ".join(sorted(type_specs))
-
-        storage = self.get_storage([spec.type for spec in self.type])
-
-        specs = {
-            "void": ctypes.void,
-
-            "_Bool": ctypes.bool_t,
-
-            "char": ctypes.char,
-            "char signed": ctypes.char,
-            "char unsigned": ctypes.unsig_char,
-
-            "int": ctypes.integer,
-            "signed": ctypes.integer,
-            "int signed": ctypes.integer,
-            "unsigned": ctypes.unsig_int,
-            "int unsigned": ctypes.unsig_int,
-        }
-
-        if specs_str in specs:
-            ctype = specs[specs_str]
-            args = []
-            for p in self.params:
-                decl = Declaration(p)
-                args.append(decl.get_decls_info()[0].ctype)
-            return ctypes.FunctionCType(args, ctype), storage
-
-        raise SyntaxError("Unrecognised type: {}".format(specs_str))
-
-    def get_storage(self, spec_kinds):
-        storage_classes = {tokens.AUTO: DeclInfo.AUTO,
-                           tokens.STATIC: DeclInfo.STATIC,
-                           tokens.EXTERN: DeclInfo.EXTERN}
-
-        storage = None
-        for kind in spec_kinds:
-            if kind in storage_classes and not storage:
-                storage = storage_classes[kind]
-            elif kind in storage_classes:
-                descrip = "too many storage classes in declaration specifiers"
-                raise SyntaxError(descrip)
-
-        return storage
-
-
 class ExprStatement(AST):
     def __init__(self, expr):
         self.expr = expr
@@ -169,114 +118,7 @@ class Declaration(AST):
         self.node = node
 
     def __repr__(self):
-        return "Declaration\n{}".format("  " + "  ".join(map(str, self.get_decls_info())))
-
-    def get_decls_info(self, node=None):
-        if node is None:
-            node = self.node
-
-        base_type, storage = self.make_specs_ctype(node.specs)
-
-        proc = zip(node.decls, node.inits)
-
-        out = []
-        for decl, init in proc:
-            ctype, identifier = self.make_ctype(decl, base_type)
-
-            out.append(DeclInfo(identifier, ctype, storage, init))
-
-        return out
-
-    def make_ctype(self, decl, prev_ctype):
-        new_ctype = None
-        if isinstance(decl, decl_tree.Pointer):
-            new_ctype = ctypes.PointerCType(prev_ctype, decl.const)
-        elif isinstance(decl, decl_tree.Array):
-            new_ctype = ctypes.ArrayCType(prev_ctype, decl.n)
-        elif isinstance(decl, decl_tree.Function):
-            for param in decl.args:
-                decl_info = self.get_decls_info(param)[0]
-                if decl_info.storage:
-                    err = "storage class specified for function parameter"
-                    raise SyntaxError(err)
-
-            args = [self.get_decls_info(decl)[0].ctype for decl in decl.args]
-            has_void = False
-            for i in range(len(args)):
-                ctype = args[i]
-                if ctype.is_array():
-                    args[i] = ctypes.PointerCType(ctype.el)
-                elif ctype.is_function():
-                    args[i] = ctypes.PointerCType(ctype)
-                elif ctype.is_void():
-                    has_void = True
-
-            if has_void and len(args) > 1:
-                err = "'void' must be the only parameter"
-                raise SyntaxError(err)
-
-            # Function declarators cannot have a function or array return type.
-            # TODO: Relevant only when typedef is implemented.
-
-            if has_void:
-                new_ctype = ctypes.FunctionCType([], prev_ctype)
-            elif not args:
-                new_ctype = ctypes.FunctionCType([], prev_ctype)
-            else:
-                new_ctype = ctypes.FunctionCType(args, prev_ctype)
-
-        elif isinstance(decl, decl_tree.Identifier):
-            return prev_ctype, decl.identifier
-
-        return self.make_ctype(decl.child, new_ctype)
-
-    def make_specs_ctype(self, specs):
-        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNSIGNED})
-        type_specs = [str(spec.type) for spec in specs
-                      if spec.type in all_type_specs]
-        specs_str = " ".join(sorted(type_specs))
-
-        storage = self.get_storage([spec.type for spec in specs])
-
-        const = tokens.CONST in specs
-
-        specs = {
-            "void": ctypes.void,
-
-            "_Bool": ctypes.bool_t,
-
-            "char": ctypes.char,
-            "char signed": ctypes.char,
-            "char unsigned": ctypes.unsig_char,
-
-            "int": ctypes.integer,
-            "signed": ctypes.integer,
-            "int signed": ctypes.integer,
-            "unsigned": ctypes.unsig_int,
-            "int unsigned": ctypes.unsig_int,
-        }
-
-        if specs_str in specs:
-            ctype = specs[specs_str]
-            ctype = ctype.make_const() if const else ctype
-            return ctype, storage
-
-        raise SyntaxError("Unrecognised type: {}".format(specs_str))
-
-    def get_storage(self, spec_kinds):
-        storage_classes = {tokens.AUTO: DeclInfo.AUTO,
-                           tokens.STATIC: DeclInfo.STATIC,
-                           tokens.EXTERN: DeclInfo.EXTERN}
-
-        storage = None
-        for kind in spec_kinds:
-            if kind in storage_classes and not storage:
-                storage = storage_classes[kind]
-            elif kind in storage_classes:
-                descrip = "too many storage classes in declaration specifiers"
-                raise SyntaxError(descrip)
-
-        return storage
+        return "Declaration\n{}".format("  " + str(self.node))
 
 
 class Return(AST):

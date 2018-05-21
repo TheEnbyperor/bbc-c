@@ -25,6 +25,9 @@ class CType:
     def is_array(self):
         return False
 
+    def is_struct_union(self):
+        return False
+
     def is_scalar(self):
         return self.is_arith() or self.is_pointer()
 
@@ -134,6 +137,55 @@ class FunctionCType(CType):
         return '<FunctionCType({args}:{ret})>'.format(args=self.args, ret=self.ret)
 
 
+class _UnionStructCType(CType):
+    def __init__(self, tag, members=None):
+        self.tag = tag
+        self.members = members
+        self.offsets = {}
+        super().__init__(1)
+
+    def is_complete(self):
+        return self.members is not None
+
+    def is_object(self):
+        return True
+
+    def is_struct_union(self):
+        return True
+
+    def get_offset(self, member):
+        return self.offsets.get(member, (None, None))
+
+    def set_members(self, members):
+        raise NotImplementedError
+
+
+class StructCType(_UnionStructCType):
+    def set_members(self, members):
+        self.members = members
+
+        cur_offset = 0
+        for member, ctype in members:
+            self.offsets[member] = cur_offset, ctype
+            cur_offset += ctype.size
+
+        self.size = cur_offset
+
+    def __repr__(self):
+        return '<StructCType({})>'.format(self.members)
+
+
+class UnionCType(_UnionStructCType):
+    def set_members(self, members):
+        self.members = members
+        self.size = max([ctype.size for _, ctype in members], default=0)
+        for member, ctype in members:
+            self.offsets[member] = 0, ctype
+
+    def __repr__(self):
+        return '<UnionCType({})>'.format(self.members)
+
+
 void = VoidCType()
 
 bool_t = IntegerCType(1, False)
@@ -145,6 +197,11 @@ integer = IntegerCType(2, True)
 unsig_int = IntegerCType(2, False)
 int_max = 32767
 int_min = -32768
+
+longint = IntegerCType(4, True)
+unsig_longint = IntegerCType(4, False)
+longint_max = 2147483647
+longint_min = -2147483648
 
 simple_types = {tokens.VOID: void,
                 tokens.BOOL: bool_t,

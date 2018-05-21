@@ -3,15 +3,18 @@
 
 #define BUF_LEN 10
 
-char buf[BUF_LEN];
-
-union Bla {
-    unsigned int a : 1, b : 2;
+struct Bla {
+    unsigned int a, b;
 } bla;
 
+struct Bla buf[BUF_LEN];
+
+int Fibonacci(int);
+
 int main() {
-    sizeof buf;
-    return buf[0];
+    buf[1];
+
+    return 0;
 }
 
 //int Fibonacci(int n) {

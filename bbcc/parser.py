@@ -591,9 +591,8 @@ class Parser:
             if self.token_is(index, spec):
                 return self.tokens[index], index + 1
         else:
-            soru, name, members, index = self.parse_struct_or_union_specifier(index)
-            print(soru, name, members)
-            return name, index
+            decl, index = self.parse_struct_or_union_specifier(index)
+            return decl, index
 
     def parse_struct_or_union_specifier(self, index):
         soru, index = self.parse_struct_or_union(index)
@@ -614,7 +613,15 @@ class Parser:
         if name is None and members is None:
             self.error()
 
-        return soru, name, members, index
+        decl = None
+        if soru == STRUCT:
+            decl = decl_tree.Struct(name, members)
+        elif soru == UNION:
+            decl = decl_tree.Union(name, members)
+        else:
+            self.error()
+
+        return decl, index
 
     def parse_struct_or_union(self, index):
         try:
@@ -642,7 +649,7 @@ class Parser:
         specs, index = self.parse_specifier_qualifier_list(index)
         decl, index = self.parse_struct_declarator_list(index)
         index = self.eat(index, SEMI)
-        return (specs, decl), index
+        return decl_tree.Root(specs, decl), index
 
     def parse_struct_declarator_list(self, index):
         decls = []
@@ -682,35 +689,7 @@ class Parser:
         if bit is None and decl is None:
             self.error()
 
-        return (decl, bit), index
-
-    def _parse_struct_union_spec(self, index, node_type):
-        start_r = self.tokens[index - 1].r
-
-        name = None
-        if self.token_is(index, ID):
-            name = self.tokens[index]
-            index += 1
-
-        members = None
-        if self.token_is(index, LBRACE):
-            members, index = self.parse_struct_union_members(index + 1)
-
-        if name is None and members is None:
-            self.error()
-
-        r = start_r + self.tokens[index - 1].r
-        return node_type(name, members, r), index
-
-    def parse_struct_union_members(self, index):
-        members = []
-
-        while True:
-            if self.token_is(index, RBRACE):
-                return members, index + 1
-
-            node, index = self.parse_decls_inits(index, False)
-            members.append(node)
+        return decl, index
 
     def parse_type_qualifier(self, index):
         specifiers = list(QUALIFIERS.keys())

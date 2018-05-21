@@ -1,3 +1,4 @@
+.export __bla
 .export __buf
 .export __main
 .import _bbcc_pusha
@@ -15,9 +16,9 @@ lda &75
 pha
 
 \ Mult
-lda #&01
+lda #&04
 sta &72
-lda #&00
+lda #&01
 sta &70
 lda #&00
 sta &71
@@ -50,18 +51,11 @@ lda &1001
 adc &75
 sta &71
 
-\ ReadAt
-lda &71
-sta &73
-lda &70
-sta &72
-ldy #&00
-lda (&72),Y
-sta &74
-
 \ Return
-lda &74
+lda #&00
 sta &70
+lda #&00
+sta &71
 pla
 sta &73
 pla

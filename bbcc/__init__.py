@@ -17,8 +17,6 @@ def main(text: str):
     p = Parser(token_list)
     ast_out = p.parse()
 
-    print(ast_out)
-
     symbol_table_builder = SymbolTableBuilder()
     symbol_table_builder.visit(ast_out)
     symbol_table = symbol_table_builder.scope_out

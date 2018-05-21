@@ -1,3 +1,5 @@
+from . import tokens
+
 class Node:
     """Base class for all decl_tree nodes."""
     pass
@@ -20,7 +22,7 @@ class Root(Node):
             self.inits = [None] * len(self.decls)
 
     def __repr__(self):
-        return str(self.decls)
+        return str(self.specs) + str(self.decls)
 
 
 class Pointer(Node):
@@ -68,3 +70,27 @@ class Identifier(Node):
 
     def __repr__(self):
         return str(self.identifier)
+
+
+class _StructUnion(Node):
+    def __init__(self, tag, members):
+        self.tag = tag
+        self.members = members
+
+        super().__init__()
+
+
+class Struct(_StructUnion):
+    """Represents a struct C type."""
+
+    def __init__(self, tag, members):
+        self.type = tokens.STRUCT
+        super().__init__(tag, members)
+
+
+class Union(_StructUnion):
+    """Represents a union C type."""
+
+    def __init__(self, tag, members):
+        self.type = tokens.UNION
+        super().__init__(tag, members)
