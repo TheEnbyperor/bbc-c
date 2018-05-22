@@ -5,7 +5,7 @@
 
 struct Bla {
     unsigned int a, b;
-} bla;
+};
 
 struct Bla buf[BUF_LEN];
 

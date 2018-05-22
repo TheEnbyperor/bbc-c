@@ -55,7 +55,7 @@ class Assemble:
         return header
 
     def assemble(self):
-        out = [0xB, 0xB, 0xC, 0x42, 0x42, 0x43, 0]
+        out = [0xB, 0xB, 0xC, 0x42, 0x42, 0x43]
 
         header = self._make_header()
         out.extend(list(struct.pack("<H", len(header))))

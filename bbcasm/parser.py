@@ -198,6 +198,26 @@ class Parser:
             return index + 1
         self.error()
 
+    def parse_cmd_byte(self, index):
+        nums = []
+        while True:
+            if self.token_is(index, INTEGER):
+                num = self.tokens[index].value
+                index += 1
+                nums.append(num)
+                if self.token_is(index, COMMA):
+                    index += 1
+                else:
+                    break
+            else:
+                self.error()
+        inst = insts.Bytes(nums)
+        if len(self.cur_labels) > 0:
+            inst.labels = self.cur_labels
+            self.cur_labels = []
+        self.prog.insts.append(inst)
+        return index
+
     def parse(self):
         index = 0
         while self.tokens[index].type != EOF:

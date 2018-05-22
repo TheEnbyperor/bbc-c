@@ -955,6 +955,8 @@ class IL:
         self.commands.append(command)
 
     def gen_asm(self, assembly: asm.ASM):
+        spotmap = self.spotmap
+
         exports = []
         imports = ["_bbcc_pusha", "_bbcc_pulla"]
 
@@ -971,10 +973,16 @@ class IL:
         for n, s in self.symbol_table.symbols.items():
             if s.storage == ast.DeclInfo.EXTERN:
                 imports.append("__{}".format(n))
-            elif s.storage != ast.DeclInfo.STATIC:
-                if s.type.is_function() and ("__{}".format(s.name) not in funcs):
-                    continue
-                exports.append("__{}".format(n))
+            else:
+                if s.storage != ast.DeclInfo.STATIC:
+                    if s.type.is_function() and ("__{}".format(s.name) not in funcs):
+                        continue
+                    exports.append("__{}".format(n))
+                if not s.type.is_function():
+                    v = s.il_value
+                    label = self.get_label()
+                    spotmap[v] = spots.LabelMemorySpot(label, v.type)
+                    assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
 
         for e in exports:
             assembly.add_inst(".export", e)
@@ -982,8 +990,6 @@ class IL:
             assembly.add_inst(".import", i)
 
         self._print_commands()
-
-        spotmap = self.spotmap
 
         for i, v in self.literals.items():
             spotmap[i] = spots.LiteralSpot(v, i.type)
@@ -998,7 +1004,6 @@ class IL:
                     move_to_mem.append(v)
 
         max_stack_offset = {}
-        mem_start = 0x1000
         current_function = ""
 
         for i, c in enumerate(self.commands):
@@ -1017,8 +1022,9 @@ class IL:
                     if v.storage == ast.DeclInfo.EXTERN:
                         spotmap[v] = spots.LabelMemorySpot("__{}".format(v.name), v.type)
                     elif current_function == "":
-                        spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
-                        mem_start += v.type.size
+                        label = self.get_label()
+                        spotmap[v] = spots.LabelMemorySpot(label, v.type)
+                        assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
                     elif v.stack_offset is None and v not in move_to_mem:
                         reg = self._find_register(spotmap, i)
                         if reg is not None:
@@ -1026,8 +1032,9 @@ class IL:
                         else:
                             if v.zp_needed:
                                 raise RuntimeError("Unable to find ZP location for {}".format(i))
-                            spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
-                            mem_start += 2
+                            label = self.get_label()
+                            spotmap[v] = spots.LabelMemorySpot(label, v.type)
+                            assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
                     elif v.stack_offset is not None:
                         if isinstance(c, Function):
                             if max_stack_offset.get(c.func_name) is None:
@@ -1037,8 +1044,9 @@ class IL:
                         spotmap[v] = spots.StackSpot(v.stack_offset, v.type)
                     elif not isinstance(c, Function):
                         if v.type.is_array():
-                            spotmap[v] = spots.AbsoluteMemorySpot(mem_start, v.type)
-                            mem_start += v.type.size
+                            label = self.get_label()
+                            spotmap[v] = spots.LabelMemorySpot(label, v.type)
+                            assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
 
         self._print_spotmap(spotmap)
 
