@@ -19,6 +19,13 @@ def assemble_s(text: str, name: str):
     obj_file.write(out)
 
 
+def link_o(arg, *args, **kwargs):
+    if arg.static:
+        link_o_static(*args, **kwargs)
+    elif arg.shared:
+        link_o_shared(arg.strip, *args, **kwargs)
+
+
 def link_o_static(objs, name: str):
     out, exa = bbcld.link_object_files_static(objs, 0xE00)
 
@@ -26,8 +33,8 @@ def link_o_static(objs, name: str):
     out_file.write(out)
 
 
-def link_o_shared(objs, name: str):
-    out  = bbcld.link_object_files_shared(objs)
+def link_o_shared(strip, objs, name: str):
+    out = bbcld.link_object_files_shared(objs, strip)
 
     out_file = open(name, "wb")
     out_file.write(out)
@@ -49,6 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", help="Compile and assemble but do not link", action="store_true")
     parser.add_argument("-shared", help="Create a shared library", action="store_true")
     parser.add_argument("-static", help="Create a statically linked executable", action="store_true")
+    parser.add_argument("-strip", help="Strip names of internal symbol", action="store_true")
     parser.add_argument("files", nargs="+", help="Input files", type=str)
 
     args = parser.parse_args()
@@ -99,11 +107,7 @@ if __name__ == "__main__":
             else:
                 name = args.output
 
-            if args.static:
-                link_o_static(files, name)
-            elif args.shared:
-                link_o_shared(files, name)
-
+            link_o(args, files, name)
     elif first_e == ".s":
         if args.S:
             raise RuntimeError("Cant just compile assembly")
@@ -126,10 +130,7 @@ if __name__ == "__main__":
             else:
                 name = args.output
 
-            if args.static:
-                link_o_static(files, name)
-            elif args.shared:
-                link_o_shared(files, name)
+            link_o(args, files, name)
     elif first_e == ".o":
         if args.S or args.c:
             raise RuntimeError("Cant just compile or assemble object file")
@@ -139,7 +140,4 @@ if __name__ == "__main__":
         else:
             name = args.output
 
-        if args.static:
-            link_o_static(map(lambda s: s[1], source_files), name)
-        elif args.shared:
-            link_o_shared(map(lambda s: s[1], source_files), name)
+        link_o(args, map(lambda s: s[1], source_files), name)
