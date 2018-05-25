@@ -2,9 +2,11 @@ import bbcc
 import bbcasm
 import bbcld
 import bbcdisk
+import bbctape
 import sys
 import os
 import argparse
+import wave
 
 
 def compile_c(text: str, out: str):
@@ -31,6 +33,7 @@ def link_o_static(objs, name: str):
 
     out_file = open(name, "wb")
     out_file.write(out)
+    make_tape(name, name, 0xE00, exa, out)
 
 
 def link_o_shared(strip, objs, name: str):
@@ -38,6 +41,11 @@ def link_o_shared(strip, objs, name: str):
 
     out_file = open(name, "wb")
     out_file.write(out)
+
+
+def make_tape(name, file, lda, exa, data):
+    w = wave.open("{}.wav".format(name), "w")
+    bbctape.make_file(w, file, lda, exa, 0, data)
 
 
 def make_disk(files):
@@ -56,7 +64,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", help="Compile and assemble but do not link", action="store_true")
     parser.add_argument("-shared", help="Create a shared library", action="store_true")
     parser.add_argument("-static", help="Create a statically linked executable", action="store_true")
-    parser.add_argument("-strip", help="Strip names of internal symbol", action="store_true")
+    parser.add_argument("-strip", help="Strip names of internal symbols", action="store_true")
     parser.add_argument("files", nargs="+", help="Input files", type=str)
 
     args = parser.parse_args()

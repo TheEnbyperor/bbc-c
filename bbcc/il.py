@@ -316,7 +316,7 @@ class CallFunction(ILInst):
         offset = 0
         for a in self.args:
             spot = spotmap[a]
-            for i in range(spot.type.size):
+            for i in range(spot.type.size)[::-1]:
                 spot.asm(assembly, "LDA", i)
                 assembly.add_inst("JSR", "_bbcc_pusha")
             offset += spot.type.size
@@ -436,7 +436,7 @@ class Sub(ILInst):
                 else:
                     assembly.add_inst("LDA", "#0")
                 if i < right.type.size:
-                    left.asm(assembly, "SBC", i)
+                    right.asm(assembly, "SBC", i)
                 else:
                     assembly.add_inst("LDA", "#0")
             output.asm(assembly, "STA", i)
