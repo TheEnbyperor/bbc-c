@@ -77,14 +77,13 @@ class Linker:
         if start_symbol is None:
             raise LookupError("No _start symbol, don't know where to start execution")
 
-        start_addr = start_symbol[0].addr+start_symbol[1]
-        return out, start_addr
+        return out, start_symbol[1]
 
     def link_shared(self, stip):
         for o in self.objects:
             self._parse_obj(o, False)
 
-        out = [0xB, 0xB, 0xC, 0x42, 0x42, 0x43, 0]
+        out = [0xB, 0xB, 0xC, 0x42, 0x42, 0x43]
         symbols = []
         code = []
         for e in self.executables:

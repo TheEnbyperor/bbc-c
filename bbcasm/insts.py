@@ -196,6 +196,7 @@ class Inst:
             print([inst] + self.value.val())
             return [inst] + self.value.val()
 
+
 class ADC(Inst):
     modes = [(LiteralVal, 0x69), (ZpVal, 0x65), (ZpXVal, 0x75), (MemVal, 0x6D), (MemXVal, 0x7D), (MemYVal, 0x79),
              (IndirectXVal, 0x61), (IndirectYVal, 0x71)]
