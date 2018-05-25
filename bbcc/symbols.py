@@ -152,18 +152,14 @@ class SymbolTable(object):
         else:
             return self.symbols.get(name)
 
-    def lookup_decl(self, name, scope_name=""):
-        if scope_name != "":
-            scope = None
-            for s in self.sub_scopes:
-                if s.scope_name == scope_name:
-                    scope = s
-                    break
-            r = scope.lookup_decl(name)
-            if r is not None:
-                return r
-        else:
-            return self.decl_infos.get(name)
+    def lookup_decl(self, name):
+        decl = self.decl_infos.get(name)
+        if decl is None:
+            for scope in self.sub_scopes:
+                decl = scope.lookup_decl(name)
+                if decl is not None:
+                    return decl
+        return decl
 
 
 class SymbolTableBuilder(ast.NodeVisitor):

@@ -193,7 +193,7 @@ class Inst:
                 if isinstance(self.value, m[0]):
                     inst = m[1]
                     break
-            print([inst] + self.value.val())
+            # print([inst] + self.value.val())
             return [inst] + self.value.val()
 
 

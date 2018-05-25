@@ -361,6 +361,8 @@ class Function(ILInst):
                     if type(c) == Return:
                         if c.func_name != self.func_name:
                             break
+                    if type(c) == Function:
+                        break
                     for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
                         if s not in used and isinstance(s, spots.Pseudo16RegisterSpot):
                             if s.loc in pseudo_registers and s.loc != return_register:

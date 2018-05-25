@@ -4,13 +4,10 @@ __bbcc_00000004: .byte &00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&
 .export __main
 .import _bbcc_pusha
 .import _bbcc_pulla
+.import __getchar
 
 \ Function
 __main: 
-lda &76
-pha
-lda &77
-pha
 lda &74
 pha
 lda &75
@@ -21,9 +18,30 @@ lda &73
 pha
 
 \ CallFunction
-lda #&00
+jsr __getchar
+lda &70
+sta &72
+
+\ Set
+lda &72
+sta &74
+
+\ Sub
+sec
+lda &74
+sbc #&41
+sta &72
+
+\ Set
+lda &72
+sta &74
+lda #0
+sta &75
+
+\ CallFunction
+lda &75
 jsr _bbcc_pusha
-lda #&02
+lda &74
 jsr _bbcc_pusha
 jsr __Fibonacci
 clc
@@ -44,6 +62,10 @@ sta &70
 lda &73
 sta &71
 pla
+sta &75
+pla
+sta &74
+pla
 sta &73
 pla
 sta &72
@@ -51,10 +73,6 @@ rts
 
 \ Function
 __Fibonacci: 
-lda &76
-pha
-lda &77
-pha
 lda &74
 pha
 lda &75
@@ -63,56 +81,6 @@ lda &72
 pha
 lda &73
 pha
-
-\ Sub
-sec
-ldy #&00
-lda (&8E),Y
-sbc #&01
-sta &72
-ldy #&01
-lda (&8E),Y
-sbc #&00
-sta &73
-
-\ Sub
-sec
-ldy #&00
-lda (&8E),Y
-sbc #&02
-sta &74
-ldy #&01
-lda (&8E),Y
-sbc #&00
-sta &75
-
-\ Add
-clc
-lda &72
-adc &74
-sta &76
-lda &73
-adc &75
-sta &77
-
-\ Return
-lda &76
-sta &70
-lda &77
-sta &71
-pla
-sta &77
-pla
-sta &76
-pla
-sta &73
-pla
-sta &72
-pla
-sta &75
-pla
-sta &74
-rts
 
 \ EqualCmp
 lda #00
@@ -140,10 +108,6 @@ lda #&00
 sta &70
 lda #&00
 sta &71
-pla
-sta &77
-pla
-sta &76
 pla
 sta &73
 pla
@@ -186,10 +150,6 @@ lda #&01
 sta &70
 lda #&00
 sta &71
-pla
-sta &77
-pla
-sta &76
 pla
 sta &73
 pla
@@ -275,10 +235,6 @@ sta &70
 lda &75
 sta &71
 pla
-sta &77
-pla
-sta &76
-pla
 sta &73
 pla
 sta &72
@@ -299,10 +255,6 @@ lda #&00
 sta &70
 lda #&00
 sta &71
-pla
-sta &77
-pla
-sta &76
 pla
 sta &73
 pla

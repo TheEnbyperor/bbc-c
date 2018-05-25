@@ -12,11 +12,11 @@ struct Bla buf[BUF_LEN];
 int Fibonacci(int);
 
 int main() {
-    return Fibonacci(2);
+    char in = getchar();
+    return Fibonacci(in-65);
 }
 
 int Fibonacci(int n) {
-    return (n-1) + (n-2);
     if ( n == 0 )
         return 0;
     else if ( n == 1 )

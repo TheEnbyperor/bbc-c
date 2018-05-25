@@ -77,7 +77,9 @@ class Interpreter(ast.NodeVisitor):
             if fa.is_pointer():
                 arg = arg.addr(self.il)
 
-            args.append(arg.val(self.il))
+            arg_val = arg.val(self.il)
+            arg_val = self._set_type(arg_val, fa)
+            args.append(arg_val)
 
         output = il.ILValue(func.type.ret)
         self.il.add(il.CallFunction("__{}".format(func_name), args, output))
@@ -509,3 +511,11 @@ class Interpreter(ast.NodeVisitor):
     def interpret(self, ast_root) -> il.IL:
         self.visit(ast_root)
         return self.il
+
+    def _set_type(self, il_value: il.ILValue, ctype: ctypes.CType):
+        if il_value.type == ctype:
+            return il_value
+        else:
+            output = il.ILValue(ctype)
+            self.il.add(il.Set(il_value, output))
+            return output

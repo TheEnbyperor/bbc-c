@@ -34,6 +34,7 @@ def link_o_static(objs, name: str):
     out_file = open(name, "wb")
     out_file.write(out)
     make_tape(name, name, 0xE00, exa, out)
+    make_disk([["$.{}".format(name), out, 0xE00, exa]], name)
 
 
 def link_o_shared(strip, objs, name: str):
@@ -48,10 +49,10 @@ def make_tape(name, file, lda, exa, data):
     bbctape.make_file(w, file, lda, exa, 0, data)
 
 
-def make_disk(files):
-    files = map(lambda f: bbcdisk.File(f[0], f[1], 0xE00, 0xE00), files)
+def make_disk(files, out):
+    files = list(map(lambda f: bbcdisk.File(f[0], f[1], f[2], f[3]), files))
     disk = bbcdisk.files_to_disk(files)
-    disk_file = open("out.ssd", "wb")
+    disk_file = open("{}.ssd".format(out), "wb")
     disk_file.write(disk)
 
 
