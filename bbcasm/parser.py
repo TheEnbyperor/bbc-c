@@ -51,6 +51,19 @@ class Parser:
             return False
 
     def parse_LiteralVal(self, index):
+        if self.tokens[index].type in [LT, GT]:
+            offset = 0
+            if self.tokens[index].type == GT:
+                offset = 1
+            index = self.eat(index+1, LPAREM)
+            if self.tokens[index].type == ID:
+                name = self.tokens[index].value
+                index = self.eat(index+1, RPAREM)
+                return insts.LabelAddrVal(name, offset=offset), index
+            else:
+                self.error()
+            return
+
         index = self.eat(index, HASH)
         if type(self.tokens[index].value) != int:
             self.error()
@@ -72,18 +85,6 @@ class Parser:
         return insts.ZpVal(self.tokens[index].value), index + 1
 
     def parse_MemVal(self, index):
-        if self.tokens[index].type in [LT, GT]:
-            offset = 0
-            if self.tokens[index].type == GT:
-                offset = 1
-            index = self.eat(index+1, LPAREM)
-            if self.tokens[index].type == ID:
-                name = self.tokens[index].value
-                index = self.eat(index+1, RPAREM)
-                return insts.LabelVal(name, offset=offset), index
-            else:
-                self.error()
-
         if self.tokens[index].type == ID:
             return insts.LabelVal(self.tokens[index].value), index + 1
 

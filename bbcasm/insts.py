@@ -62,6 +62,18 @@ class LabelVal(Value):
         raise NotImplementedError
 
 
+class LabelAddrVal(Value):
+    def __init__(self, label, offset=0):
+        self.label = label
+        self.offset = offset
+
+    def __repr__(self):
+        return "LabelAddrVal({})".format(self.label)
+
+    def val(self):
+        raise NotImplementedError
+
+
 class MemXVal(Value):
     def __init__(self, loc):
         self.loc = loc
@@ -181,6 +193,7 @@ class Inst:
                 if isinstance(self.value, m[0]):
                     inst = m[1]
                     break
+            print([inst] + self.value.val())
             return [inst] + self.value.val()
 
 class ADC(Inst):
@@ -376,7 +389,8 @@ class DEC(Inst):
 
 
 class EOR(Inst):
-    modes = [(LiteralVal, 0xE9), (ZpVal, 0x45), (ZpXVal, 0x55), (MemVal, 0x4D), (MemXVal, 0x5D), (MemYVal, 0x59), (IndirectXVal, 0x41), (IndirectYVal, 0x51)]
+    modes = [(LiteralVal, 0xE9), (ZpVal, 0x45), (ZpXVal, 0x55), (MemVal, 0x4D), (MemXVal, 0x5D), (MemYVal, 0x59),
+             (IndirectXVal, 0x41), (IndirectYVal, 0x51)]
 
     def __init__(self, value):
         self.value = value
