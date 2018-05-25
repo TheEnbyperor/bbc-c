@@ -51,6 +51,7 @@ class Parser:
             return False
 
     def parse_LiteralVal(self, index):
+        index = self.eat(index, HASH)
         if self.tokens[index].type in [LT, GT]:
             offset = 0
             if self.tokens[index].type == GT:
@@ -62,9 +63,7 @@ class Parser:
                 return insts.LabelAddrVal(name, offset=offset), index
             else:
                 self.error()
-            return
 
-        index = self.eat(index, HASH)
         if type(self.tokens[index].value) != int:
             self.error()
         if self.tokens[index].value > 255:

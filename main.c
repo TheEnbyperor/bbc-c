@@ -1,5 +1,6 @@
 // Comment
 #include "stdio.h"
+#include "stdlib.h"
 
 #define BUF_LEN 10
 
@@ -11,9 +12,17 @@ struct Bla buf[BUF_LEN];
 
 int Fibonacci(int);
 
+char num[10];
+
 int main() {
-    char in = getchar();
-    return Fibonacci(in-65);
+    while (1) {
+        char in = getchar();
+        int fib = Fibonacci(in-65);
+        itoa(fib, num);
+        for (int i=0;i<10;i++) {
+            putchar(num[i]);
+        }
+    }
 }
 
 int Fibonacci(int n) {

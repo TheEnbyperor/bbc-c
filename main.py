@@ -29,12 +29,12 @@ def link_o(arg, *args, **kwargs):
 
 
 def link_o_static(objs, name: str):
-    out, exa = bbcld.link_object_files_static(objs, 0xE00)
+    out, exa = bbcld.link_object_files_static(objs, 0x1900)
 
     out_file = open(name, "wb")
     out_file.write(out)
-    make_tape(name, name, 0xE00, exa, out)
-    make_disk([["$.{}".format(name), out, 0xE00, exa]], name)
+    make_tape(name, name, 0x1900, exa, out)
+    make_disk([["$.{}".format(name), out, 0x1900, exa]], name)
 
 
 def link_o_shared(strip, objs, name: str):

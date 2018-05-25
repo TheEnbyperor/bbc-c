@@ -178,9 +178,9 @@ class AddrOf(ILInst):
         output = spotmap[self.output]
 
         if value.has_address():
-            value.asm(assembly, "LDA", 0, extra=lambda x: "#{}".format(x[3:5]))
+            value.asm(assembly, "LDA", 0, extra=lambda x: "#{}".format(x))
             output.asm(assembly, "STA", 1)
-            value.asm(assembly, "LDA", 1, extra=lambda x: "#{}".format(x[:3]))
+            value.asm(assembly, "LDA", 1, extra=lambda x: "#{}".format(x))
             output.asm(assembly, "STA", 0)
 
 

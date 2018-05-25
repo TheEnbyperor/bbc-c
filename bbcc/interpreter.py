@@ -191,10 +191,14 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Minus(self, node):
         left = self.visit(node.left)
+        right = self.visit(node.right)
+
         left_val = left.val(self.il)
-        right = self.visit(node.right).val(self.il)
+        right_val = right.val(self.il)
+        left_val, right_val = self._arith_convert(left_val, right_val)
+
         output = il.ILValue(left.type)
-        self.il.add(il.Sub(left_val, right, output))
+        self.il.add(il.Sub(left_val, right_val, output))
         return output
 
     def visit_Mult(self, node):
@@ -519,3 +523,7 @@ class Interpreter(ast.NodeVisitor):
             output = il.ILValue(ctype)
             self.il.add(il.Set(il_value, output))
             return output
+
+    def _arith_convert(self, left: il.ILValue, right: il.ILValue):
+        max_len = max([left.type, right.type], key=lambda v: v.size)
+        return self._set_type(left, max_len), self._set_type(right, max_len)
