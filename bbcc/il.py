@@ -89,7 +89,7 @@ class Set(ILInst):
         value = spotmap[self.value]
         output = spotmap[self.output]
 
-        if output.has_address():
+        if output.has_address() and value != output:
             for i in range(output.type.size):
                 if i < value.type.size:
                     value.asm(assembly, "LDA", i)
@@ -1049,6 +1049,20 @@ class IL:
                             label = self.get_label()
                             spotmap[v] = spots.LabelMemorySpot(label, v.type)
                             assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
+
+        for i, c in enumerate(self.commands):
+            if (i+1) == len(self.commands):
+                break
+            c2 = self.commands[i+1]
+            for output in c.outputs():
+                output_spot = spotmap[output]
+                for input in c2.inputs():
+                    input_spot = spotmap[input]
+                    if input_spot == output_spot:
+                        if type(c2) == Set:
+                            if input_spot.type == output_spot.type:
+                                spotmap[output] = spotmap[c2.outputs()[0]]
+                                print(c, c2, input_spot)
 
         self._print_spotmap(spotmap)
 

@@ -8,35 +8,32 @@ __bbcc_00000004: .byte &00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&
 
 \ Function
 __main: 
-lda &74
-pha
-lda &75
-pha
 lda &72
 pha
 lda &73
+pha
+lda &74
+pha
+lda &75
 pha
 
 \ CallFunction
 jsr __getchar
 lda &70
-sta &72
+sta &74
 
 \ Set
-lda &72
-sta &74
 
 \ Sub
 sec
 lda &74
 sbc #&41
-sta &72
-
-\ Set
-lda &72
 sta &74
 lda #0
+sbc #&00
 sta &75
+
+\ Set
 
 \ CallFunction
 lda &75
