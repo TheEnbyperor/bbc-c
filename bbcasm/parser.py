@@ -52,23 +52,21 @@ class Parser:
 
     def parse_LiteralVal(self, index):
         index = self.eat(index, HASH)
-        if self.tokens[index].type in [LT, GT]:
-            offset = 0
-            if self.tokens[index].type == GT:
-                offset = 1
-            index = self.eat(index+1, LPAREM)
-            if self.tokens[index].type == ID:
-                name = self.tokens[index].value
-                index = self.eat(index+1, RPAREM)
-                return insts.LabelAddrVal(name, offset=offset), index
+        if self.tokens[index].type == INTEGER:
+            offset = self.tokens[index].value
+            if self.tokens[index+1].type == LPAREM:
+                index = self.eat(index+1, LPAREM)
+                if self.tokens[index].type == ID:
+                    name = self.tokens[index].value
+                    index = self.eat(index+1, RPAREM)
+                    return insts.LabelAddrVal(name, offset=offset), index
+                else:
+                    self.error()
             else:
-                self.error()
-
-        if type(self.tokens[index].value) != int:
-            self.error()
-        if self.tokens[index].value > 255:
-            self.error()
-        return insts.LiteralVal(self.tokens[index].value), index + 1
+                if self.tokens[index].value > 255:
+                    self.error()
+                return insts.LiteralVal(self.tokens[index].value), index + 1
+        self.error()
 
     def parse_AccumulatorVal(self, index):
         if self.token_is(index, ID):
@@ -81,17 +79,28 @@ class Parser:
             self.error()
         if self.tokens[index].value > 255:
             self.error()
+        if self.tokens[index+1].type == LPAREM:
+            self.error()
         return insts.ZpVal(self.tokens[index].value), index + 1
 
     def parse_MemVal(self, index):
         if self.tokens[index].type == ID:
             return insts.LabelVal(self.tokens[index].value), index + 1
-
-        if type(self.tokens[index].value) != int:
-            self.error()
-        if self.tokens[index].value > 65535:
-            self.error()
-        return insts.MemVal(self.tokens[index].value), index + 1
+        if self.tokens[index].type == INTEGER:
+            offset = self.tokens[index].value
+            if self.tokens[index+1].type == LPAREM:
+                index = self.eat(index+1, LPAREM)
+                if self.tokens[index].type == ID:
+                    name = self.tokens[index].value
+                    index = self.eat(index+1, RPAREM)
+                    return insts.LabelVal(name, offset=offset), index
+                else:
+                    self.error()
+            else:
+                if self.tokens[index].value > 65535:
+                    self.error()
+                return insts.MemVal(self.tokens[index].value), index + 1
+        self.error()
 
     def parse_ZpXVal(self, index):
         value, index = self.parse_ZpVal(index)
@@ -237,6 +246,7 @@ class Parser:
                 index = self.parse_cmd(index+1)
 
             else:
+                # print(self.tokens[:index])
                 self.error()
 
         return self.prog

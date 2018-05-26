@@ -6,17 +6,20 @@ class Symbol:
     INTERNAL = 0
     EXPORT = 1
     IMPORT = 2
+    IMPORT_ADDR = 3
+    INTERNAL_ADDR = 4
 
-    def __init__(self, name, addr, type):
+    def __init__(self, name, addr, type, extra=0):
         self.name = name
         self.addr = addr
         self.type = type
+        self.extra = extra
 
     def make_bin(self):
-        return list(struct.pack("<BH", self.type, self.addr) + self.name.encode()) + [0]
+        return list(struct.pack("<BHH", self.type, self.addr, self.extra) + self.name.encode()) + [0]
 
     def __repr__(self):
-        return "<Symbol({}:{}:{})>".format(self.name, self.addr, self.type)
+        return "<Symbol({}:{}:{}:{})>".format(self.name, self.addr, self.type, self.extra)
 
 
 class Assemble:
@@ -44,6 +47,15 @@ class Assemble:
                     val = insts.MemVal(self.labels[i.value.label])
                     if not i.is_relative():
                         self.symbols.append(Symbol(i.value.label, addr + 1, Symbol.INTERNAL))
+                self.prog.insts[n].value = val
+            if isinstance(i.value, insts.LabelAddrVal):
+                if i.value.label in self.prog.imports:
+                    val = insts.LiteralVal(i.value.offset)
+                    self.symbols.append(Symbol(i.value.label, addr+1, Symbol.IMPORT_ADDR))
+                else:
+                    val = insts.LiteralVal(i.value.offset)
+                    self.symbols.append(Symbol(i.value.label, addr + 1, Symbol.INTERNAL_ADDR,
+                                               self.labels[i.value.label]))
                 self.prog.insts[n].value = val
             addr += len(i)
 

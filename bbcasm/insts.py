@@ -178,7 +178,7 @@ class Inst:
                 return 1
             elif type(self.value) in [LiteralVal, ZpVal, ZpXVal, ZpYVal, IndirectXVal, IndirectYVal]:
                 return 2
-            elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal, LabelVal]:
+            elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal, LabelVal, LabelAddrVal]:
                 return 3
 
     def is_relative(self):

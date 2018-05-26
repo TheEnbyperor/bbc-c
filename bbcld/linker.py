@@ -38,7 +38,8 @@ class Linker:
             self.defined_symbols[s.name] = (s, -1)
             symbols.append(s.name)
 
-        for s in filter(lambda symbol: symbol.type == parser.Symbol.IMPORT, e.symbols):
+        for s in filter(lambda symbol: symbol.type == parser.Symbol.IMPORT or
+                                       symbol.type == parser.Symbol.IMPORT_ADDR, e.symbols):
             self._get_symbol(s.name, static)
 
         for symbol in symbols:
@@ -67,10 +68,18 @@ class Linker:
                     d_symbol, d_addr = self.defined_symbols[s.name]
                     cur_val = struct.unpack("<H", bytes(e.code[s.addr:s.addr+2]))[0]
                     e.code = e.code[:s.addr] + list(struct.pack("<H", cur_val+d_addr)) + e.code[s.addr+2:]
+                elif s.type == parser.Symbol.IMPORT_ADDR:
+                    d_symbol, d_addr = self.defined_symbols[s.name]
+                    cur_val = struct.unpack("<B", bytes(e.code[s.addr:s.addr+1]))[0]
+                    e.code = e.code[:s.addr] + list(struct.pack("<B", (d_addr >> (cur_val*8)) & 0xff)) +\
+                             e.code[s.addr+1:]
 
                 elif s.type == parser.Symbol.INTERNAL:
                     cur_val = struct.unpack("<H", bytes(e.code[s.addr:s.addr+2]))[0]
                     e.code = e.code[:s.addr] + list(struct.pack("<H", cur_val+e.pos)) + e.code[s.addr+2:]
+                elif s.type == parser.Symbol.INTERNAL_ADDR:
+                    cur_val = struct.unpack("<B", bytes(e.code[s.addr:s.addr+1]))[0]
+                    e.code = e.code[:s.addr] + list(struct.pack("<B", ((s.extra + e.pos) >> (cur_val*8)) & 0xff)) + e.code[s.addr+1:]
             out.extend(e.code)
 
         start_symbol = self.defined_symbols.get("_start")
