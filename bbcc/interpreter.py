@@ -78,6 +78,7 @@ class Interpreter(ast.NodeVisitor):
                 arg = arg.addr(self.il)
 
             arg_val = arg.val(self.il)
+            print(fa)
             arg_val = self._set_type(arg_val, fa)
             args.append(arg_val)
 
@@ -379,10 +380,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_AddrOf(self, node):
-        output = il.ILValue(ctypes.integer)
         value = self.visit(node.expr)
-        value.addr_of(output, self.il)
-        return output
+        return value.addr(self.il)
 
     def visit_Deref(self, node):
         value = self.visit(node.expr)
@@ -391,14 +390,15 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_ArraySubsc(self, node):
         head = self.visit(node.head)
-        head_val = head.val(self.il)
         arg = self.visit(node.arg).val(self.il)
 
         htype = None
         if head.type.is_array():
             htype = head.type.el
+            head_val = head.addr(self.il)
         elif head.type.is_pointer():
             htype = head.type.arg
+            head_val = head.val(self.il)
 
         type_len = il.ILValue(ctypes.unsig_char)
         self.il.register_literal_value(type_len, htype.size)

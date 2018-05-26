@@ -82,13 +82,7 @@ class LabelMemorySpot(Spot):
         self.type = value_type
 
     def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        if loc == 0:
-            char = "<"
-        elif loc == 1:
-            char = ">"
-        else:
-            raise NotImplementedError("Label memory spot cannot be accessed at offset {}".format(loc))
-        assembly.add_inst(inst, extra("{}({})".format(char, self.label)))
+        assembly.add_inst(inst, extra("{}({})".format(loc, self.label)))
 
     def __eq__(self, other):
         if isinstance(other, LabelMemorySpot):
@@ -104,12 +98,18 @@ class LabelMemorySpot(Spot):
 
 
 class StackSpot(Spot):
-    def __init__(self, offset, value_type):
+    def __init__(self, offset, value_type, il, is_param=False, func_name=""):
         self.offset = offset
         self.type = value_type
+        self.il = il
+        self.is_param = is_param
+        self.func_name = func_name
 
     def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(self.offset+loc)))
+        offset = self.offset
+        if self.is_param:
+            offset += self.il.func_stack_size[self.func_name]
+        assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(offset+loc)))
         assembly.add_inst(inst, "(&{}),Y".format(assembly.to_hex(il.stack_register.loc)))
 
     def __eq__(self, other):

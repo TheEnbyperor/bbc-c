@@ -178,10 +178,24 @@ class AddrOf(ILInst):
         output = spotmap[self.output]
 
         if value.has_address():
-            value.asm(assembly, "LDA", 0, extra=lambda x: "#{}".format(x))
-            output.asm(assembly, "STA", 1)
-            value.asm(assembly, "LDA", 1, extra=lambda x: "#{}".format(x))
-            output.asm(assembly, "STA", 0)
+            if isinstance(value, spots.LabelMemorySpot):
+                value.asm(assembly, "LDA", 0, extra=lambda x: "#{}".format(x))
+                output.asm(assembly, "STA", 1)
+                value.asm(assembly, "LDA", 1, extra=lambda x: "#{}".format(x))
+                output.asm(assembly, "STA", 0)
+            elif isinstance(value, spots.StackSpot):
+                assembly.add_inst("CLC")
+                stack_register.asm(assembly, "LDA", 0)
+                assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(value.offset, 4)[2:4]))
+                output.asm(assembly, "STA", 0)
+                stack_register.asm(assembly, "LDA", 1)
+                assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(value.offset, 4)[0:2]))
+                output.asm(assembly, "STA", 1)
+            else:
+                value.asm(assembly, "LDA", 0, extra=lambda x: "#{}".format(x[:3]))
+                output.asm(assembly, "STA", 1)
+                value.asm(assembly, "LDA", 0, extra=lambda x: "#{}".format(x[3:5]))
+                output.asm(assembly, "STA", 0)
 
 
 class Label(ILInst):
@@ -288,6 +302,16 @@ class Return(ILInst):
                     value.asm(assembly, "LDA", i)
                     ret_reg.asm(assembly, "STA", i)
 
+        if il.func_stack_size[self.func_name] > 0:
+            offset = il.func_stack_size[self.func_name]
+            assembly.add_inst("CLC")
+            stack_register.asm(assembly, "LDA", 0)
+            assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
+            stack_register.asm(assembly, "STA", 0)
+            stack_register.asm(assembly, "LDA", 1)
+            assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
+            stack_register.asm(assembly, "STA", 1)
+
         for reg in used[::-1]:
             assembly.add_inst("PLA")
             reg.asm(assembly, "STA", 1)
@@ -302,6 +326,9 @@ class CallFunction(ILInst):
         self.name = name
         self.args = args
         self.output = output
+
+    def inputs(self):
+        return self.args
 
     def outputs(self):
         return [self.output]
@@ -375,6 +402,16 @@ class Function(ILInst):
             assembly.add_inst("PHA")
             reg.asm(assembly, "LDA", 1)
             assembly.add_inst("PHA")
+
+        if il.func_stack_size[self.func_name] > 0:
+            offset = il.func_stack_size[self.func_name]
+            assembly.add_inst("SEC")
+            stack_register.asm(assembly, "LDA", 0)
+            assembly.add_inst("SBC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
+            stack_register.asm(assembly, "STA", 0)
+            stack_register.asm(assembly, "LDA", 1)
+            assembly.add_inst("SBC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
+            stack_register.asm(assembly, "STA", 1)
 
 
 # Arithmetic
@@ -485,7 +522,7 @@ class Mult(ILInst):
         assembly.add_inst("LDA", "#0")
         for i in range(output.type.size):
             output.asm(assembly, "STA", i)
-        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(right.type.size*8)))
+        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(right.type.size * 8)))
         assembly.add_inst(label=label1)
         for i in reversed(range(right.type.size)):
             if i == right.type.size - 1:
@@ -555,7 +592,7 @@ class Div(ILInst):
         assembly.add_inst("LDA", "#0")
         for i in range(output.type.size):
             scratch3.asm(assembly, "STA", i)
-        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(left.type.size*8)))
+        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(left.type.size * 8)))
         assembly.add_inst(label=label1)
         for i in range(left.type.size):
             if i == 0:
@@ -938,6 +975,7 @@ class IL:
         self.label_count = 0
         self.spotmap = {}
         self.symbol_table = symbol_table
+        self.func_stack_size = {}
 
     def register_literal_value(self, il_value: ILValue, value):
         self.literals[il_value] = value
@@ -999,18 +1037,21 @@ class IL:
         move_to_mem = []
         for c in self.commands:
             for v in c.inputs() + c.outputs() + c.scratch_spaces():
-                if v.type.is_array():
+                if v.type.is_array() or v.type.is_struct_union():
                     move_to_mem.append(v)
             if isinstance(c, AddrOf):
                 for v in c.inputs():
                     move_to_mem.append(v)
 
         max_stack_offset = {}
+        func_stack_size = {}
         current_function = ""
 
         for i, c in enumerate(self.commands):
             if isinstance(c, Function):
                 current_function = c.func_name
+                max_stack_offset[current_function] = 0
+                func_stack_size[current_function] = 0
             elif isinstance(c, Return):
                 for c2 in self.commands[i:]:
                     if isinstance(c2, Return):
@@ -1034,26 +1075,32 @@ class IL:
                         else:
                             if v.zp_needed:
                                 raise RuntimeError("Unable to find ZP location for {}".format(i))
-                            label = self.get_label()
-                            spotmap[v] = spots.LabelMemorySpot(label, v.type)
-                            assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
+                            if current_function == "":
+                                label = self.get_label()
+                                spotmap[v] = spots.LabelMemorySpot(label, v.type)
+                                assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
+                            else:
+                                raise RuntimeError("Stack memory in functions not implemented")
                     elif v.stack_offset is not None:
                         if isinstance(c, Function):
-                            if max_stack_offset.get(c.func_name) is None:
+                            if max_stack_offset[c.func_name] < v.stack_offset:
                                 max_stack_offset[c.func_name] = v.stack_offset
-                            elif max_stack_offset[c.func_name] < v.stack_offset:
-                                max_stack_offset[c.func_name] = v.stack_offset
-                        spotmap[v] = spots.StackSpot(v.stack_offset, v.type)
+                        spotmap[v] = spots.StackSpot(v.stack_offset, v.type, self, True, current_function)
                     elif not isinstance(c, Function):
-                        if v.type.is_array():
+                        if current_function == "":
                             label = self.get_label()
                             spotmap[v] = spots.LabelMemorySpot(label, v.type)
                             assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
+                        else:
+                            spotmap[v] = spots.StackSpot(func_stack_size[current_function], v.type, self)
+                            func_stack_size[current_function] += v.type.size
+
+        self.func_stack_size = func_stack_size
 
         for i, c in enumerate(self.commands):
-            if (i+1) == len(self.commands):
+            if (i + 1) == len(self.commands):
                 break
-            c2 = self.commands[i+1]
+            c2 = self.commands[i + 1]
             for output in c.outputs():
                 output_spot = spotmap[output]
                 for input in c2.inputs():
@@ -1061,6 +1108,7 @@ class IL:
                     if input_spot == output_spot:
                         if type(c2) == Set:
                             if input_spot.type == output_spot.type:
+                                print(spotmap[output], c2.outputs())
                                 spotmap[output] = spotmap[c2.outputs()[0]]
                                 print(c, c2, input_spot)
 
