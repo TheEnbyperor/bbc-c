@@ -29,21 +29,21 @@ sta &74
 lda &73
 ldy #&03
 cmp (&8E),Y
-bcc __bbcc_00000002
-bne __bbcc_00000003
+bcc __bbcc_00000003
+bne __bbcc_00000004
 lda &72
 ldy #&02
 cmp (&8E),Y
-bcs __bbcc_00000003
-__bbcc_00000002: lda #01
+bcs __bbcc_00000004
+__bbcc_00000003: lda #01
 sta &75
-__bbcc_00000003: 
+__bbcc_00000004: 
 
 \ JmpZero
 lda &74
-bne __bbcc_00000004
+bne __bbcc_00000005
 jmp __bbcc_00000001
-__bbcc_00000004: 
+__bbcc_00000005: 
 
 \ CallFunction
 jsr getchar
@@ -63,13 +63,40 @@ lda &72
 ldy #&00
 sta (&70),Y
 
-\ Inc
+\ Add
+clc
 ldy #&00
-inc (&8E),Y
-bne __bbcc_00000005
+lda (&8E),Y
+adc #&02
+ldy #&00
+sta (&8E),Y
 ldy #&01
-inc (&8E),Y
-__bbcc_00000005: 
+lda (&8E),Y
+adc #0
+ldy #&01
+sta (&8E),Y
+
+\ EqualCmp
+lda #00
+sta &70
+lda &72
+cmp #&0A
+bne __bbcc_00000006
+lda #01
+sta &70
+__bbcc_00000006: 
+
+\ JmpZero
+lda &70
+bne __bbcc_00000007
+jmp __bbcc_00000002
+__bbcc_00000007: 
+
+\ Jmp
+jmp __bbcc_00000001
+
+\ Label
+__bbcc_00000002: 
 
 \ Jmp
 jmp __bbcc_00000000

@@ -51,29 +51,6 @@ class ILInst:
         return self.__str__()
 
 
-class Routines(ILInst):
-    def gen_asm(self, assembly: asm.ASM, spotmap, il):
-        assembly.add_inst("PHA", label="_bbcc_pusha")
-        stack_register.asm(assembly, "LDA", 0)
-        assembly.add_inst("BNE", "_bbcc_pusha_1")
-        stack_register.asm(assembly, "DEC", 1)
-        assembly.add_inst(label="_bbcc_pusha_1")
-        stack_register.asm(assembly, "DEC", 0)
-        assembly.add_inst("PLA")
-        assembly.add_inst("LDY", "#00")
-        stack_register.asm(assembly, "STA", 0, lambda x: "({}),Y".format(x))
-        assembly.add_inst("RTS")
-
-        assembly.add_inst("LDY", "#0", label="_bbcc_pulla")
-        stack_register.asm(assembly, "LDA", 0, lambda x: "({}),Y".format(x))
-        stack_register.asm(assembly, "INC", 0)
-        assembly.add_inst("BEQ", "_bbcc_pulla_1")
-        assembly.add_inst("RTS")
-        assembly.add_inst(label="_bbcc_pulla_1")
-        stack_register.asm(assembly, "INC", 1)
-        assembly.add_inst("RTS")
-
-
 class Set(ILInst):
     def __init__(self, value: ILValue, output: ILValue):
         self.value = value
@@ -444,7 +421,7 @@ class Add(ILInst):
                 if i < right.type.size:
                     right.asm(assembly, "ADC", i)
                 else:
-                    assembly.add_inst("LDA", "#0")
+                    assembly.add_inst("ADC", "#0")
             output.asm(assembly, "STA", i)
 
 
@@ -712,11 +689,21 @@ class Inc(ILInst):
         label = il.get_label()
 
         if value.has_address():
-            for i in range(value.type.size):
-                value.asm(assembly, "INC", i)
-                if i != value.type.size - 1:
-                    assembly.add_inst("BNE", label)
-            assembly.add_inst(label=label)
+            if isinstance(value, spots.StackSpot):
+                assembly.add_inst("CLC")
+                for i in range(value.type.size):
+                    value.asm(assembly, "LDA", i)
+                    if i == 0:
+                        assembly.add_inst("ADC", "#1")
+                    else:
+                        assembly.add_inst("ADC", "#0")
+                    value.asm(assembly, "STA", i)
+            else:
+                for i in range(value.type.size):
+                    value.asm(assembly, "INC", i)
+                    if i != value.type.size - 1:
+                        assembly.add_inst("BNE", label)
+                assembly.add_inst(label=label)
 
 
 class Dec(ILInst):
@@ -732,16 +719,26 @@ class Dec(ILInst):
         labels = []
 
         if value.has_address():
-            for i in range(value.type.size):
-                if i != value.type.size - 1:
-                    labels.insert(i, il.get_label())
+            if isinstance(value, spots.StackSpot):
+                assembly.add_inst("SEC")
+                for i in range(value.type.size):
                     value.asm(assembly, "LDA", i)
-                    assembly.add_inst("BNE", labels[i])
+                    if i == 0:
+                        assembly.add_inst("SBC", "#1")
+                    else:
+                        assembly.add_inst("SBC", "#0")
+                    value.asm(assembly, "STA", i)
+            else:
+                for i in range(value.type.size):
+                    if i != value.type.size - 1:
+                        labels.insert(i, il.get_label())
+                        value.asm(assembly, "LDA", i)
+                        assembly.add_inst("BNE", labels[i])
 
-            for i in reversed(range(value.type.size)):
-                if i != value.type.size - 1:
-                    assembly.add_inst(label=labels[i])
-                value.asm(assembly, "DEC", i)
+                for i in reversed(range(value.type.size)):
+                    if i != value.type.size - 1:
+                        assembly.add_inst(label=labels[i])
+                    value.asm(assembly, "DEC", i)
 
 
 # Comparison

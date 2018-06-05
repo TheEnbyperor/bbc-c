@@ -13,9 +13,7 @@
 int Fibonacci(int);
 
 int main() {
-    char num[10];
-        int fib = Fibonacci(3);
-        itoa(fib, num);
+    printf("Hello, world!\n")
 }
 
 int Fibonacci(int n) {

@@ -78,7 +78,6 @@ class Interpreter(ast.NodeVisitor):
                 arg = arg.addr(self.il)
 
             arg_val = arg.val(self.il)
-            print(fa)
             arg_val = self._set_type(arg_val, fa)
             args.append(arg_val)
 
@@ -351,8 +350,15 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_PreIncr(self, node):
-        value = self.visit(node.expr).val(self.il)
-        self.il.add(il.Inc(value))
+        expr = self.visit(node.expr)
+        value = expr.val(self.il)
+
+        if expr.type.is_pointer():
+            type_len = il.ILValue(ctypes.unsig_char)
+            self.il.register_literal_value(type_len, expr.type.size)
+            self.il.add(il.Add(value, type_len, value))
+        else:
+            self.il.add(il.Inc(value))
         return value
 
     def visit_PostIncr(self, node):
@@ -361,13 +367,24 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(value.type)
 
         self.il.add(il.Set(value_val, output))
-        self.il.add(il.Inc(value_val))
+        if value.type.is_pointer():
+            type_len = il.ILValue(ctypes.unsig_char)
+            self.il.register_literal_value(type_len, value.type.size)
+            self.il.add(il.Add(value_val, type_len, value_val))
+        else:
+            self.il.add(il.Inc(value_val))
         return output
 
     def visit_PreDecr(self, node):
-        value = self.visit(node.expr).val(self.il)
+        expr = self.visit(node.expr)
+        value = expr.val(self.il)
 
-        self.il.add(il.Dec(value))
+        if expr.type.is_pointer():
+            type_len = il.ILValue(ctypes.unsig_char)
+            self.il.register_literal_value(type_len, expr.type.size)
+            self.il.add(il.Sub(value, type_len, value))
+        else:
+            self.il.add(il.Inc(value))
         return value
 
     def visit_PostDecr(self, node):
@@ -376,7 +393,12 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(value.type)
 
         self.il.add(il.Set(value_val, output))
-        self.il.add(il.Dec(value_val))
+        if value.type.is_pointer():
+            type_len = il.ILValue(ctypes.unsig_char)
+            self.il.register_literal_value(type_len, value.type.size)
+            self.il.add(il.Sub(value_val, type_len, value_val))
+        else:
+            self.il.add(il.Inc(value_val))
         return output
 
     def visit_AddrOf(self, node):

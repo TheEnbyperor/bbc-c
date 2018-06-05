@@ -6,9 +6,9 @@ char *fgets(char *s, int n) {
         char c = getchar();
         *s = c;
         ++s;
-//        if (c == 10) {
-//            break;
-//        }
+        if (c == 10) {
+            break;
+        }
     }
     *s = 0;
     return s;

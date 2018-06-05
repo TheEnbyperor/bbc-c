@@ -1,7 +1,5 @@
 .export putchar
 .export getchar
-.export osbyte
-.export fgets
 
 putchar:
 ldy #00
