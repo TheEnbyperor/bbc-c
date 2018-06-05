@@ -74,8 +74,8 @@ class Interpreter(ast.NodeVisitor):
         args = []
         for a, fa in zip(node.args, func.type.args):
             arg = self.visit(a)
-            if fa.is_pointer():
-                arg = arg.addr(self.il)
+            if arg.type.is_array():
+                arg = arg.addr()
 
             arg_val = arg.val(self.il)
             arg_val = self._set_type(arg_val, fa)
@@ -173,7 +173,7 @@ class Interpreter(ast.NodeVisitor):
         return il_value
 
     def visit_String(self, node):
-        il_value = il.ILValue('string')
+        il_value = il.ILValue(ctypes.ArrayCType(ctypes.char, len(node.chars)+1))
         self.il.register_literal_string(il_value, node.chars)
         return il_value
 

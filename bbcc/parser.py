@@ -437,7 +437,7 @@ class Parser:
         elif self.token_is(index, ID):
             return ast.Identifier(self.tokens[index]), index + 1
         elif self.token_is(index, STRING):
-            return ast.String(self.tokens[index].content), index + 1
+            return ast.String(self.tokens[index].value), index + 1
         elif self.token_is(index, CHARACTER):
             chars = self.tokens[index].value
             return ast.Number(ord(chars[0])), index + 1

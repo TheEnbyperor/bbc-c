@@ -52,21 +52,57 @@ class Lexer:
     def char(self):
         if self.current_char == '\\':
             self.advance()
-            return bytes([int(self.current_char)]).decode()
+            val = self.process_escape()
+            self.advance()
+            return val
         return self.current_char
 
     def string(self):
         result = ''
-        while self.current_char is not None and self.current_char != '"':
+        while self.current_char is not None and self.current_char != '"' and self.current_char != '\n':
             result += self.current_char
             self.advance()
+            if self.current_char == "\\":
+                self.advance()
+                result += self.process_escape()
+                self.advance()
         return result
+
+    def process_escape(self):
+        if self.current_char == "n":
+            return "\n"
+        elif self.current_char == "t":
+            return "\t"
+        elif self.current_char == "v":
+            return "\v"
+        elif self.current_char == "b":
+            return "\b"
+        elif self.current_char == "r":
+            return "\r"
+        elif self.current_char == "f":
+            return "\f"
+        elif self.current_char == "a":
+            return "\a"
+        elif self.current_char == "\\":
+            return "\\"
+        elif self.current_char == "?":
+            return "?"
+        elif self.current_char == "'":
+            return "'"
+        elif self.current_char == "\"":
+            return "\""
+        elif self.current_char == "0":
+            return "\0"
 
     def h_string(self):
         result = ''
-        while self.current_char is not None and self.current_char != '>':
+        while self.current_char is not None and self.current_char != '>' and self.current_char != '\n':
             result += self.current_char
             self.advance()
+            if self.current_char == "\\":
+                self.advance()
+                result += self.process_escape()
+                self.advance()
         return result
 
     def id(self):
