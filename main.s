@@ -1,11 +1,11 @@
-.export __Fibonacci
-.export __main
+.export Fibonacci
+.export main
 .import _bbcc_pusha
 .import _bbcc_pulla
-.import __itoa
+.import itoa
 
 \ Function
-__main: 
+main: 
 lda &76
 pha
 lda &77
@@ -59,7 +59,7 @@ lda #&00
 jsr _bbcc_pusha
 lda #&03
 jsr _bbcc_pusha
-jsr __Fibonacci
+jsr Fibonacci
 clc
 lda &8E
 adc #&02
@@ -94,7 +94,7 @@ lda &77
 jsr _bbcc_pusha
 lda &76
 jsr _bbcc_pusha
-jsr __itoa
+jsr itoa
 clc
 lda &8E
 adc #&04
@@ -126,7 +126,7 @@ sta &76
 rts
 
 \ Function
-__Fibonacci: 
+Fibonacci: 
 
 \ Return
 ldy #&00

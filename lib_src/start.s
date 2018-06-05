@@ -1,4 +1,4 @@
-.import __main
+.import main
 .export _bbcc_pusha
 .export _bbcc_pulla
 .export _start
@@ -29,5 +29,5 @@ sta &8E
 lda #&18
 sta &8F
 
-jsr __main
+jsr main
 rts

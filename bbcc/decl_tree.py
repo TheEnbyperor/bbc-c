@@ -1,5 +1,6 @@
 from . import tokens
 
+
 class Node:
     """Base class for all decl_tree nodes."""
     pass
@@ -32,9 +33,6 @@ class Pointer(Node):
         """Generate pointer node."""
         self.child = child
         self.const = const
-
-    def __repr__(self):
-        return str(self.child)
 
 
 class Array(Node):

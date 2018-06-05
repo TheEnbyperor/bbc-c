@@ -1,9 +1,10 @@
-.export __itoa
-.import __strrev
+.export itoa
 .import _bbcc_pusha
+.import _bbcc_pulla
+.import strrev
 
 \ Function
-__itoa: 
+itoa: 
 lda &7A
 pha
 lda &7B
@@ -185,17 +186,13 @@ pla
 __bbcc_0000000a: dex
 bne __bbcc_00000008
 lda &78
-sta &7A
-lda &79
-sta &7B
-
-\ Set
-lda &7A
 ldy #&00
 sta (&8E),Y
-lda &7B
+lda &79
 ldy #&01
 sta (&8E),Y
+
+\ Set
 
 \ MoreThanCmp
 lda #00
@@ -277,19 +274,22 @@ ldy #&01
 sta (&74),Y
 
 \ AddrOf
-ldy #&02
-lda (&8E),Y
-sta &73
-ldy #&03
-lda (&8E),Y
-sta &72
+clc
+lda &8E
+adc #&02
+sta &74
+lda &8F
+adc #&00
+sta &75
+
+\ Set
 
 \ CallFunction
-lda &72
+lda &75
 jsr _bbcc_pusha
-lda &73
+lda &74
 jsr _bbcc_pusha
-jsr __strrev
+jsr strrev
 clc
 lda &8E
 adc #&02
@@ -314,11 +314,11 @@ sta &79
 pla
 sta &78
 pla
-sta &75
-pla
-sta &74
-pla
 sta &73
 pla
 sta &72
+pla
+sta &75
+pla
+sta &74
 rts

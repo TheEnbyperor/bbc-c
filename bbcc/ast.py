@@ -74,16 +74,12 @@ class ForStatement(AST):
 
 
 class Function(AST):
-    def __init__(self, type_specifiers, name, params, nodes):
-        self.type = type_specifiers
-        self.name = name
-        self.params = params
+    def __init__(self, decl, nodes):
+        self.decl = decl
         self.nodes = nodes
 
     def __repr__(self):
-        return "Function<{}:{}>({})\n{}".format(self.name, self.type,
-                                                   "\n".join([str(p) for p in self.params]),
-
+        return "Function<{}>\n{}".format(self.decl,
                                                    "  " + "  ".join(str(self.nodes).splitlines(True)))
 class ExprStatement(AST):
     def __init__(self, expr):
@@ -99,11 +95,14 @@ class DeclInfo:
     STATIC = 2
     EXTERN = 3
 
-    def __init__(self, identifier, ctype, storage=None, init=None):
+    def __init__(self, identifier, ctype, storage=None, init=None, params=None):
+        if params is None:
+            params = []
         self.identifier = identifier
         self.ctype = ctype
         self.storage = storage
         self.init = init
+        self.params = params
 
     def __str__(self):
         return '<DeclInfo({identifier}:{ctype}:{storage}:{init})>'.format(identifier=self.identifier, ctype=self.ctype,

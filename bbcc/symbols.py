@@ -175,8 +175,13 @@ class SymbolTableBuilder(ast.NodeVisitor):
         for decl, init in zip(node.decls, node.inits):
             ctype, identifier = self.make_ctype(decl, base_type)
 
+            if ctype.is_function():
+                param_identifiers = self.extract_params(decl)
+            else:
+                param_identifiers = []
+
             out.append(ast.DeclInfo(
-                identifier, ctype, storage, init))
+                identifier, ctype, storage, init, param_identifiers))
 
         return out
 
@@ -191,6 +196,24 @@ class SymbolTableBuilder(ast.NodeVisitor):
             return prev_ctype, decl.identifier
 
         return self.make_ctype(decl.child, new_ctype)
+
+    def extract_params(self, decl):
+        identifiers = []
+        func_decl = None
+        while decl and not isinstance(decl, decl_tree.Identifier):
+            if isinstance(decl, decl_tree.Function):
+                func_decl = decl
+            decl = decl.child
+
+        if not func_decl:
+            err = "function definition missing parameter list"
+            raise SyntaxError(err)
+
+        for param in func_decl.args:
+            decl_info = self.get_decl_infos(param)[0]
+            identifiers.append(decl_info.identifier)
+
+        return identifiers
 
     def _generate_array_ctype(self, decl, prev_ctype):
         if decl.n:
@@ -414,27 +437,21 @@ class SymbolTableBuilder(ast.NodeVisitor):
                     self.visit(d.init)
 
     def visit_Function(self, node):
-        func_name = node.name.identifier.value
-        params = [self.get_decl_infos(p)[0] for p in node.params]
-        ctype, storage = self.make_specs_ctype(node.type, True)
-        ctype = ctypes.FunctionCType([p.ctype for p in params], ctype)
-        func_symbol = FunctionSymbol(func_name, ctype, storage)
+        decl_info = self.get_decl_infos(node.decl)[0]
+        func_symbol = FunctionSymbol(decl_info.identifier.value, decl_info.ctype, decl_info.storage)
         self.scope.define(func_symbol)
-        self.scope.add_decl(id(node), (params, ctype))
+        self.scope.add_decl(id(node), decl_info)
         procedure_scope = ScopedSymbolTable(
             scope_name=str(id(node)),
             scope_level=self.scope.scope_level + 1,
             enclosing_scope=self.scope,
         )
         self.scope = procedure_scope
-        for param in params:
-            if param.ctype.is_array():
-                param.ctype = ctypes.PointerCType(param.ctype.el)
-
-            param_name = param.identifier.value
-            if self.scope.lookup(param_name, current_scope_only=True):
-                raise SyntaxError("Duplicate identifier '%s' found" % param_name)
-            self.scope.define(VarSymbol(param_name, param.ctype, None))
+        for param, name in zip(decl_info.ctype.args, decl_info.params):
+            name = name.value
+            if self.scope.lookup(name, current_scope_only=True):
+                raise SyntaxError("Duplicate identifier '%s' found" % name)
+            self.scope.define(VarSymbol(name, param, None))
         for n in node.nodes.items:
             self.visit(n)
         self.scope_out.add_scope(procedure_scope)

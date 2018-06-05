@@ -1,9 +1,10 @@
-.export __strlen
-.export __strrev
+.export strlen
+.export strrev
 .import _bbcc_pusha
+.import _bbcc_pulla
 
 \ Function
-__strlen: 
+strlen: 
 lda &74
 pha
 lda &75
@@ -178,7 +179,7 @@ sta &74
 rts
 
 \ Function
-__strrev: 
+strrev: 
 lda &78
 pha
 lda &79
@@ -219,19 +220,22 @@ lda #&00
 sta &73
 
 \ AddrOf
-ldy #&00
-lda (&8E),Y
-sta &77
-ldy #&01
-lda (&8E),Y
-sta &76
+clc
+lda &8E
+adc #&00
+sta &78
+lda &8F
+adc #&00
+sta &79
+
+\ Set
 
 \ CallFunction
-lda &76
+lda &79
 jsr _bbcc_pusha
-lda &77
+lda &78
 jsr _bbcc_pusha
-jsr __strlen
+jsr strlen
 clc
 lda &8E
 adc #&02
@@ -242,16 +246,14 @@ sta &8F
 
 \ Sub
 sec
-lda #0
-sta &76
-lda #0
-sta &77
+lda &70
+sbc #&01
+sta &74
+lda &71
+sbc #&00
+sta &75
 
 \ Set
-lda &76
-sta &74
-lda &77
-sta &75
 
 \ Label
 __bbcc_00000003: 
@@ -321,11 +323,9 @@ lda &70
 sta &76
 ldy #&00
 lda (&76),Y
-sta &78
+sta &76
 
 \ Set
-lda &78
-sta &76
 
 \ Mult
 lda #&01

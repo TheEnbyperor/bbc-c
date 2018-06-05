@@ -40,21 +40,21 @@ class Interpreter(ast.NodeVisitor):
                         self.il.add(il.Set(val, var.il_value))
 
     def visit_Function(self, node):
-        func_name = node.name.identifier.value
         old_scope = self.current_scope
         self.current_scope = str(id(node))
 
-        params_decl, ctype = self.scope.lookup_decl(id(node))
+        decl_info = self.scope.lookup_decl(id(node))
         params = []
         offset = 0
-        for param in params_decl:
-            param_name = param.identifier.value
+        func_name = decl_info.identifier.value
+        for param, name in zip(decl_info.ctype.args, decl_info.params):
+            param_name = name.value
             param = self.scope.lookup(param_name, self.current_scope)
             param.il_value.stack_offset = offset
             offset += param.type.size
             params.append(param)
-        self.il.add(il.Function(params, "__{}".format(func_name)))
-        self.current_function = "__{}".format(func_name)
+        self.il.add(il.Function(params, func_name))
+        self.current_function = func_name
         for n in node.nodes.items:
             self.visit(n)
         should_return = True
@@ -62,9 +62,9 @@ class Interpreter(ast.NodeVisitor):
             if isinstance(node.nodes.items[-1], ast.Return):
                 should_return = False
         if should_return:
-            il_value = il.ILValue(ctype.ret)
+            il_value = il.ILValue(decl_info.ctype.ret)
             self.il.register_literal_value(il_value, 0)
-            self.il.add(il.Return(il_value, "__{}".format(func_name)))
+            self.il.add(il.Return(il_value, func_name))
         self.current_scope = old_scope
 
     def visit_FuncCall(self, node):
@@ -83,7 +83,7 @@ class Interpreter(ast.NodeVisitor):
             args.append(arg_val)
 
         output = il.ILValue(func.type.ret)
-        self.il.add(il.CallFunction("__{}".format(func_name), args, output))
+        self.il.add(il.CallFunction(func_name, args, output))
         return output
 
     def visit_Identifier(self, node):

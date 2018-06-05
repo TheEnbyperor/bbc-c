@@ -1012,12 +1012,12 @@ class IL:
 
         for n, s in self.symbol_table.symbols.items():
             if s.storage == ast.DeclInfo.EXTERN:
-                imports.append("__{}".format(n))
+                imports.append(n)
             else:
                 if s.storage != ast.DeclInfo.STATIC:
-                    if s.type.is_function() and ("__{}".format(s.name) not in funcs):
+                    if s.type.is_function() and (s.name not in funcs):
                         continue
-                    exports.append("__{}".format(n))
+                    exports.append(n)
                 if not s.type.is_function():
                     v = s.il_value
                     label = self.get_label()

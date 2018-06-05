@@ -37,7 +37,6 @@ class Parser:
         if self.tokens[index:][0].type == EOF:
             return ast.TranslationUnit(items), index
         else:
-            print(self.tokens[index:])
             self.error()
 
     def parse_external_deceleration(self, index):
@@ -51,12 +50,12 @@ class Parser:
     def parse_function_definition(self, index):
         type_specifier, index = self.parse_decl_specifiers(index)
 
-        open_parem = index
-        params, index = self.parse_parameter_list(open_parem+2)
-        name = self.parse_declarator(open_parem, open_parem+1)
+        end = self.find_decl_end(index)
+        decl = self.parse_declarator(index, end)
 
-        node, index = self.parse_compound_statement(index+1)
-        return ast.Function(type_specifier, name, params, node), index
+        node, index = self.parse_compound_statement(end)
+
+        return ast.Function(decl_tree.Root(type_specifier, [decl]), node), index
 
     def parse_statement(self, index):
         """Parse a statement.
@@ -809,6 +808,8 @@ class Parser:
         parenthesis, but that check is left to the caller.
         index - index right past the opening parenthesis
         """
+        # print("")
+        # print(self.tokens[index])
         # List of decl_nodes arguments
         params = []
 
@@ -819,10 +820,12 @@ class Parser:
         while True:
             # Try parsing declaration specifiers, quit if no more exist
             specs, index = self.parse_decl_specifiers(index)
+            # print(specs)
 
             end = self.find_decl_end(index)
             decl = self.parse_declarator(index, end)
             params.append(decl_tree.Root(specs, [decl], [None]))
+            # print(params)
 
             index = end
 
