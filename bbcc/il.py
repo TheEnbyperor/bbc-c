@@ -1107,12 +1107,8 @@ class IL:
                 output_spot = spotmap[output]
                 for input in c2.inputs():
                     input_spot = spotmap[input]
-                    if input_spot == output_spot:
-                        if type(c2) == Set:
-                            if input_spot.type == output_spot.type:
-                                print(spotmap[output], c2.outputs())
-                                spotmap[output] = spotmap[c2.outputs()[0]]
-                                print(c, c2, input_spot)
+                    if input_spot == output_spot and type(c2) == Set and input_spot.type == output_spot.type:
+                        spotmap[output] = spotmap[c2.outputs()[0]]
 
         self._print_spotmap(spotmap)
 

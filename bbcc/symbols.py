@@ -651,9 +651,15 @@ class SymbolTableBuilder(ast.NodeVisitor):
         pass
 
     def visit_SizeofType(self, node):
-        pass
+        decl = self.get_decl_infos(node.type)[0]
+        self.scope.add_decl(id(node), decl)
 
     def visit_Sizeof(self, node):
+        self.visit(node.expr)
+
+    def visit_Cast(self, node):
+        decl = self.get_decl_infos(node.type)[0]
+        self.scope.add_decl(id(node), decl)
         self.visit(node.expr)
 
     def visit_Return(self, node):

@@ -348,15 +348,21 @@ class Parser:
     def parse_multiplicative(self, index):
         """Parse multiplicative expression."""
         return self.parse_series(
-            index, self.parse_unary,
+            index, self.parse_cast,
             {STAR: ast.Mult,
              DIVIDE: ast.Div,
              MOD: ast.Mod})
 
     def parse_cast(self, index):
         """Parse cast expression."""
-        # TODO: Implement cast operation
-        return self.parse_unary(index)
+        if self.tokens[index].type == LPAREM:
+            index += 1
+            t, index = self.parse_type_name(index)
+            index = self.eat(index, RPAREM)
+            e, index = self.parse_cast(index)
+            return ast.Cast(t, e), index
+        else:
+            return self.parse_unary(index)
 
     def parse_unary(self, index):
         """Parse unary expression."""
@@ -555,7 +561,11 @@ class Parser:
     def parse_type_name(self, index):
         # TODO: Abstract declarator
 
-        return self.parse_specifier_qualifier_list(index)
+        t, index = self.parse_specifier_qualifier_list(index)
+        end = self.find_decl_end(index)
+        d = self.parse_declarator(index, end)
+
+        return decl_tree.Root(t, [d]), end
 
     def parse_specifier_qualifier_list(self, index):
         specs = []
