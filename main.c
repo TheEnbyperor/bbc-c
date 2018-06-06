@@ -1,6 +1,6 @@
 // Comment
 #include "stdio.h"
-//#include "stdlib.h"
+#include "stdlib.h"
 
 //#define BUF_LEN 10
 //
@@ -12,8 +12,12 @@
 
 //int Fibonacci(int);
 
+char out[5];
+
 int main() {
-    printf("Hello, world!\n");
+    int a = 42;
+    itoa(a, out);
+    printf("%s\n", out);
 }
 
 //int Fibonacci(int n) {

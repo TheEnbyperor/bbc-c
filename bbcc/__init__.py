@@ -10,7 +10,6 @@ from .preproc import Preproc
 def main(text: str):
     lexer_inst = Lexer(text)
     token_list = lexer_inst.tokenize()
-    print(token_list)
 
     pre = Preproc(token_list)
     token_list = pre.process()

@@ -32,12 +32,6 @@ sta &72
 lda #&00
 sta &73
 
-\ Set
-lda #&00
-sta &72
-lda #&00
-sta &73
-
 \ Label
 __bbcc_00000000: 
 
@@ -273,21 +267,18 @@ lda #&00
 ldy #&01
 sta (&74),Y
 
-\ AddrOf
-clc
-lda &8E
-adc #&02
-sta &74
-lda &8F
-adc #&00
-sta &75
-
 \ Set
+ldy #&02
+lda (&8E),Y
+sta &72
+ldy #&03
+lda (&8E),Y
+sta &73
 
 \ CallFunction
-lda &75
+lda &73
 jsr _bbcc_pusha
-lda &74
+lda &72
 jsr _bbcc_pusha
 jsr strrev
 clc
@@ -299,8 +290,6 @@ adc #&00
 sta &8F
 
 \ Return
-lda #&00
-sta &70
 pla
 sta &7B
 pla
@@ -314,11 +303,11 @@ sta &79
 pla
 sta &78
 pla
-sta &73
-pla
-sta &72
-pla
 sta &75
 pla
 sta &74
+pla
+sta &73
+pla
+sta &72
 rts

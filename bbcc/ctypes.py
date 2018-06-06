@@ -121,11 +121,12 @@ class ArrayCType(CType):
 
 
 class FunctionCType(CType):
-    def __init__(self, args, ret):
+    def __init__(self, args, ret, is_varags=False):
         """Initialize type."""
         self.args = args
         self.ret = ret
-        super().__init__(1)
+        self.is_varargs = is_varags
+        super().__init__(0)
 
     def is_complete(self):
         return False
@@ -134,7 +135,7 @@ class FunctionCType(CType):
         return True
 
     def __repr__(self):
-        return '<FunctionCType({args}:{ret})>'.format(args=self.args, ret=self.ret)
+        return '<FunctionCType({args}:{ret}:{varargs})>'.format(args=self.args, ret=self.ret, varargs=self.is_varargs)
 
 
 class _UnionStructCType(CType):

@@ -13,7 +13,7 @@ char *gets(char *s, int n) {
     return s;
 }
 
-int printf(const char *format) {
+int printf(const char *format, ...) {
     char *p;
 
     for (p = format; *p; ++p) {

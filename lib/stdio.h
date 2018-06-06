@@ -1,4 +1,4 @@
 char putchar(char);
 char getchar();
 
-void printf(char *fmt);
+void printf(char *fmt, ...);

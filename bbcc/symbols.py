@@ -210,6 +210,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
             raise SyntaxError(err)
 
         for param in func_decl.args:
+            if param.specs[0].type == tokens.ELLIPSIS:
+                break
             decl_info = self.get_decl_infos(param)[0]
             identifiers.append(decl_info.identifier)
 
@@ -223,16 +225,17 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def _generate_func_ctype(self, decl, prev_ctype):
         # Prohibit storage class specifiers in parameters.
+        is_varags = False
+        args = []
         for param in decl.args:
+            if param.specs[0].type == tokens.ELLIPSIS:
+                is_varags = True
+                break
             decl_info = self.get_decl_infos(param)[0]
             if decl_info.storage:
                 err = "storage class specified for function parameter"
                 raise SyntaxError(err)
-
-        args = [
-            self.get_decl_infos(decl)[0].ctype
-            for decl in decl.args
-        ]
+            args.append(decl_info.ctype)
 
         # adjust array and function parameters
         has_void = False
@@ -253,13 +256,16 @@ class SymbolTableBuilder(ast.NodeVisitor):
         if prev_ctype.is_array():
             err = "function cannot return array type"
             raise SyntaxError(err)
+        if not args and is_varags:
+            err = "function cannot only have varargs"
+            raise SyntaxError(err)
 
         if not args:
-            new_ctype = ctypes.FunctionCType([], prev_ctype)
+            new_ctype = ctypes.FunctionCType([], prev_ctype, is_varags)
         elif has_void:
-            new_ctype = ctypes.FunctionCType([], prev_ctype)
+            new_ctype = ctypes.FunctionCType([], prev_ctype, is_varags)
         else:
-            new_ctype = ctypes.FunctionCType(args, prev_ctype)
+            new_ctype = ctypes.FunctionCType(args, prev_ctype, is_varags)
 
         return new_ctype
 
@@ -636,7 +642,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
         func = self.scope.lookup(func_name)
         if func is None:
             raise NameError(repr(func_name))
-        if len(func.type.args) != len(node.args):
+        if len(func.type.args) > len(node.args) or (len(func.type.args) != len(node.args) and not func.type.is_varargs):
             raise NameError("Calling " + str(func.name) + " with wrong number of params")
         for a in node.args:
             self.visit(a)

@@ -1,11 +1,9 @@
 int strlen(char *s) {
   int len = 0;
-  while(1) {
-    if (s[len] == 0) {
-      return len+1;
-    }
+  while(*s++ != 0) {
     len++;
   }
+  return len;
 }
 
 void strrev(char *s) {

@@ -11,9 +11,9 @@ class Lexer:
     def error(self):
         raise Exception("Invalid character: " + self.current_char)
 
-    def peek(self):
-        peek_pos = self.pos + 1
-        if peek_pos > len(self.text) - 1:
+    def peek(self, i=1):
+        peek_pos = self.pos + i
+        if peek_pos > len(self.text) - i:
             return None
         else:
             return self.text[peek_pos]
@@ -53,7 +53,6 @@ class Lexer:
         if self.current_char == '\\':
             self.advance()
             val = self.process_escape()
-            self.advance()
             return val
         return self.current_char
 
@@ -142,6 +141,12 @@ class Lexer:
                 self.advance()
                 tokens.append(Token(STRING, self.string()))
                 self.advance()
+
+            elif self.current_char == "." and self.peek() == "." and self.peek(2) == ".":
+                self.advance()
+                self.advance()
+                self.advance()
+                tokens.append(Token(ELLIPSIS, "..."))
 
             elif self.current_char == "|" and self.peek() == "|":
                 self.advance()

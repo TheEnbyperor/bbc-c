@@ -821,14 +821,17 @@ class Parser:
             return params, index
 
         while True:
+            if self.token_is(index, ELLIPSIS):
+                params.append(decl_tree.Root([self.tokens[index]], [None], [None]))
+                index += 1
+                break
+
             # Try parsing declaration specifiers, quit if no more exist
             specs, index = self.parse_decl_specifiers(index)
-            # print(specs)
 
             end = self.find_decl_end(index)
             decl = self.parse_declarator(index, end)
             params.append(decl_tree.Root(specs, [decl], [None]))
-            # print(params)
 
             index = end
 

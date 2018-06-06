@@ -5,10 +5,6 @@
 
 \ Function
 strlen: 
-lda &74
-pha
-lda &75
-pha
 lda &76
 pha
 lda &77
@@ -16,6 +12,10 @@ pha
 lda &78
 pha
 lda &79
+pha
+lda &74
+pha
+lda &75
 pha
 lda &72
 pha
@@ -31,51 +31,26 @@ sta &73
 \ Label
 __bbcc_00000000: 
 
-\ JmpZero
-lda #&01
-bne __bbcc_00000005
-lda #&00
-bne __bbcc_00000005
-jmp __bbcc_00000001
-__bbcc_00000005: 
-
-\ Mult
-lda #&01
-sta &76
-lda &72
+\ Set
+ldy #&00
+lda (&8E),Y
 sta &74
-lda &73
+ldy #&01
+lda (&8E),Y
 sta &75
-lda #0
-sta &78
-sta &79
-ldx #&10
-__bbcc_00000006: 
-lsr &75
-ror &74
-bcc __bbcc_00000007
-clc
-lda &76
-adc &78
-sta &78
-lda #0
-adc &79
-sta &79
-__bbcc_00000007: clc
-asl &76
-dex
-bne __bbcc_00000006
 
 \ Add
 clc
 ldy #&00
 lda (&8E),Y
-adc &78
-sta &74
+adc #&01
+ldy #&00
+sta (&8E),Y
 ldy #&01
 lda (&8E),Y
-adc &79
-sta &75
+adc #0
+ldy #&01
+sta (&8E),Y
 
 \ ReadAt
 lda &75
@@ -86,56 +61,21 @@ ldy #&00
 lda (&76),Y
 sta &78
 
-\ EqualCmp
+\ NotEqualCmp
 lda #00
 sta &74
 lda &78
 cmp #&00
-bne __bbcc_00000008
+beq __bbcc_00000004
 lda #01
 sta &74
-__bbcc_00000008: 
+__bbcc_00000004: 
 
 \ JmpZero
 lda &74
-bne __bbcc_00000009
-jmp __bbcc_00000002
-__bbcc_00000009: 
-
-\ Add
-clc
-lda &72
-adc #&01
-sta &74
-lda &73
-adc #&00
-sta &75
-
-\ Return
-lda &74
-sta &70
-lda &75
-sta &71
-pla
-sta &73
-pla
-sta &72
-pla
-sta &77
-pla
-sta &76
-pla
-sta &79
-pla
-sta &78
-pla
-sta &75
-pla
-sta &74
-rts
-
-\ Label
-__bbcc_00000002: 
+bne __bbcc_00000005
+jmp __bbcc_00000001
+__bbcc_00000005: 
 
 \ Set
 lda &72
@@ -145,9 +85,9 @@ sta &75
 
 \ Inc
 inc &72
-bne __bbcc_0000000a
+bne __bbcc_00000006
 inc &73
-__bbcc_0000000a: 
+__bbcc_00000006: 
 
 \ Jmp
 jmp __bbcc_00000000
@@ -156,9 +96,9 @@ jmp __bbcc_00000000
 __bbcc_00000001: 
 
 \ Return
-lda #&00
+lda &72
 sta &70
-lda #&00
+lda &73
 sta &71
 pla
 sta &73
@@ -180,13 +120,13 @@ rts
 
 \ Function
 strrev: 
-lda &78
-pha
-lda &79
-pha
 lda &76
 pha
 lda &77
+pha
+lda &78
+pha
+lda &79
 pha
 lda &74
 pha
@@ -204,36 +144,17 @@ lda #&00
 sta &73
 
 \ Set
-lda #&00
+ldy #&00
+lda (&8E),Y
 sta &74
-lda #&00
+ldy #&01
+lda (&8E),Y
 sta &75
 
-\ Set
-lda #&00
-sta &76
-
-\ Set
-lda #&00
-sta &72
-lda #&00
-sta &73
-
-\ AddrOf
-clc
-lda &8E
-adc #&00
-sta &78
-lda &8F
-adc #&00
-sta &79
-
-\ Set
-
 \ CallFunction
-lda &79
+lda &75
 jsr _bbcc_pusha
-lda &78
+lda &74
 jsr _bbcc_pusha
 jsr strlen
 clc
@@ -248,50 +169,146 @@ sta &8F
 sec
 lda &70
 sbc #&01
-sta &74
+sta &70
 lda &71
 sbc #&00
-sta &75
+sta &71
 
 \ Set
 
 \ Label
-__bbcc_00000003: 
+__bbcc_00000002: 
 
 \ LessThanCmp
 lda #00
-sta &70
+sta &74
 lda &73
-cmp &75
-bcc __bbcc_0000000b
-bne __bbcc_0000000c
+cmp &71
+bcc __bbcc_00000007
+bne __bbcc_00000008
 lda &72
-cmp &74
-bcs __bbcc_0000000c
-__bbcc_0000000b: lda #01
-sta &71
-__bbcc_0000000c: 
+cmp &70
+bcs __bbcc_00000008
+__bbcc_00000007: lda #01
+sta &74
+__bbcc_00000008: 
 
 \ JmpZero
-lda &70
-bne __bbcc_0000000d
-jmp __bbcc_00000004
-__bbcc_0000000d: 
+lda &74
+bne __bbcc_00000009
+jmp __bbcc_00000003
+__bbcc_00000009: 
 
 \ Mult
 lda #&01
 sta &76
 lda &72
-sta &70
+sta &74
 lda &73
-sta &71
+sta &75
+lda #0
+sta &78
+sta &79
+ldx #&10
+__bbcc_0000000a: 
+lsr &75
+ror &74
+bcc __bbcc_0000000b
+clc
+lda &76
+adc &78
+sta &78
+lda #0
+adc &79
+sta &79
+__bbcc_0000000b: clc
+asl &76
+dex
+bne __bbcc_0000000a
+
+\ Add
+clc
+ldy #&00
+lda (&8E),Y
+adc &78
+sta &74
+ldy #&01
+lda (&8E),Y
+adc &79
+sta &75
+
+\ ReadAt
+lda &75
+sta &77
+lda &74
+sta &76
+ldy #&00
+lda (&76),Y
+sta &74
+
+\ Set
+
+\ Mult
+lda #&01
+sta &76
+lda &70
+sta &74
+lda &71
+sta &75
+lda #0
+sta &78
+sta &79
+ldx #&10
+__bbcc_0000000c: 
+lsr &75
+ror &74
+bcc __bbcc_0000000d
+clc
+lda &76
+adc &78
+sta &78
+lda #0
+adc &79
+sta &79
+__bbcc_0000000d: clc
+asl &76
+dex
+bne __bbcc_0000000c
+
+\ Add
+clc
+ldy #&00
+lda (&8E),Y
+adc &78
+sta &74
+ldy #&01
+lda (&8E),Y
+adc &79
+sta &75
+
+\ ReadAt
+lda &75
+sta &77
+lda &74
+sta &76
+ldy #&00
+lda (&76),Y
+sta &78
+
+\ Mult
+lda #&01
+sta &76
+lda &72
+sta &74
+lda &73
+sta &75
 lda #0
 sta &78
 sta &79
 ldx #&10
 __bbcc_0000000e: 
-lsr &71
-ror &70
+lsr &75
+ror &74
 bcc __bbcc_0000000f
 clc
 lda &76
@@ -310,37 +327,35 @@ clc
 ldy #&00
 lda (&8E),Y
 adc &78
-sta &70
+sta &74
 ldy #&01
 lda (&8E),Y
 adc &79
-sta &71
+sta &75
 
-\ ReadAt
-lda &71
+\ SetAt
+lda &74
+sta &76
+lda &75
 sta &77
-lda &70
-sta &76
+lda &78
 ldy #&00
-lda (&76),Y
-sta &76
-
-\ Set
+sta (&76),Y
 
 \ Mult
 lda #&01
 sta &76
-lda &74
-sta &70
-lda &75
-sta &71
+lda &70
+sta &74
+lda &71
+sta &75
 lda #0
 sta &78
 sta &79
 ldx #&10
 __bbcc_00000010: 
-lsr &71
-ror &70
+lsr &75
+ror &74
 bcc __bbcc_00000011
 clc
 lda &76
@@ -359,163 +374,66 @@ clc
 ldy #&00
 lda (&8E),Y
 adc &78
-sta &70
+sta &74
 ldy #&01
 lda (&8E),Y
 adc &79
-sta &71
-
-\ ReadAt
-lda &71
-sta &77
-lda &70
-sta &76
-ldy #&00
-lda (&76),Y
-sta &78
-
-\ Mult
-lda #&01
-sta &76
-lda &72
-sta &70
-lda &73
-sta &71
-lda #0
-sta &78
-sta &79
-ldx #&10
-__bbcc_00000012: 
-lsr &71
-ror &70
-bcc __bbcc_00000013
-clc
-lda &76
-adc &78
-sta &78
-lda #0
-adc &79
-sta &79
-__bbcc_00000013: clc
-asl &76
-dex
-bne __bbcc_00000012
-
-\ Add
-clc
-ldy #&00
-lda (&8E),Y
-adc &78
-sta &70
-ldy #&01
-lda (&8E),Y
-adc &79
-sta &71
+sta &75
 
 \ SetAt
-lda &70
+lda &74
 sta &76
-lda &71
+lda &75
 sta &77
-lda &78
+lda &74
 ldy #&00
 sta (&76),Y
 
-\ Mult
-lda #&01
-sta &76
-lda &74
-sta &70
-lda &75
-sta &71
-lda #0
-sta &78
-sta &79
-ldx #&10
-__bbcc_00000014: 
-lsr &71
-ror &70
-bcc __bbcc_00000015
-clc
-lda &76
-adc &78
-sta &78
-lda #0
-adc &79
-sta &79
-__bbcc_00000015: clc
-asl &76
-dex
-bne __bbcc_00000014
-
-\ Add
-clc
-ldy #&00
-lda (&8E),Y
-adc &78
-sta &70
-ldy #&01
-lda (&8E),Y
-adc &79
-sta &71
-
-\ SetAt
-lda &70
-sta &78
-lda &71
-sta &79
-lda &76
-ldy #&00
-sta (&78),Y
-
 \ Set
 lda &72
-sta &70
+sta &74
 lda &73
-sta &71
+sta &75
 
 \ Inc
 inc &72
-bne __bbcc_00000016
+bne __bbcc_00000012
 inc &73
-__bbcc_00000016: 
+__bbcc_00000012: 
 
 \ Set
-lda &74
-sta &70
-lda &75
-sta &71
+lda &70
+sta &72
+lda &71
+sta &73
 
-\ Dec
-lda &74
-bne __bbcc_00000017
-dec &75
-__bbcc_00000017: 
-dec &74
+\ Inc
+inc &70
+bne __bbcc_00000013
+inc &71
+__bbcc_00000013: 
 
 \ Jmp
-jmp __bbcc_00000003
+jmp __bbcc_00000002
 
 \ Label
-__bbcc_00000004: 
+__bbcc_00000003: 
 
 \ Return
-lda #&00
-sta &70
 pla
-sta &73
+sta &79
 pla
-sta &72
+sta &78
+pla
+sta &77
+pla
+sta &76
 pla
 sta &75
 pla
 sta &74
 pla
-sta &79
+sta &73
 pla
-sta &78
-pla
-sta &77
-pla
-sta &76
+sta &72
 rts

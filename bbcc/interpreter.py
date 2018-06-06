@@ -1,3 +1,4 @@
+import itertools
 from . import ast
 from . import il
 from . import ctypes
@@ -68,13 +69,14 @@ class Interpreter(ast.NodeVisitor):
         func = self.scope.lookup(func_name, self.current_scope)
 
         args = []
-        for a, fa in zip(node.args, func.type.args):
+        for a, fa in itertools.zip_longest(node.args, func.type.args):
             arg = self.visit(a)
             if arg.type.is_array():
                 arg = arg.addr(self.il)
 
             arg_val = arg.val(self.il)
-            arg_val = self._set_type(arg_val, fa)
+            if fa is not None:
+                arg_val = self._set_type(arg_val, fa)
             args.append(arg_val)
 
         output = il.ILValue(func.type.ret)
