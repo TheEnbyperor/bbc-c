@@ -264,6 +264,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
         return new_ctype
 
     def make_specs_ctype(self, specs, any_dec):
+        if specs is None:
+            return ctypes.integer, None
         storage = self.get_storage([spec.type for spec in specs])
         const = tokens.CONST in {spec.type for spec in specs}
 
@@ -438,6 +440,9 @@ class SymbolTableBuilder(ast.NodeVisitor):
 
     def visit_Function(self, node):
         decl_info = self.get_decl_infos(node.decl)[0]
+        if decl_info.identifier.value == "main":
+            if decl_info.ctype.ret != ctypes.integer:
+                raise TypeError("main must be of int type")
         func_symbol = FunctionSymbol(decl_info.identifier.value, decl_info.ctype, decl_info.storage)
         self.scope.define(func_symbol)
         self.scope.add_decl(id(node), decl_info)

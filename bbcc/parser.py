@@ -48,7 +48,10 @@ class Parser:
         return self.parse_declaration(index)
 
     def parse_function_definition(self, index):
-        type_specifier, index = self.parse_decl_specifiers(index)
+        try:
+            type_specifier, index = self.parse_decl_specifiers(index)
+        except SyntaxError:
+            type_specifier = None
 
         end = self.find_decl_end(index)
         decl = self.parse_declarator(index, end)
@@ -437,7 +440,7 @@ class Parser:
         elif self.token_is(index, ID):
             return ast.Identifier(self.tokens[index]), index + 1
         elif self.token_is(index, STRING):
-            return ast.String(self.tokens[index].value), index + 1
+            return ast.String(self.tokens[index].value + "\0"), index + 1
         elif self.token_is(index, CHARACTER):
             chars = self.tokens[index].value
             return ast.Number(ord(chars[0])), index + 1
