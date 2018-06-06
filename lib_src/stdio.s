@@ -240,7 +240,7 @@ sta &8F
 \ Add
 clc
 lda &72
-adc #&02
+adc #&01
 sta &72
 lda &73
 adc #0

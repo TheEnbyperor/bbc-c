@@ -157,9 +157,9 @@ class AddrOf(ILInst):
         if value.has_address():
             if isinstance(value, spots.LabelMemorySpot):
                 value.asm(assembly, "LDA", 0, extra=lambda x: "#{}".format(x))
-                output.asm(assembly, "STA", 1)
-                value.asm(assembly, "LDA", 1, extra=lambda x: "#{}".format(x))
                 output.asm(assembly, "STA", 0)
+                value.asm(assembly, "LDA", 1, extra=lambda x: "#{}".format(x))
+                output.asm(assembly, "STA", 1)
             elif isinstance(value, spots.StackSpot):
                 assembly.add_inst("CLC")
                 stack_register.asm(assembly, "LDA", 0)

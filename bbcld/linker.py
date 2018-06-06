@@ -103,6 +103,11 @@ class Linker:
                         d_symbol, d_addr = sym
                         cur_val = struct.unpack("<H", bytes(e.code[s.addr:s.addr + 2]))[0]
                         e.code = e.code[:s.addr] + list(struct.pack("<H", cur_val + d_addr)) + e.code[s.addr + 2:]
+                        if stip:
+                            name = ""
+                        else:
+                            name = s.name
+                        symbols.append(parser.Symbol(name, e.pos+s.addr, parser.Symbol.INTERNAL))
                     else:
                         symbols.append(parser.Symbol(s.name, e.pos+s.addr, parser.Symbol.IMPORT))
 
@@ -117,6 +122,14 @@ class Linker:
 
                 elif s.type == parser.Symbol.EXPORT:
                     symbols.append(parser.Symbol(s.name, e.pos+s.addr, parser.Symbol.EXPORT))
+                elif s.type == parser.Symbol.INTERNAL_ADDR:
+                    cur_val = struct.unpack("<B", bytes(e.code[s.addr:s.addr+1]))[0]
+                    e.code = e.code[:s.addr] + list(struct.pack("<B", ((s.extra + e.pos) >> (cur_val*8)) & 0xff)) + e.code[s.addr+1:]
+                    if stip:
+                        name = ""
+                    else:
+                        name = s.name
+                    symbols.append(parser.Symbol(name, e.pos+s.addr, parser.Symbol.INTERNAL_ADDR, s.extra))
             code.extend(e.code)
 
         header = []

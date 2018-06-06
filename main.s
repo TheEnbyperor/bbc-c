@@ -13,9 +13,9 @@ pha
 
 \ AddrOf
 lda #0(__bbcc_00000000)
-sta &75
-lda #1(__bbcc_00000000)
 sta &74
+lda #1(__bbcc_00000000)
+sta &75
 
 \ Set
 

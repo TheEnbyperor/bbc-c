@@ -179,10 +179,23 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Plus(self, node):
         left = self.visit(node.left)
+        right = self.visit(node.right)
+
         left_val = left.val(self.il)
-        right = self.visit(node.right).val(self.il)
+        right_val = right.val(self.il)
+        left_val, right_val = self._arith_convert(left_val, right_val)
+
         output = il.ILValue(left.type)
-        self.il.add(il.Add(left_val, right, output))
+
+        if left.type.is_pointer():
+            type_len = il.ILValue(ctypes.unsig_char)
+            self.il.register_literal_value(type_len, left.type.arg.size)
+
+            offset = il.ILValue(ctypes.unsig_int)
+            self.il.add(il.Mult(right_val, type_len, offset))
+            self.il.add(il.Add(left_val, offset, output))
+        else:
+            self.il.add(il.Add(left_val, right_val, output))
         return output
 
     def visit_Minus(self, node):
@@ -194,7 +207,16 @@ class Interpreter(ast.NodeVisitor):
         left_val, right_val = self._arith_convert(left_val, right_val)
 
         output = il.ILValue(left.type)
-        self.il.add(il.Sub(left_val, right_val, output))
+
+        if left.type.is_pointer():
+            type_len = il.ILValue(ctypes.unsig_char)
+            self.il.register_literal_value(type_len, left.type.arg.size)
+
+            offset = il.ILValue(ctypes.unsig_int)
+            self.il.add(il.Mult(right_val, type_len, offset))
+            self.il.add(il.Add(left_val, offset, output))
+        else:
+            self.il.add(il.Sub(left_val, right_val, output))
         return output
 
     def visit_Mult(self, node):
@@ -351,7 +373,7 @@ class Interpreter(ast.NodeVisitor):
 
         if expr.type.is_pointer():
             type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, expr.type.size)
+            self.il.register_literal_value(type_len, expr.type.arg.size)
             self.il.add(il.Add(value, type_len, value))
         else:
             self.il.add(il.Inc(value))
@@ -365,7 +387,7 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Set(value_val, output))
         if value.type.is_pointer():
             type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, value.type.size)
+            self.il.register_literal_value(type_len, value.type.arg.size)
             self.il.add(il.Add(value_val, type_len, value_val))
         else:
             self.il.add(il.Inc(value_val))
@@ -377,7 +399,7 @@ class Interpreter(ast.NodeVisitor):
 
         if expr.type.is_pointer():
             type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, expr.type.size)
+            self.il.register_literal_value(type_len, expr.type.arg.size)
             self.il.add(il.Sub(value, type_len, value))
         else:
             self.il.add(il.Inc(value))
@@ -391,7 +413,7 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Set(value_val, output))
         if value.type.is_pointer():
             type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, value.type.size)
+            self.il.register_literal_value(type_len, value.type.arg.size)
             self.il.add(il.Sub(value_val, type_len, value_val))
         else:
             self.il.add(il.Inc(value_val))
