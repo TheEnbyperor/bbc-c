@@ -71,7 +71,7 @@ class IntegerCType(CType):
 
 class VoidCType(CType):
     def __init__(self):
-        super().__init__(1)
+        super().__init__(0)
 
     def is_complete(self):
         return False
