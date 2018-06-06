@@ -806,7 +806,7 @@ class NotEqualCmp(ILInst):
                 assembly.add_inst("CMP", "#0")
             assembly.add_inst("BEQ", label)
         assembly.add_inst("LDA", "#01")
-        output.asm(assembly, "STA", 1)
+        output.asm(assembly, "STA", 0)
         assembly.add_inst(label=label)
 
 
@@ -845,7 +845,7 @@ class LessThanCmp(ILInst):
             else:
                 assembly.add_inst("BCS", label2)
         assembly.add_inst("LDA", "#01", label=label1)
-        output.asm(assembly, "STA", 1)
+        output.asm(assembly, "STA", 0)
         assembly.add_inst(label=label2)
 
 
@@ -881,7 +881,7 @@ class LessEqualCmp(ILInst):
             assembly.add_inst("BCC", label1)
             assembly.add_inst("BNE", label2)
         assembly.add_inst("LDA", "#01", label=label1)
-        output.asm(assembly, "STA", 1)
+        output.asm(assembly, "STA", 0)
         assembly.add_inst(label=label2)
 
 
@@ -960,7 +960,7 @@ class MoreEqualCmp(ILInst):
             else:
                 assembly.add_inst("BCC", label2)
         assembly.add_inst("LDA", "#01", label=label1)
-        output.asm(assembly, "STA", 1)
+        output.asm(assembly, "STA", 0)
         assembly.add_inst(label=label2)
 
 
@@ -1030,6 +1030,11 @@ class IL:
 
         for i, v in self.literals.items():
             spotmap[i] = spots.LiteralSpot(v, i.type)
+
+        for i, v in self.string_literals.items():
+            label = self.get_label()
+            assembly.add_inst(".byte", ",".join(["&{}".format(assembly.to_hex(b)) for b in v.encode()]), label=label)
+            spotmap[i] = spots.LabelMemorySpot(label, i.type)
 
         move_to_mem = []
         for c in self.commands:
