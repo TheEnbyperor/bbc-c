@@ -55,10 +55,9 @@ class Interpreter(ast.NodeVisitor):
         for n in node.nodes.items:
             self.visit(n)
         should_return = True
-        if node.nodes.items is not None:
-            if isinstance(node.nodes.items[-1], ast.Return):
-                should_return = False
-        if should_return:
+        if node.nodes.items is not None and len(node.nodes.items) != 0 and isinstance(node.nodes.items[-1], ast.Return):
+            should_return = False
+        if should_return and func_name == "main":
             il_value = il.ILValue(decl_info.ctype.ret)
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value, func_name))
