@@ -31,11 +31,7 @@ class Interpreter(ast.NodeVisitor):
                 var_global = self.scope.lookup(var_name, "")
                 if var_global is None:
                     var = self.scope.lookup(var_name, self.current_scope)
-                    if d.init is None:
-                        val = il.ILValue(var.type)
-                        self.il.register_literal_value(val, 0)
-                        self.il.add(il.Set(val, var.il_value))
-                    else:
+                    if d.init is not None:
                         val = self.visit(d.init).val(self.il)
                         self.il.add(il.Set(val, var.il_value))
 
@@ -75,7 +71,7 @@ class Interpreter(ast.NodeVisitor):
         for a, fa in zip(node.args, func.type.args):
             arg = self.visit(a)
             if arg.type.is_array():
-                arg = arg.addr()
+                arg = arg.addr(self.il)
 
             arg_val = arg.val(self.il)
             arg_val = self._set_type(arg_val, fa)
@@ -89,6 +85,16 @@ class Interpreter(ast.NodeVisitor):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
         return ast.DirectLValue(val.il_value)
+
+    def visit_Number(self, node):
+        il_value = il.ILValue(ctypes.integer)
+        self.il.register_literal_value(il_value, node.number)
+        return il_value
+
+    def visit_String(self, node):
+        il_value = il.ILValue(ctypes.ArrayCType(ctypes.char, len(node.chars)))
+        self.il.register_literal_string(il_value, node.chars)
+        return ast.DirectLValue(il_value)
 
     def visit_Compound(self, node):
         old_scope = self.current_scope
@@ -106,7 +112,7 @@ class Interpreter(ast.NodeVisitor):
         if not left.modable():
             raise TypeError("{} is not modable".format(left.type))
         left.set_to(right, self.il)
-        return right
+        return left
 
     def visit_PlusEquals(self, node):
         left = self.visit(node.left)
@@ -166,16 +172,6 @@ class Interpreter(ast.NodeVisitor):
     def visit_MultiExpr(self, node):
         self.visit(node.left)
         self.visit(node.right)
-
-    def visit_Number(self, node):
-        il_value = il.ILValue(ctypes.integer)
-        self.il.register_literal_value(il_value, node.number)
-        return il_value
-
-    def visit_String(self, node):
-        il_value = il.ILValue(ctypes.ArrayCType(ctypes.char, len(node.chars)+1))
-        self.il.register_literal_string(il_value, node.chars)
-        return il_value
 
     def visit_ParenExpr(self, node):
         il_value = self.visit(node.expr)
@@ -407,8 +403,7 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Deref(self, node):
         value = self.visit(node.expr)
-
-        return ast.IndirectLValue(value.val(self.il), value.type)
+        return ast.IndirectLValue(value.val(self.il), value.type.arg)
 
     def visit_ArraySubsc(self, node):
         head = self.visit(node.head)

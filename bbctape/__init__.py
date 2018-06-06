@@ -62,10 +62,11 @@ def bytes_to_sample(byte):
 
 
 def make_file(w, file, lda, exa, prot, data):
-    num_blocks = int(math.ceil(len(data) / 256))
+    BLOCK_LEN = 65535
+    num_blocks = int(math.ceil(len(data) / BLOCK_LEN))
     blocks = [start]
     for i in range(num_blocks):
-        bdata = data[0+(i*256):256+(i*256)]
+        bdata = data[i*BLOCK_LEN:BLOCK_LEN+(i*BLOCK_LEN)]
         block = make_block(file, lda, exa, i, prot, 0, (i == num_blocks-1), bdata)
         block = bytes_to_sample(block)
         blocks.append(block)

@@ -1,15 +1,22 @@
 #include "stdio.h"
 
-char *fgets(char *s, int n) {
-    int c = 0;
-    while (c < n) {
-        char c = getchar();
-        *s = c;
-        ++s;
-        if (c == 10) {
+char *gets(char *s, int n) {
+    char c;
+    char *cs;
+
+    cs = s;
+    while(--n < 0) {
+        if ((*cs++ = (c = getchar())) == 10)
             break;
-        }
     }
-    *s = 0;
+    *cs = 0;
     return s;
+}
+
+int printf(const char *format) {
+    char *p;
+
+    for (p = format; *p; ++p) {
+        putchar(*p);
+    }
 }

@@ -2,33 +2,27 @@
 .import _bbcc_pusha
 .import _bbcc_pulla
 .import printf
+__bbcc_00000000: .byte &48,&65,&6C,&6C,&6F,&2C,&20,&77,&6F,&72,&6C,&64,&21,&0A,&00
 
 \ Function
 main: 
-lda &72
+lda &74
 pha
-lda &73
+lda &75
 pha
-sec
-lda &8E
-sbc #&0F
-sta &8E
-lda &8F
-sbc #&00
-sta &8F
+
+\ AddrOf
+lda #0(__bbcc_00000000)
+sta &75
+lda #1(__bbcc_00000000)
+sta &74
 
 \ Set
-ldy #&00
-lda (&8E),Y
-sta &72
-ldy #&01
-lda (&8E),Y
-sta &73
 
 \ CallFunction
-lda &73
+lda &75
 jsr _bbcc_pusha
-lda &72
+lda &74
 jsr _bbcc_pusha
 jsr printf
 clc
@@ -44,15 +38,8 @@ lda #&00
 sta &70
 lda #&00
 sta &71
-clc
-lda &8E
-adc #&0F
-sta &8E
-lda &8F
-adc #&00
-sta &8F
 pla
-sta &73
+sta &75
 pla
-sta &72
+sta &74
 rts
