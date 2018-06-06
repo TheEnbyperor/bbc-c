@@ -538,9 +538,9 @@ class Interpreter(ast.NodeVisitor):
         pass
 
     def visit_SizeofType(self, node):
-        ctype = node.make_ctype()
+        decl_info = self.scope.lookup_decl(id(node))
         val = il.ILValue(ctypes.unsig_int)
-        self.il.register_literal_value(val, ctype.size)
+        self.il.register_literal_value(val, decl_info.ctype.size)
         return val
 
     def visit_Sizeof(self, node):
@@ -548,6 +548,14 @@ class Interpreter(ast.NodeVisitor):
         val = il.ILValue(ctypes.unsig_int)
         self.il.register_literal_value(val, node_val.type.size)
         return val
+
+    def visit_Cast(self, node):
+        val = self.visit(node.expr).val(self.il)
+        decl_info = self.scope.lookup_decl(id(node))
+        output = il.ILValue(decl_info.ctype)
+
+        self.il.add(il.Set(val, output))
+        return output
 
     def visit_Return(self, node):
         value = self.visit(node.right).val(self.il)

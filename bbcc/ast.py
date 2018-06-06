@@ -222,34 +222,6 @@ class SizeofType(AST):
         """Initialize node."""
         self.type = expr
 
-    def make_ctype(self):
-        all_type_specs = (set(ctypes.simple_types) | {tokens.SIGNED, tokens.UNSIGNED})
-        type_specs = [str(spec.type) for spec in self.type
-                      if spec.type in all_type_specs]
-        specs_str = " ".join(sorted(type_specs))
-
-        specs = {
-            "void": ctypes.void,
-
-            "_Bool": ctypes.bool_t,
-
-            "char": ctypes.char,
-            "char signed": ctypes.char,
-            "char unsigned": ctypes.unsig_char,
-
-            "int": ctypes.integer,
-            "signed": ctypes.integer,
-            "int signed": ctypes.integer,
-            "unsigned": ctypes.unsig_int,
-            "int unsigned": ctypes.unsig_int,
-        }
-
-        if specs_str in specs:
-            ctype = specs[specs_str]
-            return ctype
-
-        raise SyntaxError("Unrecognised type: {}".format(specs_str))
-
 
 class _ArithBinOp(_RExprNode):
     """Base class for some binary operators.
@@ -556,6 +528,12 @@ class FuncCall(_RExprNode):
                                          "\n".join(map(lambda x: "  " + "  ".join(str(x).splitlines(True)), self.args)))
 
 
+class Cast(_RExprNode):
+    def __init__(self, type, expr):
+        self.type = type
+        self.expr = expr
+
+
 class NodeVisitor:
     def visit(self, node):
         method_name = 'visit_' + type(node).__name__
@@ -605,7 +583,7 @@ class DirectLValue(LValue):
         il_code.add(il.Set(rvalue, self.il_value))
 
     def addr(self, il_code: il.IL):
-        output = il.ILValue(ctypes.integer)
+        output = il.ILValue(ctypes.unsig_int)
         il_code.add(il.AddrOf(self.il_value, output))
         return output
 
