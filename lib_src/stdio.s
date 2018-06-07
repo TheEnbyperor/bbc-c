@@ -1,86 +1,9 @@
 .export printf
-.export isupper
 .export gets
 .import _bbcc_pusha
 .import _bbcc_pulla
 .import getchar
 .import putchar
-
-\ Function
-isupper: 
-lda &74
-pha
-lda &75
-pha
-lda &72
-pha
-lda &73
-pha
-
-\ Set
-lda #&01
-sta &72
-
-\ MoreEqualCmp
-lda #00
-sta &74
-ldy #&00
-lda (&8E),Y
-cmp #&41
-bcc __bbcc_0000000a
-__bbcc_00000009: lda #01
-sta &74
-__bbcc_0000000a: 
-
-\ JmpZero
-lda &74
-bne __bbcc_0000000b
-jmp __bbcc_00000000
-__bbcc_0000000b: 
-
-\ LessEqualCmp
-lda #00
-sta &74
-ldy #&00
-lda (&8E),Y
-cmp #&5A
-bcc __bbcc_0000000c
-bne __bbcc_0000000d
-__bbcc_0000000c: lda #01
-sta &74
-__bbcc_0000000d: 
-
-\ JmpZero
-lda &74
-bne __bbcc_0000000e
-jmp __bbcc_00000000
-__bbcc_0000000e: 
-
-\ Jmp
-jmp __bbcc_00000001
-
-\ Label
-__bbcc_00000000: 
-
-\ Set
-lda #&00
-sta &72
-
-\ Label
-__bbcc_00000001: 
-
-\ Return
-lda &72
-sta &70
-pla
-sta &75
-pla
-sta &74
-pla
-sta &73
-pla
-sta &72
-rts
 
 \ Function
 gets: 
@@ -110,7 +33,7 @@ lda (&8E),Y
 sta &73
 
 \ Label
-__bbcc_00000002: 
+__bbcc_00000000: 
 
 \ Dec
 sec
@@ -131,21 +54,21 @@ sta &74
 ldy #&03
 lda (&8E),Y
 cmp #&00
-bcc __bbcc_0000000f
-bne __bbcc_00000010
+bcc __bbcc_00000007
+bne __bbcc_00000008
 ldy #&02
 lda (&8E),Y
 cmp #&00
-bcs __bbcc_00000010
-__bbcc_0000000f: lda #01
+bcs __bbcc_00000008
+__bbcc_00000007: lda #01
 sta &74
-__bbcc_00000010: 
+__bbcc_00000008: 
 
 \ JmpZero
 lda &74
-bne __bbcc_00000011
-jmp __bbcc_00000003
-__bbcc_00000011: 
+bne __bbcc_00000009
+jmp __bbcc_00000001
+__bbcc_00000009: 
 
 \ CallFunction
 jsr getchar
@@ -190,28 +113,28 @@ lda #00
 sta &74
 lda &78
 cmp #&0A
-bne __bbcc_00000012
+bne __bbcc_0000000a
 lda #01
 sta &74
-__bbcc_00000012: 
+__bbcc_0000000a: 
 
 \ JmpZero
 lda &74
-bne __bbcc_00000013
-jmp __bbcc_00000004
-__bbcc_00000013: 
-
-\ Jmp
-jmp __bbcc_00000003
-
-\ Label
-__bbcc_00000004: 
-
-\ Jmp
+bne __bbcc_0000000b
 jmp __bbcc_00000002
+__bbcc_0000000b: 
+
+\ Jmp
+jmp __bbcc_00000001
 
 \ Label
-__bbcc_00000003: 
+__bbcc_00000002: 
+
+\ Jmp
+jmp __bbcc_00000000
+
+\ Label
+__bbcc_00000001: 
 
 \ SetAt
 lda &72
@@ -302,7 +225,7 @@ lda (&8E),Y
 sta &75
 
 \ Label
-__bbcc_00000005: 
+__bbcc_00000003: 
 
 \ ReadAt
 lda &75
@@ -317,25 +240,25 @@ sta &76
 
 \ JmpZero
 lda &76
-bne __bbcc_00000014
-jmp __bbcc_00000006
-__bbcc_00000014: 
+bne __bbcc_0000000c
+jmp __bbcc_00000004
+__bbcc_0000000c: 
 
 \ EqualCmp
 lda #00
 sta &78
 lda &76
 cmp #&25
-bne __bbcc_00000015
+bne __bbcc_0000000d
 lda #01
 sta &78
-__bbcc_00000015: 
+__bbcc_0000000d: 
 
 \ JmpZero
 lda &78
-bne __bbcc_00000016
-jmp __bbcc_00000007
-__bbcc_00000016: 
+bne __bbcc_0000000e
+jmp __bbcc_00000005
+__bbcc_0000000e: 
 
 \ Add
 clc
@@ -362,16 +285,16 @@ lda #00
 sta &78
 lda &76
 cmp #&73
-bne __bbcc_00000017
+bne __bbcc_0000000f
 lda #01
 sta &78
-__bbcc_00000017: 
+__bbcc_0000000f: 
 
 \ JmpZero
 lda &78
-bne __bbcc_00000018
-jmp __bbcc_00000008
-__bbcc_00000018: 
+bne __bbcc_00000010
+jmp __bbcc_00000006
+__bbcc_00000010: 
 
 \ Set
 lda &72
@@ -417,13 +340,13 @@ lda &71
 sta &79
 
 \ Jmp
-jmp __bbcc_00000005
+jmp __bbcc_00000003
 
 \ Label
-__bbcc_00000008: 
+__bbcc_00000006: 
 
 \ Label
-__bbcc_00000007: 
+__bbcc_00000005: 
 
 \ CallFunction
 lda &76
@@ -447,10 +370,10 @@ adc #0
 sta &75
 
 \ Jmp
-jmp __bbcc_00000005
+jmp __bbcc_00000003
 
 \ Label
-__bbcc_00000006: 
+__bbcc_00000004: 
 
 \ Return
 pla

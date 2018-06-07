@@ -189,7 +189,7 @@ class Interpreter(ast.NodeVisitor):
         right_val = right.val(self.il)
         left_val, right_val = self._arith_convert(left_val, right_val)
 
-        output = il.ILValue(left.type)
+        output = il.ILValue(left_val.type)
 
         if left.type.is_pointer():
             type_len = il.ILValue(ctypes.unsig_char)
@@ -319,6 +319,63 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Label(set_out))
         self.il.add(il.Set(other, output))
         self.il.add(il.Label(end))
+
+        return output
+
+    def visit_And(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+
+        left_val = left.val(self.il)
+        right_val = right.val(self.il)
+        left_val, right_val = self._arith_convert(left_val, right_val)
+
+        output = il.ILValue(left_val.type)
+
+        self.il.add(il.And(left_val, right_val, output))
+        return output
+
+    def visit_IncOr(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+
+        left_val = left.val(self.il)
+        right_val = right.val(self.il)
+        left_val, right_val = self._arith_convert(left_val, right_val)
+
+        output = il.ILValue(left_val.type)
+
+        self.il.add(il.IncOr(left_val, right_val, output))
+        return output
+
+    def visit_Negate(self, node):
+        expr = self.visit(node.expr).val(self.il)
+
+        output = il.ILValue(expr.type)
+
+        self.il.add(il.Not(expr, output))
+        return output
+
+    def visit_Conditional(self, node):
+        condition = self.visit(node.condition).val(self.il)
+        left = self.visit(node.statement)
+        right = self.visit(node.else_statement)
+
+        max_len = max([left.type, right.type], key=lambda v: v.size)
+        output = il.ILValue(max_len)
+
+        else_label = self.il.get_label()
+
+        self.il.add(il.JmpZero(condition, else_label))
+        left_val = left.val(self.il)
+        self.il.add(il.Set(left_val, output))
+        else_end_label = self.il.get_label()
+        self.il.add(il.Jmp(else_end_label))
+
+        self.il.add(il.Label(else_label))
+        right_val = right.val(self.il)
+        self.il.add(il.Set(right_val, output))
+        self.il.add(il.Label(else_end_label))
 
         return output
 
