@@ -589,6 +589,17 @@ class SymbolTableBuilder(ast.NodeVisitor):
     def visit_BoolNot(self, node):
         self.visit(node.expr)
 
+    def visit_And(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_IncOr(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_Negate(self, node):
+        self.visit(node.expr)
+
     def visit_PreIncr(self, node):
         self.visit(node.expr)
 
@@ -616,6 +627,11 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.statement)
         if node.else_statement is not None:
             self.visit(node.else_statement)
+
+    def visit_Conditional(self, node):
+        self.visit(node.condition)
+        self.visit(node.statement)
+        self.visit(node.else_statement)
 
     def visit_WhileStatement(self, node):
         self.visit(node.condition)

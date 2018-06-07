@@ -302,7 +302,6 @@ class Parser:
         """Parse a conditional expression."""
         cond, index = self.parse_logical_or(index)
 
-        print(self.tokens[index])
         if self.tokens[index].type == QMARK:
             first, index = self.parse_expression(index + 1)
             index = self.eat(index, COLON)
@@ -837,8 +836,6 @@ class Parser:
         parenthesis, but that check is left to the caller.
         index - index right past the opening parenthesis
         """
-        # print("")
-        # print(self.tokens[index])
         # List of decl_nodes arguments
         params = []
 
