@@ -273,6 +273,9 @@ class Lexer:
             elif self.current_char == "|":
                 self.advance()
                 tokens.append(Token(VLINE, "|"))
+            elif self.current_char == "^":
+                self.advance()
+                tokens.append(Token(HAT, "^"))
 
             else:
                 self.error()

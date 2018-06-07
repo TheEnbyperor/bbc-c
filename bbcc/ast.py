@@ -392,6 +392,13 @@ class IncOr(_ArithBinOp):
         super().__init__(left, right, op)
 
 
+class ExcOr(_ArithBinOp):
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
 class Equals(_RExprNode):
     """Expression that is an assignment."""
 

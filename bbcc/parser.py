@@ -327,8 +327,13 @@ class Parser:
 
     def parse_inc_or(self, index):
         return self.parse_series(
-            index, self.parse_and,
+            index, self.parse_exc_or,
             {VLINE: ast.IncOr})
+
+    def parse_exc_or(self, index):
+        return self.parse_series(
+            index, self.parse_and,
+            {HAT: ast.ExcOr})
 
     def parse_and(self, index):
         return self.parse_series(
