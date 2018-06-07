@@ -1,17 +1,17 @@
 #include "stdio.h"
 
-//char *gets(char *s, int n) {
-//    char c;
-//    char *cs;
-//
-//    cs = s;
-//    while(--n < 0) {
-//        if ((*cs++ = (c = getchar())) == 10)
-//            break;
-//    }
-//    *cs = 0;
-//    return s;
-//}
+char *gets(char *s, int n) {
+    char *cs;
+
+    cs = s;
+    while(--n < 0) {
+        if ((*cs++ = getchar()) == '\n') {
+            break;
+        }
+    }
+    *cs = 0;
+    return s;
+}
 
 int printf(const char *format, ...) {
     void *ap;

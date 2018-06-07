@@ -37,6 +37,10 @@ class Assemble:
                     if l in self.prog.exports:
                         self.symbols.append(Symbol(l, addr, Symbol.EXPORT))
             addr += len(i)
+        for l in self.prog.end_labels:
+            self.labels[l] = addr
+            if l in self.prog.exports:
+                self.symbols.append(Symbol(l, addr, Symbol.EXPORT))
         addr = 0
         for n, i in enumerate(self.prog.insts):
             if isinstance(i.value, insts.LabelVal):

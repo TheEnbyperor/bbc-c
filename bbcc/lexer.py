@@ -261,10 +261,18 @@ class Lexer:
             elif self.current_char == "!":
                 self.advance()
                 tokens.append(Token(NOT, "!"))
-
             elif self.current_char == "#":
                 self.advance()
                 tokens.append(Token(HASH, "#"))
+            elif self.current_char == "~":
+                self.advance()
+                tokens.append(Token(TILDA, "~"))
+            elif self.current_char == "?":
+                self.advance()
+                tokens.append(Token(QMARK, "?"))
+            elif self.current_char == "|":
+                self.advance()
+                tokens.append(Token(VLINE, "|"))
 
             else:
                 self.error()

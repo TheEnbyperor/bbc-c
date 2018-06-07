@@ -57,8 +57,11 @@ class Interpreter(ast.NodeVisitor):
         should_return = True
         if node.nodes.items is not None and len(node.nodes.items) != 0 and isinstance(node.nodes.items[-1], ast.Return):
             should_return = False
-        if should_return and func_name == "main":
-            il_value = il.ILValue(decl_info.ctype.ret)
+        if should_return:
+            if func_name == "main":
+                il_value = il.ILValue(decl_info.ctype.ret)
+            else:
+                il_value = il.ILValue(ctypes.void)
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value, func_name))
         self.current_scope = old_scope
@@ -403,7 +406,7 @@ class Interpreter(ast.NodeVisitor):
             self.il.register_literal_value(type_len, expr.type.arg.size)
             self.il.add(il.Sub(value, type_len, value))
         else:
-            self.il.add(il.Inc(value))
+            self.il.add(il.Dec(value))
         return value
 
     def visit_PostDecr(self, node):
@@ -417,7 +420,7 @@ class Interpreter(ast.NodeVisitor):
             self.il.register_literal_value(type_len, value.type.arg.size)
             self.il.add(il.Sub(value_val, type_len, value_val))
         else:
-            self.il.add(il.Inc(value_val))
+            self.il.add(il.Dec(value_val))
         return output
 
     def visit_AddrOf(self, node):

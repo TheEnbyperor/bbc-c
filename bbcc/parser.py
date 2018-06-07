@@ -276,12 +276,6 @@ class Parser:
     def parse_assignment(self, index):
         """Parse an assignment expression."""
 
-        # This is a slight departure from the official grammar. The standard
-        # specifies that a program is syntactically correct only if the
-        # left-hand side of an assignment expression is a unary expression. But,
-        # to provide more helpful error messages, we permit the left side to be
-        # any non-assignment expression.
-
         left, index = self.parse_conditional(index)
 
         if index < len(self.tokens):
@@ -306,8 +300,17 @@ class Parser:
 
     def parse_conditional(self, index):
         """Parse a conditional expression."""
-        # TODO: Parse ternary operator
-        return self.parse_logical_or(index)
+        cond, index = self.parse_logical_or(index)
+
+        print(self.tokens[index])
+        if self.tokens[index].type == QMARK:
+            first, index = self.parse_expression(index + 1)
+            index = self.eat(index, COLON)
+            second, index = self.parse_conditional(index)
+
+            return ast.Conditional(cond, first, second), index
+
+        return cond, index
 
     def parse_logical_or(self, index):
         """Parse logical or expression."""
@@ -319,8 +322,18 @@ class Parser:
         """Parse logical and expression."""
         # TODO: Implement bitwise operators here.
         return self.parse_series(
-            index, self.parse_equality,
+            index, self.parse_inc_or,
             {BOOLAND: ast.BoolAnd})
+
+    def parse_inc_or(self, index):
+        return self.parse_series(
+            index, self.parse_and,
+            {VLINE: ast.IncOr})
+
+    def parse_and(self, index):
+        return self.parse_series(
+            index, self.parse_equality,
+            {AMP: ast.And})
 
     def parse_equality(self, index):
         """Parse equality expression."""
@@ -355,14 +368,14 @@ class Parser:
 
     def parse_cast(self, index):
         """Parse cast expression."""
-        if self.tokens[index].type == LPAREM:
-            index += 1
+        try:
+            return self.parse_unary(index)
+        except SyntaxError:
+            index = self.eat(index, LPAREM)
             t, index = self.parse_type_name(index)
             index = self.eat(index, RPAREM)
             e, index = self.parse_cast(index)
             return ast.Cast(t, e), index
-        else:
-            return self.parse_unary(index)
 
     def parse_unary(self, index):
         """Parse unary expression."""
@@ -381,6 +394,9 @@ class Parser:
         elif self.token_is(index, NOT):
             node, index = self.parse_cast(index + 1)
             return ast.BoolNot(node), index
+        elif self.token_is(index, TILDA):
+            node, index = self.parse_cast(index + 1)
+            return ast.Negate(node), index
         elif self.token_is(index, SIZEOF):
             try:
                 node, index = self.parse_unary(index + 1)

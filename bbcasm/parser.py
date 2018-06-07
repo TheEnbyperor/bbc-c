@@ -8,6 +8,7 @@ class Prog:
     insts = []
     imports = []
     exports = []
+    end_labels = []
 
     def __int__(self, insts=None, imports=None, exports=None):
         if exports is None:
@@ -246,7 +247,9 @@ class Parser:
                 index = self.parse_cmd(index+1)
 
             else:
-                # print(self.tokens[:index])
                 self.error()
+
+        if len(self.cur_labels) > 0:
+            self.prog.end_labels = self.cur_labels
 
         return self.prog

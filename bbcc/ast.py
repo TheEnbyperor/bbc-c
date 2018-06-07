@@ -45,6 +45,13 @@ class IfStatement(AST):
                                                 "  " + "  ".join(str(self.else_statement).splitlines(True)))
 
 
+class Conditional(AST):
+    def __init__(self, condition, statement, else_statement):
+        self.condition = condition
+        self.statement = statement
+        self.else_statement = else_statement
+
+
 class WhileStatement(AST):
     def __init__(self, condition, statement):
         self.condition = condition
@@ -371,6 +378,20 @@ class BoolOr(_BoolAndOr):
         super().__init__(left, right, op)
 
 
+class And(_ArithBinOp):
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
+class IncOr(_ArithBinOp):
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
 class Equals(_RExprNode):
     """Expression that is an assignment."""
 
@@ -476,6 +497,14 @@ class PostDecr(_IncrDecr):
 
 
 class BoolNot(_RExprNode):
+    """Boolean not."""
+
+    def __init__(self, expr):
+        """Initialize node."""
+        self.expr = expr
+
+
+class Negate(_RExprNode):
     """Boolean not."""
 
     def __init__(self, expr):
