@@ -348,6 +348,19 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.IncOr(left_val, right_val, output))
         return output
 
+    def visit_ExcOr(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+
+        left_val = left.val(self.il)
+        right_val = right.val(self.il)
+        left_val, right_val = self._arith_convert(left_val, right_val)
+
+        output = il.ILValue(left_val.type)
+
+        self.il.add(il.ExcOr(left_val, right_val, output))
+        return output
+
     def visit_Negate(self, node):
         expr = self.visit(node.expr).val(self.il)
 

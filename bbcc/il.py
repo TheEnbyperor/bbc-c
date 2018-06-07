@@ -805,6 +805,38 @@ class IncOr(ILInst):
             output.asm(assembly, "STA", i)
 
 
+class ExcOr(ILInst):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+        self.left = left
+        self.right = right
+        self.output = output
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def outputs(self):
+        return [self.output]
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+        output = spotmap[self.output]
+
+        for i in range(output.type.size):
+            if i > left.type.size and i > right.type.size:
+                assembly.add_inst("LDA", "#0")
+            else:
+                if i < left.type.size:
+                    left.asm(assembly, "LDA", i)
+                else:
+                    assembly.add_inst("LDA", "#0")
+                if i < right.type.size:
+                    right.asm(assembly, "EOR", i)
+                else:
+                    assembly.add_inst("EOR", "#0")
+            output.asm(assembly, "STA", i)
+
+
 class Not(ILInst):
     def __init__(self, expr: ILValue, output: ILValue):
         self.expr = expr
