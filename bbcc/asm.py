@@ -21,7 +21,7 @@ class ASM:
 
     @classmethod
     def to_hex(cls, num, length=2):
-        return (('%0' + str(length) + 'x') % num).upper()
+        return (('%0' + str(length) + 'x') % ((num + (1 << length*4)) % (1 << length*4))).upper()
 
     def add_comment(self, comment):
         self.asm += "\n\\ " + comment + "\n"

@@ -250,23 +250,25 @@ rts
 
 \ Function
 isdigit: 
-lda &72
-pha
-lda &73
-pha
 lda &74
 pha
 lda &75
+pha
+lda &72
+pha
+lda &73
 pha
 
 \ Set
 ldy #&00
 lda (&8E),Y
+sta &72
+
+\ Set
+lda &72
 sta &74
 lda #0
 sta &75
-
-\ Set
 
 \ Sub
 sec
@@ -391,10 +393,6 @@ lda &76
 pha
 lda &77
 pha
-lda &74
-pha
-lda &75
-pha
 lda &72
 pha
 lda &73
@@ -403,14 +401,6 @@ pha
 \ Set
 lda #&01
 sta &72
-
-\ Not
-lda #&7F
-eor #&FF
-sta &74
-lda #&00
-eor #&FF
-sta &75
 
 \ Set
 ldy #&00
@@ -421,10 +411,10 @@ sta &77
 
 \ And
 lda &76
-and &74
+and #&80
 sta &78
 lda &77
-and &75
+and #&FF
 sta &79
 
 \ JmpNotZero
@@ -451,10 +441,6 @@ __bbcc_00000009:
 \ Return
 lda &72
 sta &70
-pla
-sta &75
-pla
-sta &74
 pla
 sta &77
 pla
@@ -961,17 +947,9 @@ rts
 
 \ Function
 toupper: 
-lda &78
-pha
-lda &79
-pha
 lda &76
 pha
 lda &77
-pha
-lda &74
-pha
-lda &75
 pha
 lda &72
 pha
@@ -993,14 +971,6 @@ sta &8F
 lda &70
 sta &72
 
-\ Not
-lda #&20
-eor #&FF
-sta &74
-lda #&00
-eor #&FF
-sta &75
-
 \ Set
 ldy #&00
 lda (&8E),Y
@@ -1010,11 +980,11 @@ sta &77
 
 \ And
 lda &76
-and &74
-sta &78
+and #&DF
+sta &72
 lda &77
-and &75
-sta &79
+and #&FF
+sta &73
 
 \ JmpZero
 lda &72
@@ -1023,10 +993,6 @@ jmp __bbcc_0000001a
 __bbcc_00000062: 
 
 \ Set
-lda &78
-sta &72
-lda &79
-sta &73
 
 \ Jmp
 jmp __bbcc_0000001b
@@ -1050,17 +1016,9 @@ sta &70
 lda &73
 sta &71
 pla
-sta &75
-pla
-sta &74
-pla
 sta &77
 pla
 sta &76
-pla
-sta &79
-pla
-sta &78
 pla
 sta &73
 pla
@@ -1069,10 +1027,6 @@ rts
 
 \ Function
 tolower: 
-lda &74
-pha
-lda &75
-pha
 lda &72
 pha
 lda &73
@@ -1101,10 +1055,10 @@ sta &73
 \ IncOr
 lda &72
 ora #&20
-sta &74
+sta &70
 lda &73
 ora #&00
-sta &75
+sta &71
 
 \ JmpZero
 lda &70
@@ -1113,10 +1067,6 @@ jmp __bbcc_0000001c
 __bbcc_00000063: 
 
 \ Set
-lda &74
-sta &70
-lda &75
-sta &71
 
 \ Jmp
 jmp __bbcc_0000001d
@@ -1139,8 +1089,4 @@ pla
 sta &73
 pla
 sta &72
-pla
-sta &75
-pla
-sta &74
 rts

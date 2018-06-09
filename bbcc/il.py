@@ -2,6 +2,7 @@ from . import asm
 from . import ast
 from . import spots
 from . import ctypes
+from . import optimiser
 
 pseudo_registers = [asm.ASM.preg1, asm.ASM.preg2, asm.ASM.preg3, asm.ASM.preg4, asm.ASM.preg5,
                     asm.ASM.preg6, asm.ASM.preg7, asm.ASM.preg8, asm.ASM.preg9, asm.ASM.preg10,
@@ -1219,16 +1220,8 @@ class IL:
 
         self.func_stack_size = func_stack_size
 
-        for i, c in enumerate(self.commands):
-            if (i + 1) == len(self.commands):
-                break
-            c2 = self.commands[i + 1]
-            for output in c.outputs():
-                output_spot = spotmap[output]
-                for input in c2.inputs():
-                    input_spot = spotmap[input]
-                    if input_spot == output_spot and type(c2) == Set and input_spot.type == output_spot.type:
-                        spotmap[output] = spotmap[c2.outputs()[0]]
+        optimise = optimiser.Optimiser()
+        optimise.optimise(self.commands, spotmap)
 
         self._print_spotmap(spotmap)
 
