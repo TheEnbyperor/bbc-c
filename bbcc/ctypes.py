@@ -68,6 +68,9 @@ class IntegerCType(CType):
     def __repr__(self):
         return '<IntegerCType({size}:{signed})>'.format(size=self.size, signed=self.signed)
 
+    def __eq__(self, other):
+        return type(other) == type(self) and other.size == self.size and other.signed == self.signed
+
 
 class VoidCType(CType):
     def __init__(self):

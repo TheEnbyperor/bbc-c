@@ -9,37 +9,35 @@ __bbcc_00000001: .byte &25,&73,&0A,&00
 
 \ Function
 main: 
-lda &74
+lda &72
 pha
-lda &75
+lda &73
 pha
 lda &76
 pha
 lda &77
 pha
-lda &72
+lda &74
 pha
-lda &73
+lda &75
 pha
-
-\ Set
-lda #&2A
-sta &72
-lda #&00
-sta &73
 
 \ AddrOf
 lda #0(__bbcc_00000000)
-sta &76
+sta &74
 lda #1(__bbcc_00000000)
-sta &77
+sta &75
 
 \ Set
+lda &74
+sta &76
+lda &75
+sta &77
 
 \ CallFunction
-lda &73
+lda #&00
 jsr _bbcc_pusha
-lda &72
+lda #&2A
 jsr _bbcc_pusha
 lda &77
 jsr _bbcc_pusha
@@ -56,11 +54,15 @@ sta &8F
 
 \ AddrOf
 lda #0(__bbcc_00000001)
-sta &74
+sta &72
 lda #1(__bbcc_00000001)
-sta &75
+sta &73
 
 \ Set
+lda &72
+sta &74
+lda &73
+sta &75
 
 \ AddrOf
 lda #0(__bbcc_00000000)
