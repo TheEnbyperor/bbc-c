@@ -37,6 +37,9 @@ class CType:
     def is_function(self):
         return False
 
+    def is_signed(self):
+        return False
+
     def make_unsigned(self):
         raise NotImplementedError
 
@@ -59,6 +62,9 @@ class IntegerCType(CType):
 
     def is_arith(self):
         return True
+
+    def is_signed(self):
+        return self.signed
 
     def make_unsigned(self):
         unsign_self = copy.copy(self)

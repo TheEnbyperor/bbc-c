@@ -34,10 +34,12 @@ sta &74
 ldy #&00
 lda (&8E),Y
 cmp #&41
-bcc __bbcc_0000001f
-__bbcc_0000001e: lda #01
+bvc __bbcc_0000001f
+eor #&80
+__bbcc_0000001f: bpl __bbcc_0000001e
+lda #01
 sta &74
-__bbcc_0000001f: 
+__bbcc_0000001e: 
 
 \ JmpZero
 lda &74
@@ -48,14 +50,17 @@ __bbcc_00000020:
 \ LessEqualCmp
 lda #00
 sta &74
+clc
 ldy #&00
 lda (&8E),Y
-cmp #&5A
-bcc __bbcc_00000021
-bne __bbcc_00000022
-__bbcc_00000021: lda #01
+sbc #&5A
+bvc __bbcc_00000022
+eor #&80
+__bbcc_00000022: bmi __bbcc_00000021
+bcs __bbcc_00000021
+lda #01
 sta &74
-__bbcc_00000022: 
+__bbcc_00000021: 
 
 \ JmpZero
 lda &74
@@ -110,10 +115,12 @@ sta &74
 ldy #&00
 lda (&8E),Y
 cmp #&61
-bcc __bbcc_00000025
-__bbcc_00000024: lda #01
+bvc __bbcc_00000025
+eor #&80
+__bbcc_00000025: bpl __bbcc_00000024
+lda #01
 sta &74
-__bbcc_00000025: 
+__bbcc_00000024: 
 
 \ JmpZero
 lda &74
@@ -124,14 +131,17 @@ __bbcc_00000026:
 \ LessEqualCmp
 lda #00
 sta &74
+clc
 ldy #&00
 lda (&8E),Y
-cmp #&7A
-bcc __bbcc_00000027
-bne __bbcc_00000028
-__bbcc_00000027: lda #01
+sbc #&7A
+bvc __bbcc_00000028
+eor #&80
+__bbcc_00000028: bmi __bbcc_00000027
+bcs __bbcc_00000027
+lda #01
 sta &74
-__bbcc_00000028: 
+__bbcc_00000027: 
 
 \ JmpZero
 lda &74
@@ -279,13 +289,16 @@ sta &72
 \ LessEqualCmp
 lda #00
 sta &74
+clc
 lda &72
-cmp #&09
-bcc __bbcc_0000002e
-bne __bbcc_0000002f
-__bbcc_0000002e: lda #01
+sbc #&09
+bvc __bbcc_0000002f
+eor #&80
+__bbcc_0000002f: bmi __bbcc_0000002e
+bcs __bbcc_0000002e
+lda #01
 sta &74
-__bbcc_0000002f: 
+__bbcc_0000002e: 
 
 \ Return
 lda &74
@@ -543,10 +556,12 @@ sta &72
 ldy #&00
 lda (&8E),Y
 cmp #&20
-bcs __bbcc_0000003d
-__bbcc_0000003c: lda #01
+bvc __bbcc_0000003d
+eor #&80
+__bbcc_0000003d: bmi __bbcc_0000003c
+lda #01
 sta &72
-__bbcc_0000003d: 
+__bbcc_0000003c: 
 
 \ Return
 lda &72
@@ -786,10 +801,12 @@ sta &78
 ldy #&00
 lda (&8E),Y
 cmp #&61
-bcc __bbcc_00000051
-__bbcc_00000050: lda #01
+bvc __bbcc_00000051
+eor #&80
+__bbcc_00000051: bpl __bbcc_00000050
+lda #01
 sta &78
-__bbcc_00000051: 
+__bbcc_00000050: 
 
 \ JmpZero
 lda &78
@@ -800,14 +817,17 @@ __bbcc_00000052:
 \ LessEqualCmp
 lda #00
 sta &78
+clc
 ldy #&00
 lda (&8E),Y
-cmp #&66
-bcc __bbcc_00000053
-bne __bbcc_00000054
-__bbcc_00000053: lda #01
+sbc #&66
+bvc __bbcc_00000054
+eor #&80
+__bbcc_00000054: bmi __bbcc_00000053
+bcs __bbcc_00000053
+lda #01
 sta &78
-__bbcc_00000054: 
+__bbcc_00000053: 
 
 \ JmpZero
 lda &78
@@ -863,10 +883,12 @@ sta &76
 ldy #&00
 lda (&8E),Y
 cmp #&41
-bcc __bbcc_0000005b
-__bbcc_0000005a: lda #01
+bvc __bbcc_0000005b
+eor #&80
+__bbcc_0000005b: bpl __bbcc_0000005a
+lda #01
 sta &76
-__bbcc_0000005b: 
+__bbcc_0000005a: 
 
 \ JmpZero
 lda &76
@@ -877,14 +899,17 @@ __bbcc_0000005c:
 \ LessEqualCmp
 lda #00
 sta &76
+clc
 ldy #&00
 lda (&8E),Y
-cmp #&46
-bcc __bbcc_0000005d
-bne __bbcc_0000005e
-__bbcc_0000005d: lda #01
+sbc #&46
+bvc __bbcc_0000005e
+eor #&80
+__bbcc_0000005e: bmi __bbcc_0000005d
+bcs __bbcc_0000005d
+lda #01
 sta &76
-__bbcc_0000005e: 
+__bbcc_0000005d: 
 
 \ JmpZero
 lda &76
