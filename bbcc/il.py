@@ -258,12 +258,15 @@ class Return(ILInst):
         used = []
         if self.epilouge:
             found_start = False
-            for c in il.commands[::-1]:
-                if isinstance(c, Return):
+            for c in il.commands:
+                if isinstance(c, Function):
                     if c.func_name == self.func_name:
                         found_start = True
                         continue
                 if found_start:
+                    if type(c) == Return:
+                        if c.func_name != self.func_name:
+                            break
                     if type(c) == Function:
                         break
                     for s in [spotmap[v] for v in c.outputs() + c.scratch_spaces()]:
@@ -290,7 +293,7 @@ class Return(ILInst):
             assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
             stack_register.asm(assembly, "STA", 1)
 
-        for reg in used[::-1]:
+        for reg in used:
             assembly.add_inst("PLA")
             reg.asm(assembly, "STA", 1)
             assembly.add_inst("PLA")

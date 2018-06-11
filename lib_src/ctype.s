@@ -85,13 +85,13 @@ __bbcc_00000001:
 lda &72
 sta &70
 pla
-sta &75
-pla
-sta &74
-pla
 sta &73
 pla
 sta &72
+pla
+sta &75
+pla
+sta &74
 rts
 
 \ Function
@@ -166,13 +166,13 @@ __bbcc_00000003:
 lda &72
 sta &70
 pla
-sta &75
-pla
-sta &74
-pla
 sta &73
 pla
 sta &72
+pla
+sta &75
+pla
+sta &74
 rts
 
 \ Function
@@ -249,13 +249,13 @@ __bbcc_00000005:
 lda &72
 sta &70
 pla
-sta &75
-pla
-sta &74
-pla
 sta &73
 pla
 sta &72
+pla
+sta &75
+pla
+sta &74
 rts
 
 \ Function
@@ -387,13 +387,13 @@ __bbcc_00000007:
 lda &72
 sta &70
 pla
-sta &75
-pla
-sta &74
-pla
 sta &73
 pla
 sta &72
+pla
+sta &75
+pla
+sta &74
 rts
 
 \ Function
@@ -455,6 +455,10 @@ __bbcc_00000009:
 lda &72
 sta &70
 pla
+sta &73
+pla
+sta &72
+pla
 sta &77
 pla
 sta &76
@@ -462,10 +466,6 @@ pla
 sta &79
 pla
 sta &78
-pla
-sta &73
-pla
-sta &72
 rts
 
 \ Function
@@ -534,13 +534,13 @@ __bbcc_0000000b:
 lda &72
 sta &70
 pla
-sta &75
-pla
-sta &74
-pla
 sta &73
 pla
 sta &72
+pla
+sta &75
+pla
+sta &74
 rts
 
 \ Function
@@ -726,21 +726,21 @@ __bbcc_0000000d:
 lda &72
 sta &70
 pla
-sta &79
+sta &73
 pla
-sta &78
-pla
-sta &77
-pla
-sta &76
+sta &72
 pla
 sta &75
 pla
 sta &74
 pla
-sta &73
+sta &77
 pla
-sta &72
+sta &76
+pla
+sta &79
+pla
+sta &78
 rts
 
 \ Function
@@ -953,21 +953,21 @@ __bbcc_00000013:
 lda &72
 sta &70
 pla
-sta &79
+sta &73
 pla
-sta &78
-pla
-sta &77
-pla
-sta &76
+sta &72
 pla
 sta &75
 pla
 sta &74
 pla
-sta &73
+sta &77
 pla
-sta &72
+sta &76
+pla
+sta &79
+pla
+sta &78
 rts
 
 \ Function
@@ -1041,13 +1041,13 @@ sta &70
 lda &73
 sta &71
 pla
-sta &77
-pla
-sta &76
-pla
 sta &73
 pla
 sta &72
+pla
+sta &77
+pla
+sta &76
 rts
 
 \ Function

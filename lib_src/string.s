@@ -77,12 +77,6 @@ bne __bbcc_00000005
 jmp __bbcc_00000001
 __bbcc_00000005: 
 
-\ Set
-lda &72
-sta &74
-lda &73
-sta &75
-
 \ Inc
 inc &72
 bne __bbcc_00000006
@@ -105,17 +99,17 @@ sta &73
 pla
 sta &72
 pla
-sta &77
+sta &75
 pla
-sta &76
+sta &74
 pla
 sta &79
 pla
 sta &78
 pla
-sta &75
+sta &77
 pla
-sta &74
+sta &76
 rts
 
 \ Function
@@ -169,12 +163,16 @@ sta &8F
 sec
 lda &70
 sbc #&01
-sta &70
+sta &74
 lda &71
 sbc #&00
-sta &71
+sta &75
 
 \ Set
+lda &74
+sta &70
+lda &75
+sta &71
 
 \ Label
 __bbcc_00000002: 
@@ -183,15 +181,15 @@ __bbcc_00000002:
 lda #00
 sta &74
 lda &73
-cmp &71
-bcc __bbcc_00000007
-bne __bbcc_00000008
+sbc &71
 lda &72
 cmp &70
-bcs __bbcc_00000008
-__bbcc_00000007: lda #01
+bvc __bbcc_00000008
+eor #&80
+__bbcc_00000008: bmi __bbcc_00000007
+lda #01
 sta &74
-__bbcc_00000008: 
+__bbcc_00000007: 
 
 \ JmpZero
 lda &74
@@ -244,9 +242,11 @@ lda &74
 sta &76
 ldy #&00
 lda (&76),Y
-sta &74
+sta &78
 
 \ Set
+lda &78
+sta &74
 
 \ Mult
 lda #&01
@@ -407,11 +407,12 @@ sta &72
 lda &71
 sta &73
 
-\ Inc
-inc &70
+\ Dec
+lda &70
 bne __bbcc_00000013
-inc &71
+dec &71
 __bbcc_00000013: 
+dec &70
 
 \ Jmp
 jmp __bbcc_00000002
@@ -421,6 +422,14 @@ __bbcc_00000003:
 
 \ Return
 pla
+sta &73
+pla
+sta &72
+pla
+sta &75
+pla
+sta &74
+pla
 sta &79
 pla
 sta &78
@@ -428,12 +437,4 @@ pla
 sta &77
 pla
 sta &76
-pla
-sta &75
-pla
-sta &74
-pla
-sta &73
-pla
-sta &72
 rts

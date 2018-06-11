@@ -9,6 +9,10 @@ lda &7A
 pha
 lda &7B
 pha
+lda &7C
+pha
+lda &7D
+pha
 lda &74
 pha
 lda &75
@@ -83,9 +87,9 @@ sta &75
 
 \ Set
 lda &72
-sta &74
+sta &76
 lda &73
-sta &75
+sta &77
 
 \ Inc
 inc &72
@@ -95,28 +99,28 @@ __bbcc_00000005:
 
 \ Mult
 lda #&01
-sta &78
-lda &74
-sta &76
-lda &75
-sta &77
-lda #0
 sta &7A
-sta &7B
+lda &76
+sta &78
+lda &77
+sta &79
+lda #0
+sta &7C
+sta &7D
 ldx #&10
 __bbcc_00000006: 
-lsr &77
-ror &76
+lsr &79
+ror &78
 bcc __bbcc_00000007
 clc
-lda &78
-adc &7A
-sta &7A
+lda &7A
+adc &7C
+sta &7C
 lda #0
-adc &7B
-sta &7B
+adc &7D
+sta &7D
 __bbcc_00000007: clc
-asl &78
+asl &7A
 dex
 bne __bbcc_00000006
 
@@ -124,24 +128,25 @@ bne __bbcc_00000006
 clc
 ldy #&02
 lda (&8E),Y
-adc &7A
-sta &74
+adc &7C
+sta &76
 ldy #&03
 lda (&8E),Y
-adc &7B
-sta &75
+adc &7D
+sta &77
+
+\ Set
+lda &74
+sta &78
 
 \ SetAt
-lda &74
-sta &76
-lda &75
-sta &77
-lda &74
+lda &76
+sta &74
+lda &77
+sta &75
+lda &78
 ldy #&00
-sta (&76),Y
-lda &75
-ldy #&01
-sta (&76),Y
+sta (&74),Y
 
 \ Div
 ldy #&00
@@ -259,17 +264,18 @@ lda (&8E),Y
 adc &79
 sta &73
 
+\ Set
+lda #&00
+sta &74
+
 \ SetAt
 lda &72
-sta &74
+sta &76
 lda &73
-sta &75
-lda #&00
+sta &77
+lda &74
 ldy #&00
-sta (&74),Y
-lda #&00
-ldy #&01
-sta (&74),Y
+sta (&76),Y
 
 \ Set
 ldy #&02
@@ -295,23 +301,27 @@ sta &8F
 
 \ Return
 pla
-sta &7B
+sta &73
 pla
-sta &7A
-pla
-sta &77
-pla
-sta &76
+sta &72
 pla
 sta &79
 pla
 sta &78
 pla
+sta &77
+pla
+sta &76
+pla
 sta &75
 pla
 sta &74
 pla
-sta &73
+sta &7D
 pla
-sta &72
+sta &7C
+pla
+sta &7B
+pla
+sta &7A
 rts
