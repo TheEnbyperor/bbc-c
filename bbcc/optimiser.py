@@ -1,3 +1,4 @@
+from . import il
 from . import spots
 
 
@@ -24,18 +25,25 @@ class Optimiser:
         return commands, index+1, spotmap
 
     def optimise_Set(self, commands, index, spotmap):
-        c2 = commands[index]
-        c = commands[index - 2]
-        for output in c.outputs():
-            output_spot = spotmap[output]
-            for input in c2.inputs():
-                input_spot = spotmap[input]
-                if input_spot == output_spot and input_spot.type == output_spot.type:
-                    spotmap[output] = spotmap[c2.outputs()[0]]
+        c = commands[index]
+        c2 = commands[index - 1]
+        if not isinstance(c2, il.Set):
+            for output in c2.outputs():
+                output_spot = spotmap[output]
+                for input in c.inputs():
+                    input_spot = spotmap[input]
+                    if input_spot == output_spot and input_spot.type == output_spot.type:
+                        print(c2)
+                        spotmap[output] = spotmap[c.output]
+                        print(output, spotmap[output])
+        else:
+            del commands[index]
+            index -= 1
+            spotmap[c2.output] = spotmap[c.output]
 
-        if isinstance(spotmap[c2.value], spots.LiteralSpot) or isinstance(spotmap[c2.value], spots.LabelMemorySpot):
-            if c2.output.type.is_const() and c2.output.type == c2.value.type:
-                spotmap[c2.output] = spotmap[c2.value]
+        if isinstance(spotmap[c.value], spots.LiteralSpot) or isinstance(spotmap[c.value], spots.LabelMemorySpot):
+            if c.output.type.is_const() and c.output.type == c.value.type:
+                spotmap[c.output] = spotmap[c.value]
                 del commands[index]
                 index -= 1
 

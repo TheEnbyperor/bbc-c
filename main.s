@@ -17,34 +17,14 @@ lda &74
 pha
 lda &75
 pha
-lda &72
-pha
-lda &73
-pha
 
 \ AddrOf
 lda #0(__bbcc_00000001)
-sta &72
+sta &74
 lda #1(__bbcc_00000001)
-sta &73
-
-\ Set
-lda &72
-sta &74
-lda &73
 sta &75
 
 \ Set
-lda &74
-sta &72
-lda &75
-sta &73
-
-\ Set
-lda &72
-sta &74
-lda &73
-sta &75
 
 \ CallFunction
 lda &75
@@ -85,10 +65,6 @@ lda #&00
 sta &70
 lda #&00
 sta &71
-pla
-sta &73
-pla
-sta &72
 pla
 sta &75
 pla

@@ -1256,7 +1256,7 @@ class IL:
         self.func_stack_size = func_stack_size
 
         optimise = optimiser.Optimiser()
-        self.commands, spotmat = optimise.optimise(self.commands, spotmap)
+        self.commands, spotmap = optimise.optimise(self.commands, spotmap)
 
         self._print_spotmap(spotmap)
 
