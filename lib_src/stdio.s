@@ -53,16 +53,16 @@ lda #00
 sta &74
 ldy #&03
 lda (&8E),Y
-cmp #&00
-bcc __bbcc_00000007
-bne __bbcc_00000008
+sbc #&00
 ldy #&02
 lda (&8E),Y
 cmp #&00
-bcs __bbcc_00000008
-__bbcc_00000007: lda #01
+bvc __bbcc_00000008
+eor #&80
+__bbcc_00000008: bmi __bbcc_00000007
+lda #01
 sta &74
-__bbcc_00000008: 
+__bbcc_00000007: 
 
 \ JmpZero
 lda &74
@@ -179,13 +179,13 @@ lda &7A
 pha
 lda &7B
 pha
-lda &78
-pha
-lda &79
-pha
 lda &76
 pha
 lda &77
+pha
+lda &78
+pha
+lda &79
 pha
 lda &74
 pha
@@ -209,12 +209,16 @@ sta &73
 clc
 lda &72
 adc #&02
-sta &72
+sta &74
 lda &73
 adc #&00
-sta &73
+sta &75
 
 \ Set
+lda &74
+sta &72
+lda &75
+sta &73
 
 \ Set
 ldy #&00
@@ -234,9 +238,11 @@ lda &74
 sta &76
 ldy #&00
 lda (&76),Y
-sta &76
+sta &78
 
 \ Set
+lda &78
+sta &76
 
 \ JmpZero
 lda &76
@@ -276,9 +282,11 @@ lda &74
 sta &78
 ldy #&00
 lda (&78),Y
-sta &76
+sta &7A
 
 \ Set
+lda &7A
+sta &76
 
 \ EqualCmp
 lda #00
@@ -298,22 +306,30 @@ __bbcc_00000010:
 
 \ Set
 lda &72
-sta &7A
+sta &78
 lda &73
-sta &7B
+sta &79
 
 \ Set
+lda &78
+sta &7A
+lda &79
+sta &7B
 
 \ Add
 clc
 lda &72
 adc #&02
-sta &72
+sta &78
 lda &73
 adc #&00
-sta &73
+sta &79
 
 \ Set
+lda &78
+sta &72
+lda &79
+sta &73
 
 \ Set
 lda &7A

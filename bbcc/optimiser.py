@@ -33,7 +33,7 @@ class Optimiser:
                 if input_spot == output_spot and input_spot.type == output_spot.type:
                     spotmap[output] = spotmap[c2.outputs()[0]]
 
-        if isinstance(spotmap[c2.value], spots.LiteralSpot):
+        if isinstance(spotmap[c2.value], spots.LiteralSpot) or isinstance(spotmap[c2.value], spots.LabelMemorySpot):
             if c2.output.type.is_const() and c2.output.type == c2.value.type:
                 spotmap[c2.output] = spotmap[c2.value]
                 del commands[index]

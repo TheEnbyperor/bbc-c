@@ -1130,6 +1130,9 @@ class IL:
     def register_literal_string(self, il_value: ILValue, value):
         self.string_literals[il_value] = value
 
+    def is_string_literal(self, il_value: ILValue):
+        return il_value in self.string_literals
+
     def register_spot_value(self, il_value: ILValue, spot: spots.Spot):
         self.spotmap[il_value] = spot
 

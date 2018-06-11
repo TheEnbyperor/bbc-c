@@ -33,7 +33,8 @@ class Interpreter(ast.NodeVisitor):
                 if var_global is None:
                     var = self.scope.lookup(var_name, self.current_scope)
                     if d.init is not None:
-                        val = self.visit(d.init).val(self.il)
+                        val = self.visit(d.init)
+                        val = self._set_type(val, var.type)
                         self.il.add(il.Set(val, var.il_value))
 
     def visit_Function(self, node):
@@ -115,6 +116,8 @@ class Interpreter(ast.NodeVisitor):
         left = self.visit(node.left)
         if not left.modable():
             raise TypeError("{} is not modable".format(left.type))
+
+        right = self._set_type(right, left.type)
         left.set_to(right, self.il)
         return left
 
@@ -637,11 +640,20 @@ class Interpreter(ast.NodeVisitor):
         self.visit(ast_root)
         return self.il
 
-    def _set_type(self, il_value: il.ILValue, ctype: ctypes.CType):
+    def _set_type(self, il_value, ctype: ctypes.CType):
         if il_value.type == ctype:
-            return il_value
+            return il_value.val(self.il)
         else:
             output = il.ILValue(ctype)
+            if isinstance(il_value, il.ILValue):
+                iv = il_value
+            else:
+                iv = il_value.il_value
+            if ctype.is_pointer() and ctype.arg == ctypes.char and self.il.is_string_literal(iv):
+                print(il_value)
+                il_value = il_value.addr(self.il)
+            else:
+                il_value = il_value.val(self.il)
             self.il.add(il.Set(il_value, output))
             return output
 

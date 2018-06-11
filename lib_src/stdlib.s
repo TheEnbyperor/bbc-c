@@ -180,30 +180,34 @@ pla
 __bbcc_0000000a: dex
 bne __bbcc_00000008
 lda &78
-ldy #&00
-sta (&8E),Y
+sta &7A
 lda &79
-ldy #&01
-sta (&8E),Y
+sta &7B
 
 \ Set
+lda &7A
+ldy #&00
+sta (&8E),Y
+lda &7B
+ldy #&01
+sta (&8E),Y
 
 \ MoreThanCmp
 lda #00
 sta &74
+clc
 ldy #&01
 lda (&8E),Y
 cmp #&00
-bcc __bbcc_0000000c
-bne __bbcc_0000000b
 ldy #&00
 lda (&8E),Y
 cmp #&00
-beq __bbcc_0000000c
-bcc __bbcc_0000000c
-__bbcc_0000000b: lda #01
-sta &75
-__bbcc_0000000c: 
+bvc __bbcc_0000000c
+eor #&80
+__bbcc_0000000c: bpl __bbcc_0000000b
+lda #01
+sta &74
+__bbcc_0000000b: 
 
 \ JmpZero
 lda &74
