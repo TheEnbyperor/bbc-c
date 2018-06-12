@@ -951,50 +951,30 @@ class LessThanCmp(ILInst):
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        label1 = il.get_label()
-        label2 = il.get_label()
+        label = il.get_label()
         is_signed = left.type.is_signed() or right.type.is_signed()
 
         assembly.add_inst("LDA", "#00")
         for i in range(output.type.size):
             output.asm(assembly, "STA", i)
 
-        if is_signed:
-            assembly.add_inst("SEC")
-            for i in reversed(range(left.type.size)):
-                left.asm(assembly, "LDA", i)
-                if i < right.type.size:
-                    right.asm(assembly, "SBC", i)
-                else:
-                    assembly.add_inst("SBC", "#0")
-                if i == left.type.size-1:
-                    label3 = il.get_label()
-                    label4 = il.get_label()
-                    assembly.add_inst("BVC", label3)
-                    assembly.add_inst("EOR", "#&80")
-                    assembly.add_inst("BMI", label1, label=label3)
-                    assembly.add_inst("BVC", label4)
-                    assembly.add_inst("EOR", "#&80")
-                    assembly.add_inst("BNE", label2, label=label4)
-                else:
-                    assembly.add_inst("BCC", label1)
-                    if i != 0:
-                        assembly.add_inst("BNE", label2)
-        else:
-            for i in reversed(range(left.type.size)):
-                left.asm(assembly, "LDA", i)
-                if i < right.type.size:
-                    right.asm(assembly, "CMP", i)
-                else:
-                    assembly.add_inst("CMP", "#0")
-                assembly.add_inst("BCC", label1)
-                if i != 0:
-                    assembly.add_inst("BNE", label2)
+        for i in range(left.type.size):
+            left.asm(assembly, "LDA", i)
+            if i == 0:
+                right.asm(assembly, "CMP", i)
+            else:
+                right.asm(assembly, "SBC", i)
+            if is_signed:
+                assembly.add_inst("BCS", label)
+            else:
+                label2 = il.get_label()
+                assembly.add_inst("BVC", label2)
+                assembly.add_inst("EOR", "#&80")
+                assembly.add_inst("BPL", label, label=label2)
 
-        assembly.add_inst(label=label1)
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
-        assembly.add_inst(label=label2)
+        assembly.add_inst(label=label)
 
 
 class LessEqualCmp(ILInst):
@@ -1020,25 +1000,19 @@ class LessEqualCmp(ILInst):
         assembly.add_inst("LDA", "#00")
         for i in range(output.type.size):
             output.asm(assembly, "STA", i)
-        if is_signed:
-            assembly.add_inst("SEC")
-        else:
-            assembly.add_inst("CLC")
-        for i in reversed(range(left.type.size)):
-            left.asm(assembly, "LDA", i)
-            if i < right.type.size:
-                right.asm(assembly, "SBC", i)
-            else:
-                assembly.add_inst("SBC", "#0")
 
-        if is_signed:
-            label2 = il.get_label()
-            assembly.add_inst("BVC", label2)
-            assembly.add_inst("EOR", "#&80")
-            assembly.add_inst("BPL", label, label=label2)
-        else:
-            assembly.add_inst("BCS", label)
-        assembly.add_inst("BCS", label)
+        assembly.add_inst("CLC")
+        for i in range(left.type.size):
+            left.asm(assembly, "LDA", i)
+            right.asm(assembly, "SBC", i)
+            if is_signed:
+                assembly.add_inst("BCS", label)
+            else:
+                label2 = il.get_label()
+                assembly.add_inst("BVC", label2)
+                assembly.add_inst("EOR", "#&80")
+                assembly.add_inst("BPL", label, label=label2)
+
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
         assembly.add_inst(label=label)
@@ -1067,24 +1041,19 @@ class MoreThanCmp(ILInst):
         assembly.add_inst("LDA", "#00")
         for i in range(output.type.size):
             output.asm(assembly, "STA", i)
-        if is_signed:
-            assembly.add_inst("SEC")
-        else:
-            assembly.add_inst("CLC")
-        for i in reversed(range(left.type.size)):
-            left.asm(assembly, "LDA", i)
-            if i < right.type.size:
-                right.asm(assembly, "CMP", i)
-            else:
-                assembly.add_inst("CMP", "#0")
 
-        if is_signed:
-            label2 = il.get_label()
-            assembly.add_inst("BVC", label2)
-            assembly.add_inst("EOR", "#&80")
-            assembly.add_inst("BMI", label, label=label2)
-        else:
-            assembly.add_inst("BCC", label)
+        assembly.add_inst("CLC")
+        for i in range(left.type.size):
+            left.asm(assembly, "LDA", i)
+            right.asm(assembly, "SBC", i)
+            if is_signed:
+                assembly.add_inst("BCS", label)
+            else:
+                label2 = il.get_label()
+                assembly.add_inst("BVC", label2)
+                assembly.add_inst("EOR", "#&80")
+                assembly.add_inst("BPL", label, label=label2)
+
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
         assembly.add_inst(label=label)
@@ -1113,30 +1082,21 @@ class MoreEqualCmp(ILInst):
         assembly.add_inst("LDA", "#00")
         for i in range(output.type.size):
             output.asm(assembly, "STA", i)
-        if is_signed:
-            assembly.add_inst("CLC")
-        else:
-            assembly.add_inst("SEC")
-        for i in reversed(range(left.type.size)):
+
+        for i in range(left.type.size):
             left.asm(assembly, "LDA", i)
             if i == 0:
-                if i < right.type.size:
-                    right.asm(assembly, "CMP", i)
-                else:
-                    assembly.add_inst("CMP", "#0")
+                right.asm(assembly, "CMP", i)
             else:
-                if i < right.type.size:
-                    right.asm(assembly, "SBC", i)
-                else:
-                    assembly.add_inst("SBC", "#0")
+                right.asm(assembly, "SBC", i)
+            if is_signed:
+                assembly.add_inst("BCC", label)
+            else:
+                label2 = il.get_label()
+                assembly.add_inst("BVC", label2)
+                assembly.add_inst("EOR", "#&80")
+                assembly.add_inst("BMI", label, label=label2)
 
-        if is_signed:
-            label2 = il.get_label()
-            assembly.add_inst("BVC", label2)
-            assembly.add_inst("EOR", "#&80")
-            assembly.add_inst("BMI", label, label=label2)
-        else:
-            assembly.add_inst("BCC", label)
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
         assembly.add_inst(label=label)
