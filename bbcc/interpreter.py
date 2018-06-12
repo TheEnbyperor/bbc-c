@@ -89,7 +89,6 @@ class Interpreter(ast.NodeVisitor):
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
-        print(var_name, val.il_value)
         return ast.DirectLValue(val.il_value)
 
     def visit_Number(self, node):
@@ -450,7 +449,7 @@ class Interpreter(ast.NodeVisitor):
         expr = self.visit(node.expr)
         value = expr.val(self.il)
 
-        if expr.type.is_pointer():
+        if expr.type.is_pointer() and expr.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
             self.il.register_literal_value(type_len, expr.type.arg.size)
             self.il.add(il.Add(value, type_len, value))
@@ -464,7 +463,7 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(value.type)
 
         self.il.add(il.Set(value_val, output))
-        if value.type.is_pointer():
+        if value.type.is_pointer() and value.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
             self.il.register_literal_value(type_len, value.type.arg.size)
             self.il.add(il.Add(value_val, type_len, value_val))
@@ -476,7 +475,7 @@ class Interpreter(ast.NodeVisitor):
         expr = self.visit(node.expr)
         value = expr.val(self.il)
 
-        if expr.type.is_pointer():
+        if expr.type.is_pointer() and expr.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
             self.il.register_literal_value(type_len, expr.type.arg.size)
             self.il.add(il.Sub(value, type_len, value))
@@ -490,7 +489,7 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(value.type)
 
         self.il.add(il.Set(value_val, output))
-        if value.type.is_pointer():
+        if value.type.is_pointer() and value.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
             self.il.register_literal_value(type_len, value.type.arg.size)
             self.il.add(il.Sub(value_val, type_len, value_val))

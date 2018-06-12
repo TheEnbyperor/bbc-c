@@ -169,13 +169,13 @@ sta (&8E),Y
 \ MoreThanCmp
 lda #00
 sta &74
-sec
-ldy #&01
-lda (&8E),Y
-cmp #&00
+clc
 ldy #&00
 lda (&8E),Y
-cmp #&00
+sbc #&00
+ldy #&01
+lda (&8E),Y
+sbc #&00
 bvc __bbcc_0000000a
 eor #&80
 __bbcc_0000000a: bmi __bbcc_00000009

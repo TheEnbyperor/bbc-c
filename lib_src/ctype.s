@@ -36,7 +36,7 @@ lda (&8E),Y
 cmp #&41
 bvc __bbcc_0000001f
 eor #&80
-__bbcc_0000001f: bpl __bbcc_0000001e
+__bbcc_0000001f: bmi __bbcc_0000001e
 lda #01
 sta &74
 __bbcc_0000001e: 
@@ -56,8 +56,7 @@ lda (&8E),Y
 sbc #&5A
 bvc __bbcc_00000022
 eor #&80
-__bbcc_00000022: bmi __bbcc_00000021
-bcs __bbcc_00000021
+__bbcc_00000022: bpl __bbcc_00000021
 lda #01
 sta &74
 __bbcc_00000021: 
@@ -117,7 +116,7 @@ lda (&8E),Y
 cmp #&61
 bvc __bbcc_00000025
 eor #&80
-__bbcc_00000025: bpl __bbcc_00000024
+__bbcc_00000025: bmi __bbcc_00000024
 lda #01
 sta &74
 __bbcc_00000024: 
@@ -137,8 +136,7 @@ lda (&8E),Y
 sbc #&7A
 bvc __bbcc_00000028
 eor #&80
-__bbcc_00000028: bmi __bbcc_00000027
-bcs __bbcc_00000027
+__bbcc_00000028: bpl __bbcc_00000027
 lda #01
 sta &74
 __bbcc_00000027: 
@@ -260,22 +258,18 @@ rts
 
 \ Function
 isdigit: 
-lda &74
-pha
-lda &75
-pha
 lda &72
 pha
 lda &73
+pha
+lda &74
+pha
+lda &75
 pha
 
 \ Set
 ldy #&00
 lda (&8E),Y
-sta &72
-
-\ Set
-lda &72
 sta &74
 lda #0
 sta &75
@@ -294,8 +288,7 @@ lda &72
 sbc #&09
 bvc __bbcc_0000002f
 eor #&80
-__bbcc_0000002f: bmi __bbcc_0000002e
-bcs __bbcc_0000002e
+__bbcc_0000002f: bpl __bbcc_0000002e
 lda #01
 sta &74
 __bbcc_0000002e: 
@@ -304,13 +297,13 @@ __bbcc_0000002e:
 lda &74
 sta &70
 pla
-sta &73
-pla
-sta &72
-pla
 sta &75
 pla
 sta &74
+pla
+sta &73
+pla
+sta &72
 rts
 
 \ Function
@@ -558,7 +551,7 @@ lda (&8E),Y
 cmp #&20
 bvc __bbcc_0000003d
 eor #&80
-__bbcc_0000003d: bmi __bbcc_0000003c
+__bbcc_0000003d: bpl __bbcc_0000003c
 lda #01
 sta &72
 __bbcc_0000003c: 
@@ -803,7 +796,7 @@ lda (&8E),Y
 cmp #&61
 bvc __bbcc_00000051
 eor #&80
-__bbcc_00000051: bpl __bbcc_00000050
+__bbcc_00000051: bmi __bbcc_00000050
 lda #01
 sta &78
 __bbcc_00000050: 
@@ -823,8 +816,7 @@ lda (&8E),Y
 sbc #&66
 bvc __bbcc_00000054
 eor #&80
-__bbcc_00000054: bmi __bbcc_00000053
-bcs __bbcc_00000053
+__bbcc_00000054: bpl __bbcc_00000053
 lda #01
 sta &78
 __bbcc_00000053: 
@@ -885,7 +877,7 @@ lda (&8E),Y
 cmp #&41
 bvc __bbcc_0000005b
 eor #&80
-__bbcc_0000005b: bpl __bbcc_0000005a
+__bbcc_0000005b: bmi __bbcc_0000005a
 lda #01
 sta &76
 __bbcc_0000005a: 
@@ -905,8 +897,7 @@ lda (&8E),Y
 sbc #&46
 bvc __bbcc_0000005e
 eor #&80
-__bbcc_0000005e: bmi __bbcc_0000005d
-bcs __bbcc_0000005d
+__bbcc_0000005e: bpl __bbcc_0000005d
 lda #01
 sta &76
 __bbcc_0000005d: 
@@ -972,6 +963,10 @@ rts
 
 \ Function
 toupper: 
+lda &78
+pha
+lda &79
+pha
 lda &76
 pha
 lda &77
@@ -1006,10 +1001,10 @@ sta &77
 \ And
 lda &76
 and #&DF
-sta &72
+sta &78
 lda &77
 and #&FF
-sta &73
+sta &79
 
 \ JmpZero
 lda &72
@@ -1018,6 +1013,10 @@ jmp __bbcc_0000001a
 __bbcc_00000062: 
 
 \ Set
+lda &78
+sta &72
+lda &79
+sta &73
 
 \ Jmp
 jmp __bbcc_0000001b
@@ -1048,10 +1047,18 @@ pla
 sta &77
 pla
 sta &76
+pla
+sta &79
+pla
+sta &78
 rts
 
 \ Function
 tolower: 
+lda &74
+pha
+lda &75
+pha
 lda &72
 pha
 lda &73
@@ -1080,10 +1087,10 @@ sta &73
 \ IncOr
 lda &72
 ora #&20
-sta &70
+sta &74
 lda &73
 ora #&00
-sta &71
+sta &75
 
 \ JmpZero
 lda &70
@@ -1092,6 +1099,10 @@ jmp __bbcc_0000001c
 __bbcc_00000063: 
 
 \ Set
+lda &74
+sta &70
+lda &75
+sta &71
 
 \ Jmp
 jmp __bbcc_0000001d
@@ -1114,4 +1125,8 @@ pla
 sta &73
 pla
 sta &72
+pla
+sta &75
+pla
+sta &74
 rts

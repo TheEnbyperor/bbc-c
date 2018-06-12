@@ -114,10 +114,6 @@ rts
 
 \ Function
 strrev: 
-lda &78
-pha
-lda &79
-pha
 lda &7A
 pha
 lda &7B
@@ -125,6 +121,10 @@ pha
 lda &76
 pha
 lda &77
+pha
+lda &78
+pha
+lda &79
 pha
 lda &74
 pha
@@ -167,12 +167,16 @@ sta &8F
 sec
 lda &70
 sbc #&01
-sta &70
+sta &74
 lda &71
 sbc #&00
-sta &71
+sta &75
 
 \ Set
+lda &74
+sta &70
+lda &75
+sta &71
 
 \ Label
 __bbcc_00000002: 
@@ -180,11 +184,10 @@ __bbcc_00000002:
 \ LessThanCmp
 lda #00
 sta &74
-clc
-lda &73
-sbc &71
 lda &72
 cmp &70
+lda &73
+sbc &71
 bvc __bbcc_00000008
 eor #&80
 __bbcc_00000008: bpl __bbcc_00000007
@@ -216,9 +219,11 @@ lda &74
 sta &76
 ldy #&00
 lda (&76),Y
-sta &74
+sta &78
 
 \ Set
+lda &78
+sta &74
 
 \ Add
 clc
@@ -309,6 +314,10 @@ sta &75
 pla
 sta &74
 pla
+sta &79
+pla
+sta &78
+pla
 sta &77
 pla
 sta &76
@@ -316,8 +325,4 @@ pla
 sta &7B
 pla
 sta &7A
-pla
-sta &79
-pla
-sta &78
 rts

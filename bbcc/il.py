@@ -964,13 +964,13 @@ class LessThanCmp(ILInst):
                 right.asm(assembly, "CMP", i)
             else:
                 right.asm(assembly, "SBC", i)
-            if is_signed:
-                assembly.add_inst("BCS", label)
-            else:
-                label2 = il.get_label()
-                assembly.add_inst("BVC", label2)
-                assembly.add_inst("EOR", "#&80")
-                assembly.add_inst("BPL", label, label=label2)
+        if not is_signed:
+            assembly.add_inst("BCS", label)
+        else:
+            label2 = il.get_label()
+            assembly.add_inst("BVC", label2)
+            assembly.add_inst("EOR", "#&80")
+            assembly.add_inst("BPL", label, label=label2)
 
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
@@ -1005,13 +1005,13 @@ class LessEqualCmp(ILInst):
         for i in range(left.type.size):
             left.asm(assembly, "LDA", i)
             right.asm(assembly, "SBC", i)
-            if is_signed:
-                assembly.add_inst("BCS", label)
-            else:
-                label2 = il.get_label()
-                assembly.add_inst("BVC", label2)
-                assembly.add_inst("EOR", "#&80")
-                assembly.add_inst("BPL", label, label=label2)
+        if not is_signed:
+            assembly.add_inst("BCS", label)
+        else:
+            label2 = il.get_label()
+            assembly.add_inst("BVC", label2)
+            assembly.add_inst("EOR", "#&80")
+            assembly.add_inst("BPL", label, label=label2)
 
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
@@ -1046,13 +1046,13 @@ class MoreThanCmp(ILInst):
         for i in range(left.type.size):
             left.asm(assembly, "LDA", i)
             right.asm(assembly, "SBC", i)
-            if is_signed:
-                assembly.add_inst("BCS", label)
-            else:
-                label2 = il.get_label()
-                assembly.add_inst("BVC", label2)
-                assembly.add_inst("EOR", "#&80")
-                assembly.add_inst("BPL", label, label=label2)
+        if not is_signed:
+            assembly.add_inst("BCC", label)
+        else:
+            label2 = il.get_label()
+            assembly.add_inst("BVC", label2)
+            assembly.add_inst("EOR", "#&80")
+            assembly.add_inst("BMI", label, label=label2)
 
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
@@ -1089,13 +1089,13 @@ class MoreEqualCmp(ILInst):
                 right.asm(assembly, "CMP", i)
             else:
                 right.asm(assembly, "SBC", i)
-            if is_signed:
-                assembly.add_inst("BCC", label)
-            else:
-                label2 = il.get_label()
-                assembly.add_inst("BVC", label2)
-                assembly.add_inst("EOR", "#&80")
-                assembly.add_inst("BMI", label, label=label2)
+        if not is_signed:
+            assembly.add_inst("BCC", label)
+        else:
+            label2 = il.get_label()
+            assembly.add_inst("BVC", label2)
+            assembly.add_inst("EOR", "#&80")
+            assembly.add_inst("BMI", label, label=label2)
 
         assembly.add_inst("LDA", "#01")
         output.asm(assembly, "STA", 0)
