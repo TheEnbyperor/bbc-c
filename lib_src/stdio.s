@@ -15,27 +15,21 @@ lda &76
 pha
 lda &77
 pha
-lda &74
-pha
-lda &75
-pha
 lda &72
 pha
 lda &73
+pha
+lda &74
+pha
+lda &75
 pha
 
 \ Set
 ldy #&00
 lda (&8E),Y
-sta &72
+sta &74
 ldy #&01
 lda (&8E),Y
-sta &73
-
-\ Set
-lda &72
-sta &74
-lda &73
 sta &75
 
 \ Label
@@ -57,6 +51,7 @@ sta (&8E),Y
 \ LessThanCmp
 lda #00
 sta &72
+clc
 ldy #&03
 lda (&8E),Y
 sbc #&00
@@ -65,7 +60,7 @@ lda (&8E),Y
 cmp #&00
 bvc __bbcc_00000008
 eor #&80
-__bbcc_00000008: bmi __bbcc_00000007
+__bbcc_00000008: bpl __bbcc_00000007
 lda #01
 sta &72
 __bbcc_00000007: 
@@ -83,9 +78,9 @@ sta &72
 
 \ Set
 lda &74
-sta &72
+sta &76
 lda &75
-sta &73
+sta &77
 
 \ Add
 clc
@@ -97,21 +92,21 @@ adc #0
 sta &75
 
 \ SetAt
-lda &72
-sta &76
-lda &73
-sta &77
+lda &76
+sta &78
+lda &77
+sta &79
 lda &72
 ldy #&00
-sta (&76),Y
+sta (&78),Y
 
 \ ReadAt
-lda &73
-sta &77
-lda &72
-sta &76
+lda &77
+sta &73
+lda &76
+sta &72
 ldy #&00
-lda (&76),Y
+lda (&72),Y
 sta &78
 
 \ EqualCmp
@@ -163,13 +158,13 @@ ldy #&01
 lda (&8E),Y
 sta &71
 pla
-sta &73
-pla
-sta &72
-pla
 sta &75
 pla
 sta &74
+pla
+sta &73
+pla
+sta &72
 pla
 sta &77
 pla
@@ -222,29 +217,13 @@ adc #&00
 sta &75
 
 \ Set
-lda &74
-sta &72
-lda &75
-sta &73
-
-\ Set
-lda &72
-sta &74
-lda &73
-sta &75
 
 \ Set
 ldy #&00
 lda (&8E),Y
-sta &72
+sta &76
 ldy #&01
 lda (&8E),Y
-sta &73
-
-\ Set
-lda &72
-sta &76
-lda &73
 sta &77
 
 \ Label
@@ -327,18 +306,6 @@ __bbcc_00000010:
 lda &74
 sta &78
 lda &75
-sta &79
-
-\ Set
-lda &78
-sta &7A
-lda &79
-sta &7B
-
-\ Set
-lda &7A
-sta &78
-lda &7B
 sta &79
 
 \ Add

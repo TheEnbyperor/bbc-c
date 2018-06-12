@@ -114,13 +114,17 @@ rts
 
 \ Function
 strrev: 
-lda &76
-pha
-lda &77
-pha
 lda &78
 pha
 lda &79
+pha
+lda &7A
+pha
+lda &7B
+pha
+lda &76
+pha
+lda &77
 pha
 lda &74
 pha
@@ -163,16 +167,12 @@ sta &8F
 sec
 lda &70
 sbc #&01
-sta &74
+sta &70
 lda &71
 sbc #&00
-sta &75
+sta &71
 
 \ Set
-lda &74
-sta &70
-lda &75
-sta &71
 
 \ Label
 __bbcc_00000002: 
@@ -180,13 +180,14 @@ __bbcc_00000002:
 \ LessThanCmp
 lda #00
 sta &74
+clc
 lda &73
 sbc &71
 lda &72
 cmp &70
 bvc __bbcc_00000008
 eor #&80
-__bbcc_00000008: bmi __bbcc_00000007
+__bbcc_00000008: bpl __bbcc_00000007
 lda #01
 sta &74
 __bbcc_00000007: 
@@ -197,42 +198,15 @@ bne __bbcc_00000009
 jmp __bbcc_00000003
 __bbcc_00000009: 
 
-\ Mult
-lda #&01
-sta &76
-lda &72
-sta &74
-lda &73
-sta &75
-lda #0
-sta &78
-sta &79
-ldx #&10
-__bbcc_0000000a: 
-lsr &75
-ror &74
-bcc __bbcc_0000000b
-clc
-lda &76
-adc &78
-sta &78
-lda #0
-adc &79
-sta &79
-__bbcc_0000000b: clc
-asl &76
-dex
-bne __bbcc_0000000a
-
 \ Add
 clc
 ldy #&00
 lda (&8E),Y
-adc &78
+adc &72
 sta &74
 ldy #&01
 lda (&8E),Y
-adc &79
+adc &73
 sta &75
 
 \ ReadAt
@@ -242,176 +216,81 @@ lda &74
 sta &76
 ldy #&00
 lda (&76),Y
-sta &78
+sta &74
 
 \ Set
-lda &78
-sta &74
-
-\ Mult
-lda #&01
-sta &76
-lda &70
-sta &74
-lda &71
-sta &75
-lda #0
-sta &78
-sta &79
-ldx #&10
-__bbcc_0000000c: 
-lsr &75
-ror &74
-bcc __bbcc_0000000d
-clc
-lda &76
-adc &78
-sta &78
-lda #0
-adc &79
-sta &79
-__bbcc_0000000d: clc
-asl &76
-dex
-bne __bbcc_0000000c
 
 \ Add
 clc
 ldy #&00
 lda (&8E),Y
-adc &78
-sta &74
+adc &70
+sta &76
 ldy #&01
 lda (&8E),Y
-adc &79
-sta &75
+adc &71
+sta &77
 
 \ ReadAt
-lda &75
-sta &77
-lda &74
-sta &76
-ldy #&00
-lda (&76),Y
-sta &78
-
-\ Mult
-lda #&01
-sta &76
-lda &72
-sta &74
-lda &73
-sta &75
-lda #0
-sta &78
+lda &77
 sta &79
-ldx #&10
-__bbcc_0000000e: 
-lsr &75
-ror &74
-bcc __bbcc_0000000f
-clc
 lda &76
-adc &78
 sta &78
-lda #0
-adc &79
-sta &79
-__bbcc_0000000f: clc
-asl &76
-dex
-bne __bbcc_0000000e
+ldy #&00
+lda (&78),Y
+sta &7A
 
 \ Add
 clc
 ldy #&00
 lda (&8E),Y
-adc &78
-sta &74
+adc &72
+sta &76
 ldy #&01
 lda (&8E),Y
-adc &79
-sta &75
+adc &73
+sta &77
 
 \ SetAt
-lda &74
-sta &76
-lda &75
-sta &77
-lda &78
-ldy #&00
-sta (&76),Y
-
-\ Mult
-lda #&01
-sta &76
-lda &70
-sta &74
-lda &71
-sta &75
-lda #0
-sta &78
-sta &79
-ldx #&10
-__bbcc_00000010: 
-lsr &75
-ror &74
-bcc __bbcc_00000011
-clc
 lda &76
-adc &78
 sta &78
-lda #0
-adc &79
+lda &77
 sta &79
-__bbcc_00000011: clc
-asl &76
-dex
-bne __bbcc_00000010
+lda &7A
+ldy #&00
+sta (&78),Y
 
 \ Add
 clc
 ldy #&00
 lda (&8E),Y
-adc &78
-sta &74
+adc &70
+sta &76
 ldy #&01
 lda (&8E),Y
-adc &79
-sta &75
+adc &71
+sta &77
 
 \ SetAt
-lda &74
-sta &76
-lda &75
-sta &77
+lda &76
+sta &78
+lda &77
+sta &79
 lda &74
 ldy #&00
-sta (&76),Y
-
-\ Set
-lda &72
-sta &74
-lda &73
-sta &75
+sta (&78),Y
 
 \ Inc
 inc &72
-bne __bbcc_00000012
+bne __bbcc_0000000a
 inc &73
-__bbcc_00000012: 
-
-\ Set
-lda &70
-sta &72
-lda &71
-sta &73
+__bbcc_0000000a: 
 
 \ Dec
 lda &70
-bne __bbcc_00000013
+bne __bbcc_0000000b
 dec &71
-__bbcc_00000013: 
+__bbcc_0000000b: 
 dec &70
 
 \ Jmp
@@ -430,11 +309,15 @@ sta &75
 pla
 sta &74
 pla
-sta &79
-pla
-sta &78
-pla
 sta &77
 pla
 sta &76
+pla
+sta &7B
+pla
+sta &7A
+pla
+sta &79
+pla
+sta &78
 rts

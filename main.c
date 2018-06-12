@@ -6,10 +6,7 @@
 char out[5];
 
 int main() {
-//    const int a = 41;
-//    const int b = a+1;
-//    itoa(b, out);
-    const char *s = "Hello, world!";
-    strrev(s);
-    printf(s);
+    const unsigned int a = 42;
+    itoa(a, out);
+    printf(out);
 }

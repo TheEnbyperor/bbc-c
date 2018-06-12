@@ -89,6 +89,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
+        print(var_name, val.il_value)
         return ast.DirectLValue(val.il_value)
 
     def visit_Number(self, node):
@@ -178,7 +179,8 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_MultiExpr(self, node):
         self.visit(node.left)
-        self.visit(node.right)
+        val = self.visit(node.right).val(self.il)
+        return val
 
     def visit_ParenExpr(self, node):
         il_value = self.visit(node.expr)
@@ -516,11 +518,14 @@ class Interpreter(ast.NodeVisitor):
             htype = head.type.arg
             head_val = head.val(self.il)
 
-        type_len = il.ILValue(ctypes.unsig_char)
-        self.il.register_literal_value(type_len, htype.size)
+        if htype.size != 1:
+            type_len = il.ILValue(ctypes.unsig_char)
+            self.il.register_literal_value(type_len, htype.size)
 
-        offset = il.ILValue(ctypes.unsig_int)
-        self.il.add(il.Mult(type_len, arg, offset))
+            offset = il.ILValue(ctypes.unsig_int)
+            self.il.add(il.Mult(type_len, arg, offset))
+        else:
+            offset = arg
 
         output = il.ILValue(ctypes.unsig_int)
         self.il.add(il.Add(head_val, offset, output))

@@ -9,10 +9,6 @@ lda &7A
 pha
 lda &7B
 pha
-lda &7C
-pha
-lda &7D
-pha
 lda &74
 pha
 lda &75
@@ -97,54 +93,27 @@ bne __bbcc_00000005
 inc &73
 __bbcc_00000005: 
 
-\ Mult
-lda #&01
-sta &7A
-lda &76
-sta &78
-lda &77
-sta &79
-lda #0
-sta &7C
-sta &7D
-ldx #&10
-__bbcc_00000006: 
-lsr &79
-ror &78
-bcc __bbcc_00000007
-clc
-lda &7A
-adc &7C
-sta &7C
-lda #0
-adc &7D
-sta &7D
-__bbcc_00000007: clc
-asl &7A
-dex
-bne __bbcc_00000006
-
 \ Add
 clc
 ldy #&02
 lda (&8E),Y
-adc &7C
-sta &76
+adc &76
+sta &78
 ldy #&03
 lda (&8E),Y
-adc &7D
-sta &77
+adc &77
+sta &79
 
 \ Set
 lda &74
-sta &78
+sta &76
 
 \ SetAt
-lda &76
-sta &74
-lda &77
-sta &75
 lda &78
+sta &74
+lda &79
+sta &75
+lda &76
 ldy #&00
 sta (&74),Y
 
@@ -163,7 +132,7 @@ lda #0
 sta &74
 sta &75
 ldx #&10
-__bbcc_00000008: 
+__bbcc_00000006: 
 asl &78
 rol &79
 rol &74
@@ -174,16 +143,16 @@ sbc &76
 pha
 lda &75
 sbc &77
-bcc __bbcc_00000009
+bcc __bbcc_00000007
 sta &75
 pla
 sta &74
 inc &78
-jmp __bbcc_0000000a
-__bbcc_00000009: 
+jmp __bbcc_00000008
+__bbcc_00000007: 
 pla
-__bbcc_0000000a: dex
-bne __bbcc_00000008
+__bbcc_00000008: dex
+bne __bbcc_00000006
 lda &78
 sta &7A
 lda &79
@@ -200,25 +169,25 @@ sta (&8E),Y
 \ MoreThanCmp
 lda #00
 sta &74
-clc
+sec
 ldy #&01
 lda (&8E),Y
 cmp #&00
 ldy #&00
 lda (&8E),Y
 cmp #&00
-bvc __bbcc_0000000c
+bvc __bbcc_0000000a
 eor #&80
-__bbcc_0000000c: bpl __bbcc_0000000b
+__bbcc_0000000a: bmi __bbcc_00000009
 lda #01
 sta &74
-__bbcc_0000000b: 
+__bbcc_00000009: 
 
 \ JmpZero
 lda &74
-bne __bbcc_0000000d
+bne __bbcc_0000000b
 jmp __bbcc_00000001
-__bbcc_0000000d: 
+__bbcc_0000000b: 
 
 \ Jmp
 jmp __bbcc_00000000
@@ -226,54 +195,27 @@ jmp __bbcc_00000000
 \ Label
 __bbcc_00000001: 
 
-\ Mult
-lda #&01
-sta &76
-lda &72
-sta &74
-lda &73
-sta &75
-lda #0
-sta &78
-sta &79
-ldx #&10
-__bbcc_0000000e: 
-lsr &75
-ror &74
-bcc __bbcc_0000000f
-clc
-lda &76
-adc &78
-sta &78
-lda #0
-adc &79
-sta &79
-__bbcc_0000000f: clc
-asl &76
-dex
-bne __bbcc_0000000e
-
 \ Add
 clc
 ldy #&02
 lda (&8E),Y
-adc &78
-sta &72
+adc &72
+sta &74
 ldy #&03
 lda (&8E),Y
-adc &79
-sta &73
+adc &73
+sta &75
 
 \ Set
 lda #&00
-sta &74
+sta &72
 
 \ SetAt
-lda &72
-sta &76
-lda &73
-sta &77
 lda &74
+sta &76
+lda &75
+sta &77
+lda &72
 ldy #&00
 sta (&76),Y
 
@@ -316,10 +258,6 @@ pla
 sta &75
 pla
 sta &74
-pla
-sta &7D
-pla
-sta &7C
 pla
 sta &7B
 pla
