@@ -72,7 +72,7 @@ class IntegerCType(CType):
         return unsign_self
 
     def __repr__(self):
-        return '<IntegerCType({size}:{signed})>'.format(size=self.size, signed=self.signed)
+        return '<IntegerCType({size}:{signed}:{const})>'.format(size=self.size, signed=self.signed, const=self.const)
 
     def __eq__(self, other):
         return type(other) == type(self) and other.size == self.size and other.signed == self.signed
@@ -107,7 +107,7 @@ class PointerCType(CType):
         return True
 
     def __repr__(self):
-        return '<PointerCType({arg})>'.format(arg=self.arg)
+        return '<PointerCType({arg}:{const})>'.format(arg=self.arg, const=self.const)
 
 
 class ArrayCType(CType):
@@ -126,7 +126,7 @@ class ArrayCType(CType):
         return True
 
     def __repr__(self):
-        return '<ArrayCType({el}:{n})>'.format(el=self.el, n=self.n)
+        return '<ArrayCType({el}:{n}:{const})>'.format(el=self.el, n=self.n, const=self.const)
 
 
 class FunctionCType(CType):

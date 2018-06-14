@@ -13,8 +13,8 @@ class ASM:
     preg12 = preg11 + 2
     preg13 = preg12 + 2
     preg14 = preg13 + 2
-    preg15 = preg14 + 2
-    cstck = preg15 + 2
+    bstck = preg14 + 2
+    cstck = bstck + 2
 
     def __init__(self):
         self.asm = ""

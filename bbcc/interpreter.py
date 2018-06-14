@@ -42,16 +42,8 @@ class Interpreter(ast.NodeVisitor):
         self.current_scope = str(id(node))
 
         decl_info = self.scope.lookup_decl(id(node))
-        params = []
-        offset = 0
         func_name = decl_info.identifier.value
-        for param, name in zip(decl_info.ctype.args, decl_info.params):
-            param_name = name.value
-            param = self.scope.lookup(param_name, self.current_scope)
-            param.il_value.stack_offset = offset
-            offset += param.type.size
-            params.append(param)
-        self.il.add(il.Function(params, func_name))
+        self.il.start_function(func_name)
         self.current_function = func_name
         for n in node.nodes.items:
             self.visit(n)
@@ -65,6 +57,7 @@ class Interpreter(ast.NodeVisitor):
                 il_value = il.ILValue(ctypes.void)
             self.il.register_literal_value(il_value, 0)
             self.il.add(il.Return(il_value, func_name))
+        self.il.end_function()
         self.current_scope = old_scope
 
     def visit_FuncCall(self, node):
@@ -114,6 +107,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Equals(self, node):
         right = self.visit(node.right).val(self.il)
         left = self.visit(node.left)
+
         if not left.modable():
             raise TypeError("{} is not modable".format(left.type))
 
@@ -584,10 +578,11 @@ class Interpreter(ast.NodeVisitor):
         start_label = self.il.get_label()
         end_label = self.il.get_label()
 
-        self.visit(node.first)
+        if node.first:
+            self.visit(node.first)
         self.il.add(il.Label(start_label))
 
-        if node.second is not None:
+        if node.second:
             condition = self.visit(node.second).val(self.il)
             self.il.add(il.JmpZero(condition, end_label))
 
@@ -595,7 +590,7 @@ class Interpreter(ast.NodeVisitor):
         self.current_loop["end"] = end_label
         self.visit(node.statement)
 
-        if node.third is not None:
+        if node.third:
             self.visit(node.third)
 
         self.il.add(il.Jmp(start_label))
@@ -645,6 +640,8 @@ class Interpreter(ast.NodeVisitor):
         return self.il
 
     def _set_type(self, il_value, ctype: ctypes.CType):
+        if il_value.type.is_void():
+            raise RuntimeError("Can't do anything with void type")
         if il_value.type == ctype:
             return il_value.val(self.il)
         else:
@@ -654,7 +651,6 @@ class Interpreter(ast.NodeVisitor):
             else:
                 iv = il_value.il_value
             if ctype.is_pointer() and ctype.arg == ctypes.char and self.il.is_string_literal(iv):
-                print(il_value)
                 il_value = il_value.addr(self.il)
             else:
                 il_value = il_value.val(self.il)

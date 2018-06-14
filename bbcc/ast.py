@@ -1,7 +1,5 @@
 from . import il
 from . import ctypes
-from . import tokens
-from . import decl_tree
 
 
 class AST:

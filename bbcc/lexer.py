@@ -130,7 +130,7 @@ class Lexer:
             elif self.current_char.isdigit():
                 tokens.append(Token(INTEGER, self.integer()))
 
-            elif self.current_char.isalpha():
+            elif self.current_char in string.ascii_letters+string.digits+"_":
                 tokens.append(self.id())
             elif self.current_char == "'":
                 self.advance()

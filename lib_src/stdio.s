@@ -1,136 +1,72 @@
-__bbcc_0000000a: .byte &00,&00,&00,&00,&00,&00
-.export printf
-.export out
-.export gets
-.export puts
 .import _bbcc_pusha
 .import _bbcc_pulla
+.import putchar
 .import getchar
-.import putchar
-.import putchar
-.import putchar
+.export printf
+.import itoa
+__bbcc_0000000d: .byte &00,&00,&00,&00,&00,&00
+.export puts
+.export gets
 
-\ Function
-gets: 
-lda &78
-pha
-lda &79
-pha
-lda &76
-pha
-lda &77
-pha
-lda &72
-pha
-lda &73
-pha
-lda &74
-pha
-lda &75
-pha
-
-\ Set
-ldy #&00
-lda (&8E),Y
-sta &74
-ldy #&01
-lda (&8E),Y
-sta &75
+\ Function: _puts
+_puts: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
 
 \ Label
 __bbcc_00000000: 
 
-\ Dec
-sec
-ldy #&02
-lda (&8E),Y
-sbc #1
-ldy #&02
-sta (&8E),Y
-ldy #&03
-lda (&8E),Y
-sbc #0
-ldy #&03
-sta (&8E),Y
-
-\ LessThanCmp
-lda #00
-sta &72
-ldy #&02
-lda (&8E),Y
-cmp #&00
-ldy #&03
-lda (&8E),Y
-sbc #&00
-bvc __bbcc_0000000c
-eor #&80
-__bbcc_0000000c: bpl __bbcc_0000000b
-lda #01
-sta &72
-__bbcc_0000000b: 
-
-\ JmpZero
-lda &72
-bne __bbcc_0000000d
-jmp __bbcc_00000001
-__bbcc_0000000d: 
-
-\ CallFunction
-jsr getchar
-lda &70
-sta &72
+\ ReadAt
+ldy #&01
+lda (&8C),Y
+sta &71
+ldy #&00
+lda (&8C),Y
+sta &70
+ldy #&00
+lda (&70),Y
+sta &70
 
 \ Set
-lda &74
-sta &76
-lda &75
-sta &77
-
-\ Inc
-inc &74
-bne __bbcc_0000000e
-inc &75
-__bbcc_0000000e: 
-
-\ SetAt
-lda &76
-sta &78
-lda &77
-sta &79
-lda &72
-ldy #&00
-sta (&78),Y
-
-\ ReadAt
-lda &77
-sta &73
-lda &76
-sta &72
-ldy #&00
-lda (&72),Y
-sta &78
-
-\ EqualCmp
-lda #00
-sta &72
-lda &78
-cmp #&0A
-bne __bbcc_0000000f
-lda #01
-sta &72
-__bbcc_0000000f: 
 
 \ JmpZero
-lda &72
-bne __bbcc_00000010
-jmp __bbcc_00000002
-__bbcc_00000010: 
-
-\ Jmp
+lda &70
+bne __bbcc_0000000e
 jmp __bbcc_00000001
+__bbcc_0000000e: 
 
-\ Label
-__bbcc_00000002: 
+\ Set
+
+\ CallFunction
+lda &70
+jsr _bbcc_pusha
+jsr putchar
+clc
+lda &8E
+adc #&01
+sta &8E
+lda &8F
+adc #&00
+sta &8F
+
+\ Inc
+clc
+ldy #&00
+lda (&8C),Y
+adc #1
+ldy #&00
+sta (&8C),Y
+ldy #&01
+lda (&8C),Y
+adc #0
+ldy #&01
+sta (&8C),Y
 
 \ Jmp
 jmp __bbcc_00000000
@@ -138,86 +74,60 @@ jmp __bbcc_00000000
 \ Label
 __bbcc_00000001: 
 
-\ Set
-lda #&00
-sta &72
-
-\ SetAt
-lda &74
-sta &76
-lda &75
-sta &77
-lda &72
-ldy #&00
-sta (&76),Y
-
 \ Return
-ldy #&00
-lda (&8E),Y
+lda #&00
 sta &70
-ldy #&01
-lda (&8E),Y
+lda #&00
 sta &71
-pla
-sta &75
-pla
-sta &74
-pla
-sta &73
-pla
-sta &72
-pla
-sta &77
-pla
-sta &76
-pla
-sta &79
-pla
-sta &78
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
 
-\ Function
+\ Function: puts
 puts: 
-lda &72
-pha
-lda &73
-pha
-lda &76
-pha
-lda &77
-pha
-lda &74
-pha
-lda &75
-pha
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
 
 \ Set
 ldy #&00
-lda (&8E),Y
-sta &74
+lda (&8C),Y
+sta &70
 ldy #&01
-lda (&8E),Y
-sta &75
-
-\ Label
-__bbcc_00000003: 
-
-\ ReadAt
-lda &75
-sta &73
-lda &74
-sta &72
-
-\ Set
-
-\ JmpZero
-lda &76
-bne __bbcc_00000011
-jmp __bbcc_00000004
-__bbcc_00000011: 
+lda (&8C),Y
+sta &71
 
 \ CallFunction
-lda &76
+lda &71
+jsr _bbcc_pusha
+lda &70
+jsr _bbcc_pusha
+jsr _puts
+clc
+lda &8E
+adc #&02
+sta &8E
+lda &8F
+adc #&00
+sta &8F
+
+\ Set
+lda #&0A
+sta &70
+
+\ CallFunction
+lda &70
 jsr _bbcc_pusha
 jsr putchar
 clc
@@ -227,17 +137,121 @@ sta &8E
 lda &8F
 adc #&00
 sta &8F
-lda &70
-sta &72
 
-\ Add
-clc
+\ Return
+lda #&00
+sta &70
+lda #&00
+sta &71
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
+rts
+
+\ Function: gets
+gets: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
 lda &74
-adc #&00
-sta &74
+jsr _bbcc_pusha
 lda &75
-adc #0
-sta &75
+jsr _bbcc_pusha
+
+\ Label
+__bbcc_00000002: 
+
+\ Dec
+sec
+ldy #&02
+lda (&8C),Y
+sbc #1
+ldy #&02
+sta (&8C),Y
+ldy #&03
+lda (&8C),Y
+sbc #0
+ldy #&03
+sta (&8C),Y
+
+\ LessThanCmp
+lda #00
+sta &70
+ldy #&02
+lda (&8C),Y
+cmp #&00
+ldy #&03
+lda (&8C),Y
+sbc #&00
+bvc __bbcc_00000011
+eor #&80
+__bbcc_00000011: bpl __bbcc_00000010
+lda #01
+sta &70
+__bbcc_00000010: 
+
+\ JmpZero
+lda &70
+bne __bbcc_00000012
+jmp __bbcc_00000003
+__bbcc_00000012: 
+
+\ CallFunction
+jsr getchar
+
+\ Set
+lda &74
+sta &72
+lda &75
+sta &73
+
+\ Inc
+inc &74
+bne __bbcc_00000013
+inc &75
+__bbcc_00000013: 
+
+\ Set
+
+\ SetAt
+lda &70
+ldy #&00
+sta (&72),Y
+
+\ ReadAt
+ldy #&00
+lda (&72),Y
+sta &70
+
+\ EqualCmp
+lda #00
+sta &70
+lda &70
+cmp #&0A
+bne __bbcc_00000014
+lda #01
+sta &70
+__bbcc_00000014: 
+
+\ JmpZero
+lda &70
+bne __bbcc_00000015
+jmp __bbcc_00000004
+__bbcc_00000015: 
 
 \ Jmp
 jmp __bbcc_00000003
@@ -245,189 +259,215 @@ jmp __bbcc_00000003
 \ Label
 __bbcc_00000004: 
 
-\ Return
+\ Jmp
+jmp __bbcc_00000002
+
+\ Label
+__bbcc_00000003: 
+
+\ Set
 lda #&00
 sta &70
-lda #&00
+
+\ SetAt
+lda &70
+ldy #&00
+sta (&74),Y
+
+\ Return
+ldy #&00
+lda (&8C),Y
+sta &70
+ldy #&01
+lda (&8C),Y
 sta &71
-pla
+jsr _bbcc_pulla
 sta &75
-pla
+jsr _bbcc_pulla
 sta &74
-pla
-sta &77
-pla
-sta &76
-pla
+jsr _bbcc_pulla
 sta &73
-pla
+jsr _bbcc_pulla
 sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
 
-\ Function
+\ Function: printf
 printf: 
-lda &7C
-pha
-lda &7D
-pha
-lda &7A
-pha
-lda &7B
-pha
-lda &78
-pha
-lda &79
-pha
-lda &76
-pha
-lda &77
-pha
-lda &74
-pha
-lda &75
-pha
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
 lda &72
-pha
+jsr _bbcc_pusha
 lda &73
-pha
+jsr _bbcc_pusha
+lda &74
+jsr _bbcc_pusha
+lda &75
+jsr _bbcc_pusha
+lda &76
+jsr _bbcc_pusha
+lda &77
+jsr _bbcc_pusha
 
 \ AddrOf
 clc
-lda &8E
+lda &8C
 adc #&00
-sta &72
-lda &8F
+sta &70
+lda &8D
 adc #&00
-sta &73
+sta &71
 
 \ Add
 clc
-lda &72
+lda &70
 adc #&02
-sta &74
-lda &73
+sta &70
+lda &71
 adc #&00
+sta &71
+
+\ Set
+
+\ Set
+lda &70
+sta &74
+lda &71
 sta &75
-
-\ Set
-
-\ Set
-ldy #&00
-lda (&8E),Y
-sta &76
-ldy #&01
-lda (&8E),Y
-sta &77
 
 \ Label
 __bbcc_00000005: 
 
 \ ReadAt
-lda &77
-sta &73
-lda &76
-sta &72
+ldy #&01
+lda (&8C),Y
+sta &71
 ldy #&00
-lda (&72),Y
-sta &78
+lda (&8C),Y
+sta &70
+ldy #&00
+lda (&70),Y
+sta &70
 
 \ Set
-lda &78
-sta &72
+lda &70
+sta &76
 
 \ JmpZero
-lda &72
-bne __bbcc_00000012
-jmp __bbcc_00000006
-__bbcc_00000012: 
-
-\ EqualCmp
-lda #00
-sta &78
-lda &72
-cmp #&25
-bne __bbcc_00000013
-lda #01
-sta &78
-__bbcc_00000013: 
-
-\ JmpZero
-lda &78
-bne __bbcc_00000014
-jmp __bbcc_00000007
-__bbcc_00000014: 
-
-\ Inc
-inc &76
-bne __bbcc_00000015
-inc &77
-__bbcc_00000015: 
-
-\ ReadAt
-lda &77
-sta &79
 lda &76
-sta &78
-ldy #&00
-lda (&78),Y
-sta &7A
-
-\ Set
-lda &7A
-sta &72
-
-\ EqualCmp
-lda #00
-sta &78
-lda &72
-cmp #&63
 bne __bbcc_00000016
-lda #01
-sta &78
+jmp __bbcc_00000006
 __bbcc_00000016: 
 
-\ JmpZero
-lda &78
+\ EqualCmp
+lda #00
+sta &70
+lda &76
+cmp #&25
 bne __bbcc_00000017
-jmp __bbcc_00000008
+lda #01
+sta &70
 __bbcc_00000017: 
+
+\ JmpZero
+lda &70
+bne __bbcc_00000018
+jmp __bbcc_00000007
+__bbcc_00000018: 
+
+\ Inc
+clc
+ldy #&00
+lda (&8C),Y
+adc #1
+ldy #&00
+sta (&8C),Y
+ldy #&01
+lda (&8C),Y
+adc #0
+ldy #&01
+sta (&8C),Y
+
+\ ReadAt
+ldy #&01
+lda (&8C),Y
+sta &71
+ldy #&00
+lda (&8C),Y
+sta &70
+ldy #&00
+lda (&70),Y
+sta &70
+
+\ Set
+lda &70
+sta &76
+
+\ EqualCmp
+lda #00
+sta &70
+lda &76
+cmp #&63
+bne __bbcc_0000001a
+lda #01
+sta &70
+__bbcc_0000001a: 
+
+\ JmpZero
+lda &70
+bne __bbcc_0000001b
+jmp __bbcc_00000008
+__bbcc_0000001b: 
 
 \ Set
 lda &74
-sta &78
+sta &70
 lda &75
-sta &79
+sta &71
 
 \ ReadAt
-lda &79
-sta &7B
-lda &78
-sta &7A
 ldy #&00
-lda (&7A),Y
-sta &7C
+lda (&70),Y
+sta &70
 
 \ Set
-lda &7C
-sta &78
+lda &70
+sta &72
 
 \ Add
 clc
 lda &74
 adc #&01
-sta &7A
+sta &70
 lda &75
 adc #&00
-sta &7B
+sta &71
 
 \ Set
-lda &7A
+lda &70
 sta &74
-lda &7B
+lda &71
 sta &75
 
+\ Set
+lda &72
+sta &70
+
 \ CallFunction
-lda &78
+lda &70
 jsr _bbcc_pusha
 jsr putchar
 clc
@@ -437,8 +477,6 @@ sta &8E
 lda &8F
 adc #&00
 sta &8F
-lda &70
-sta &7A
 
 \ Jmp
 jmp __bbcc_00000005
@@ -448,71 +486,69 @@ __bbcc_00000008:
 
 \ EqualCmp
 lda #00
-sta &78
-lda &72
+sta &70
+lda &76
 cmp #&73
-bne __bbcc_00000018
+bne __bbcc_0000001c
 lda #01
-sta &78
-__bbcc_00000018: 
+sta &70
+__bbcc_0000001c: 
 
 \ JmpZero
-lda &78
-bne __bbcc_00000019
+lda &70
+bne __bbcc_0000001d
 jmp __bbcc_00000009
-__bbcc_00000019: 
+__bbcc_0000001d: 
 
 \ Set
 lda &74
-sta &78
+sta &70
 lda &75
-sta &79
+sta &71
 
 \ ReadAt
-lda &79
-sta &7B
-lda &78
-sta &7A
 ldy #&00
-lda (&7A),Y
-sta &7C
+lda (&70),Y
+sta &70
 ldy #&01
-lda (&7A),Y
-sta &7D
+lda (&70),Y
+sta &71
 
 \ Set
-lda &7C
-sta &7A
-lda &7D
-sta &7B
+
+\ Set
+lda &70
+sta &72
+lda &71
+sta &73
 
 \ Add
 clc
 lda &74
 adc #&02
-sta &78
+sta &70
 lda &75
 adc #&00
-sta &79
+sta &71
 
 \ Set
-lda &78
+lda &70
 sta &74
-lda &79
+lda &71
 sta &75
 
 \ Set
-lda &7A
-sta &74
-lda &7B
-sta &75
+lda &72
+sta &70
+lda &73
+sta &71
 
 \ CallFunction
-lda &75
+lda &71
 jsr _bbcc_pusha
-lda &74
+lda &70
 jsr _bbcc_pusha
-jsr puts
+jsr _puts
 clc
 lda &8E
 adc #&02
@@ -520,10 +556,6 @@ sta &8E
 lda &8F
 adc #&00
 sta &8F
-lda &70
-sta &78
-lda &71
-sta &79
 
 \ Jmp
 jmp __bbcc_00000005
@@ -531,11 +563,159 @@ jmp __bbcc_00000005
 \ Label
 __bbcc_00000009: 
 
+\ Set
+lda #&00
+sta &72
+
+\ EqualCmp
+lda #00
+sta &70
+lda &76
+cmp #&69
+bne __bbcc_0000001e
+lda #01
+sta &70
+__bbcc_0000001e: 
+
+\ JmpNotZero
+lda &70
+beq __bbcc_0000001f
+__bbcc_0000001f: jmp __bbcc_0000000a
+__bbcc_00000020: 
+
+\ EqualCmp
+lda #00
+sta &70
+lda &76
+cmp #&64
+bne __bbcc_00000021
+lda #01
+sta &70
+__bbcc_00000021: 
+
+\ JmpNotZero
+lda &70
+beq __bbcc_00000022
+__bbcc_00000022: jmp __bbcc_0000000a
+__bbcc_00000023: 
+
+\ Jmp
+jmp __bbcc_0000000b
+
+\ Label
+__bbcc_0000000a: 
+
+\ Set
+lda #&01
+sta &72
+
+\ Label
+__bbcc_0000000b: 
+
+\ JmpZero
+lda &72
+bne __bbcc_00000024
+jmp __bbcc_0000000c
+__bbcc_00000024: 
+
+\ Set
+lda &74
+sta &70
+lda &75
+sta &71
+
+\ ReadAt
+ldy #&00
+lda (&70),Y
+sta &70
+ldy #&01
+lda (&70),Y
+sta &71
+
+\ Set
+lda &70
+sta &72
+lda &71
+sta &73
+
+\ Add
+clc
+lda &74
+adc #&02
+sta &70
+lda &75
+adc #&00
+sta &71
+
+\ Set
+lda &70
+sta &74
+lda &71
+sta &75
+
+\ AddrOf
+lda #0(__bbcc_0000000d)
+sta &70
+lda #1(__bbcc_0000000d)
+sta &71
+
+\ Set
+
+\ CallFunction
+lda &71
+jsr _bbcc_pusha
+lda &70
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
+lda &72
+jsr _bbcc_pusha
+jsr itoa
+clc
+lda &8E
+adc #&04
+sta &8E
+lda &8F
+adc #&00
+sta &8F
+
+\ AddrOf
+lda #0(__bbcc_0000000d)
+sta &70
+lda #1(__bbcc_0000000d)
+sta &71
+
+\ Set
+
+\ CallFunction
+lda &71
+jsr _bbcc_pusha
+lda &70
+jsr _bbcc_pusha
+jsr _puts
+clc
+lda &8E
+adc #&02
+sta &8E
+lda &8F
+adc #&00
+sta &8F
+
+\ Jmp
+jmp __bbcc_00000005
+
+\ Label
+__bbcc_0000000c: 
+
 \ Label
 __bbcc_00000007: 
 
+\ Set
+lda &76
+sta &70
+
 \ CallFunction
-lda &72
+lda &70
 jsr _bbcc_pusha
 jsr putchar
 clc
@@ -547,10 +727,17 @@ adc #&00
 sta &8F
 
 \ Inc
-inc &76
-bne __bbcc_0000001a
-inc &77
-__bbcc_0000001a: 
+clc
+ldy #&00
+lda (&8C),Y
+adc #1
+ldy #&00
+sta (&8C),Y
+ldy #&01
+lda (&8C),Y
+adc #0
+ldy #&01
+sta (&8C),Y
 
 \ Jmp
 jmp __bbcc_00000005
@@ -559,28 +746,24 @@ jmp __bbcc_00000005
 __bbcc_00000006: 
 
 \ Return
-pla
-sta &73
-pla
-sta &72
-pla
-sta &75
-pla
-sta &74
-pla
+jsr _bbcc_pulla
 sta &77
-pla
+jsr _bbcc_pulla
 sta &76
-pla
-sta &79
-pla
-sta &78
-pla
-sta &7B
-pla
-sta &7A
-pla
-sta &7D
-pla
-sta &7C
+jsr _bbcc_pulla
+sta &75
+jsr _bbcc_pulla
+sta &74
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts

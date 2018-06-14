@@ -458,11 +458,15 @@ class SymbolTableBuilder(ast.NodeVisitor):
             enclosing_scope=self.scope,
         )
         self.scope = procedure_scope
+        offset = 0
         for param, name in zip(decl_info.ctype.args, decl_info.params):
             name = name.value
             if self.scope.lookup(name, current_scope_only=True):
                 raise SyntaxError("Duplicate identifier '%s' found" % name)
-            self.scope.define(VarSymbol(name, param, None))
+            symbol = VarSymbol(name, param, None)
+            symbol.il_value.stack_offset = offset
+            offset += symbol.type.size
+            self.scope.define(symbol)
         for n in node.nodes.items:
             self.visit(n)
         self.scope_out.add_scope(procedure_scope)
@@ -642,9 +646,12 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.condition)
 
     def visit_ForStatement(self, node):
-        self.visit(node.first)
-        self.visit(node.second)
-        self.visit(node.third)
+        if node.first:
+            self.visit(node.first)
+        if node.second:
+            self.visit(node.second)
+        if node.third:
+            self.visit(node.third)
         self.visit(node.statement)
 
     def visit_Break(self, node):

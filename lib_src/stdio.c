@@ -1,12 +1,26 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-char out[6];
+static char out[6];
+
+static int _puts(const char *s) {
+    char c;
+
+    for (; c = *s; ++s) {
+        putchar(c);
+    }
+    return 0;
+}
+
+int puts(const char *s) {
+    _puts(s);
+    putchar('\n');
+    return 0;
+}
 
 char *gets(char *s, int n) {
     char *cs;
 
-    cs = s;
     while(--n < 0) {
         if ((*cs++ = getchar()) == '\n') {
             break;
@@ -16,27 +30,16 @@ char *gets(char *s, int n) {
     return s;
 }
 
-int puts(const char *s) {
-    void *p;
-    char c;
-
-    for (p = s; c = *p; ++p) {
-        putchar(c);
-    }
-    return 0;
-}
-
 int printf(const char *format, ...) {
     void *ap;
-    char *p;
     char c;
 
     ap = &format+sizeof(format);
 
-    for (p = format; c = *p; ++p) {
+    for (; c = *format; ++format) {
         if (c == '%') {
-            ++p;
-            c = *p;
+            ++format;
+            c = *format;
             if (c == 'c') {
                 char c = *((char *)ap);
                 ap += sizeof(char);
@@ -46,16 +49,16 @@ int printf(const char *format, ...) {
             if (c == 's') {
                 char* s = *((char **)ap);
                 ap += sizeof(char *);
-				puts(s);
+				_puts(s);
                 continue;
             }
-//            if (c == 'i' || c == 'd') {
-//                int i = *((int *)ap);
-//                ap += sizeof(int);
-//                itoa(i, out);
-//                puts(out);
-//                continue;
-//            }
+            if (c == 'i' || c == 'd') {
+                int i = *((int *)ap);
+                ap += sizeof(int);
+                itoa(i, out);
+                _puts(out);
+                continue;
+            }
         }
         putchar(c);
     }

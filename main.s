@@ -1,48 +1,42 @@
-__bbcc_00000000: .byte &00,&00,&00,&00,&00
-.export out
-.export main
 .import _bbcc_pusha
 .import _bbcc_pulla
-.import itoa
+.import putchar
+.import getchar
 .import printf
-
-\ Function
+.import itoa
+.import strlen
+.import strrev
+.export out
+__bbcc_00000000: .byte &00,&00,&00,&00,&00
+.export main
 main: 
-lda &76
-pha
-lda &77
-pha
-lda &74
-pha
-lda &75
-pha
-lda &72
-pha
-lda &73
-pha
 
 \ Set
 lda #&2A
-sta &72
+sta &70
 lda #&00
+sta &71
+
+\ Set
+
+\ Set
+lda &70
+sta &72
+lda &71
 sta &73
 
 \ AddrOf
 lda #0(__bbcc_00000000)
-sta &74
+sta &70
 lda #1(__bbcc_00000000)
-sta &75
+sta &71
 
 \ Set
-lda &74
-sta &76
-lda &75
-sta &77
 
 \ CallFunction
-lda &77
+lda &71
 jsr _bbcc_pusha
-lda &76
+lda &70
 jsr _bbcc_pusha
 lda &73
 jsr _bbcc_pusha
@@ -59,20 +53,16 @@ sta &8F
 
 \ AddrOf
 lda #0(__bbcc_00000000)
-sta &72
+sta &70
 lda #1(__bbcc_00000000)
-sta &73
+sta &71
 
 \ Set
-lda &72
-sta &74
-lda &73
-sta &75
 
 \ CallFunction
-lda &75
+lda &71
 jsr _bbcc_pusha
-lda &74
+lda &70
 jsr _bbcc_pusha
 jsr printf
 clc
@@ -88,16 +78,4 @@ lda #&00
 sta &70
 lda #&00
 sta &71
-pla
-sta &73
-pla
-sta &72
-pla
-sta &75
-pla
-sta &74
-pla
-sta &77
-pla
-sta &76
 rts

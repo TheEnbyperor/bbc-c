@@ -21,12 +21,12 @@ def main(text: str):
     symbol_table_builder.visit(ast_out)
     symbol_table = symbol_table_builder.scope_out
 
-    il = IL(symbol_table)
+    asm_code = ASM()
+    il = IL(symbol_table, asm_code)
     interp = Interpreter(symbol_table, il)
 
     il_out = interp.interpret(ast_out)
 
-    asm_code = ASM()
-    il_out.gen_asm(asm_code)
+    il_out.gen_asm()
 
     return asm_code.get_asm()
