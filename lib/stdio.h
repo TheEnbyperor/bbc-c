@@ -1,4 +1,5 @@
 unsigned char putchar(const unsigned char);
 unsigned char getchar();
 
-void printf(char *fmt, ...);
+int printf(const char *fmt, ...);
+int puts(const char *fmt, ...);

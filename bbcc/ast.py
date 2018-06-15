@@ -86,6 +86,7 @@ class Function(AST):
     def __repr__(self):
         return "Function<{}>\n{}".format(self.decl,
                                                    "  " + "  ".join(str(self.nodes).splitlines(True)))
+
 class ExprStatement(AST):
     def __init__(self, expr):
         self.expr = expr
@@ -181,6 +182,17 @@ class Number(_RExprNode):
 
     def __repr__(self):
         return "Number<{}>".format(self.number)
+
+
+class InitializerList(_RExprNode):
+    """Expression that is just a single number."""
+
+    def __init__(self, inits):
+        """Initialize node."""
+        self.inits = inits
+
+    def __repr__(self):
+        return "InitializerList<{}>".format(self.inits)
 
 
 class String(_LExprNode):

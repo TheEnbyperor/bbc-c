@@ -1245,7 +1245,7 @@ class IL:
 
         global_spotmap = self._get_global_spotmap()
 
-        self._print_spotmap(global_spotmap)
+        # self._print_spotmap(global_spotmap)
 
         for func in self.functions:
             self.assembly.add_comment("Function: {}".format(func))
@@ -1253,7 +1253,7 @@ class IL:
             self._gen_asm(self.functions[func], global_spotmap)
 
     def _gen_asm(self, commands, global_spotmap):
-        self._print_commands(commands)
+        # self._print_commands(commands)
         offset = 0
         free_values = self._get_free_values(commands, global_spotmap)
 
@@ -1330,7 +1330,7 @@ class IL:
         for v in global_spotmap:
             spotmap[v] = global_spotmap[v]
 
-        self._print_spotmap(spotmap)
+        # self._print_spotmap(spotmap)
 
         self._gen_func(commands, spotmap, live_vars)
 

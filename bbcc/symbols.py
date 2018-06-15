@@ -529,6 +529,10 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.left)
         self.visit(node.right)
 
+    def visit_InitializerList(self, node):
+        for n in node.inits:
+            self.visit(n)
+
     def visit_Number(self, node):
         pass
 

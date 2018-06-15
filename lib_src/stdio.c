@@ -1,7 +1,6 @@
 #include "stdio.h"
 #include "stdlib.h"
-
-static char out[6];
+#include "string.h"
 
 static int _puts(const char *s) {
     char c;
@@ -33,6 +32,7 @@ char *gets(char *s, int n) {
 int printf(const char *format, ...) {
     void *ap;
     char c;
+    int i;
 
     ap = &format+sizeof(format);
 
@@ -40,26 +40,35 @@ int printf(const char *format, ...) {
         if (c == '%') {
             ++format;
             c = *format;
+            if (c == 0) {
+                break;
+            }
             if (c == 'c') {
                 char c = *((char *)ap);
                 ap += sizeof(char);
 				putchar(c);
+				++i;
                 continue;
             }
             if (c == 's') {
                 char* s = *((char **)ap);
                 ap += sizeof(char *);
 				_puts(s);
+				i+= strlen(s);
                 continue;
             }
             if (c == 'i' || c == 'd') {
+                char out[6] = {0};
                 int i = *((int *)ap);
                 ap += sizeof(int);
                 itoa(i, out);
                 _puts(out);
+				i += strlen(out);
                 continue;
             }
+            putchar(c);
         }
         putchar(c);
+        ++i;
     }
 }

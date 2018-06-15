@@ -525,9 +525,7 @@ class Parser:
 
             index = end
             if self.token_is(index, EQUALS) and parse_inits:
-                # Parse initializer expression
-                # Currently, only simple initializers are supported
-                expr, index = self.parse_assignment(index + 1)
+                expr, index = self.parse_initializer(index + 1)
                 inits.append(expr)
             else:
                 inits.append(None)
@@ -542,6 +540,27 @@ class Parser:
 
         node = decl_tree.Root(specs, decls, inits)
         return node, index
+
+    def parse_initializer(self, index):
+        try:
+            return self.parse_assignment(index)
+        except SyntaxError:
+            index = self.eat(index, LBRACE)
+            expr, index = self.parse_intializer_list(index)
+            if self.token_is(index, COMMA):
+                index += 1
+            index = self.eat(index, RBRACE)
+            return expr, index
+
+    def parse_intializer_list(self, index):
+        inits = []
+        while True:
+            init, index = self.parse_initializer(index)
+            inits.append(init)
+            if not self.token_is(index, COMMA):
+                break
+            index += 1
+        return ast.InitializerList(inits), index
 
     def parse_decl_specifiers(self, index):
         """Parse a declaration specifier list.

@@ -12,16 +12,31 @@
 .export isxdigit
 .export toupper
 .export tolower
+
+\ Function: isupper
 isupper: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
 
 \ Set
 lda #&01
-sta &74
+sta &72
 
 \ MoreEqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&41
 bvc __bbcc_0000001f
 eor #&80
@@ -40,7 +55,8 @@ __bbcc_00000020:
 lda #00
 sta &70
 clc
-lda &72
+ldy #&00
+lda (&8C),Y
 sbc #&5A
 bvc __bbcc_00000022
 eor #&80
@@ -63,25 +79,52 @@ __bbcc_00000000:
 
 \ Set
 lda #&00
-sta &74
+sta &72
 
 \ Label
 __bbcc_00000001: 
 
 \ Return
-lda &74
+lda &72
 sta &70
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: islower
 islower: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
 
 \ Set
 lda #&01
-sta &74
+sta &72
 
 \ MoreEqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&61
 bvc __bbcc_00000025
 eor #&80
@@ -100,7 +143,8 @@ __bbcc_00000026:
 lda #00
 sta &70
 clc
-lda &72
+ldy #&00
+lda (&8C),Y
 sbc #&7A
 bvc __bbcc_00000028
 eor #&80
@@ -123,23 +167,50 @@ __bbcc_00000002:
 
 \ Set
 lda #&00
-sta &74
+sta &72
 
 \ Label
 __bbcc_00000003: 
 
 \ Return
-lda &74
+lda &72
 sta &70
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: isalpha
 isalpha: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
 
 \ Set
 lda #&00
-sta &74
+sta &72
 
 \ CallFunction
-lda &72
+ldy #&00
+lda (&8C),Y
 jsr _bbcc_pusha
 jsr islower
 clc
@@ -157,7 +228,8 @@ __bbcc_0000002a: jmp __bbcc_00000004
 __bbcc_0000002b: 
 
 \ CallFunction
-lda &72
+ldy #&00
+lda (&8C),Y
 jsr _bbcc_pusha
 jsr isupper
 clc
@@ -182,18 +254,43 @@ __bbcc_00000004:
 
 \ Set
 lda #&01
-sta &74
+sta &72
 
 \ Label
 __bbcc_00000005: 
 
 \ Return
-lda &74
+lda &72
 sta &70
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: isdigit
 isdigit: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
 
 \ Set
+ldy #&00
+lda (&8C),Y
+sta &70
 
 \ Set
 
@@ -217,15 +314,38 @@ sta &70
 __bbcc_0000002e: 
 
 \ Return
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: isalnum
 isalnum: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
 
 \ Set
 lda #&00
-sta &74
+sta &72
 
 \ CallFunction
-lda &72
+ldy #&00
+lda (&8C),Y
 jsr _bbcc_pusha
 jsr isalpha
 clc
@@ -243,7 +363,8 @@ __bbcc_00000030: jmp __bbcc_00000006
 __bbcc_00000031: 
 
 \ CallFunction
-lda &72
+ldy #&00
+lda (&8C),Y
 jsr _bbcc_pusha
 jsr isdigit
 clc
@@ -268,16 +389,46 @@ __bbcc_00000006:
 
 \ Set
 lda #&01
-sta &74
+sta &72
 
 \ Label
 __bbcc_00000007: 
 
 \ Return
-lda &74
+lda &72
 sta &70
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: isascii
 isascii: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
+lda &74
+jsr _bbcc_pusha
+lda &75
+jsr _bbcc_pusha
 
 \ Set
 lda #&01
@@ -292,6 +443,11 @@ eor #&FF
 sta &73
 
 \ Set
+ldy #&00
+lda (&8C),Y
+sta &70
+lda #0
+sta &71
 
 \ And
 lda &70
@@ -325,17 +481,48 @@ __bbcc_00000009:
 \ Return
 lda &74
 sta &70
+jsr _bbcc_pulla
+sta &75
+jsr _bbcc_pulla
+sta &74
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: isblank
 isblank: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
 
 \ Set
 lda #&00
-sta &74
+sta &72
 
 \ EqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&09
 bne __bbcc_00000036
 lda #01
@@ -351,7 +538,8 @@ __bbcc_00000038:
 \ EqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&20
 bne __bbcc_00000039
 lda #01
@@ -372,21 +560,44 @@ __bbcc_0000000a:
 
 \ Set
 lda #&01
-sta &74
+sta &72
 
 \ Label
 __bbcc_0000000b: 
 
 \ Return
-lda &74
+lda &72
 sta &70
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: iscntrl
 iscntrl: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
 
 \ LessThanCmp
 lda #00
 sta &70
-lda &70
+ldy #&00
+lda (&8C),Y
 cmp #&20
 bvc __bbcc_0000003d
 eor #&80
@@ -396,12 +607,38 @@ sta &70
 __bbcc_0000003c: 
 
 \ Return
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
-isspace: 
 
-\ Set
-lda #&00
-sta &78
+\ Function: isspace
+isspace: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
+lda &74
+jsr _bbcc_pusha
+lda &75
+jsr _bbcc_pusha
+lda &76
+jsr _bbcc_pusha
+lda &77
+jsr _bbcc_pusha
 
 \ Set
 lda #&00
@@ -411,10 +648,15 @@ sta &76
 lda #&00
 sta &74
 
+\ Set
+lda #&00
+sta &72
+
 \ EqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&20
 bne __bbcc_0000003e
 lda #01
@@ -430,7 +672,8 @@ __bbcc_00000040:
 \ EqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&0A
 bne __bbcc_00000041
 lda #01
@@ -451,13 +694,13 @@ __bbcc_00000010:
 
 \ Set
 lda #&01
-sta &74
+sta &72
 
 \ Label
 __bbcc_00000011: 
 
 \ JmpNotZero
-lda &74
+lda &72
 beq __bbcc_00000044
 __bbcc_00000044: jmp __bbcc_0000000e
 __bbcc_00000045: 
@@ -465,7 +708,8 @@ __bbcc_00000045:
 \ EqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&09
 bne __bbcc_00000046
 lda #01
@@ -486,13 +730,13 @@ __bbcc_0000000e:
 
 \ Set
 lda #&01
-sta &76
+sta &74
 
 \ Label
 __bbcc_0000000f: 
 
 \ JmpNotZero
-lda &76
+lda &74
 beq __bbcc_00000049
 __bbcc_00000049: jmp __bbcc_0000000c
 __bbcc_0000004a: 
@@ -500,7 +744,8 @@ __bbcc_0000004a:
 \ EqualCmp
 lda #00
 sta &70
-lda &72
+ldy #&00
+lda (&8C),Y
 cmp #&0D
 bne __bbcc_0000004b
 lda #01
@@ -521,27 +766,70 @@ __bbcc_0000000c:
 
 \ Set
 lda #&01
-sta &78
+sta &76
 
 \ Label
 __bbcc_0000000d: 
 
 \ Return
-lda &78
+lda &76
 sta &70
+jsr _bbcc_pulla
+sta &77
+jsr _bbcc_pulla
+sta &76
+jsr _bbcc_pulla
+sta &75
+jsr _bbcc_pulla
+sta &74
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
-isxdigit: 
 
-\ Set
-lda #&00
-sta &78
+\ Function: isxdigit
+isxdigit: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
+lda &74
+jsr _bbcc_pusha
+lda &75
+jsr _bbcc_pusha
+lda &76
+jsr _bbcc_pusha
+lda &77
+jsr _bbcc_pusha
 
 \ Set
 lda #&00
 sta &76
 
+\ Set
+lda #&00
+sta &74
+
 \ CallFunction
-lda &74
+ldy #&00
+lda (&8C),Y
 jsr _bbcc_pusha
 jsr isdigit
 clc
@@ -565,7 +853,8 @@ sta &72
 \ MoreEqualCmp
 lda #00
 sta &70
-lda &74
+ldy #&00
+lda (&8C),Y
 cmp #&61
 bvc __bbcc_00000051
 eor #&80
@@ -584,7 +873,8 @@ __bbcc_00000052:
 lda #00
 sta &70
 clc
-lda &74
+ldy #&00
+lda (&8C),Y
 sbc #&66
 bvc __bbcc_00000054
 eor #&80
@@ -626,13 +916,13 @@ __bbcc_00000014:
 
 \ Set
 lda #&01
-sta &76
+sta &74
 
 \ Label
 __bbcc_00000015: 
 
 \ JmpNotZero
-lda &76
+lda &74
 beq __bbcc_00000058
 __bbcc_00000058: jmp __bbcc_00000012
 __bbcc_00000059: 
@@ -644,7 +934,8 @@ sta &72
 \ MoreEqualCmp
 lda #00
 sta &70
-lda &74
+ldy #&00
+lda (&8C),Y
 cmp #&41
 bvc __bbcc_0000005b
 eor #&80
@@ -663,7 +954,8 @@ __bbcc_0000005c:
 lda #00
 sta &70
 clc
-lda &74
+ldy #&00
+lda (&8C),Y
 sbc #&46
 bvc __bbcc_0000005e
 eor #&80
@@ -705,19 +997,58 @@ __bbcc_00000012:
 
 \ Set
 lda #&01
-sta &78
+sta &76
 
 \ Label
 __bbcc_00000013: 
 
 \ Return
-lda &78
+lda &76
 sta &70
+jsr _bbcc_pulla
+sta &77
+jsr _bbcc_pulla
+sta &76
+jsr _bbcc_pulla
+sta &75
+jsr _bbcc_pulla
+sta &74
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: toupper
 toupper: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
+lda &74
+jsr _bbcc_pusha
+lda &75
+jsr _bbcc_pusha
 
 \ CallFunction
-lda &76
+ldy #&00
+lda (&8C),Y
 jsr _bbcc_pusha
 jsr islower
 clc
@@ -739,7 +1070,8 @@ eor #&FF
 sta &73
 
 \ Set
-lda &76
+ldy #&00
+lda (&8C),Y
 sta &70
 lda #0
 sta &71
@@ -767,7 +1099,8 @@ jmp __bbcc_0000001b
 __bbcc_0000001a: 
 
 \ Set
-lda &76
+ldy #&00
+lda (&8C),Y
 sta &70
 lda #0
 sta &71
@@ -776,11 +1109,42 @@ sta &71
 __bbcc_0000001b: 
 
 \ Return
+jsr _bbcc_pulla
+sta &75
+jsr _bbcc_pulla
+sta &74
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts
+
+\ Function: tolower
 tolower: 
+lda &8C
+jsr _bbcc_pusha
+lda &8D
+jsr _bbcc_pusha
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+lda &72
+jsr _bbcc_pusha
+lda &73
+jsr _bbcc_pusha
 
 \ CallFunction
-lda &74
+ldy #&00
+lda (&8C),Y
 jsr _bbcc_pusha
 jsr isupper
 clc
@@ -794,7 +1158,8 @@ lda &70
 sta &72
 
 \ Set
-lda &74
+ldy #&00
+lda (&8C),Y
 sta &70
 lda #0
 sta &71
@@ -822,7 +1187,8 @@ jmp __bbcc_0000001d
 __bbcc_0000001c: 
 
 \ Set
-lda &74
+ldy #&00
+lda (&8C),Y
 sta &70
 lda #0
 sta &71
@@ -831,4 +1197,16 @@ sta &71
 __bbcc_0000001d: 
 
 \ Return
+jsr _bbcc_pulla
+sta &73
+jsr _bbcc_pulla
+sta &72
+lda &8C
+sta &8E
+lda &8D
+sta &8F
+jsr _bbcc_pulla
+sta &8D
+jsr _bbcc_pulla
+sta &8C
 rts

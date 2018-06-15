@@ -30,12 +30,45 @@ class Interpreter(ast.NodeVisitor):
             if type(d.ctype) != ctypes.FunctionCType:
                 var_name = d.identifier.value
                 var_global = self.scope.lookup(var_name, "")
+                var = self.scope.lookup(var_name, self.current_scope)
                 if var_global is None:
-                    var = self.scope.lookup(var_name, self.current_scope)
-                    if d.init is not None:
-                        val = self.visit(d.init)
-                        val = self._set_type(val, var.type)
-                        self.il.add(il.Set(val, var.il_value))
+                    def init_var(init, il_value):
+                        if il_value.storage == ast.DeclInfo.STATIC and init is None:
+                                val = il.ILValue(il_value.type)
+                                self.il.register_literal_value(val, 0)
+                                self.il.add(il.Set(val, il_value))
+                        if init is not None:
+                            if il_value.type.is_scalar():
+                                if isinstance(init, ast.InitializerList):
+                                    if len(init.inits) != 1:
+                                        raise SyntaxError("Can't assign list to scalar type")
+                                val = self.visit(init)
+                                val = self._set_type(val, var.type)
+                                self.il.add(il.Set(val, var.il_value))
+                            elif il_value.type.is_array():
+                                if not isinstance(init, ast.InitializerList):
+                                    raise SyntaxError("Array must be initialized with list")
+                                loc = il.ILValue(ctypes.unsig_int)
+                                self.il.add(il.AddrOf(il_value, loc))
+                                size = il.ILValue(ctypes.unsig_int)
+                                self.il.register_literal_value(size, il_value.type.el.size)
+                                for i in range(il_value.type.size):
+                                    if i >= len(init.inits):
+                                        val = il.ILValue(il_value.type.el)
+                                        self.il.register_literal_value(val, 0)
+                                    else:
+                                        val = self.visit(init.inits[i])
+                                        if val.type != il_value.type.el:
+                                            val = self._set_type(val, il_value.type.el)
+                                        val = val.val(self.il)
+                                    self.il.add(il.SetAt(loc, val))
+                                    if i != il_value.type.size - 1:
+                                        if il_value.type.el.size == 1:
+                                            self.il.add(il.Inc(loc))
+                                        else:
+                                            self.il.add(il.Add(loc, size, loc))
+
+                    init_var(d.init, var.il_value)
 
     def visit_Function(self, node):
         old_scope = self.current_scope
