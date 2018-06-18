@@ -218,7 +218,6 @@ rts
 \ Set carry from status flag
 load_carry_status:
 lda &88
-and &01
 lsr a
 rts
 
@@ -231,6 +230,29 @@ lda #0
 rol a
 ora &88
 sta &88
+rts
+
+set_sign_zero_from_reg:
+lda &88
+and #&F9
+tay
+lda &71,x
+php
+asl a
+bcc _set_sign_zero_from_reg_not_minus
+tya
+ora #&04
+tay
+_set_sign_zero_from_reg_not_minus:
+plp
+bne _set_sign_zero_from_reg_not_zero
+lda &70,x
+bne _set_sign_zero_from_reg_not_zero
+tya
+ora #&02
+tay
+_set_sign_zero_from_reg_not_zero:
+sty &88
 rts
 
 \ Sets the carry flag
@@ -260,6 +282,7 @@ lda &71,x
 adc (&8C),y
 sta &71,x
 jsr set_carry_status
+jsr set_sign_zero_from_reg
 jmp inc_pc
 
 \ Add register to register
@@ -276,7 +299,8 @@ sta &70,x
 lda &0071,y
 adc &71,x
 sta &71,x
-jmp set_carry_status
+jsr set_carry_status
+jmp set_sign_zero_from_reg
 
 \ Helper for memory to register add
 add_mem_reg_start:
@@ -297,7 +321,8 @@ jsr add_mem_reg_start
 lda #0
 adc &71,x
 sta &71,x
-jmp set_carry_status
+jsr set_carry_status
+jmp set_sign_zero_from_reg
 
 \ Add 16 bit memory to register
 add_mem_reg_long:
@@ -312,7 +337,8 @@ iny
 lda (&8E),y
 adc &71,x
 sta &71,x
-jmp set_carry_status
+jsr set_carry_status
+jmp set_sign_zero_from_reg
 
 \ Subtract constant from register
 sub_const_reg:
@@ -331,6 +357,7 @@ lda &71,x
 sbc (&8C),y
 sta &71,x
 jsr set_carry_status
+jsr set_sign_zero_from_reg
 jmp inc_pc
 
 \ Subtract register from register
@@ -347,7 +374,8 @@ sta &70,x
 lda &0071,y
 sbc &71,x
 sta &71,x
-jmp set_carry_status
+jsr set_carry_status
+jmp set_sign_zero_from_reg
 
 \ Helper for memory from register subtract
 sub_mem_reg_start:
@@ -369,7 +397,8 @@ jsr sub_mem_reg_start
 lda #0
 sbc &71,x
 sta &71,x
-jmp set_carry_status
+jsr set_carry_status
+jmp set_sign_zero_from_reg
 
 \ Subtract 16 bit memory from register
 sub_mem_reg_long:
@@ -384,7 +413,8 @@ iny
 lda (&8E),y
 sbc &71,x
 sta &71,x
-jmp set_carry_status
+jsr set_carry_status
+jmp set_sign_zero_from_reg
 
 \ Increment register
 inc_reg:
@@ -392,7 +422,7 @@ inc &70,x
 bne _inc_reg
 inc &71,x
 _inc_reg:
-rts
+jmp set_sign_zero_from_reg
 
 \ Decrement register
 dec_reg:
@@ -401,7 +431,7 @@ bne _inc_reg
 dec &71,x
 _inc_reg:
 dec &70,x
-rts
+jmp set_sign_zero_from_reg
 
 \ Logical and constant and register
 and_const_reg:
@@ -413,6 +443,8 @@ iny
 lda &71,x
 and (&8C),y
 sta &71,x
+jsr set_sign_zero_from_reg
+jsr clear_carry
 jmp inc_pc
 
 \ Logical and register and register
@@ -423,7 +455,8 @@ sta &70,x
 lda &0071,y
 and &71,x
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ Helper for memory and register logical and
 and_mem_reg_start:
@@ -431,13 +464,15 @@ jsr get_mem_address
 lda (&8E),y
 and &70,x
 sta &70,x
+rts
 
 \ 8 bit logical and memory anh register
 and_mem_reg_short:
 jsr and_mem_reg_start
 lda #0
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ 16 bit logical and memory and register
 and_mem_reg_long:
@@ -446,7 +481,8 @@ iny
 lda (&8E),y
 and &71,x
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ Logical or constant and register
 or_const_reg:
@@ -458,6 +494,8 @@ iny
 lda &71,x
 ora (&8C),y
 sta &71,x
+jsr set_sign_zero_from_reg
+jsr clear_carry
 jmp inc_pc
 
 \ Logical or register and register
@@ -468,7 +506,8 @@ sta &70,x
 lda &0071,y
 ora &71,x
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ Helper for memory and register logical or
 or_mem_reg_start:
@@ -478,6 +517,7 @@ ora &70,x
 sta &70,x
 iny
 lda (&8E),y
+rts
 
 \ 8 bit logical or memory and register
 or_mem_reg_short:
@@ -490,7 +530,8 @@ or_mem_reg_long:
 jsr or_mem_reg_start
 ora &71,x
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ Logical xor constant and register
 xor_const_reg:
@@ -502,6 +543,8 @@ iny
 lda &71,x
 eor (&8C),y
 sta &71,x
+jsr set_sign_zero_from_reg
+jsr clear_carry
 jmp inc_pc
 
 \ Logical xor register and register
@@ -512,7 +555,8 @@ sta &70,x
 lda &0071,y
 eor &71,x
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ Helper for memory and register logical xor
 xor_mem_reg_start:
@@ -522,20 +566,23 @@ eor &70,x
 sta &70,x
 iny
 lda (&8E),y
+rts
 
 \ 8 bit logical xor memory and register
 xor_mem_reg_short:
 jsr xor_mem_reg_start
 eor #0
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ 16 bit logical xor memory and register
 xor_mem_reg_long:
 jsr xor_mem_reg_start
 eor &71,x
 sta &71,x
-rts
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 \ Logical not register
 not_reg:
@@ -558,7 +605,7 @@ lda &71,x
 eor #&ff
 adc #0
 sta &71,x
-rts
+jmp set_sign_zero_from_reg
 
 call_subroutine:
 ldx #14

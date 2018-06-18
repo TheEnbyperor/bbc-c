@@ -16,13 +16,13 @@ The status register is as such, where X means not used.
 
 |  7   |  6   |  5   |  4   |  3   |  2   |  1   |   0   |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :---: |
-|  X   |  X   |  X   |  X   |  X   |  X   |  X   | Carry |
+|  X   |  X   |  X   |  X   |  X   | Sign | Zero | Carry |
 
 
 
 ## Entering the VM
 
-The VM in entered by a jump to the start address (label _start). All data following is interpreted by the VM.
+The VM in entered by a jsr to the start address (label _start). All data following is interpreted by the VM.
 
 ## General layout of each instruction
 
@@ -48,6 +48,10 @@ Moves the 16 bit constant into the register
 
 *Does not clobber R15*
 
+#### Flags
+
+None affected
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-31 |
 | :-----: | :-------: | :-------------: | :--------: |
 |  0x00   | Anything  | Register number |  Constant  |
@@ -55,6 +59,10 @@ Moves the 16 bit constant into the register
 ### movs \<mem\>, \<reg\>
 
 Moves the 8 bit value at the memory location into the LSB of the register and 0 into the MSB
+
+#### Flags
+
+None affected
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -64,6 +72,10 @@ Moves the 8 bit value at the memory location into the LSB of the register and 0 
 
 Moves the 16 bit value at the memory location into the register
 
+#### Flags
+
+None affected
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
 |  0x01   | Anything  | Register number | Memory location |
@@ -72,6 +84,10 @@ Moves the 16 bit value at the memory location into the register
 
 Moves the LSB of the register to the memory location
 
+#### Flags
+
+None affected
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
 |  0x03   | Anything  | Register number | Memory location |
@@ -79,6 +95,10 @@ Moves the LSB of the register to the memory location
 ### mov \<reg\>, \<mem\>
 
 Moves the register to the 16-bit memory location
+
+#### Flags
+
+None affected
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -90,6 +110,10 @@ Moves the first register to the second register
 
 *Does not clobber R15*
 
+#### Flags
+
+None affected
+
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
 |  0x05   | Second register number | First register number |
@@ -99,6 +123,10 @@ Moves the first register to the second register
 Pushes the register onto the stack
 
 *Does not clobber R15*
+
+#### Flags
+
+None affected
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
@@ -110,6 +138,10 @@ Pops the 16-value off the top of the stack and puts it in the register
 
 *Does not clobber R15*
 
+#### Flags
+
+None affected
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
 |  0x07   | Anything  | Register number |
@@ -117,6 +149,10 @@ Pops the 16-value off the top of the stack and puts it in the register
 ### la \<mem\>, \<reg\>
 
 Loads the address which data would be read from into the register. Not currently any more useful than moving a constant into a register, but will be once indirection is added.
+
+#### Flags
+
+None affected
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-32    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -128,6 +164,10 @@ Sets the carry flag
 
 *Does not clobber R15*
 
+#### Flags
+
+Carry
+
 | Bit 0-7 |
 | :-----: |
 |  0x80   |
@@ -138,15 +178,23 @@ Clears the carry flag
 
 *Does not clobber R15*
 
+#### Flags
+
+Carry
+
 | Bit 0-7 |
 | :-----: |
 |  0x81   |
 
 ### add \<const>, \<reg>
 
-Adds the constant value to the register and stores back in the register. Does not use the carry flag, but it is set accordingly after performing the addition.
+Adds the constant value to the register and stores back in the register. Does not use the carry flag.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
 | :-----: | :-------: | :-------------: | :--------: |
@@ -154,9 +202,13 @@ Adds the constant value to the register and stores back in the register. Does no
 
 ###add \<reg>, \<reg>
 
-Adds the value in the first register to the second register and stores back in the first register. Does not use the carry flag, but it is set accordingly after performing the addition.
+Adds the value in the first register to the second register and stores back in the first register. Does not use the carry flag.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
@@ -164,7 +216,11 @@ Adds the value in the first register to the second register and stores back in t
 
 ### adds \<mem\>, \<reg\>
 
-Adds the 8 bit value at the memory location into the the register and stores in the register. Does not use the carry flag, but it is set accordingly after performing the addition.
+Adds the 8 bit value at the memory location into the the register and stores in the register. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -172,7 +228,11 @@ Adds the 8 bit value at the memory location into the the register and stores in 
 
 ### add \<mem\>, \<reg\>
 
-Adds the 16 bit value at the memory location to the register and stores in the register. Does not use the carry flag, but it is set accordingly after performing the addition.
+Adds the 16 bit value at the memory location to the register and stores in the register. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -180,9 +240,13 @@ Adds the 16 bit value at the memory location to the register and stores in the r
 
 ### adc \<const>, \<reg>
 
-Adds the constant value plus the carry to the register and stores back in the register. Sets carry accordingly after performing the addition.
+Adds the constant value plus the carry to the register and stores back in the register.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
 | :-----: | :-------: | :-------------: | :--------: |
@@ -190,9 +254,13 @@ Adds the constant value plus the carry to the register and stores back in the re
 
 ### adc \<reg>, \<reg>
 
-Adds the value in the first register plus the carry to the second register and stores back in the first register. Sets carry accordingly after performing the addition.
+Adds the value in the first register plus the carry to the second register and stores back in the first register.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
@@ -200,7 +268,11 @@ Adds the value in the first register plus the carry to the second register and s
 
 ### adcs \<mem\>, \<reg\>
 
-Adds the 8 bit value at the memory location plus the carry into the the register and stores in the register.  Sets carry accordingly after performing the addition.
+Adds the 8 bit value at the memory location plus the carry into the the register and stores in the register.
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -208,7 +280,11 @@ Adds the 8 bit value at the memory location plus the carry into the the register
 
 ### adc \<mem\>, \<reg\>
 
-Adds the 16 bit value at the memory location plus the carry to the register and stores in the register.  Sets carry accordingly after performing the addition.
+Adds the 16 bit value at the memory location plus the carry to the register and stores in the register.  
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -216,9 +292,13 @@ Adds the 16 bit value at the memory location plus the carry to the register and 
 
 ###  sub \<const>, \<reg>
 
-Subtracts the constant value from the register and stores back in the register. Does not use the carry flag, but it is set accordingly after performing the subtraction.
+Subtracts the constant value from the register and stores back in the register. Does not use the carry flag.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
 | :-----: | :-------: | :-------------: | :--------: |
@@ -226,9 +306,13 @@ Subtracts the constant value from the register and stores back in the register. 
 
 ### sub \<reg>, \<reg>
 
-Subtracts the value in the first register from the second register and stores back in the first register. Does not use the carry flag, but it is set accordingly after performing the subtraction.
+Subtracts the value in the first register from the second register and stores back in the first register. Does not use the carry flag.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
@@ -236,7 +320,11 @@ Subtracts the value in the first register from the second register and stores ba
 
 ### subs \<mem\>, \<reg\>
 
-Subtracts the 8 bit value at the memory location from the the register and stores in the register. Does not use the carry flag, but it is set accordingly after performing the subtraction.
+Subtracts the 8 bit value at the memory location from the the register and stores in the register. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -244,7 +332,11 @@ Subtracts the 8 bit value at the memory location from the the register and store
 
 ### sub \<mem\>, \<reg\>
 
-Subtracts the 16 bit value at the memory location from the register and stores in the register. Does not use the carry flag, but it is set accordingly after performing the subtraction.
+Subtracts the 16 bit value at the memory location from the register and stores in the register. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -252,9 +344,13 @@ Subtracts the 16 bit value at the memory location from the register and stores i
 
 ### sbc \<const>, \<reg>
 
-Subtracts the constant value and the carry from the register and stores back in the register. Sets carry accordingly after performing the subtraction.
+Subtracts the constant value and the carry from the register and stores back in the register.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
 | :-----: | :-------: | :-------------: | :--------: |
@@ -262,9 +358,13 @@ Subtracts the constant value and the carry from the register and stores back in 
 
 ### sbc \<reg>, \<reg\>
 
-Subtracts the value in the first register and the carry from the second register and stores back in the first register. Sets carry accordingly after performing the subtraction.
+Subtracts the value in the first register and the carry from the second register and stores back in the first register.
 
 *Does not clobber R15*
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
@@ -272,7 +372,11 @@ Subtracts the value in the first register and the carry from the second register
 
 ### sbcs \<mem\>, \<reg\>
 
-Subtracts the 8 bit value at the memory location and the carry from the the register and stores in the register. Sets carry accordingly after performing the subtraction.
+Subtracts the 8 bit value at the memory location and the carry from the the register and stores in the register.
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -280,7 +384,11 @@ Subtracts the 8 bit value at the memory location and the carry from the the regi
 
 ### sbc \<mem\>, \<reg\>
 
-Subtracts the 16 bit value at the memory location and the carry from the register and stores in the register. Sets carry accordingly after performing the subtraction.
+Subtracts the 16 bit value at the memory location and the carry from the register and stores in the register.
+
+#### Flags
+
+Carry, sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -292,6 +400,10 @@ Increments the register
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
 |  0x19   | Anything  | Register number |
@@ -301,6 +413,10 @@ Increments the register
 Decrements the register
 
 *Does not clobber R15*
+
+#### Flags
+
+Sign, zero
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
@@ -312,6 +428,10 @@ Logical ands the constant with the register and stores in the register
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
 | :-----: | :-------: | :-------------: | :--------: |
 |  0x1B   | Anything  | Register number |  Constant  |
@@ -322,6 +442,10 @@ Logical ands the first register with the second register and stores in the first
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
 |  0x1C   | Second register number | First register number |
@@ -330,6 +454,10 @@ Logical ands the first register with the second register and stores in the first
 
 Logical ands the 8 bit value at the memory location (LSB) and 0 (MSB) with the register and stores in the register
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
 |  0x1D   | Anything  | Register number | Memory location |
@@ -337,6 +465,10 @@ Logical ands the 8 bit value at the memory location (LSB) and 0 (MSB) with the r
 ### and \<mem\>, \<reg\>
 
 Logical ands the 16 bit value at the memory location with the register and stores in the register
+
+#### Flags
+
+Sign, zero, clears carry
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -348,6 +480,10 @@ Logical ors the constant with the register and stores in the register
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
 | :-----: | :-------: | :-------------: | :--------: |
 |  0x1F   | Anything  | Register number |  Constant  |
@@ -358,6 +494,10 @@ Logical ors the first register with the second register and stores in the first 
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
 |  0x20   | Second register number | First register number |
@@ -366,6 +506,10 @@ Logical ors the first register with the second register and stores in the first 
 
 Logical ors the 8 bit value at the memory location (LSB) and 0 (MSB) with the register and stores in the register
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
 |  0x21   | Anything  | Register number | Memory location |
@@ -373,6 +517,10 @@ Logical ors the 8 bit value at the memory location (LSB) and 0 (MSB) with the re
 ### or \<mem\>, \<reg\>
 
 Logical ors the 16 bit value at the memory location with the register and stores in the register
+
+#### Flags
+
+Sign, zero, clears carry
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -384,6 +532,10 @@ Logical xors the constant with the register and stores in the register
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
 | :-----: | :-------: | :-------------: | :--------: |
 |  0x23   | Anything  | Register number |  Constant  |
@@ -394,6 +546,10 @@ Logical xors the first register with the second register and stores in the first
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
 |  0x24   | Second register number | First register number |
@@ -402,6 +558,10 @@ Logical xors the first register with the second register and stores in the first
 
 Logical xors the 8 bit value at the memory location (LSB) and 0 (MSB) with the register and stores in the register
 
+#### Flags
+
+Sign, zero, clears carry
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
 |  0x25   | Anything  | Register number | Memory location |
@@ -409,6 +569,10 @@ Logical xors the 8 bit value at the memory location (LSB) and 0 (MSB) with the r
 ### xor \<mem\>, \<reg\>
 
 Logical ands the 16 bit value at the memory location with the register and stores in the register
+
+#### Flags
+
+Sign, zero, clears carry
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------: | :-------------: | :-------------: |
@@ -420,6 +584,10 @@ Logical nots the register
 
 *Does not clobber R15*
 
+#### Flags
+
+None
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
 |  0x27   | Anything  | Register number |
@@ -430,6 +598,10 @@ Two's compliment negate of the register
 
 *Does not clobber R15*
 
+#### Flags
+
+Sign, zero
+
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
 |  0x28   | Anything  | Register number |
@@ -438,6 +610,10 @@ Two's compliment negate of the register
 
 Pushes the current program counter onto the stack and jumps to the memory location. Note this will not return to this instruction since the PC is incremented **before** a fetch.
 
+#### Flags
+
+None
+
 | Bit 0-7 |    Bits 8-15    |
 | :-----: | :-------------: |
 |  0x82   | Memory location |
@@ -445,6 +621,10 @@ Pushes the current program counter onto the stack and jumps to the memory locati
 ### ret
 
 Pops the program counter off the stack and continues at that address + 1.
+
+#### Flags
+
+None
 
 | Bit 0-7 |
 | :-----: |
