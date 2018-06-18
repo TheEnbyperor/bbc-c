@@ -43,15 +43,15 @@ class Assemble:
                 self.symbols.append(Symbol(l, addr, Symbol.EXPORT))
         addr = 0
         for n, i in enumerate(self.prog.insts):
-            if isinstance(i.value, insts.LabelVal):
-                if i.value.label in self.prog.imports:
-                    val = insts.MemVal(i.value.offset)
-                    self.symbols.append(Symbol(i.value.label, addr+1, Symbol.IMPORT))
+            if isinstance(getattr(i.value, "loc", None), insts.LabelVal):
+                if i.value.loc.label in self.prog.imports:
+                    loc = i.value.loc.offset
+                    self.symbols.append(Symbol(i.value.loc.label, addr+1, Symbol.IMPORT))
                 else:
-                    val = insts.MemVal(self.labels[i.value.label])
+                    loc = self.labels[i.value.loc.label]
                     if not i.is_relative():
-                        self.symbols.append(Symbol(i.value.label, addr + 1, Symbol.INTERNAL))
-                self.prog.insts[n].value = val
+                        self.symbols.append(Symbol(i.value.loc.label, addr + 1, Symbol.INTERNAL))
+                self.prog.insts[n].value.loc = loc
             if isinstance(i.value, insts.LabelAddrVal):
                 if i.value.label in self.prog.imports:
                     val = insts.LiteralVal(i.value.offset)
@@ -59,7 +59,7 @@ class Assemble:
                 else:
                     val = insts.LiteralVal(i.value.offset)
                     self.symbols.append(Symbol(i.value.label, addr + 1, Symbol.INTERNAL_ADDR,
-                                               self.labels[i.value.label]))
+                                               self.labels[i.value.label]+i.value.loc_offset))
                 self.prog.insts[n].value = val
             addr += len(i)
 

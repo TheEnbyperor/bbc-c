@@ -94,6 +94,12 @@ class Lexer:
             elif self.current_char == ">":
                 self.advance()
                 tokens.append(Token(GT, ">"))
+            elif self.current_char == "+":
+                self.advance()
+                tokens.append(Token(PLUS, "+"))
+            elif self.current_char == "-":
+                self.advance()
+                tokens.append(Token(MINUS, "-"))
             elif self.current_char == ",":
                 self.advance()
                 tokens.append(Token(COMMA, ","))

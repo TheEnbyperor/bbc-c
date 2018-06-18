@@ -59,8 +59,17 @@ class Parser:
                 index = self.eat(index+1, LPAREM)
                 if self.tokens[index].type == ID:
                     name = self.tokens[index].value
+                    loc_offset = 0
+                    index += 1
+                    if self.tokens[index].type in [PLUS, MINUS]:
+                        index += 1
+                        if not self.tokens[index].type == INTEGER:
+                            self.error()
+                        loc_offset = self.tokens[index].value
+                        if self.tokens[index-1].type == MINUS:
+                            loc_offset = -loc_offset
                     index = self.eat(index+1, RPAREM)
-                    return insts.LabelAddrVal(name, offset=offset), index
+                    return insts.LabelAddrVal(name, offset=offset, loc_offset=loc_offset), index
                 else:
                     self.error()
             else:
@@ -71,22 +80,20 @@ class Parser:
 
     def parse_AccumulatorVal(self, index):
         if self.token_is(index, ID):
-            if self.tokens[index].value == "A":
+            if self.tokens[index].value.upper() == "A":
                 return insts.AccumulatorVal(), index + 1
         self.error()
 
     def parse_ZpVal(self, index):
-        if type(self.tokens[index].value) != int:
+        if self.tokens[index].type != INTEGER:
             self.error()
         if self.tokens[index].value > 255:
-            self.error()
-        if self.tokens[index+1].type == LPAREM:
             self.error()
         return insts.ZpVal(self.tokens[index].value), index + 1
 
     def parse_MemVal(self, index):
         if self.tokens[index].type == ID:
-            return insts.LabelVal(self.tokens[index].value), index + 1
+            return insts.MemVal(insts.LabelVal(self.tokens[index].value)), index + 1
         if self.tokens[index].type == INTEGER:
             offset = self.tokens[index].value
             if self.tokens[index+1].type == LPAREM:
@@ -94,7 +101,7 @@ class Parser:
                 if self.tokens[index].type == ID:
                     name = self.tokens[index].value
                     index = self.eat(index+1, RPAREM)
-                    return insts.LabelVal(name, offset=offset), index
+                    return insts.MemVal(insts.LabelVal(name, offset=offset)), index
                 else:
                     self.error()
             else:
@@ -107,7 +114,7 @@ class Parser:
         value, index = self.parse_ZpVal(index)
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
-            if self.tokens[index].value == "X":
+            if self.tokens[index].value.upper() == "X":
                 return insts.ZpXVal(value.loc), index + 1
         self.error()
 
@@ -115,24 +122,23 @@ class Parser:
         value, index = self.parse_ZpVal(index)
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
-            if self.tokens[index].value == "X":
-                return insts.ZpXVal(value.loc), index + 1
+            if self.tokens[index].value.upper() == "Y":
+                return insts.ZpYVal(value.loc), index + 1
         self.error()
 
     def parse_MemXVal(self, index):
         value, index = self.parse_MemVal(index)
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
-            if self.tokens[index].value == "X":
+            if self.tokens[index].value.upper() == "X":
                 return insts.MemXVal(value.loc), index + 1
-        self.error()
         self.error()
 
     def parse_MemYVal(self, index):
         value, index = self.parse_MemVal(index)
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
-            if self.tokens[index].value == "Y":
+            if self.tokens[index].value.upper() == "Y":
                 return insts.MemYVal(value.loc), index + 1
         self.error()
 
@@ -148,7 +154,7 @@ class Parser:
         index = self.eat(index, RPAREM)
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
-            if self.tokens[index].value == "Y":
+            if self.tokens[index].value.upper() == "Y":
                 return insts.IndirectYVal(value.loc), index + 1
         self.error()
 
@@ -157,7 +163,7 @@ class Parser:
         value, index = self.parse_ZpVal(index)
         index = self.eat(index, COMMA)
         if self.token_is(index, ID):
-            if self.tokens[index].value == "X":
+            if self.tokens[index].value.upper() == "X":
                 return insts.IndirectXVal(value.loc), self.eat(index + 1, RPAREM)
         self.error()
 
@@ -169,8 +175,7 @@ class Parser:
         op = self.ops.get(inst.upper())
 
         if op is None:
-            self.error()
-
+            raise SyntaxError("Unknown instruction: {}".format(inst))
         if len(op.modes) > 0:
             value = None
             for m in op.modes:
@@ -211,21 +216,17 @@ class Parser:
     def parse_cmd_byte(self, index):
         nums = []
         while True:
-            if self.token_is(index, INTEGER):
-                num = self.tokens[index].value
+            num, index = self.parse_LiteralVal(index)
+            inst = insts.Byte(num)
+            nums.append(inst)
+            if self.token_is(index, COMMA):
                 index += 1
-                nums.append(num)
-                if self.token_is(index, COMMA):
-                    index += 1
-                else:
-                    break
             else:
-                self.error()
-        inst = insts.Bytes(nums)
+                break
         if len(self.cur_labels) > 0:
-            inst.labels = self.cur_labels
+            nums[0].labels = self.cur_labels
             self.cur_labels = []
-        self.prog.insts.append(inst)
+        self.prog.insts.extend(nums)
         return index
 
     def parse(self):
