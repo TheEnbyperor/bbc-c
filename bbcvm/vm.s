@@ -10,7 +10,8 @@ inst_jump_table_l:
       #0(inc_reg-1), #0(dec_reg-1), #0(and_const_reg-1), #0(and_reg_reg-1), #0(and_mem_reg_short-1),
       #0(and_mem_reg_long-1), #0(or_const_reg-1), #0(or_reg_reg-1), #0(or_mem_reg_short-1), #0(or_mem_reg_long-1),
       #0(xor_const_reg-1), #0(xor_reg_reg-1), #0(xor_mem_reg_short-1), #0(xor_mem_reg_long-1), #0(not_reg-1),
-      #0(neg_reg-1)
+      #0(neg_reg-1), #0(cmp_const_reg-1), #0(cmp_reg_reg-1), #0(cmp_mem_reg_short-1), #0(cmp_mem_reg_long-1),
+      #0(call_subroutine-1), #0(call_6502-1)
 
 inst_jump_table_h:
 .byte #1(mov_const_reg-1), #1(mov_mem_reg_short-1), #1(mov_mem_reg_long-1), #1(mov_reg_mem_short-1),
@@ -22,13 +23,14 @@ inst_jump_table_h:
       #1(inc_reg-1), #1(dec_reg-1), #1(and_const_reg-1), #1(and_reg_reg-1), #1(and_mem_reg_short-1),
       #1(and_mem_reg_long-1), #1(or_const_reg-1), #1(or_reg_reg-1), #1(or_mem_reg_short-1), #1(or_mem_reg_long-1),
       #1(xor_const_reg-1), #1(xor_reg_reg-1), #1(xor_mem_reg_short-1), #1(xor_mem_reg_long-1), #1(not_reg-1),
-      #1(neg_reg-1)
+      #1(neg_reg-1), #1(cmp_const_reg-1), #1(cmp_reg_reg-1), #1(cmp_mem_reg_short-1), #1(cmp_mem_reg_long-1),
+      #1(call_subroutine-1), #1(call_6502-1)
 
 other_inst_jump_table_l:
-.byte #0(set_carry-1), #0(clear_carry-1), #0(call_subroutine-1), #0(return-1)
+.byte #0(set_carry-1), #0(clear_carry-1), #0(return-1)
 
 other_inst_jump_table_h:
-.byte #1(set_carry-1), #1(clear_carry-1), #1(call_subroutine-1), #1(return-1)
+.byte #1(set_carry-1), #1(clear_carry-1), #1(return-1)
 
 _start:
 \ Load PC
@@ -114,6 +116,74 @@ pha
 \ Do jump
 rts
 
+\ Helper: Load address to scratch register
+get_mem_address:
+tya
+beq _get_mem_absolute
+cmp #&01
+beq _get_mem_rel_minus
+cmp #&02
+beq _get_mem_rel_plus
+cmp #&03
+beq _get_mem_indirect
+_get_mem_absolute:
+ldy #2
+lda (&8C),y
+sta &8F
+dey
+lda (&8C),y
+sta &8E
+jmp _get_mem_address
+_get_mem_rel_minus:
+ldy #1
+lda &8C
+sec
+sbc (&8C),y
+sta &8E
+iny
+lda &8D
+sbc (&8C),y
+sta &8F
+jmp _get_mem_address
+_get_mem_rel_plus:
+ldy #1
+lda &8C
+clc
+adc (&8C),y
+sta &8E
+iny
+lda &8D
+adc (&8C),y
+sta &8F
+jmp _get_mem_address
+_get_mem_indirect:
+ldy #1
+lda (&8C), y
+lsr a
+lsr a
+lsr a
+lsr a
+php
+asl a
+tax
+lda (&8C), y
+and #&0F
+plp
+bcc _get_mem_indirect_2
+ora #&F0
+_get_mem_indirect_2:
+clc
+adc &70,x
+sta &8E
+iny
+lda (&8C), y
+adc &71,x
+sta &8F
+_get_mem_address:
+jsr inc_pc
+ldy #0
+jmp inc_pc
+
 \ Load 16 bit constant value into register
 mov_const_reg:
 ldy #1
@@ -131,17 +201,6 @@ sta &0071,y
 lda &71,x
 sta &0070,y
 rts
-
-\ Helper: Load address to scratch register
-get_mem_address:
-ldy #2
-lda (&8C),y
-sta &8E
-dey
-lda (&8C),y
-sta &8F
-dey
-jmp inc_pc
 
 \ Load a 8 bit value from memory into a register
 mov_mem_reg_short:
@@ -344,7 +403,7 @@ jmp set_sign_zero_from_reg
 sub_const_reg:
 sec
 bcc _sub_const_reg
-\ Add with carry
+\ Subtract with carry
 sub_carry_const_reg:
 jsr load_carry_status
 _sub_const_reg:
@@ -357,6 +416,22 @@ lda &71,x
 sbc (&8C),y
 sta &71,x
 jsr set_carry_status
+jsr set_sign_zero_from_reg
+jmp inc_pc
+
+\ Compare constant and register
+cmp_const_reg:
+sec
+lda &70,x
+ldy #1
+sbc (&8C),y
+sta &8E
+iny
+lda &71,x
+sbc (&8C),y
+sta &8F
+jsr set_carry_status
+ldx #15
 jsr set_sign_zero_from_reg
 jmp inc_pc
 
@@ -373,17 +448,29 @@ sbc &70,x
 sta &70,x
 lda &0071,y
 sbc &71,x
-sta &71,x
+sta &70,x
 jsr set_carry_status
+jmp set_sign_zero_from_reg
+
+\ Compare register and register
+cmp_reg_reg:
+sec
+lda &0070,y
+sbc &70,x
+sta &8E
+lda &0071,y
+sbc &71,x
+sta &8F
+jsr set_carry_status
+ldx #15
 jmp set_sign_zero_from_reg
 
 \ Helper for memory from register subtract
 sub_mem_reg_start:
 jsr get_mem_address
-lda (&8E),y
+lda &70,x
 sec
-sbc &70,x
-sta &70,x
+sbc (&8E),y
 
 \ Subtract 8 bit memory from register
 sub_mem_reg_short:
@@ -394,10 +481,23 @@ sub_carry_mem_reg_short:
 jsr load_carry_status
 _sub_mem_reg_short:
 jsr sub_mem_reg_start
-lda #0
-sbc &71,x
+sta &70,x
+lda &71,x
+sbc #0
 sta &71,x
 jsr set_carry_status
+jmp set_sign_zero_from_reg
+
+\ Compare 8 bit memory and register
+cmp_mem_reg_short:
+sec
+jsr sub_mem_reg_start
+sta &8E
+lda &71,x
+sbc #0
+sta #8F
+jsr set_carry_status
+ldx #15
 jmp set_sign_zero_from_reg
 
 \ Subtract 16 bit memory from register
@@ -409,11 +509,25 @@ sub_carry_mem_reg_long:
 jsr load_carry_status
 _sub_mem_reg_long:
 jsr sub_mem_reg_start
+sta &70,x
+iny
+lda &71,x
+sbc (&8E),y
+sta &71,x
+jsr set_carry_status
+jmp set_sign_zero_from_reg
+
+\ Compare 16 bit memory and register
+cmp_mem_reg_long:
+sec
+jsr sub_mem_reg_start
+sta &8E
 iny
 lda (&8E),y
 sbc &71,x
-sta &71,x
+sta &8F
 jsr set_carry_status
+ldx #15
 jmp set_sign_zero_from_reg
 
 \ Increment register
@@ -610,17 +724,24 @@ jmp set_sign_zero_from_reg
 call_subroutine:
 ldx #14
 jsr push_reg
-dey
-lda (&8C), y
+jsr get_mem_address
+lda &8E
 sec
 sbc #1
+sta &8C
+iny
+lda &8F
+sbc #0
+sta &8D
+rts
+
+call_6502:
+ldy #0
+lda (&8C), y
 pha
 iny
 lda (&8C), y
-sbc #0
-sta &8C
-pla
-sta &8C
+pha
 rts
 
 return:

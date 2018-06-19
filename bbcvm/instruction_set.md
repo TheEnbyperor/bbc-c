@@ -2,15 +2,15 @@
 
 ## Registers
 
-There are 15 registers available R0-R14. Each register is 16-bits long. R15 does exist but it is used by many instructions as a scratch space. Instructions that don't clobber R15 are marked as such.
+There are 15 registers available R0-R14. Each register is 16-bits long. R15 does exist but it is used by many instructions as a scratch space, as such its use is not recommended. Instructions that don't clobber R15 are marked as such.
 
 A few registers have special purposes.
 
-| Register | Purpose         |
-| -------- | --------------- |
-| R14      | Program counter |
-| R13      | Stack pointer   |
-| R12      | Status register |
+| Register | Purpose                |
+| -------- | ---------------------- |
+| R14      | Program counter        |
+| R13      | Stack pointer          |
+| R12      | Status register in LSB |
 
 The status register is as such, where X means not used.
 
@@ -38,6 +38,27 @@ When a memory value or constant is required in is stored in little-endian after 
 
 If the first bit of the instruction is 1 then the data after is purely instruction dependent and may be nothing (i.e. next instruction)
 
+## Addressing modes
+
+On instructions starting with a 0 the second register operand (first in memory) may be used to specify the addressing mode of the memory operand. It may be set as such:
+
+| Register operand (binary) |  Addressing mode  |
+| :-----------------------: | :---------------: |
+|           0000            | Absolute address  |
+|           0001            |   Relative add    |
+|           0010            | Relative subtract |
+|           0011            | Register indirect |
+
+When relative addressing is used it is relative to the address of start of the instruction.
+
+Register indirect allows using the value stored in a register plus a 12-bit signed offset. The data is stored in the memory location as such:
+
+| Bits 0-3        | Bits 4-7         | Bits 8-15        |
+| --------------- | ---------------- | ---------------- |
+| Register number | Offset value LSB | Offset value MSB |
+
+
+
 ## List of instructions
 
 The instructions available are similar to x86 16-bit mode, but with a few simplifications.
@@ -64,9 +85,9 @@ Moves the 8 bit value at the memory location into the LSB of the register and 0 
 
 None affected
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x01   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x01   | Addressing mode | Register number | Memory location |
 
 ### mov \<mem\>, \<reg\>
 
@@ -76,9 +97,9 @@ Moves the 16 bit value at the memory location into the register
 
 None affected
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x01   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x01   | Addressing mode | Register number | Memory location |
 
 ### movs \<reg\>, \<mem\>
 
@@ -88,9 +109,9 @@ Moves the LSB of the register to the memory location
 
 None affected
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x03   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x03   | Addressing mode | Register number | Memory location |
 
 ### mov \<reg\>, \<mem\>
 
@@ -100,9 +121,9 @@ Moves the register to the 16-bit memory location
 
 None affected
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x04   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x04   | Addressing mode | Register number | Memory location |
 
 ### mov \<reg\>, \<reg\>
 
@@ -154,9 +175,9 @@ Loads the address which data would be read from into the register. Not currently
 
 None affected
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-32    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x08   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-32    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x08   | Addressing mode | Register number | Memory location |
 
 ### sec
 
@@ -222,9 +243,9 @@ Adds the 8 bit value at the memory location into the the register and stores in 
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x0D   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x0D   | Addressing mode | Register number | Memory location |
 
 ### add \<mem\>, \<reg\>
 
@@ -234,9 +255,9 @@ Adds the 16 bit value at the memory location to the register and stores in the r
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x0F   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x0F   | Addressing mode | Register number | Memory location |
 
 ### adc \<const>, \<reg>
 
@@ -274,9 +295,9 @@ Adds the 8 bit value at the memory location plus the carry into the the register
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x0E   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x0E   | Addressing mode | Register number | Memory location |
 
 ### adc \<mem\>, \<reg\>
 
@@ -286,9 +307,9 @@ Adds the 16 bit value at the memory location plus the carry to the register and 
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x10   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x10   | Addressing mode | Register number | Memory location |
 
 ###  sub \<const>, \<reg>
 
@@ -326,9 +347,9 @@ Subtracts the 8 bit value at the memory location from the the register and store
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x15   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x15   | Addressing mode | Register number | Memory location |
 
 ### sub \<mem\>, \<reg\>
 
@@ -338,9 +359,9 @@ Subtracts the 16 bit value at the memory location from the register and stores i
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x17   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x17   | Addressing mode | Register number | Memory location |
 
 ### sbc \<const>, \<reg>
 
@@ -378,9 +399,9 @@ Subtracts the 8 bit value at the memory location and the carry from the the regi
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x16   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x16   | Addressing mode | Register number | Memory location |
 
 ### sbc \<mem\>, \<reg\>
 
@@ -390,9 +411,9 @@ Subtracts the 16 bit value at the memory location and the carry from the registe
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x18   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x18   | Addressing mode | Register number | Memory location |
 
 ### inc \<reg\>
 
@@ -458,9 +479,9 @@ Logical ands the 8 bit value at the memory location (LSB) and 0 (MSB) with the r
 
 Sign, zero, clears carry
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x1D   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x1D   | Addressing mode | Register number | Memory location |
 
 ### and \<mem\>, \<reg\>
 
@@ -470,9 +491,9 @@ Logical ands the 16 bit value at the memory location with the register and store
 
 Sign, zero, clears carry
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x1E   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x1E   | Addressing mode | Register number | Memory location |
 
 ### or \<const>, \<reg\>
 
@@ -510,9 +531,9 @@ Logical ors the 8 bit value at the memory location (LSB) and 0 (MSB) with the re
 
 Sign, zero, clears carry
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x21   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x21   | Addressing mode | Register number | Memory location |
 
 ### or \<mem\>, \<reg\>
 
@@ -522,9 +543,9 @@ Logical ors the 16 bit value at the memory location with the register and stores
 
 Sign, zero, clears carry
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x22   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x22   | Addressing mode | Register number | Memory location |
 
 ### xor \<const>, \<reg>
 
@@ -562,9 +583,9 @@ Logical xors the 8 bit value at the memory location (LSB) and 0 (MSB) with the r
 
 Sign, zero, clears carry
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x25   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x25   | Addressing mode | Register number | Memory location |
 
 ### xor \<mem\>, \<reg\>
 
@@ -574,9 +595,9 @@ Logical ands the 16 bit value at the memory location with the register and store
 
 Sign, zero, clears carry
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    |   Bits 16-31    |
-| :-----: | :-------: | :-------------: | :-------------: |
-|  0x26   | Anything  | Register number | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x26   | Addressing mode | Register number | Memory location |
 
 ### not \<reg>
 
@@ -606,6 +627,54 @@ Sign, zero
 | :-----: | :-------: | :-------------: |
 |  0x28   | Anything  | Register number |
 
+### cmp \<const>, \<reg\>
+
+Subtracts the constant value from the register but does not store. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
+
+| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
+| :-----: | :-------: | :-------------: | :--------: |
+|  0x29   | Anything  | Register number |  Constant  |
+
+### cmp \<reg>, \<reg>
+
+Subtracts the value in the first register from the second register but does not store. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
+
+| Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
+| :-----: | :--------------------: | :-------------------: |
+|  0x2A   | Second register number | First register number |
+
+### cmp \<mem\>, \<reg\>
+
+Subtracts the 8 bit value at the memory location from the the register but does not store. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x2B   | Addressing mode | Register number | Memory location |
+
+### cmp \<mem\>, \<reg\>
+
+Subtracts the 16 bit value at the memory location from the register but does not store. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x2C   | Addressing mode | Register number | Memory location |
+
 ### call \<mem\>
 
 Pushes the current program counter onto the stack and jumps to the memory location. Note this will not return to this instruction since the PC is incremented **before** a fetch.
@@ -614,9 +683,21 @@ Pushes the current program counter onto the stack and jumps to the memory locati
 
 None
 
-| Bit 0-7 |    Bits 8-15    |
-| :-----: | :-------------: |
-|  0x82   | Memory location |
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x2D   | Addressing mode |  Anything  | Memory location |
+
+### calln \<mem\>
+
+Performs a jsr to native 6502 code. The code at the location will return to the VM on rts.
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x2E   | Addressing mode |  Anything  | Memory location |
 
 ### ret
 
