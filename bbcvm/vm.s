@@ -233,21 +233,50 @@ iny
 sta (&8E), y
 rts
 
+push_start:
+lda &8A
+bne _push_start
+dec &8B
+_push_start:
+dec &8A
+rts
+
 \ Push register onto stack
 push_reg:
-lda &8A
-sec
-sbc #2
-sta &8A
-bcs _push_reg
-dec &8B
-_push_reg:
+jsr push_start
+jsr push_start
 lda &70,x
 ldy #0
 sta (&8A),y
 lda &71,x
 iny
 sta (&8A),y
+rts
+
+\ Push 8 bit memory location onto stack
+push_mem_short:
+jsr push_start
+jsr get_mem_address
+lda (&8E),y
+sta (&8A),y
+rts
+
+\ Push 16 bit memory location onto stack
+push_mem_long:
+jsr push_start
+jsr push_start
+lda (&8E),y
+sta (&8A),y
+iny
+lda (&8E),y
+sta (&8A),y
+rts
+
+pop_end:
+inc &8A
+bne _pop_reg
+inc &8B
+_pop_reg:
 rts
 
 \ Pop value off stack to register
@@ -258,12 +287,28 @@ sta &71,x
 dey
 lda (&8A),y
 sta &70,x
-inc &8A
-inc &8A
-bne _push_reg
-inc &8B
-_push_reg:
-rts
+jsr pop_end
+jmp pop_end
+
+\ Pop 8 bit value off stack to memory
+pop_mem_short:
+jsr get_mem_address
+ldy #1
+lda (&8A),y
+sta (&8E),y
+jmp pop_end
+
+\ Pop 16 bit value off stack to memory
+pop_mem_long:
+jsr get_mem_address
+ldy #1
+lda (&8A),y
+sta (&8E),y
+dey
+lda (&8A),y
+sta (&8E),y
+jsr pop_end
+jmp pop_end
 
 \ Load address into register
 load_address_reg:
@@ -495,7 +540,7 @@ jsr sub_mem_reg_start
 sta &8E
 lda &71,x
 sbc #0
-sta #8F
+sta &8F
 jsr set_carry_status
 ldx #15
 jmp set_sign_zero_from_reg

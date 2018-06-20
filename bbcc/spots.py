@@ -6,9 +6,6 @@ class Spot:
     def __init__(self, detail):
         self.detail = detail
 
-    def has_address(self):
-        return True
-
     def stack_offset(self):
         return 0
 
@@ -21,95 +18,78 @@ class Spot:
     def __hash__(self):
         return hash((self.__class__.__name__, self.detail))
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
+    def asm(self, size: int):
         raise NotImplementedError
 
 
 class LiteralSpot(Spot):
-    def __init__(self, value, value_type):
+    def __init__(self, value):
         super().__init__(value)
         self.value = value
-        self.type = value_type
 
     def has_address(self):
         return False
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        hex = asm.ASM.to_hex(self.value, self.type.size*2)
-        assembly.add_inst(inst, extra("#&" + hex[len(hex)-loc*2-2:len(hex)-loc*2]))
+    def asm(self, size: int):
+        return "#{}".format(self.value)
 
     def __repr__(self):
-        return '<LiteralSpot({type}:{value})>'.format(value=self.value, type=self.type)
+        return '<LiteralSpot({value})>'.format(value=self.value)
 
 
-class Pseudo16RegisterSpot(Spot):
-    def __init__(self, loc, value_type):
-        super().__init__(loc)
-        self.loc = loc
-        self.type = value_type
+class RegisterSpot(Spot):
+    def __init__(self, num):
+        super().__init__(num)
+        self.num = num
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        if loc not in [0, 1]:
-            raise NotImplementedError("16-bit pseudo register cannot be accessed at offset {}".format(loc))
-        assembly.add_inst(inst, extra("&" + asm.ASM.to_hex(self.loc+loc, 2)))
+    def asm(self, size: int):
+        return "%{}".format(self.num)
 
     def __repr__(self):
-        return '<Pseudo16RegisterSpot({type}:{loc})>'.format(loc=self.loc, type=self.type)
+        return f'<RegisterSpot({self.num})>'
 
 
-class AbsoluteMemorySpot(Spot):
-    def __init__(self, loc, value_type):
-        super().__init__(loc)
-        self.loc = loc
-        self.type = value_type
+class MemorySpot(Spot):
+    size_map = {1: "BYTE",
+                2: "WORD"}
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        assembly.add_inst(inst, extra("&" + asm.ASM.to_hex(self.loc+loc, 2)))
-
-    def __repr__(self):
-        return '<AbsoluteMemorySpot({type}:{pos})>'.format(pos=asm.ASM.to_hex(self.loc), type=self.type)
-
-
-class LabelMemorySpot(Spot):
-    def __init__(self, label, value_type):
-        super().__init__(label)
-        self.label = label
-        self.type = value_type
-
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        assembly.add_inst(inst, extra("{}({})".format(loc, self.label)))
-        return False
-
-    def __repr__(self):
-        return '<LabelMemorySpot({type}:{pos})>'.format(pos=self.label, type=self.type)
-
-
-class StackSpot(Spot):
-    def __init__(self, offset, value_type,):
-        super().__init__(offset)
+    def __init__(self, base, offset=0):
+        super().__init__((base, offset))
+        self.base = base
         self.offset = offset
-        self.type = value_type
 
-    def stack_offset(self):
-        return self.offset
+    def asm(self, size: int):
+        if isinstance(self.base, Spot):
+            base_str = self.base.asm(0)
+        else:
+            base_str = self.base
 
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(self.offset+loc)))
-        assembly.add_inst(inst, "(&{}),Y".format(assembly.to_hex(il.stack_register.loc)))
+        if self.offset == 0:
+            simple = base_str
+        elif self.offset > 0:
+            simple = f"{base_str}+{self.offset}"
+        else:
+            simple = f"{base_str}-{-self.offset}"
 
-    def __repr__(self):
-        return '<StackSpot({type}:{offset})>'.format(offset=self.offset, type=self.type)
-
-
-class BaseStackSpot(Spot):
-    def __init__(self, offset, value_type,):
-        super().__init__(offset)
-        self.offset = offset
-        self.type = value_type
-
-    def asm(self, assembly: asm.ASM, inst: str, loc: int, extra=lambda x: x):
-        assembly.add_inst("LDY", "#&{}".format(assembly.to_hex(self.offset+loc)))
-        assembly.add_inst(inst, "(&{}),Y".format(assembly.to_hex(il.base_register.loc)))
+        size_desc = self.size_map.get(size, "")
+        return f"{size_desc}[{simple}]"
 
     def __repr__(self):
-        return '<StackSpot({type}:{offset})>'.format(offset=self.offset, type=self.type)
+        return f'<MemorySpot({self.base}:{self.offset})>'
+
+
+R1 = RegisterSpot("r1")
+R2 = RegisterSpot("r2")
+R3 = RegisterSpot("r3")
+R4 = RegisterSpot("r4")
+R5 = RegisterSpot("r5")
+R6 = RegisterSpot("r6")
+R7 = RegisterSpot("r7")
+R8 = RegisterSpot("r8")
+R9 = RegisterSpot("r9")
+R10 = RegisterSpot("r10")
+
+registers = [R1, R2, R3, R4, R5, R6, R7, R8, R9]
+
+RBP = RegisterSpot("r11")
+RSP = RegisterSpot("r13")

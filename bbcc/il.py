@@ -5,12 +5,7 @@ from . import ast
 from . import spots
 from . import ctypes
 
-pseudo_registers = [asm.ASM.preg1, asm.ASM.preg2, asm.ASM.preg3, asm.ASM.preg4, asm.ASM.preg5,
-                    asm.ASM.preg6, asm.ASM.preg7, asm.ASM.preg8, asm.ASM.preg9, asm.ASM.preg10,
-                    asm.ASM.preg11, asm.ASM.preg12, asm.ASM.preg13, asm.ASM.preg14]
-return_register = asm.ASM.preg1
-stack_register = spots.Pseudo16RegisterSpot(asm.ASM.cstck, ctypes.unsig_int)
-base_register = spots.Pseudo16RegisterSpot(asm.ASM.bstck, ctypes.unsig_int)
+return_register = spots.R1
 
 
 class ILValue:
@@ -89,13 +84,8 @@ class Set(ILInst):
         value = spotmap[self.value]
         output = spotmap[self.output]
 
-        if output.has_address() and value != output:
-            for i in range(output.type.size):
-                if i < value.type.size:
-                    value.asm(assembly, "LDA", i)
-                else:
-                    assembly.add_inst("LDA", "#0")
-                output.asm(assembly, "STA", i)
+        if value != output:
+            assembly.add_inst(asm.Mov(value, output, self.output.type.size))
 
 
 class ReadAt(ILInst):
@@ -298,17 +288,14 @@ class Return(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         if self.value is not None:
             value = spotmap[self.value]
-            ret_reg = spots.Pseudo16RegisterSpot(return_register, value.type)
 
-            if value != ret_reg:
-                for i in range(ret_reg.type.size):
-                    value.asm(assembly, "LDA", i)
-                    ret_reg.asm(assembly, "STA", i)
+            if value != return_register:
+                assembly.add_inst(asm.Mov(value, return_register, self.value.type.size))
 
         used_regs = []
         for v in spotmap.values():
-            if isinstance(v, spots.Pseudo16RegisterSpot):
-                if v not in used_regs and v.loc != return_register:
+            if isinstance(v, spots.RegisterSpot):
+                if v not in used_regs and v != return_register:
                     used_regs.append(v)
 
         for r in used_regs[::-1]:
@@ -317,17 +304,10 @@ class Return(ILInst):
             assembly.add_inst("JSR", "_bbcc_pulla")
             r.asm(assembly, "STA", 0)
 
-        base_register.asm(assembly, "LDA", 0)
-        stack_register.asm(assembly, "STA", 0)
-        base_register.asm(assembly, "LDA", 1)
-        stack_register.asm(assembly, "STA", 1)
+        assembly.add_inst(asm.Mov(spots.RBP, spots.RSP, 2))
+        assembly.add_inst(asm.Pop(spots.RBP, None, 2))
 
-        assembly.add_inst("JSR", "_bbcc_pulla")
-        base_register.asm(assembly, "STA", 1)
-        assembly.add_inst("JSR", "_bbcc_pulla")
-        base_register.asm(assembly, "STA", 0)
-
-        assembly.add_inst("RTS")
+        assembly.add_inst(asm.Ret())
 
 
 class CallFunction(ILInst):
@@ -1240,20 +1220,17 @@ class IL:
         self.functions[self.current_function].append(command)
 
     def gen_asm(self):
-        self.assembly.add_inst(".import", "_bbcc_pusha")
-        self.assembly.add_inst(".import", "_bbcc_pulla")
-
         global_spotmap = self._get_global_spotmap()
 
-        # self._print_spotmap(global_spotmap)
+        self._print_spotmap(global_spotmap)
 
         for func in self.functions:
-            self.assembly.add_comment("Function: {}".format(func))
-            self.assembly.add_inst(label=func)
+            self.assembly.add_inst(asm.Comment("Function: {}".format(func)))
+            self.assembly.add_inst(asm.Label(func))
             self._gen_asm(self.functions[func], global_spotmap)
 
     def _gen_asm(self, commands, global_spotmap):
-        # self._print_commands(commands)
+        self._print_commands(commands)
         offset = 0
         free_values = self._get_free_values(commands, global_spotmap)
 
@@ -1267,7 +1244,7 @@ class IL:
 
         for v in free_values:
             if v.stack_offset is not None:
-                global_spotmap[v] = spots.BaseStackSpot(v.stack_offset, v.type)
+                global_spotmap[v] = spots.MemorySpot(spots.RBP, v.stack_offset)
                 free_values.remove(v)
 
         for v in free_values:
@@ -1277,7 +1254,7 @@ class IL:
         for v in move_to_mem:
             if v in free_values:
                 offset += v.type.size
-                global_spotmap[v] = spots.StackSpot(offset, v.type)
+                global_spotmap[v] = spots.MemorySpot(spots.RSP, offset)
                 free_values.remove(v)
 
         live_vars = self._get_live_vars(commands, free_values)
@@ -1330,27 +1307,20 @@ class IL:
         for v in global_spotmap:
             spotmap[v] = global_spotmap[v]
 
-        # self._print_spotmap(spotmap)
+        self._print_spotmap(spotmap)
 
         self._gen_func(commands, spotmap, live_vars)
 
     def _gen_func(self, commands, spotmap, live_vars):
         max_offset = max(spot.stack_offset() for spot in spotmap.values())
 
-        base_register.asm(self.assembly, "LDA", 0)
-        self.assembly.add_inst("JSR", "_bbcc_pusha")
-        base_register.asm(self.assembly, "LDA", 1)
-        self.assembly.add_inst("JSR", "_bbcc_pusha")
-
-        stack_register.asm(self.assembly, "LDA", 0)
-        base_register.asm(self.assembly, "STA", 0)
-        stack_register.asm(self.assembly, "LDA", 1)
-        base_register.asm(self.assembly, "STA", 1)
+        self.assembly.add_inst(asm.Push(spots.RBP, None, 2))
+        self.assembly.add_inst(asm.Mov(spots.RSP, spots.RBP, 2))
 
         used_regs = []
         for v in spotmap.values():
-            if isinstance(v, spots.Pseudo16RegisterSpot):
-                if v not in used_regs and v.loc != return_register:
+            if isinstance(v, spots.RegisterSpot):
+                if v not in used_regs and v != return_register:
                     used_regs.append(v)
 
         for r in used_regs:
@@ -1370,7 +1340,7 @@ class IL:
             stack_register.asm(self.assembly, "STA", 1)
 
         for i, c in enumerate(commands):
-            self.assembly.add_comment(str(type(c).__name__))
+            self.assembly.add_inst(asm.Comment(type(c).__name__))
 
             def get_reg(pref=None, conf=None):
                 if not pref:
@@ -1387,8 +1357,8 @@ class IL:
                 # Spot is bad if it is listed as a conflicting spot.
                 bad_spots |= set(conf)
 
-                for s in (pref + pseudo_registers):
-                    if s not in map(lambda b: b.loc if isinstance(b, spots.Pseudo16RegisterSpot) else None, bad_spots):
+                for s in (pref + spots.registers):
+                    if s not in bad_spots:
                         return s
 
                 raise RuntimeError("get_reg can't find register")
@@ -1441,7 +1411,7 @@ class IL:
     def _simplify_once(nodes, g):
         for v in nodes:
             # If the node has low conflict degree remove it from the graph
-            if len(g.confs(v)) < len(pseudo_registers):
+            if len(g.confs(v)) < len(spots.registers):
                 return g.pop(v)
 
     def _coalesce_all(self, merged_nodes, g):
@@ -1477,7 +1447,7 @@ class IL:
                     for T in g.confs(v1):
                         if v2 in g.confs(T):
                             continue
-                        if len(g.confs(T)) < len(pseudo_registers):
+                        if len(g.confs(T)) < len(spots.registers):
                             continue
                         break
                     else:
@@ -1486,7 +1456,7 @@ class IL:
                         return v2, v1
 
                 # Otherwise, apply regular merging rules.
-                elif total_confs < len(pseudo_registers):
+                elif total_confs < len(spots.registers):
                     g.merge(v1, v2)
                     return v1, v2
 
@@ -1537,7 +1507,7 @@ class IL:
 
             # Allocate register to node `n`
             n1 = removed_nodes.pop()
-            regs = pseudo_registers[::-1]
+            regs = spots.registers[::-1]
 
             # If n1 is a Spot (i.e. dummy node), immediately assign it a
             # register.
@@ -1559,9 +1529,6 @@ class IL:
             for n2 in get_merged(n1):
                 spotmap[n2] = reg
 
-        for s in spotmap:
-            spotmap[s] = spots.Pseudo16RegisterSpot(spotmap[s], s.type)
-
         return spotmap
 
     def _get_global_spotmap(self):
@@ -1569,27 +1536,29 @@ class IL:
         funcs = [n for n in self.functions.keys()]
 
         for i, v in self.literals.items():
-            spotmap[i] = spots.LiteralSpot(v, i.type)
+            spotmap[i] = spots.LiteralSpot(v)
 
         for i, v in self.string_literals.items():
             label = self.get_label()
-            self.assembly.add_inst(".byte", ",".join(["&{}".format(self.assembly.to_hex(b)) for b in v.encode()]), label=label)
-            spotmap[i] = spots.LabelMemorySpot(label, i.type)
+            self.assembly.add_inst(asm.Label(label))
+            self.assembly.add_inst(asm.Bytes(v.encode()))
+            spotmap[i] = spots.MemorySpot(label)
 
         for n, s in self.symbol_table.symbols.items():
             if s.storage == ast.DeclInfo.EXTERN:
-                self.assembly.add_inst(".import", n)
+                self.assembly.add_import(n)
             else:
                 if s.storage != ast.DeclInfo.STATIC:
                     if s.type.is_function() and s.name not in funcs:
-                        self.assembly.add_inst(".import", n)
+                        self.assembly.add_import(n)
                     else:
-                        self.assembly.add_inst(".export", n)
+                        self.assembly.add_export(n)
                 if not s.type.is_function():
                     v = s.il_value
                     label = self.get_label()
-                    spotmap[v] = spots.LabelMemorySpot(label, v.type)
-                    self.assembly.add_inst(".byte", ("&00," * v.type.size).rstrip(","), label=label)
+                    spotmap[v] = spots.MemorySpot(label)
+                    self.assembly.add_inst(asm.Label(label))
+                    self.assembly.add_inst(asm.Bytes([0 for _ in range(v.type.size)]))
 
         return spotmap
 

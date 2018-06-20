@@ -4,13 +4,15 @@
 
 There are 15 registers available R0-R14. Each register is 16-bits long. R15 does exist but it is used by many instructions as a scratch space, as such its use is not recommended. Instructions that don't clobber R15 are marked as such.
 
-A few registers have special purposes.
+A few registers have special purposes. Note the base pointer and return register are not enforced anywhere in the VM, they are just convention.
 
 | Register | Purpose                |
 | -------- | ---------------------- |
 | R14      | Program counter        |
 | R13      | Stack pointer          |
 | R12      | Status register in LSB |
+| R11      | Base pointer           |
+| R1       | Return register        |
 
 The status register is as such, where X means not used.
 

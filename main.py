@@ -1,5 +1,5 @@
 import bbcc
-import bbcasm
+import bbcvmasm
 import bbcld
 import bbcdisk
 import bbctape
@@ -16,7 +16,7 @@ def compile_c(text: str, out: str):
 
 
 def assemble_s(text: str, name: str):
-    out = bbcasm.asm_to_object(text)
+    out = bbcvmasm.asm_to_object(text)
     obj_file = open(name, "wb")
     obj_file.write(out)
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     if first_e == ".c":
         for n, s in source_files:
-            if args.output == "" or not args.S:
+            if args.output is None:
                 name = "{}.s".format(n[0])
             else:
                 name = args.output
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
             if not args.S:
                 sourceFile = open(name, "r")
-                if args.output == "" or not args.c:
+                if args.output is None:
                     name = "{}.o".format(n[0])
                 else:
                     name = args.output
