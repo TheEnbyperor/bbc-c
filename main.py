@@ -1,6 +1,6 @@
 import bbcc
 import bbcvmasm
-import bbcld
+import bbcvmld
 import bbcdisk
 import bbctape
 import sys
@@ -29,7 +29,7 @@ def link_o(arg, *args, **kwargs):
 
 
 def link_o_static(objs, name: str):
-    out, exa = bbcld.link_object_files_static(objs, 0x1900)
+    out, exa = bbcvmld.link_object_files_static(objs)
 
     out_file = open(name, "wb")
     out_file.write(out)

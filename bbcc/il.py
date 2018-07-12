@@ -1302,7 +1302,7 @@ class IL:
 
         for v in spilled_nodes:
             offset += v.type.size
-            global_spotmap[v] = spots.StackSpot(offset, v.type)
+            global_spotmap[v] = spots.MemorySpot(spots.RSP, offset)
 
         for v in global_spotmap:
             spotmap[v] = global_spotmap[v]
@@ -1324,13 +1324,9 @@ class IL:
                     used_regs.append(v)
 
         for r in used_regs:
-            r.asm(self.assembly, "LDA", 0)
-            self.assembly.add_inst("JSR", "_bbcc_pusha")
-            r.asm(self.assembly, "LDA", 1)
-            self.assembly.add_inst("JSR", "_bbcc_pusha")
-
+            self.assembly.add_inst(asm.Push(r, None, 0))
         if max_offset != 0:
-            offset_spot = spots.LiteralSpot(max_offset, ctypes.unsig_int)
+            offset_spot = spots.LiteralSpot(max_offset)
             self.assembly.add_inst("SEC")
             stack_register.asm(self.assembly, "LDA", 0)
             offset_spot.asm(self.assembly, "SBC", 0)
@@ -1555,7 +1551,7 @@ class IL:
                         self.assembly.add_export(n)
                 if not s.type.is_function():
                     v = s.il_value
-                    label = self.get_label()
+                    label = s.name
                     spotmap[v] = spots.MemorySpot(label)
                     self.assembly.add_inst(asm.Label(label))
                     self.assembly.add_inst(asm.Bytes([0 for _ in range(v.type.size)]))

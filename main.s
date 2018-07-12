@@ -1,4 +1,7 @@
+.export out
 .export main
+out:
+.byte #0,#0,#0,#0,#0
 \ Function: main
 main:
 	push %r11

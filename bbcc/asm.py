@@ -65,7 +65,7 @@ class Bytes:
         self.data = data
 
     def __str__(self):
-        return ".byte " + ",".join(["${}".format(ASM.to_hex(b)) for b in self.data])
+        return ".byte " + ",".join(["#{}".format(b) for b in self.data])
 
 
 class Mov(_Inst):

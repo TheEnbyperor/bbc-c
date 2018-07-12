@@ -2,6 +2,21 @@ class ASTNode:
     pass
 
 
+class RegisterValue(ASTNode):
+    def __init__(self, reg_num):
+        self.reg_num = reg_num
+
+
+class LiteralValue(ASTNode):
+    def __init__(self, val):
+        self.val = val
+
+
+class LabelValue(ASTNode):
+    def __init__(self, label):
+        self.label = label
+
+
 class TranslationUnit(ASTNode):
     def __init__(self, items):
         self.items = items
@@ -17,14 +32,19 @@ class ExportCommand(ASTNode):
         self.label = label
 
 
-class RegisterValue(ASTNode):
-    def __init__(self, reg_num):
-        self.reg_num = reg_num
+class ImportCommand(ASTNode):
+    def __init__(self, label):
+        self.label = label
 
 
-class LiteralValue(ASTNode):
-    def __init__(self, val):
-        self.val = val
+class Bytes(ASTNode):
+    def __init__(self, bytes):
+        self.bytes = bytes
+
+
+class Call(ASTNode):
+    def __init__(self, value):
+        self.value = value
 
 
 class Push(ASTNode):
