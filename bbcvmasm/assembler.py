@@ -2,6 +2,7 @@ import struct
 from . import ast
 
 
+# noinspection PyArgumentList
 class Assembler:
     def __init__(self, ast):
         self.ast = ast
@@ -83,11 +84,11 @@ class Assembler:
             label = value.label
             if label in self.labels:
                 if self.labels[label] < self.loc:
-                    am = 0x2
-                    mv = self.loc - self.labels[label]
-                else:
                     am = 0x1
-                    mv = self.labels[label] - self.loc
+                    mv = ml - self.labels[label]
+                else:
+                    am = 0x2
+                    mv = self.labels[label] - ml
             elif label in self.imported_labels:
                 self.imports.append((self.loc, al, al2, ml, label))
             else:
@@ -105,6 +106,11 @@ class Assembler:
 
     @setup_labels
     def visit_Ret(self, node):
+        self.insts.append(0x82)
+        self.loc += 1
+
+    @setup_labels
+    def visit_Exit(self, node):
         self.insts.append(0x83)
         self.loc += 1
 
@@ -130,7 +136,7 @@ class Assembler:
     def visit_Mov(self, node):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x05)
-            self.insts.append(((node.left.reg_num & 0x0F) << 4) | (node.right.reg_num & 0x0F))
+            self.insts.append(((node.right.reg_num & 0x0F) << 4) | (node.left.reg_num & 0x0F))
             self.loc += 2
         elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x00)

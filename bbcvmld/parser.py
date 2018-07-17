@@ -2,10 +2,11 @@ import struct
 
 
 class Executable:
-    def __init__(self, imports, exports, code):
+    def __init__(self, imports, exports, code, pos=0):
         self.exports = exports
         self.imports = imports
         self.code = code
+        self.pos = pos
 
     def __repr__(self):
         return f"<Executable:{self.exports}:{self.imports}:{self.code}>"

@@ -32,13 +32,15 @@ class Linker:
             lib = self._find_lib(s)
             if lib is None:
                 raise LookupError("Symbol {} not exported anywhere".format(s))
-            self._load_exports(lib)
+            lib = self._load_exports(lib)
             self.executables.append(lib)
 
     def _load_exports(self, e):
         for n, l in e.exports.items():
             self.defined_symbols[n] = l + self.pos
+        e.pos = self.pos
         self.pos += len(e.code)
+        return e
 
     def _get_symbols(self, static):
         for e in self.executables:
@@ -48,7 +50,7 @@ class Linker:
     def _parse_obj(self, obj):
         p = parser.Parser(obj)
         e = p.parse()
-        self._load_exports(e)
+        e = self._load_exports(e)
         self.executables.append(e)
 
     def link_static(self):
@@ -62,12 +64,13 @@ class Linker:
             code = bytearray(e.code)
             for i in e.imports:
                 s_addr = self.defined_symbols[i[0]]
-                if s_addr < i[1]:
-                    am = 0x2
-                    mv = i[1] - s_addr
-                else:
+                pos = i[4] + e.pos
+                if s_addr < pos:
                     am = 0x1
-                    mv = s_addr - i[1]
+                    mv = pos - s_addr
+                else:
+                    am = 0x2
+                    mv = s_addr - pos
 
                 lal = i[2]
                 if i[3] == 0:
@@ -83,4 +86,11 @@ class Linker:
         if start_symbol is None:
             raise LookupError("No _start symbol, don't know where to start execution")
 
-        return out, start_symbol
+        cur_dir = os.path.dirname(__file__)
+        with open(os.path.join(cur_dir, "start.o"), "rb") as f:
+            start_o = bytearray(f.read())
+
+        start_o.extend([0x2F, 0x20])
+        start_o.extend(struct.pack("<h", start_symbol + 2))  # 2 is length of jump instruction excluding address
+
+        return start_o + out

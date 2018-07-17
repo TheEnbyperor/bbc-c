@@ -94,7 +94,7 @@ class Parser:
         return ast.Label(self.tokens[index-2].value), index
 
     def parse_inst(self, index):
-        insts = [self.parse_push, self.parse_pop, self.parse_ret, self.parse_call, self.parse_mov]
+        insts = [self.parse_push, self.parse_pop, self.parse_ret, self.parse_call, self.parse_mov, self.parse_exit]
 
         for inst in insts:
             try:
@@ -116,6 +116,10 @@ class Parser:
     def parse_ret(self, index):
         index = self.eat_id(index, "ret")
         return ast.Ret(), index
+
+    def parse_exit(self, index):
+        index = self.eat_id(index, "exit")
+        return ast.Exit(), index
 
     def parse_call(self, index):
         index = self.eat_id(index, "call")

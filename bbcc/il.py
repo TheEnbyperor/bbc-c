@@ -5,7 +5,7 @@ from . import ast
 from . import spots
 from . import ctypes
 
-return_register = spots.R1
+return_register = spots.R0
 
 
 class ILValue:

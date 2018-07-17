@@ -7,7 +7,7 @@ main:
 	push %r11
 	mov %r13, %r11
 \ Set
-	mov #42, %r1
+	mov #42, %r0
 \ Set
 \ Return
 	mov %r11, %r13

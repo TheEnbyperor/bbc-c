@@ -12,7 +12,7 @@ A few registers have special purposes. Note the base pointer and return register
 | R13      | Stack pointer          |
 | R12      | Status register in LSB |
 | R11      | Base pointer           |
-| R1       | Return register        |
+| R0       | Return register        |
 
 The status register is as such, where X means not used.
 
@@ -42,16 +42,16 @@ If the first bit of the instruction is 1 then the data after is purely instructi
 
 ## Addressing modes
 
-On instructions starting with a 0 the second register operand (first in memory) may be used to specify the addressing mode of the memory operand. It may be set as such:
+On instructions with a 0 in the first bit location the second register operand (first in memory) may sometimes be used to specify the addressing mode of the memory operand. It may be set as such:
 
 | Register operand (binary) |  Addressing mode  |
 | :-----------------------: | :---------------: |
 |           0000            | Absolute address  |
-|           0001            |   Relative add    |
-|           0010            | Relative subtract |
+|           0001            | Relative subtract |
+|           0010            |   Relative add    |
 |           0011            | Register indirect |
 
-When relative addressing is used it is relative to the address of start of the instruction.
+When relative addressing is used it is relative to the address of memory location/offset.
 
 Register indirect allows using the value stored in a register plus a 12-bit signed offset. The data is stored in the memory location as such:
 
@@ -689,6 +689,18 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x2D   | Addressing mode |  Anything  | Memory location |
 
+### jmp \<mem\>
+
+Jumps to the memory location. 
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x2F   | Addressing mode |  Anything  | Memory location |
+
 ### calln \<mem\>
 
 Performs a jsr to native 6502 code. The code at the location will return to the VM on rts.
@@ -704,6 +716,18 @@ None
 ### ret
 
 Pops the program counter off the stack and continues at that address + 1.
+
+#### Flags
+
+None
+
+| Bit 0-7 |
+| :-----: |
+|  0x82   |
+
+### exit
+
+Exit the VM by performing a rts in 6502 land.
 
 #### Flags
 

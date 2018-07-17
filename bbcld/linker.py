@@ -86,6 +86,7 @@ class Linker:
         if start_symbol is None:
             raise LookupError("No _start symbol, don't know where to start execution")
 
+        print(start_symbol)
         return out, start_symbol[1]
 
     def link_shared(self, stip):

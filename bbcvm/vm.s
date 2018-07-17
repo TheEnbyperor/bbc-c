@@ -1,4 +1,4 @@
-.export _start
+.export _start_vm
 
 inst_jump_table_l:
 .byte #0(mov_const_reg-1), #0(mov_mem_reg_short-1), #0(mov_mem_reg_long-1), #0(mov_reg_mem_short-1),
@@ -11,7 +11,7 @@ inst_jump_table_l:
       #0(and_mem_reg_long-1), #0(or_const_reg-1), #0(or_reg_reg-1), #0(or_mem_reg_short-1), #0(or_mem_reg_long-1),
       #0(xor_const_reg-1), #0(xor_reg_reg-1), #0(xor_mem_reg_short-1), #0(xor_mem_reg_long-1), #0(not_reg-1),
       #0(neg_reg-1), #0(cmp_const_reg-1), #0(cmp_reg_reg-1), #0(cmp_mem_reg_short-1), #0(cmp_mem_reg_long-1),
-      #0(call_subroutine-1), #0(call_6502-1)
+      #0(call_subroutine-1), #0(call_6502-1), #0(jump-1)
 
 inst_jump_table_h:
 .byte #1(mov_const_reg-1), #1(mov_mem_reg_short-1), #1(mov_mem_reg_long-1), #1(mov_reg_mem_short-1),
@@ -24,20 +24,23 @@ inst_jump_table_h:
       #1(and_mem_reg_long-1), #1(or_const_reg-1), #1(or_reg_reg-1), #1(or_mem_reg_short-1), #1(or_mem_reg_long-1),
       #1(xor_const_reg-1), #1(xor_reg_reg-1), #1(xor_mem_reg_short-1), #1(xor_mem_reg_long-1), #1(not_reg-1),
       #1(neg_reg-1), #1(cmp_const_reg-1), #1(cmp_reg_reg-1), #1(cmp_mem_reg_short-1), #1(cmp_mem_reg_long-1),
-      #1(call_subroutine-1), #1(call_6502-1)
+      #1(call_subroutine-1), #1(call_6502-1), #1(jump-1)
 
 other_inst_jump_table_l:
-.byte #0(set_carry-1), #0(clear_carry-1), #0(return-1)
+.byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1)
 
 other_inst_jump_table_h:
-.byte #1(set_carry-1), #1(clear_carry-1), #1(return-1)
+.byte #1(set_carry-1), #1(clear_carry-1), #1(return-1), #1(exit_vm-1)
 
-_start:
-\ Load PC
+_start_vm:
+\ Load PC and put back on stack
 pla
 sta &8C
 pla
 sta &8D
+pha
+lda &8C
+pha
 
 \ Set SP and status register
 lda #&00
@@ -91,6 +94,7 @@ tax
 
 \ Load second register operand
 tya
+and #&F0
 lsr a
 lsr a
 lsr a
@@ -104,7 +108,7 @@ other_inst:
 
 \ Set top bit to 0
 txa
-and &7f
+and #&7f
 tax
 
 \ Load jump address
@@ -119,6 +123,7 @@ rts
 \ Helper: Load address to scratch register
 get_mem_address:
 tya
+lsr a
 beq _get_mem_absolute
 cmp #&01
 beq _get_mem_rel_minus
@@ -192,14 +197,15 @@ sta &70,x
 iny
 lda (&8C),y
 sta &71,x
+jsr inc_pc
 jmp inc_pc
 
 \ Moves register to register
 mov_reg_reg:
 lda &70,x
-sta &0071,y
-lda &71,x
 sta &0070,y
+lda &71,x
+sta &0071,y
 rts
 
 \ Load a 8 bit value from memory into a register
@@ -767,16 +773,20 @@ sta &71,x
 jmp set_sign_zero_from_reg
 
 call_subroutine:
-ldx #14
+jsr get_mem_address
+ldx #&1C
 jsr push_reg
+lda &8E
+sta &8C
+lda &8F
+sta &8D
+rts
+
+jump:
 jsr get_mem_address
 lda &8E
-sec
-sbc #1
 sta &8C
-iny
 lda &8F
-sbc #0
 sta &8D
 rts
 
@@ -790,5 +800,12 @@ pha
 rts
 
 return:
-ldx #14
+ldx #&1C
 jmp pop_reg
+
+exit_vm:
+pla
+pla
+pla
+pla
+rts

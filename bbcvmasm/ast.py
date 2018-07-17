@@ -66,3 +66,8 @@ class Mov(ASTNode):
 class Ret(ASTNode):
     def __init__(self):
         pass
+
+
+class Exit(ASTNode):
+    def __init__(self):
+        pass

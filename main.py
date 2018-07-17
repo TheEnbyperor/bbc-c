@@ -1,5 +1,7 @@
 import bbcc
+import bbcasm
 import bbcvmasm
+import bbcld
 import bbcvmld
 import bbcdisk
 import bbctape
@@ -15,30 +17,42 @@ def compile_c(text: str, out: str):
     asm_file.write(asm)
 
 
-def assemble_s(text: str, name: str):
-    out = bbcvmasm.asm_to_object(text)
+def assemble_s(text: str, name: str, arg):
+    if getattr(arg, "6502", False):
+        out = bbcasm.asm_to_object(text)
+    else:
+        out = bbcvmasm.asm_to_object(text)
     obj_file = open(name, "wb")
     obj_file.write(out)
 
 
 def link_o(arg, *args, **kwargs):
     if arg.static:
-        link_o_static(*args, **kwargs)
+        link_o_static(arg, *args, **kwargs)
     elif arg.shared:
-        link_o_shared(arg.strip, *args, **kwargs)
+        link_o_shared(arg, *args, **kwargs)
 
 
-def link_o_static(objs, name: str):
-    out, exa = bbcvmld.link_object_files_static(objs)
+def link_o_static(arg, objs, name: str):
+    exa = 0
+    if getattr(arg, "6502", False):
+        out, exa = bbcld.link_object_files_static(objs, 0x1900)
+    else:
+        out = bbcvmld.link_object_files_static(objs)
 
     out_file = open(name, "wb")
     out_file.write(out)
-    make_tape(name, name, 0x1900, exa, out)
-    make_disk([["$.{}".format(name.upper()), out, 0x1900, exa]], name)
+
+    if getattr(arg, "6502", False):
+        make_tape(name, name, 0x1900, exa, out)
+        make_disk([["$.{}".format(name.upper()), out, 0x1900, exa]], name)
 
 
-def link_o_shared(strip, objs, name: str):
-    out = bbcld.link_object_files_shared(objs, strip)
+def link_o_shared(arg, objs, name: str):
+    if getattr(arg, "6502", False):
+        out = bbcld.link_object_files_shared(objs, arg.strip)
+    else:
+        out = bbcvmld.link_object_files_shared(objs, arg.strip)
 
     out_file = open(name, "wb")
     out_file.write(out)
@@ -66,6 +80,7 @@ if __name__ == "__main__":
     parser.add_argument("-shared", help="Create a shared library", action="store_true")
     parser.add_argument("-static", help="Create a statically linked executable", action="store_true")
     parser.add_argument("-strip", help="Strip names of internal symbols", action="store_true")
+    parser.add_argument("-6502", help="Assemble and link (not compile) for 6502 instead of VM", action="store_true")
     parser.add_argument("files", nargs="+", help="Input files", type=str)
 
     args = parser.parse_args()
@@ -101,7 +116,7 @@ if __name__ == "__main__":
                     name = "{}.o".format(n[0])
                 else:
                     name = args.output
-                assemble_s(sourceFile.read(), name)
+                assemble_s(sourceFile.read(), name, args)
                 sourceFile.close()
 
         if not args.c and not args.S:
@@ -125,7 +140,7 @@ if __name__ == "__main__":
                 name = "{}.o".format(n[0])
             else:
                 name = args.output
-            assemble_s(s.decode(), name)
+            assemble_s(s.decode(), name, args)
 
         if not args.c and not args.S:
             files = []
