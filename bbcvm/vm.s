@@ -121,6 +121,8 @@ pha
 rts
 
 \ Helper: Load address to scratch register
+_get_mem_address_temp: .byte #0
+_get_mem_address_temp2: .byte #0
 get_mem_address:
 tya
 lsr a
@@ -162,28 +164,49 @@ adc (&8C),y
 sta &8F
 jmp _get_mem_address
 _get_mem_indirect:
+txa
+pha
 ldy #1
 lda (&8C), y
+and #&F0
 lsr a
 lsr a
 lsr a
-lsr a
-php
-asl a
 tax
 lda (&8C), y
 and #&0F
+sta _get_mem_address_temp
+iny
+lda (&8C), y
+and &0F
+asl a
+asl a
+asl a
+asl a
+ora _get_mem_address_temp
+sta _get_mem_address_temp
+lda (&8C), y
+asl a
+php
+ror a
+lsr a
+lsr a
+lsr a
+lsr a
 plp
 bcc _get_mem_indirect_2
 ora #&F0
 _get_mem_indirect_2:
+sta _get_mem_address_temp2
+lda _get_mem_address_temp
 clc
 adc &70,x
 sta &8E
-iny
-lda (&8C), y
+lda _get_mem_address_temp2
 adc &71,x
 sta &8F
+pla
+tax
 _get_mem_address:
 jsr inc_pc
 ldy #0
@@ -393,6 +416,7 @@ adc (&8C),y
 sta &71,x
 jsr set_carry_status
 jsr set_sign_zero_from_reg
+jsr inc_pc
 jmp inc_pc
 
 \ Add register to register
@@ -418,6 +442,7 @@ jsr get_mem_address
 lda (&8E),y
 adc &70,x
 sta &70,x
+rts
 
 \ Add 8 bit memory to register
 add_mem_reg_short:
@@ -468,6 +493,7 @@ sbc (&8C),y
 sta &71,x
 jsr set_carry_status
 jsr set_sign_zero_from_reg
+jsr inc_pc
 jmp inc_pc
 
 \ Compare constant and register
@@ -484,6 +510,7 @@ sta &8F
 jsr set_carry_status
 ldx #15
 jsr set_sign_zero_from_reg
+jsr inc_pc
 jmp inc_pc
 
 \ Subtract register from register
@@ -610,6 +637,7 @@ and (&8C),y
 sta &71,x
 jsr set_sign_zero_from_reg
 jsr clear_carry
+jsr inc_pc
 jmp inc_pc
 
 \ Logical and register and register
@@ -661,6 +689,7 @@ ora (&8C),y
 sta &71,x
 jsr set_sign_zero_from_reg
 jsr clear_carry
+jsr inc_pc
 jmp inc_pc
 
 \ Logical or register and register
@@ -710,6 +739,7 @@ eor (&8C),y
 sta &71,x
 jsr set_sign_zero_from_reg
 jsr clear_carry
+jsr inc_pc
 jmp inc_pc
 
 \ Logical xor register and register
@@ -791,13 +821,17 @@ sta &8D
 rts
 
 call_6502:
-ldy #0
-lda (&8C), y
+jsr get_mem_address
+txa
 pha
-iny
-lda (&8C), y
-pha
+lda &70,x
+jsr _call_6502
+pla
+tax
+sta &70,x
 rts
+_call_6502:
+jmp (&8E)
 
 return:
 ldx #&1C

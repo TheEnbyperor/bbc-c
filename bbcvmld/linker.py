@@ -22,7 +22,7 @@ class Linker:
             parse = parser.Parser(lib_source)
             try:
                 obj = parse.parse()
-                if symbol_name in s.exports:
+                if symbol_name in obj.exports:
                     return obj
             except SyntaxError:
                 pass

@@ -12,6 +12,13 @@ class LiteralValue(ASTNode):
         self.val = val
 
 
+class MemoryValue(ASTNode):
+    def __init__(self, const_loc, reg_indirect, length):
+        self.const_loc = const_loc
+        self.reg_indirect = reg_indirect
+        self.length = length
+
+
 class LabelValue(ASTNode):
     def __init__(self, label):
         self.label = label
@@ -47,6 +54,12 @@ class Call(ASTNode):
         self.value = value
 
 
+class Calln(ASTNode):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+
 class Push(ASTNode):
     def __init__(self, value):
         self.value = value
@@ -58,6 +71,12 @@ class Pop(ASTNode):
 
 
 class Mov(ASTNode):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+
+class Add(ASTNode):
     def __init__(self, left, right):
         self.left = left
         self.right = right

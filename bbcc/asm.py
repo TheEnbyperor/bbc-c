@@ -72,6 +72,18 @@ class Mov(_Inst):
     name = "mov"
 
 
+class Call(_Inst):
+    name = "call"
+
+
+class Sub(_Inst):
+    name = "sub"
+
+
+class Add(_Inst):
+    name = "add"
+
+
 class Push(_Inst):
     name = "push"
 

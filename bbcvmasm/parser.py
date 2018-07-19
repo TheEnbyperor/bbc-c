@@ -33,7 +33,6 @@ class Parser:
         while True:
             try:
                 item, index = self.parse_line(index)
-                print(item)
                 items.append(item)
             except SyntaxError:
                 break
@@ -94,7 +93,8 @@ class Parser:
         return ast.Label(self.tokens[index-2].value), index
 
     def parse_inst(self, index):
-        insts = [self.parse_push, self.parse_pop, self.parse_ret, self.parse_call, self.parse_mov, self.parse_exit]
+        insts = [self.parse_push, self.parse_pop, self.parse_ret, self.parse_call, self.parse_calln, self.parse_mov,
+                 self.parse_add, self.parse_exit]
 
         for inst in insts:
             try:
@@ -126,6 +126,13 @@ class Parser:
         value, index = self.parse_value(index)
         return ast.Call(value), index
 
+    def parse_calln(self, index):
+        index = self.eat_id(index, "calln")
+        left, index = self.parse_value(index)
+        index = self.eat(index, COMMA)
+        right, index = self.parse_value(index)
+        return ast.Calln(left, right), index
+
     def parse_mov(self, index):
         index = self.eat_id(index, "mov")
         left, index = self.parse_value(index)
@@ -133,8 +140,15 @@ class Parser:
         right, index = self.parse_value(index)
         return ast.Mov(left, right), index
 
+    def parse_add(self, index):
+        index = self.eat_id(index, "add")
+        left, index = self.parse_value(index)
+        index = self.eat(index, COMMA)
+        right, index = self.parse_value(index)
+        return ast.Add(left, right), index
+
     def parse_value(self, index):
-        values = [self.parse_register_value, self.parse_literal_value, self.parse_label_value]
+        values = [self.parse_register_value, self.parse_literal_value, self.parse_mem_value]
 
         for val in values:
             try:
@@ -150,6 +164,18 @@ class Parser:
         num = self.tokens[index].value
         return ast.LiteralValue(num), index + 1
 
+    def parse_literal_mem_value(self, index):
+        if not self.token_is(index, INTEGER):
+            self.error()
+        num = self.tokens[index].value
+        return ast.LiteralValue(num), index + 1
+
+    def parse_label_value(self, index):
+        if not self.token_is(index, ID):
+            self.error()
+        label = self.tokens[index].value
+        return ast.LabelValue(label), index + 1
+
     def parse_register_value(self, index):
         index = self.eat(index, PERCENT)
         if not self.token_is(index, ID):
@@ -160,8 +186,45 @@ class Parser:
         reg_num = int(reg[1:])
         return ast.RegisterValue(reg_num), index + 1
 
-    def parse_label_value(self, index):
-        if not self.token_is(index, ID):
+    def parse_mem_value(self, index):
+        length = 2
+        if self.token_is(index, BYTE):
+            length = 1
+            index += 1
+        elif self.token_is(index, WORD):
+            index += 1
+
+        def get_const_loc(index):
+            try:
+                return self.parse_label_value(index)
+            except SyntaxError:
+                try:
+                    return self.parse_literal_mem_value(index)
+                except SyntaxError:
+                    return None, index
+
+        const_loc, index = get_const_loc(index)
+        reg_indirect = None
+        if self.token_is(index, LBRACE):
+            index += 1
+            seen_const = False
+            if const_loc is None:
+                const_loc, index = get_const_loc(index)
+                seen_const = True
+            seen_plus = False
+            try:
+                if seen_const:
+                    index = self.eat(index, PLUS)
+                    seen_plus = True
+            except SyntaxError:
+                pass
+            try:
+                reg_indirect, index = self.parse_value(index)
+            except SyntaxError:
+                pass
+            if seen_plus and reg_indirect is None:
+                self.error()
+            index = self.eat(index, RBRACE)
+        if const_loc is None and reg_indirect is None:
             self.error()
-        label = self.tokens[index].value
-        return ast.LabelValue(label), index + 1
+        return ast.MemoryValue(const_loc, reg_indirect, length), index

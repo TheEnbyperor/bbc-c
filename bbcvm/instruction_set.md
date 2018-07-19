@@ -79,7 +79,7 @@ None affected
 | :-----: | :-------: | :-------------: | :--------: |
 |  0x00   | Anything  | Register number |  Constant  |
 
-### movs \<mem\>, \<reg\>
+### mov  BYTE\<mem\>, \<reg\>
 
 Moves the 8 bit value at the memory location into the LSB of the register and 0 into the MSB
 
@@ -101,9 +101,9 @@ None affected
 
 | Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------------: | :-------------: | :-------------: |
-|  0x01   | Addressing mode | Register number | Memory location |
+|  0x02   | Addressing mode | Register number | Memory location |
 
-### movs \<reg\>, \<mem\>
+### mov \<reg\>, BYTE\<mem\>
 
 Moves the LSB of the register to the memory location
 
@@ -237,7 +237,7 @@ Carry, sign, zero
 | :-----: | :--------------------: | :-------------------: |
 |  0x0B   | Second register number | First register number |
 
-### adds \<mem\>, \<reg\>
+### add BYTE\<mem\>, \<reg\>
 
 Adds the 8 bit value at the memory location into the the register and stores in the register. Does not use the carry flag.
 
@@ -289,7 +289,7 @@ Carry, sign, zero
 | :-----: | :--------------------: | :-------------------: |
 |  0x0C   | Second register number | First register number |
 
-### adcs \<mem\>, \<reg\>
+### adc  BYTE\<mem\>, \<reg\>
 
 Adds the 8 bit value at the memory location plus the carry into the the register and stores in the register.
 
@@ -341,7 +341,7 @@ Carry, sign, zero
 | :-----: | :--------------------: | :-------------------: |
 |  0x13   | Second register number | First register number |
 
-### subs \<mem\>, \<reg\>
+### sub BYTE\<mem\>, \<reg\>
 
 Subtracts the 8 bit value at the memory location from the the register and stores in the register. Does not use the carry flag.
 
@@ -393,7 +393,7 @@ Carry, sign, zero
 | :-----: | :--------------------: | :-------------------: |
 |  0x14   | Second register number | First register number |
 
-### sbcs \<mem\>, \<reg\>
+### sbc BYTE\<mem\>, \<reg\>
 
 Subtracts the 8 bit value at the memory location and the carry from the the register and stores in the register.
 
@@ -473,7 +473,7 @@ Sign, zero, clears carry
 | :-----: | :--------------------: | :-------------------: |
 |  0x1C   | Second register number | First register number |
 
-### ands \<mem\>, \<reg\>
+### and BYTE\<mem\>, \<reg\>
 
 Logical ands the 8 bit value at the memory location (LSB) and 0 (MSB) with the register and stores in the register
 
@@ -525,7 +525,7 @@ Sign, zero, clears carry
 | :-----: | :--------------------: | :-------------------: |
 |  0x20   | Second register number | First register number |
 
-### ors \<mem\>, \<reg\>
+### or BYTE\<mem\>, \<reg\>
 
 Logical ors the 8 bit value at the memory location (LSB) and 0 (MSB) with the register and stores in the register
 
@@ -577,7 +577,7 @@ Sign, zero, clears carry
 | :-----: | :--------------------: | :-------------------: |
 |  0x24   | Second register number | First register number |
 
-### xors \<mem\>, \<reg\>
+### xor BYTE\<mem\>, \<reg\>
 
 Logical xors the 8 bit value at the memory location (LSB) and 0 (MSB) with the register and stores in the register
 
@@ -653,7 +653,7 @@ Carry, sign, zero
 | :-----: | :--------------------: | :-------------------: |
 |  0x2A   | Second register number | First register number |
 
-### cmp \<mem\>, \<reg\>
+### cmp BYTE\<mem\>, \<reg\>
 
 Subtracts the 8 bit value at the memory location from the the register but does not store. Does not use the carry flag.
 
@@ -701,17 +701,17 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x2F   | Addressing mode |  Anything  | Memory location |
 
-### calln \<mem\>
+### calln \<mem\>, \<reg\>
 
-Performs a jsr to native 6502 code. The code at the location will return to the VM on rts.
+Performs a jsr to native 6502 code, with the accumulator set to the LSB of value of the register. The code at the location will return to the VM on rts, with the new accumulator value put in the LSB of register.
 
 #### Flags
 
 None
 
-| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
-| :-----: | :-------------: | :--------: | :-------------: |
-|  0x2E   | Addressing mode |  Anything  | Memory location |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x2E   | Addressing mode | Register number | Memory location |
 
 ### ret
 
@@ -727,7 +727,7 @@ None
 
 ### exit
 
-Exit the VM by performing a rts in 6502 land.
+Exit the VM by performing a rts in 6502 land. Assumes VM was entered from a nested jsr. That is, a jsr (followed by the rest of the 6502 program) to a jsr (followed by the vm program).
 
 #### Flags
 

@@ -465,7 +465,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 raise SyntaxError("Duplicate identifier '%s' found" % name)
             symbol = VarSymbol(name, param, None)
             symbol.il_value.stack_offset = offset
-            offset += symbol.type.size
+            offset += symbol.type.size + (symbol.type.size % 2)
             self.scope.define(symbol)
         for n in node.nodes.items:
             self.visit(n)

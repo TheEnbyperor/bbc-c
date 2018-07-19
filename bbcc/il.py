@@ -299,10 +299,7 @@ class Return(ILInst):
                     used_regs.append(v)
 
         for r in used_regs[::-1]:
-            assembly.add_inst("JSR", "_bbcc_pulla")
-            r.asm(assembly, "STA", 1)
-            assembly.add_inst("JSR", "_bbcc_pulla")
-            r.asm(assembly, "STA", 0)
+            assembly.add_inst(asm.Pop(r, None, 2))
 
         assembly.add_inst(asm.Mov(spots.RBP, spots.RSP, 2))
         assembly.add_inst(asm.Pop(spots.RBP, None, 2))
@@ -323,36 +320,29 @@ class CallFunction(ILInst):
         return [self.output]
 
     def clobber(self):
-        return [spots.Pseudo16RegisterSpot(return_register, self.output.type)]
+        return [return_register] if not self.output.type.is_void() else []
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         output = spotmap[self.output]
-        ret_reg = spots.Pseudo16RegisterSpot(return_register, output.type)
 
         offset = 0
         for a in self.args[::-1]:
             spot = spotmap[a]
-            for i in range(spot.type.size)[::-1]:
-                spot.asm(assembly, "LDA", i)
-                assembly.add_inst("JSR", "_bbcc_pusha")
-            offset += spot.type.size
+            if not isinstance(spot, spots.RegisterSpot):
+                old_spot = spot
+                spot = get_reg()
+                assembly.add_inst(asm.Mov(old_spot, spot))
+            assembly.add_inst(asm.Push(spot, None))
+            offset += 2
 
-        assembly.add_inst("JSR", self.name)
+        assembly.add_inst(asm.Call(spots.MemorySpot(self.name), None))
 
         if offset > 0:
-            assembly.add_inst("CLC")
-            stack_register.asm(assembly, "LDA", 0)
-            assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[2:4]))
-            stack_register.asm(assembly, "STA", 0)
-            stack_register.asm(assembly, "LDA", 1)
-            assembly.add_inst("ADC", "#&{}".format(assembly.to_hex(offset, 4)[0:2]))
-            stack_register.asm(assembly, "STA", 1)
+            assembly.add_inst(asm.Add(spots.LiteralSpot(offset), spots.RSP, 2))
 
-        if not output.type.is_void():
-            if ret_reg != output:
-                for i in range(output.type.size):
-                    ret_reg.asm(assembly, "LDA", i)
-                    output.asm(assembly, "STA", i)
+        if not self.output.type.is_void():
+            if return_register != output:
+                assembly.add_inst(asm.Mov(return_register, output, self.output.type.size))
 
 
 # Arithmetic
@@ -1324,16 +1314,10 @@ class IL:
                     used_regs.append(v)
 
         for r in used_regs:
-            self.assembly.add_inst(asm.Push(r, None, 0))
+            self.assembly.add_inst(asm.Push(r, None, 2))
         if max_offset != 0:
             offset_spot = spots.LiteralSpot(max_offset)
-            self.assembly.add_inst("SEC")
-            stack_register.asm(self.assembly, "LDA", 0)
-            offset_spot.asm(self.assembly, "SBC", 0)
-            stack_register.asm(self.assembly, "STA", 0)
-            stack_register.asm(self.assembly, "LDA", 1)
-            offset_spot.asm(self.assembly, "SBC", 1)
-            stack_register.asm(self.assembly, "STA", 1)
+            self.assembly.add_inst(asm.Sub(offset_spot, spots.RSP))
 
         for i, c in enumerate(commands):
             self.assembly.add_inst(asm.Comment(type(c).__name__))

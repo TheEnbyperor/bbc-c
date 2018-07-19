@@ -37,7 +37,7 @@ class Parser:
         while pos < len(header):
             if header[pos] == 0x0:
                 pos += 1
-                loc, = struct.unpack("<h", header[pos:pos+2])
+                loc, = struct.unpack("<H", header[pos:pos+2])
                 pos += 2
                 name = ""
                 while header[pos] != 0:
@@ -47,7 +47,7 @@ class Parser:
                 exports[name] = loc
             elif header[pos] == 0x1:
                 pos += 1
-                lil, lal, lal2, lml = struct.unpack("<hhbh", header[pos:pos+7])
+                lil, lal, lal2, lml = struct.unpack("<HHBH", header[pos:pos+7])
                 pos += 7
                 name = ""
                 while header[pos] != 0:

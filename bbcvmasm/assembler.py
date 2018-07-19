@@ -1,4 +1,5 @@
 import struct
+import typing
 from . import ast
 
 
@@ -30,18 +31,18 @@ class Assembler:
         for l in self.exports:
             lv = self.labels[l]
             header.append(0x0)
-            header.extend(struct.pack("<h", lv))
+            header.extend(struct.pack("<H", lv))
             header.extend(l.encode())
             header.append(0x0)
 
         for l in self.imports:
             lil, lal, lal2, lml, ln = l
             header.append(0x1)
-            header.extend(struct.pack("<hhbh", lil, lal, lal2, lml))
+            header.extend(struct.pack("<HHBH", lil, lal, lal2, lml))
             header.extend(ln.encode())
             header.append(0x0)
 
-        out.extend(struct.pack("<h", len(header)))
+        out.extend(struct.pack("<H", len(header)))
         out.extend(header)
 
         out.extend(self.insts)
@@ -56,17 +57,17 @@ class Assembler:
     def generic_visit(node):
         raise RuntimeError('No visit_{} method'.format(type(node).__name__))
 
-    def visit_TranslationUnit(self, node):
+    def visit_TranslationUnit(self, node: ast.TranslationUnit):
         for item in node.items:
             self.visit(item)
 
-    def visit_ImportCommand(self, node):
+    def visit_ImportCommand(self, node: ast.ImportCommand):
         self.imported_labels.append(node.label)
 
-    def visit_ExportCommand(self, node):
+    def visit_ExportCommand(self, node: ast.ExportCommand):
         self.exports.append(node.label)
 
-    def visit_Label(self, node):
+    def visit_Label(self, node: ast.Label):
         self.cur_labels.append(node.label)
 
     def setup_labels(func):
@@ -77,11 +78,15 @@ class Assembler:
             return func(self, node)
         return wrapper
 
-    def get_label_val(self, value, al, al2, ml):
+    def get_mem_val(self, value: ast.MemoryValue, al, al2, ml):
+        al = self.loc + al
+        ml = self.loc + ml
         am = 0x0
         mv = 0x0
-        if isinstance(value, ast.LabelValue):
-            label = value.label
+        if isinstance(value.const_loc, ast.LabelValue):
+            if value.reg_indirect is not None:
+                raise SyntaxError("Indirect with label as constant is not supported")
+            label = value.const_loc.label
             if label in self.labels:
                 if self.labels[label] < self.loc:
                     am = 0x1
@@ -93,10 +98,36 @@ class Assembler:
                 self.imports.append((self.loc, al, al2, ml, label))
             else:
                 raise ValueError(f"Undefined label: {label}")
-        return am, mv
+        elif isinstance(value.const_loc, ast.LiteralValue):
+            if value.reg_indirect is None:
+                mv = value.const_loc.val
+            elif isinstance(value.reg_indirect, ast.RegisterValue):
+                am = 0x3
+                mv = (((value.reg_indirect.reg_num << 4) & 0xF0) | (value.const_loc.val & 0x0F)) |\
+                     ((value.const_loc.val & 0xFF0) << 4)
+            else:
+                raise SyntaxError(f"Indirect register can't be {value.reg_indirect}")
+        elif value.const_loc is not None:
+            raise SyntaxError(f"Memory address constant offset can't be {value.const_loc}")
+        if al2 == 0:
+            self.insts.append((am << 4) & 0xF0)
+        elif al2 == 1:
+            self.insts.append(am & 0x0F)
+        self.insts.extend(struct.pack("<H", mv))
+        self.loc += 3
+
+    def get_reg_val(self, left: typing.Union[ast.RegisterValue, None], right: typing.Union[ast.RegisterValue, None]):
+        left_num = left.reg_num if left is not None else 0
+        right_num = right.reg_num if right is not None else 0
+        self.insts.append(((right_num & 0x0F) << 4) | (left_num & 0x0F))
+        self.loc += 1
+
+    def get_mem_reg_val(self, mem: ast.MemoryValue, reg: ast.RegisterValue, al, ml):
+        self.get_mem_val(mem, al, 0, ml)
+        self.insts[-3] |= (reg.reg_num & 0x0F)
 
     @setup_labels
-    def visit_Bytes(self, node):
+    def visit_Bytes(self, node: ast.Bytes):
         values = []
         for b in node.bytes:
             if isinstance(b, ast.LiteralValue):
@@ -105,17 +136,17 @@ class Assembler:
         self.loc += len(values)
 
     @setup_labels
-    def visit_Ret(self, node):
+    def visit_Ret(self, node: ast.Ret):
         self.insts.append(0x82)
         self.loc += 1
 
     @setup_labels
-    def visit_Exit(self, node):
+    def visit_Exit(self, node: ast.Exit):
         self.insts.append(0x83)
         self.loc += 1
 
     @setup_labels
-    def visit_Push(self, node):
+    def visit_Push(self, node: ast.Push):
         if isinstance(node.value, ast.RegisterValue):
             self.insts.append(0x06)
             self.insts.append(node.value.reg_num & 0x0F)
@@ -124,7 +155,7 @@ class Assembler:
             raise SyntaxError(f"Can't push {node.value}")
 
     @setup_labels
-    def visit_Pop(self, node):
+    def visit_Pop(self, node: ast.Pop):
         if isinstance(node.value, ast.RegisterValue):
             self.insts.append(0x07)
             self.insts.append(node.value.reg_num & 0x0F)
@@ -133,28 +164,58 @@ class Assembler:
             raise SyntaxError(f"Can't pop {node.value}")
 
     @setup_labels
-    def visit_Mov(self, node):
+    def visit_Mov(self, node: ast.Mov):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x05)
-            self.insts.append(((node.right.reg_num & 0x0F) << 4) | (node.left.reg_num & 0x0F))
-            self.loc += 2
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
         elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x00)
-            self.insts.append(node.right.reg_num & 0x0F)
+            self.get_reg_val(node.right, None)
             self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 4
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x01)
+            elif node.left.length == 2:
+                self.insts.append(0x02)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 3
         else:
             raise SyntaxError(f"Can't mov {node.left} into {node.right}")
 
     @setup_labels
-    def visit_Call(self, node):
-        if isinstance(node.value, ast.LabelValue):
+    def visit_Add(self, node: ast.Mov):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x0B)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x09)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        else:
+            raise SyntaxError(f"Can't mov {node.left} into {node.right}")
+
+    @setup_labels
+    def visit_Call(self, node: ast.Call):
+        if isinstance(node.value, ast.MemoryValue):
+            if node.value.length == 1:
+                raise SyntaxError("Can't call byte pointer")
             self.insts.append(0x2D)
-            lal = self.loc + 1
-            lml = self.loc + 2
-            av, mv = self.get_label_val(node.value, lal, 0, lml)
-            self.insts.append((av << 4) & 0xF0)
-            self.insts.extend(struct.pack("<h", mv))
-            self.loc += 4
+            self.get_mem_val(node.value, 1, 0, 2)
+            self.loc += 1
         else:
             raise SyntaxError(f"Can't call {node.value}")
+
+    @setup_labels
+    def visit_Calln(self, node: ast.Calln):
+        if isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                raise SyntaxError("Can't call byte pointer")
+            self.insts.append(0x2E)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't call native code at {node.left} with value {node.right}")

@@ -45,7 +45,8 @@ class Lexer:
     def integer_hex(self):
         """Return a integer consumed from the input."""
         result = ''
-        while self.current_char is not None and (self.current_char.isdigit() or self.current_char.lower() in ["a", "b", "c", "d", "e", "f"]):
+        while self.current_char is not None and (self.current_char.isdigit() or
+                                                 self.current_char.lower() in ["a", "b", "c", "d", "e", "f"]):
             result += self.current_char
             self.advance()
         return int(result, 16)
@@ -56,13 +57,13 @@ class Lexer:
             result += self.current_char
             self.advance()
 
-        token = Token(ID, result)
+        token_type = RESERVED.get(result, ID)
+        token = Token(token_type, result)
         return token
 
     def tokenize(self):
         tokens = []
         while self.current_char is not None:
-            # print(tokens)
             if self.current_char.isspace() and self.current_char is not "\n":
                 self.skip_whitespace()
             elif self.current_char == "\n":
@@ -96,6 +97,15 @@ class Lexer:
             elif self.current_char == "#":
                 self.advance()
                 tokens.append(Token(HASH, "#"))
+            elif self.current_char == "[":
+                self.advance()
+                tokens.append(Token(LBRACE, "["))
+            elif self.current_char == "]":
+                self.advance()
+                tokens.append(Token(RBRACE, "]"))
+            elif self.current_char == "+":
+                self.advance()
+                tokens.append(Token(PLUS, "+"))
 
             else:
                 self.error()

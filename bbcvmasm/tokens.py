@@ -1,5 +1,5 @@
-ID, EOF, INTEGER, COLON, PERIOD, PERCENT, COMMA, HASH  \
-    = "ID", "EOF", "INTEGER", "COLON", "PERIOD", "PERCENT", "COMMA", "HASH"
+ID, EOF, INTEGER, COLON, PERIOD, PERCENT, COMMA, HASH, LBRACE, RBRACE, WORD, BYTE, PLUS \
+    = "ID", "EOF", "INTEGER", "COLON", "PERIOD", "PERCENT", "COMMA", "HASH", "LBRACE", "RBRACE", "WORD", "BYTE", "PLUS"
 
 
 class Token:
@@ -12,3 +12,9 @@ class Token:
             type=self.type,
             value=repr(self.value)
         )
+
+
+RESERVED = {
+    "BYTE": BYTE,
+    "WORD": WORD
+}
