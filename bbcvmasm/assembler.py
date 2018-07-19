@@ -149,8 +149,8 @@ class Assembler:
     def visit_Push(self, node: ast.Push):
         if isinstance(node.value, ast.RegisterValue):
             self.insts.append(0x06)
-            self.insts.append(node.value.reg_num & 0x0F)
-            self.loc += 2
+            self.get_reg_val(node.value, None)
+            self.loc += 1
         else:
             raise SyntaxError(f"Can't push {node.value}")
 
@@ -158,8 +158,8 @@ class Assembler:
     def visit_Pop(self, node: ast.Pop):
         if isinstance(node.value, ast.RegisterValue):
             self.insts.append(0x07)
-            self.insts.append(node.value.reg_num & 0x0F)
-            self.loc += 2
+            self.get_reg_val(node.value, None)
+            self.loc += 1
         else:
             raise SyntaxError(f"Can't pop {node.value}")
 
@@ -180,7 +180,7 @@ class Assembler:
             elif node.left.length == 2:
                 self.insts.append(0x02)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
-            self.loc += 3
+            self.loc += 1
         else:
             raise SyntaxError(f"Can't mov {node.left} into {node.right}")
 
@@ -197,6 +197,17 @@ class Assembler:
             self.loc += 3
         else:
             raise SyntaxError(f"Can't mov {node.left} into {node.right}")
+
+    @setup_labels
+    def visit_Jmp(self, node: ast.Call):
+        if isinstance(node.value, ast.MemoryValue):
+            if node.value.length == 1:
+                raise SyntaxError("Can't jump to a byte pointer")
+            self.insts.append(0x2F)
+            self.get_mem_val(node.value, 1, 0, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't jump to {node.value}")
 
     @setup_labels
     def visit_Call(self, node: ast.Call):

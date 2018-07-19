@@ -78,6 +78,9 @@ class Interpreter(ast.NodeVisitor):
         func_name = decl_info.identifier.value
         self.il.start_function(func_name)
         self.current_function = func_name
+        for name in decl_info.params:
+            name = name.value
+            print(name)
         for n in node.nodes.items:
             self.visit(n)
         should_return = True

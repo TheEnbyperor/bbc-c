@@ -93,59 +93,26 @@ class Parser:
         return ast.Label(self.tokens[index-2].value), index
 
     def parse_inst(self, index):
-        insts = [self.parse_push, self.parse_pop, self.parse_ret, self.parse_call, self.parse_calln, self.parse_mov,
-                 self.parse_add, self.parse_exit]
+        insts = [("push", 1, ast.Push), ("pop", 1, ast.Pop), ("ret", 0, ast.Ret), ("call", 1, ast.Call),
+                 ("calln", 2, ast.Calln), ("mov", 2, ast.Mov), ("add", 2, ast.Add), ("cmp", 2, ast.Cmp),
+                 ("jze", 1, ast.Jze), ("jmp", 1, ast.Jmp)]
+
+        def parse(inst, index):
+            index = self.eat_id(index, inst[0])
+            args = []
+            for i in range(inst[1]):
+                if i != 0:
+                    index = self.eat(index, COMMA)
+                value, index = self.parse_value(index)
+                args.append(value)
+            return inst[2](*args), index
 
         for inst in insts:
             try:
-                return inst(index)
+                return parse(inst, index)
             except SyntaxError:
                 continue
         self.error()
-
-    def parse_push(self, index):
-        index = self.eat_id(index, "push")
-        value, index = self.parse_value(index)
-        return ast.Push(value), index
-
-    def parse_pop(self, index):
-        index = self.eat_id(index, "pop")
-        value, index = self.parse_value(index)
-        return ast.Pop(value), index
-
-    def parse_ret(self, index):
-        index = self.eat_id(index, "ret")
-        return ast.Ret(), index
-
-    def parse_exit(self, index):
-        index = self.eat_id(index, "exit")
-        return ast.Exit(), index
-
-    def parse_call(self, index):
-        index = self.eat_id(index, "call")
-        value, index = self.parse_value(index)
-        return ast.Call(value), index
-
-    def parse_calln(self, index):
-        index = self.eat_id(index, "calln")
-        left, index = self.parse_value(index)
-        index = self.eat(index, COMMA)
-        right, index = self.parse_value(index)
-        return ast.Calln(left, right), index
-
-    def parse_mov(self, index):
-        index = self.eat_id(index, "mov")
-        left, index = self.parse_value(index)
-        index = self.eat(index, COMMA)
-        right, index = self.parse_value(index)
-        return ast.Mov(left, right), index
-
-    def parse_add(self, index):
-        index = self.eat_id(index, "add")
-        left, index = self.parse_value(index)
-        index = self.eat(index, COMMA)
-        right, index = self.parse_value(index)
-        return ast.Add(left, right), index
 
     def parse_value(self, index):
         values = [self.parse_register_value, self.parse_literal_value, self.parse_mem_value]

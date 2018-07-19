@@ -3,5 +3,7 @@
 //#include "string.h"
 
 int main() {
-    putchar('a');
+    while (1) {
+        putchar(getchar());
+    }
 }

@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     if first_e == ".c":
         for n, s in source_files:
-            if args.output is None:
+            if args.output is None or not args.S:
                 name = "{}.s".format(n[0])
             else:
                 name = args.output
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
             if not args.S:
                 sourceFile = open(name, "r")
-                if args.output is None:
+                if args.output is None or not args.c:
                     name = "{}.o".format(n[0])
                 else:
                     name = args.output

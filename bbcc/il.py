@@ -203,7 +203,7 @@ class Label(ILInst):
         return self.label
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
-        assembly.add_inst(label=self.label)
+        assembly.add_inst(asm.Label(self.label))
 
 
 class JmpSub(ILInst):
@@ -222,7 +222,7 @@ class Jmp(ILInst):
         return [self.label]
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
-        assembly.add_inst("JMP", self.label)
+        assembly.add_inst(asm.Jmp(spots.MemorySpot(self.label)))
 
 
 class JmpZero(ILInst):
@@ -239,14 +239,14 @@ class JmpZero(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         value = spotmap[self.value]
 
-        label = il.get_label()
+        if isinstance(value, spots.LiteralSpot):
+            if value.value == 0:
+                assembly.add_inst(asm.Jmp(spots.MemorySpot(self.label)))
+        else:
+            zero = spots.LiteralSpot(0)
+            assembly.add_inst(asm.Cmp(value, zero))
 
-        for i in range(value.type.size):
-            value.asm(assembly, "LDA", i)
-            assembly.add_inst("BNE", label)
-
-        assembly.add_inst("JMP", self.label)
-        assembly.add_inst(label=label)
+            assembly.add_inst(asm.Jze(spots.MemorySpot(self.label)))
 
 
 class JmpNotZero(ILInst):

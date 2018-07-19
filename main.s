@@ -5,12 +5,19 @@
 main:
 	push %r11
 	mov %r13, %r11
-\ Set
-	mov #97, %r0
+\ Label
+__bbcc_00000000:
+\ JmpZero
+\ CallFunction
+	call [getchar]
 \ CallFunction
 	push %r0
 	call [putchar]
 	add #2, %r13
+\ Jmp
+	jmp [__bbcc_00000000]
+\ Label
+__bbcc_00000001:
 \ Return
 	mov #0, %r0
 	mov %r11, %r13

@@ -49,44 +49,61 @@ class Bytes(ASTNode):
         self.bytes = bytes
 
 
-class Call(ASTNode):
-    def __init__(self, value):
-        self.value = value
-
-
-class Calln(ASTNode):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-
-class Push(ASTNode):
-    def __init__(self, value):
-        self.value = value
-
-
-class Pop(ASTNode):
-    def __init__(self, value):
-        self.value = value
-
-
-class Mov(ASTNode):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-
-class Add(ASTNode):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-
-class Ret(ASTNode):
+class _ZeroValueNode(ASTNode):
     def __init__(self):
         pass
 
 
-class Exit(ASTNode):
-    def __init__(self):
-        pass
+class _OneValueNode(ASTNode):
+    def __init__(self, value):
+        self.value = value
+
+
+class _TwoValueNode(ASTNode):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+
+class Call(_OneValueNode):
+    pass
+
+
+class Jmp(_OneValueNode):
+    pass
+
+
+class Jze(_OneValueNode):
+    pass
+
+
+class Calln(_TwoValueNode):
+    pass
+
+
+class Push(_OneValueNode):
+    pass
+
+
+class Pop(_OneValueNode):
+    pass
+
+
+class Mov(_TwoValueNode):
+    pass
+
+
+class Cmp(_TwoValueNode):
+    pass
+
+
+class Add(_TwoValueNode):
+    pass
+
+
+class Ret(_ZeroValueNode):
+    pass
+
+
+class Exit(_ZeroValueNode):
+    pass

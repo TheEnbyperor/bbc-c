@@ -76,12 +76,24 @@ class Call(_Inst):
     name = "call"
 
 
+class Jmp(_Inst):
+    name = "jmp"
+
+
+class Jze(_Inst):
+    name = "jze"
+
+
 class Sub(_Inst):
     name = "sub"
 
 
 class Add(_Inst):
     name = "add"
+
+
+class Cmp(_Inst):
+    name = "cmp"
 
 
 class Push(_Inst):
