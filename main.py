@@ -136,7 +136,7 @@ if __name__ == "__main__":
         if args.S:
             raise RuntimeError("Cant just compile assembly")
         for n, s in source_files:
-            if args.output == "" or not args.c:
+            if args.output is None or not args.c:
                 name = "{}.o".format(n[0])
             else:
                 name = args.output

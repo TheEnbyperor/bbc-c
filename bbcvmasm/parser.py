@@ -95,7 +95,8 @@ class Parser:
     def parse_inst(self, index):
         insts = [("push", 1, ast.Push), ("pop", 1, ast.Pop), ("ret", 0, ast.Ret), ("call", 1, ast.Call),
                  ("calln", 2, ast.Calln), ("mov", 2, ast.Mov), ("add", 2, ast.Add), ("cmp", 2, ast.Cmp),
-                 ("jze", 1, ast.Jze), ("jmp", 1, ast.Jmp)]
+                 ("jze", 1, ast.Jze), ("jnz", 1, ast.Jnz), ("jmp", 1, ast.Jmp), ("lea", 2, ast.Lea),
+                 ("inc", 1, ast.Inc), ("dec", 1, ast.Dec)]
 
         def parse(inst, index):
             index = self.eat_id(index, inst[0])

@@ -80,7 +80,6 @@ class Interpreter(ast.NodeVisitor):
         self.current_function = func_name
         for name in decl_info.params:
             name = name.value
-            print(name)
         for n in node.nodes.items:
             self.visit(n)
         should_return = True

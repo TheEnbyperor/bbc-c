@@ -14,6 +14,7 @@ class Assembler:
         self.labels = None
         self.imported_labels = None
         self.cur_labels = None
+        self.label_errors = True
 
     def assemble(self):
         self.loc = 0
@@ -23,6 +24,16 @@ class Assembler:
         self.labels = {}
         self.imported_labels = []
         self.cur_labels = []
+        self.label_errors = False
+        self.visit(self.ast)
+
+        self.loc = 0
+        self.insts = bytearray()
+        self.exports = []
+        self.imports = []
+        self.imported_labels = []
+        self.cur_labels = []
+        self.label_errors = True
         self.visit(self.ast)
 
         out = bytearray([0xB, 0xB, 0xC, ord('V'), ord('M'), 0x0])
@@ -97,10 +108,11 @@ class Assembler:
             elif label in self.imported_labels:
                 self.imports.append((self.loc, al, al2, ml, label))
             else:
-                raise ValueError(f"Undefined label: {label}")
+                if self.label_errors:
+                    raise ValueError(f"Undefined label: {label}")
         elif isinstance(value.const_loc, ast.LiteralValue):
             if value.reg_indirect is None:
-                mv = value.const_loc.val
+                mv = value.const_loc.val - 1
             elif isinstance(value.reg_indirect, ast.RegisterValue):
                 am = 0x3
                 mv = (((value.reg_indirect.reg_num << 4) & 0xF0) | (value.const_loc.val & 0x0F)) |\
@@ -132,6 +144,8 @@ class Assembler:
         for b in node.bytes:
             if isinstance(b, ast.LiteralValue):
                 values.append(b.val)
+            else:
+                raise SyntaxError(f"Bytes can't be {b}")
         self.insts.extend(values)
         self.loc += len(values)
 
@@ -164,6 +178,24 @@ class Assembler:
             raise SyntaxError(f"Can't pop {node.value}")
 
     @setup_labels
+    def visit_Inc(self, node: ast.Pop):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x19)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't increment {node.value}")
+
+    @setup_labels
+    def visit_Dec(self, node: ast.Pop):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x1A)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't decrement {node.value}")
+
+    @setup_labels
     def visit_Mov(self, node: ast.Mov):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x05)
@@ -181,8 +213,24 @@ class Assembler:
                 self.insts.append(0x02)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
+        elif isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.MemoryValue):
+            if node.right.length == 1:
+                self.insts.append(0x03)
+            elif node.right.length == 2:
+                self.insts.append(0x04)
+            self.get_mem_reg_val(node.right, node.left, 1, 2)
+            self.loc += 1
         else:
             raise SyntaxError(f"Can't mov {node.left} into {node.right}")
+
+    @setup_labels
+    def visit_Lea(self, node: ast.Calln):
+        if isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x08)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't put effective address of {node.left} into {node.right}")
 
     @setup_labels
     def visit_Add(self, node: ast.Mov):
@@ -196,7 +244,21 @@ class Assembler:
             self.insts.extend(struct.pack("<h", node.left.val))
             self.loc += 3
         else:
-            raise SyntaxError(f"Can't mov {node.left} into {node.right}")
+            raise SyntaxError(f"Can't add {node.left} to {node.right}")
+
+    @setup_labels
+    def visit_Cmp(self, node: ast.Mov):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x2A)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x29)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        else:
+            raise SyntaxError(f"Can't compare {node.left} and {node.right}")
 
     @setup_labels
     def visit_Jmp(self, node: ast.Call):
@@ -208,6 +270,28 @@ class Assembler:
             self.loc += 1
         else:
             raise SyntaxError(f"Can't jump to {node.value}")
+
+    @setup_labels
+    def visit_Jze(self, node: ast.Call):
+        if isinstance(node.value, ast.MemoryValue):
+            if node.value.length == 1:
+                raise SyntaxError("Can't jump on zero to a byte pointer")
+            self.insts.append(0x30)
+            self.get_mem_val(node.value, 1, 0, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't jump on zero to {node.value}")
+
+    @setup_labels
+    def visit_Jnz(self, node: ast.Call):
+        if isinstance(node.value, ast.MemoryValue):
+            if node.value.length == 1:
+                raise SyntaxError("Can't jump on not zero to a byte pointer")
+            self.insts.append(0x31)
+            self.get_mem_val(node.value, 1, 0, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't jump on not zero to {node.value}")
 
     @setup_labels
     def visit_Call(self, node: ast.Call):

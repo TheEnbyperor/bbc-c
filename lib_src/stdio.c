@@ -17,17 +17,17 @@ int puts(const char *s) {
     return 0;
 }
 
-char *gets(char *s, int n) {
-    char *cs;
-
-    while(--n < 0) {
-        if ((*cs++ = getchar()) == '\n') {
-            break;
-        }
-    }
-    *cs = 0;
-    return s;
-}
+//char *gets(char *s, int n) {
+//    char *cs;
+//
+//    while(--n < 0) {
+//        if ((*cs++ = getchar()) == '\n') {
+//            break;
+//        }
+//    }
+//    *cs = 0;
+//    return s;
+//}
 
 int printf(const char *format, ...) {
     void *ap;

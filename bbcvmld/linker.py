@@ -94,3 +94,60 @@ class Linker:
         start_o.extend(struct.pack("<h", start_symbol + 2))  # 2 is length of jump instruction excluding address
 
         return start_o + out
+
+    def link_shared(self, strip):
+        for o in self.objects:
+            self._parse_obj(o)
+        self._get_symbols(static=False)
+
+        out = bytearray([0xB, 0xB, 0xC, ord('V'), ord('M'), 0x0])
+        code = bytearray()
+        exports = []
+        imports = []
+
+        for e in self.executables:
+            code = bytearray(e.code)
+            for i, l in e.exports.items():
+                pos = l + e.pos
+                exports.append((i, pos))
+            for i in e.imports:
+                s_addr = self.defined_symbols.get(i[0])
+                if s_addr is not None:
+                    pos = i[4] + e.pos
+                    if s_addr < pos:
+                        am = 0x1
+                        mv = pos - s_addr
+                    else:
+                        am = 0x2
+                        mv = s_addr - pos
+
+                    lal = i[2]
+                    if i[3] == 0:
+                        code[lal] = (code[lal] & 0x0F) | ((am << 4) & 0xF0)
+                    else:
+                        code[lal] = (code[lal] & 0xF0) | (am & 0x0F)
+
+                    code[i[4]:i[4]+2] = struct.pack("<h", mv)
+                else:
+                    imports.append((i[1]+e.pos, i[2]+e.pos, i[3]+e.pos, i[4]+e.pos, i[0]))
+
+            code.extend(code)
+
+        header = bytearray()
+        for i, l in exports:
+            header.append(0x0)
+            header.extend(struct.pack("<H", l))
+            header.extend(i.encode())
+            header.append(0x0)
+
+        for l in imports:
+            lil, lal, lal2, lml, ln = l
+            header.append(0x1)
+            header.extend(struct.pack("<HHBH", lil, lal, lal2, lml))
+            header.extend(ln.encode())
+            header.append(0x0)
+
+        out.extend(struct.pack("<H", len(header)))
+        out.extend(header)
+
+        return out

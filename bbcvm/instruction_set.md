@@ -53,6 +53,8 @@ On instructions with a 0 in the first bit location the second register operand (
 
 When relative addressing is used it is relative to the address of memory location/offset.
 
+When using absolute addressing the memory location - 1 must be stored as the program counter is incremented before a fetch.
+
 Register indirect allows using the value stored in a register plus a 12-bit signed offset. The data is stored in the memory location as such:
 
 | Bits 0-3        | Bits 4-7         | Bits 8-15        |
@@ -169,9 +171,9 @@ None affected
 | :-----: | :-------: | :-------------: |
 |  0x07   | Anything  | Register number |
 
-### la \<mem\>, \<reg\>
+### lea \<mem\>, \<reg\>
 
-Loads the address which data would be read from into the register. Not currently any more useful than moving a constant into a register, but will be once indirection is added.
+Loads the address which data would be read from into the register. 
 
 #### Flags
 
@@ -700,6 +702,30 @@ None
 | Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x2F   | Addressing mode |  Anything  | Memory location |
+
+### jze \<mem\>
+
+Jumps to the memory location when the zero flag is set.  
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x30   | Addressing mode |  Anything  | Memory location |
+
+### jnz \<mem\>
+
+Jumps to the memory location when the zero flag is unset.  
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x31   | Addressing mode |  Anything  | Memory location |
 
 ### calln \<mem\>, \<reg\>
 

@@ -72,6 +72,10 @@ class Mov(_Inst):
     name = "mov"
 
 
+class Lea(_Inst):
+    name = "lea"
+
+
 class Call(_Inst):
     name = "call"
 
@@ -84,12 +88,24 @@ class Jze(_Inst):
     name = "jze"
 
 
+class Jnz(_Inst):
+    name = "jnz"
+
+
 class Sub(_Inst):
     name = "sub"
 
 
 class Add(_Inst):
     name = "add"
+
+
+class Inc(_Inst):
+    name = "inc"
+
+
+class Dec(_Inst):
+    name = "dec"
 
 
 class Cmp(_Inst):

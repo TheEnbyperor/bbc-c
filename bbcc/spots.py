@@ -27,9 +27,6 @@ class LiteralSpot(Spot):
         super().__init__(value)
         self.value = value
 
-    def has_address(self):
-        return False
-
     def asm(self, size: int):
         return "#{}".format(self.value)
 
@@ -50,8 +47,8 @@ class RegisterSpot(Spot):
 
 
 class MemorySpot(Spot):
-    size_map = {1: "BYTE",
-                2: "WORD"}
+    size_map = {1: "BYTE ",
+                2: "WORD "}
 
     def __init__(self, base, offset=0):
         super().__init__((base, offset))
@@ -65,14 +62,14 @@ class MemorySpot(Spot):
             base_str = self.base
 
         if self.offset == 0:
-            simple = base_str
+            simple = f"[{base_str}]"
         elif self.offset > 0:
-            simple = f"{base_str}+{self.offset}"
+            simple = f"{self.offset}[{base_str}]"
         else:
-            simple = f"{base_str}-{-self.offset}"
+            simple = f"-{-self.offset}[{base_str}]"
 
         size_desc = self.size_map.get(size, "")
-        return f"{size_desc}[{simple}]"
+        return f"{size_desc}{simple}"
 
     def __repr__(self):
         return f'<MemorySpot({self.base}:{self.offset})>'

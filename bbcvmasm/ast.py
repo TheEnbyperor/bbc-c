@@ -77,6 +77,10 @@ class Jze(_OneValueNode):
     pass
 
 
+class Jnz(_OneValueNode):
+    pass
+
+
 class Calln(_TwoValueNode):
     pass
 
@@ -89,7 +93,19 @@ class Pop(_OneValueNode):
     pass
 
 
+class Inc(_OneValueNode):
+    pass
+
+
+class Dec(_OneValueNode):
+    pass
+
+
 class Mov(_TwoValueNode):
+    pass
+
+
+class Lea(_TwoValueNode):
     pass
 
 

@@ -11,7 +11,7 @@ inst_jump_table_l:
       #0(and_mem_reg_long-1), #0(or_const_reg-1), #0(or_reg_reg-1), #0(or_mem_reg_short-1), #0(or_mem_reg_long-1),
       #0(xor_const_reg-1), #0(xor_reg_reg-1), #0(xor_mem_reg_short-1), #0(xor_mem_reg_long-1), #0(not_reg-1),
       #0(neg_reg-1), #0(cmp_const_reg-1), #0(cmp_reg_reg-1), #0(cmp_mem_reg_short-1), #0(cmp_mem_reg_long-1),
-      #0(call_subroutine-1), #0(call_6502-1), #0(jump-1), #0(jump_zero-1)
+      #0(call_subroutine-1), #0(call_6502-1), #0(jump-1), #0(jump_zero-1), #0(jump_not_zero-1)
 
 inst_jump_table_h:
 .byte #1(mov_const_reg-1), #1(mov_mem_reg_short-1), #1(mov_mem_reg_long-1), #1(mov_reg_mem_short-1),
@@ -24,7 +24,7 @@ inst_jump_table_h:
       #1(and_mem_reg_long-1), #1(or_const_reg-1), #1(or_reg_reg-1), #1(or_mem_reg_short-1), #1(or_mem_reg_long-1),
       #1(xor_const_reg-1), #1(xor_reg_reg-1), #1(xor_mem_reg_short-1), #1(xor_mem_reg_long-1), #1(not_reg-1),
       #1(neg_reg-1), #1(cmp_const_reg-1), #1(cmp_reg_reg-1), #1(cmp_mem_reg_short-1), #1(cmp_mem_reg_long-1),
-      #1(call_subroutine-1), #1(call_6502-1), #1(jump-1), #1(jump_zero-1)
+      #1(call_subroutine-1), #1(call_6502-1), #1(jump-1), #1(jump_zero-1), #1(jump_not_zero-1)
 
 other_inst_jump_table_l:
 .byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1)
@@ -508,7 +508,7 @@ lda &71,x
 sbc (&8C),y
 sta &8F
 jsr set_carry_status
-ldx #15
+ldx #&1E
 jsr set_sign_zero_from_reg
 jsr inc_pc
 jmp inc_pc
@@ -540,7 +540,7 @@ lda &0071,y
 sbc &71,x
 sta &8F
 jsr set_carry_status
-ldx #15
+ldx #&1E
 jmp set_sign_zero_from_reg
 
 \ Helper for memory from register subtract
@@ -575,7 +575,7 @@ lda &71,x
 sbc #0
 sta &8F
 jsr set_carry_status
-ldx #15
+ldx #&1E
 jmp set_sign_zero_from_reg
 
 \ Subtract 16 bit memory from register
@@ -605,7 +605,7 @@ lda (&8E),y
 sbc &71,x
 sta &8F
 jsr set_carry_status
-ldx #15
+ldx #&1E
 jmp set_sign_zero_from_reg
 
 \ Increment register
@@ -820,21 +820,37 @@ lda &8F
 sta &8D
 rts
 
-jump_zero:
+_jump_zero_start:
 jsr get_mem_address
 lda &88
 and #&02
-beq _jump_zero
+rts
+
+_jump_zero_end:
 lda &8E
 sta &8C
 lda &8F
 sta &8D
-_jump_zero:
+_jump_zero_fail:
 rts
+
+jump_zero:
+jsr _jump_zero_start
+beq _jump_zero_fail
+jmp _jump_zero_end
+
+jump_not_zero:
+jsr _jump_zero_start
+bne _jump_zero_fail
+jmp _jump_zero_end
 
 _call_6502_temp: .byte #0
 call_6502:
 jsr get_mem_address
+inc &8E
+bne __call_6502_2
+inc &8F
+__call_6502_2:
 stx _call_6502_temp
 lda &70,x
 jsr _call_6502

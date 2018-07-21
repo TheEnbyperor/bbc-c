@@ -458,7 +458,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
             enclosing_scope=self.scope,
         )
         self.scope = procedure_scope
-        offset = 0
+        offset = 2
         for param, name in zip(decl_info.ctype.args, decl_info.params):
             name = name.value
             if self.scope.lookup(name, current_scope_only=True):
