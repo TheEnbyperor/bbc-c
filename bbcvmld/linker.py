@@ -28,7 +28,7 @@ class Linker:
                 pass
 
     def _get_symbol(self, s, static):
-        if s not in self.defined_symbols and static:
+        if s not in self.defined_symbols and s != "_HIMEM" and static:
             lib = self._find_lib(s)
             if lib is None:
                 raise LookupError("Symbol {} not exported anywhere".format(s))
@@ -58,6 +58,13 @@ class Linker:
             self._parse_obj(o)
         self._get_symbols(static=True)
         self._get_symbol("_start", static=True)
+
+        himem = 0
+        for e in self.executables:
+            if e.pos + len(e.code) > himem:
+                himem = e.pos + len(e.code)
+
+        self.defined_symbols["_HIMEM"] = himem
 
         out = bytearray()
         for e in self.executables:
@@ -101,7 +108,7 @@ class Linker:
         self._get_symbols(static=False)
 
         out = bytearray([0xB, 0xB, 0xC, ord('V'), ord('M'), 0x0])
-        code = bytearray()
+        code_out = bytearray()
         exports = []
         imports = []
 
@@ -129,9 +136,9 @@ class Linker:
 
                     code[i[4]:i[4]+2] = struct.pack("<h", mv)
                 else:
-                    imports.append((i[1]+e.pos, i[2]+e.pos, i[3]+e.pos, i[4]+e.pos, i[0]))
+                    imports.append((i[1]+e.pos, i[2]+e.pos, i[3], i[4]+e.pos, i[0]))
 
-            code.extend(code)
+            code_out.extend(code)
 
         header = bytearray()
         for i, l in exports:
@@ -148,6 +155,5 @@ class Linker:
             header.append(0x0)
 
         out.extend(struct.pack("<H", len(header)))
-        out.extend(header)
 
-        return out
+        return out + header + code_out

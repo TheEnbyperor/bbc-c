@@ -37,6 +37,7 @@ class Parser:
         if self.tokens[index:][0].type == EOF:
             return ast.TranslationUnit(items), index
         else:
+            print(self.tokens[index:])
             self.error()
 
     def parse_external_deceleration(self, index):
@@ -141,7 +142,10 @@ class Parser:
         Ex: return 5;
         """
         index = self.eat(index, RETURN)
-        node, index = self.parse_expression(index)
+        try:
+            node, index = self.parse_expression(index)
+        except SyntaxError:
+            node = None
 
         index = self.eat(index, SEMI)
         return ast.Return(node), index
@@ -425,6 +429,18 @@ class Parser:
                 self.eat(index, RBRACK)
                 index += 1
 
+            elif self.token_is(index, DOT) or self.token_is(index, ARROW):
+                index += 1
+                if not self.token_is(index, ID):
+                    self.error()
+                member = self.tokens[index].value
+
+                if self.token_is(index - 1, DOT):
+                    cur = ast.ObjMember(cur, member)
+                else:
+                    cur = ast.ObjPtrMember(cur, member)
+                index += 1
+
             elif self.token_is(index, LPAREM):
                 args = []
                 index += 1
@@ -466,10 +482,10 @@ class Parser:
         elif self.token_is(index, ID):
             return ast.Identifier(self.tokens[index]), index + 1
         elif self.token_is(index, STRING):
-            return ast.String(self.tokens[index].value + "\0"), index + 1
+            return ast.String(self.tokens[index].value + bytes([0])), index + 1
         elif self.token_is(index, CHARACTER):
             chars = self.tokens[index].value
-            return ast.Number(ord(chars[0])), index + 1
+            return ast.Number(chars), index + 1
         else:
             self.error()
 
@@ -685,14 +701,12 @@ class Parser:
     def parse_struct_declaration_list(self, index):
         members = []
 
-        node, index = self.parse_struct_declaration(index)
-        members.append(node)
-
-        try:
-            nodes, index = self.parse_struct_declaration_list(index)
-            members.extend(nodes)
-        except SyntaxError:
-            pass
+        while True:
+            try:
+                node, index = self.parse_struct_declaration(index)
+                members.append(node)
+            except SyntaxError:
+                break
 
         return members, index
 

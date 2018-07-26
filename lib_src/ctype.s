@@ -1,5 +1,3 @@
-.import _bbcc_pusha
-.import _bbcc_pulla
 .export isupper
 .export islower
 .export isalpha
@@ -12,1201 +10,564 @@
 .export isxdigit
 .export toupper
 .export tolower
-
 \ Function: isupper
-isupper: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-
+isupper:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ MoreEqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&41
-bvc __bbcc_0000001f
-eor #&80
-__bbcc_0000001f: bmi __bbcc_0000001e
-lda #01
-sta &70
-__bbcc_0000001e: 
-
+	mov #65, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jge [__bbcc_0000001e]
+	mov #0, %r0
+__bbcc_0000001e:
 \ JmpZero
-lda &70
-bne __bbcc_00000020
-jmp __bbcc_00000000
-__bbcc_00000020: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000000]
 \ LessEqualCmp
-lda #00
-sta &70
-clc
-ldy #&00
-lda (&8C),Y
-sbc #&5A
-bvc __bbcc_00000022
-eor #&80
-__bbcc_00000022: bpl __bbcc_00000021
-lda #01
-sta &70
-__bbcc_00000021: 
-
+	mov #90, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jle [__bbcc_0000001f]
+	mov #0, %r0
+__bbcc_0000001f:
 \ JmpZero
-lda &70
-bne __bbcc_00000023
-jmp __bbcc_00000000
-__bbcc_00000023: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000000]
 \ Jmp
-jmp __bbcc_00000001
-
+	jmp [__bbcc_00000001]
 \ Label
-__bbcc_00000000: 
-
+__bbcc_00000000:
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ Label
-__bbcc_00000001: 
-
+__bbcc_00000001:
 \ Return
-lda &72
-sta &70
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r1, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: islower
-islower: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-
+islower:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ MoreEqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&61
-bvc __bbcc_00000025
-eor #&80
-__bbcc_00000025: bmi __bbcc_00000024
-lda #01
-sta &70
-__bbcc_00000024: 
-
+	mov #97, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jge [__bbcc_00000020]
+	mov #0, %r0
+__bbcc_00000020:
 \ JmpZero
-lda &70
-bne __bbcc_00000026
-jmp __bbcc_00000002
-__bbcc_00000026: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000002]
 \ LessEqualCmp
-lda #00
-sta &70
-clc
-ldy #&00
-lda (&8C),Y
-sbc #&7A
-bvc __bbcc_00000028
-eor #&80
-__bbcc_00000028: bpl __bbcc_00000027
-lda #01
-sta &70
-__bbcc_00000027: 
-
+	mov #122, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jle [__bbcc_00000021]
+	mov #0, %r0
+__bbcc_00000021:
 \ JmpZero
-lda &70
-bne __bbcc_00000029
-jmp __bbcc_00000002
-__bbcc_00000029: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000002]
 \ Jmp
-jmp __bbcc_00000003
-
+	jmp [__bbcc_00000003]
 \ Label
-__bbcc_00000002: 
-
+__bbcc_00000002:
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ Label
-__bbcc_00000003: 
-
+__bbcc_00000003:
 \ Return
-lda &72
-sta &70
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r1, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: isalpha
-isalpha: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-
+isalpha:
+	push %r11
+	mov %r13, %r11
+	push %r1
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ CallFunction
-ldy #&00
-lda (&8C),Y
-jsr _bbcc_pusha
-jsr islower
-clc
-lda &8E
-adc #&01
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-
+	mov 4[%r11], %r0
+	push %r0
+	call [islower]
+	add #2, %r13
 \ JmpNotZero
-lda &70
-beq __bbcc_0000002a
-__bbcc_0000002a: jmp __bbcc_00000004
-__bbcc_0000002b: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000004]
 \ CallFunction
-ldy #&00
-lda (&8C),Y
-jsr _bbcc_pusha
-jsr isupper
-clc
-lda &8E
-adc #&01
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-
+	mov 4[%r11], %r0
+	push %r0
+	call [isupper]
+	add #2, %r13
 \ JmpNotZero
-lda &70
-beq __bbcc_0000002c
-__bbcc_0000002c: jmp __bbcc_00000004
-__bbcc_0000002d: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000004]
 \ Jmp
-jmp __bbcc_00000005
-
+	jmp [__bbcc_00000005]
 \ Label
-__bbcc_00000004: 
-
+__bbcc_00000004:
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ Label
-__bbcc_00000005: 
-
+__bbcc_00000005:
 \ Return
-lda &72
-sta &70
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r1, %r0
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: isdigit
-isdigit: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-
+isdigit:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
 \ Set
-ldy #&00
-lda (&8C),Y
-sta &70
-
+	mov BYTE 4[%r11], %r0
 \ Set
-
 \ Sub
-sec
-lda &70
-sbc #&30
-sta &70
-
+	sub #48, %r0
 \ LessEqualCmp
-lda #00
-sta &70
-clc
-lda &70
-sbc #&09
-bvc __bbcc_0000002f
-eor #&80
-__bbcc_0000002f: bpl __bbcc_0000002e
-lda #01
-sta &70
-__bbcc_0000002e: 
-
+	mov #9, %r2
+	mov #1, %r1
+	cmp %r0, %r2
+	jle [__bbcc_00000022]
+	mov #0, %r1
+__bbcc_00000022:
 \ Return
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r1, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: isalnum
-isalnum: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-
+isalnum:
+	push %r11
+	mov %r13, %r11
+	push %r1
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ CallFunction
-ldy #&00
-lda (&8C),Y
-jsr _bbcc_pusha
-jsr isalpha
-clc
-lda &8E
-adc #&01
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-
+	mov 4[%r11], %r0
+	push %r0
+	call [isalpha]
+	add #2, %r13
 \ JmpNotZero
-lda &70
-beq __bbcc_00000030
-__bbcc_00000030: jmp __bbcc_00000006
-__bbcc_00000031: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000006]
 \ CallFunction
-ldy #&00
-lda (&8C),Y
-jsr _bbcc_pusha
-jsr isdigit
-clc
-lda &8E
-adc #&01
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-
+	mov 4[%r11], %r0
+	push %r0
+	call [isdigit]
+	add #2, %r13
 \ JmpNotZero
-lda &70
-beq __bbcc_00000032
-__bbcc_00000032: jmp __bbcc_00000006
-__bbcc_00000033: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000006]
 \ Jmp
-jmp __bbcc_00000007
-
+	jmp [__bbcc_00000007]
 \ Label
-__bbcc_00000006: 
-
+__bbcc_00000006:
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ Label
-__bbcc_00000007: 
-
+__bbcc_00000007:
 \ Return
-lda &72
-sta &70
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r1, %r0
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: isascii
-isascii: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-lda &74
-jsr _bbcc_pusha
-lda &75
-jsr _bbcc_pusha
-
+isascii:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
+	push %r3
 \ Set
-lda #&01
-sta &74
-
-\ Not
-lda #&7F
-eor #&FF
-sta &72
-lda #&00
-eor #&FF
-sta &73
-
+	mov #1, %r3
+\ Neg
+	mov #-127, %r2
 \ Set
-ldy #&00
-lda (&8C),Y
-sta &70
-lda #0
-sta &71
-
+	mov WORD 4[%r11], %r1
 \ And
-lda &70
-and &72
-sta &70
-lda &71
-and &73
-sta &71
-
+	mov %r2, %r0
+	and %r1, %r0
 \ JmpNotZero
-lda &70
-beq __bbcc_00000034
-lda &71
-beq __bbcc_00000034
-__bbcc_00000034: jmp __bbcc_00000008
-__bbcc_00000035: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000008]
 \ Jmp
-jmp __bbcc_00000009
-
+	jmp [__bbcc_00000009]
 \ Label
-__bbcc_00000008: 
-
+__bbcc_00000008:
 \ Set
-lda #&00
-sta &74
-
+	mov #0, %r3
 \ Label
-__bbcc_00000009: 
-
+__bbcc_00000009:
 \ Return
-lda &74
-sta &70
-jsr _bbcc_pulla
-sta &75
-jsr _bbcc_pulla
-sta &74
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r3, %r0
+	pop %r3
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: isblank
-isblank: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-
+isblank:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ EqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&09
-bne __bbcc_00000036
-lda #01
-sta &70
-__bbcc_00000036: 
-
+	mov #9, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jze [__bbcc_00000023]
+	mov #0, %r0
+__bbcc_00000023:
 \ JmpNotZero
-lda &70
-beq __bbcc_00000037
-__bbcc_00000037: jmp __bbcc_0000000a
-__bbcc_00000038: 
-
+	cmp #0, %r0
+	jnz [__bbcc_0000000a]
 \ EqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&20
-bne __bbcc_00000039
-lda #01
-sta &70
-__bbcc_00000039: 
-
+	mov #32, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jze [__bbcc_00000024]
+	mov #0, %r0
+__bbcc_00000024:
 \ JmpNotZero
-lda &70
-beq __bbcc_0000003a
-__bbcc_0000003a: jmp __bbcc_0000000a
-__bbcc_0000003b: 
-
+	cmp #0, %r0
+	jnz [__bbcc_0000000a]
 \ Jmp
-jmp __bbcc_0000000b
-
+	jmp [__bbcc_0000000b]
 \ Label
-__bbcc_0000000a: 
-
+__bbcc_0000000a:
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ Label
-__bbcc_0000000b: 
-
+__bbcc_0000000b:
 \ Return
-lda &72
-sta &70
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r1, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: iscntrl
-iscntrl: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-
+iscntrl:
+	push %r11
+	mov %r13, %r11
+	push %r1
 \ LessThanCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&20
-bvc __bbcc_0000003d
-eor #&80
-__bbcc_0000003d: bpl __bbcc_0000003c
-lda #01
-sta &70
-__bbcc_0000003c: 
-
+	mov #32, %r1
+	mov #1, %r0
+	cmp 4[%r11], %r1
+	jl [__bbcc_00000025]
+	mov #0, %r0
+__bbcc_00000025:
 \ Return
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: isspace
-isspace: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-lda &74
-jsr _bbcc_pusha
-lda &75
-jsr _bbcc_pusha
-lda &76
-jsr _bbcc_pusha
-lda &77
-jsr _bbcc_pusha
-
+isspace:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
+	push %r3
+	push %r4
 \ Set
-lda #&00
-sta &76
-
+	mov #0, %r3
 \ Set
-lda #&00
-sta &74
-
+	mov #0, %r2
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ EqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&20
-bne __bbcc_0000003e
-lda #01
-sta &70
-__bbcc_0000003e: 
-
+	mov #32, %r4
+	mov #1, %r0
+	cmp 4[%r11], %r4
+	jze [__bbcc_00000026]
+	mov #0, %r0
+__bbcc_00000026:
 \ JmpNotZero
-lda &70
-beq __bbcc_0000003f
-__bbcc_0000003f: jmp __bbcc_00000010
-__bbcc_00000040: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000010]
 \ EqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&0A
-bne __bbcc_00000041
-lda #01
-sta &70
-__bbcc_00000041: 
-
+	mov #10, %r4
+	mov #1, %r0
+	cmp 4[%r11], %r4
+	jze [__bbcc_00000027]
+	mov #0, %r0
+__bbcc_00000027:
 \ JmpNotZero
-lda &70
-beq __bbcc_00000042
-__bbcc_00000042: jmp __bbcc_00000010
-__bbcc_00000043: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000010]
 \ Jmp
-jmp __bbcc_00000011
-
+	jmp [__bbcc_00000011]
 \ Label
-__bbcc_00000010: 
-
+__bbcc_00000010:
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ Label
-__bbcc_00000011: 
-
+__bbcc_00000011:
 \ JmpNotZero
-lda &72
-beq __bbcc_00000044
-__bbcc_00000044: jmp __bbcc_0000000e
-__bbcc_00000045: 
-
+	cmp #0, %r1
+	jnz [__bbcc_0000000e]
 \ EqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&09
-bne __bbcc_00000046
-lda #01
-sta &70
-__bbcc_00000046: 
-
+	mov #9, %r1
+	mov #1, %r0
+	cmp 4[%r11], %r1
+	jze [__bbcc_00000028]
+	mov #0, %r0
+__bbcc_00000028:
 \ JmpNotZero
-lda &70
-beq __bbcc_00000047
-__bbcc_00000047: jmp __bbcc_0000000e
-__bbcc_00000048: 
-
+	cmp #0, %r0
+	jnz [__bbcc_0000000e]
 \ Jmp
-jmp __bbcc_0000000f
-
+	jmp [__bbcc_0000000f]
 \ Label
-__bbcc_0000000e: 
-
+__bbcc_0000000e:
 \ Set
-lda #&01
-sta &74
-
+	mov #1, %r2
 \ Label
-__bbcc_0000000f: 
-
+__bbcc_0000000f:
 \ JmpNotZero
-lda &74
-beq __bbcc_00000049
-__bbcc_00000049: jmp __bbcc_0000000c
-__bbcc_0000004a: 
-
+	cmp #0, %r2
+	jnz [__bbcc_0000000c]
 \ EqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&0D
-bne __bbcc_0000004b
-lda #01
-sta &70
-__bbcc_0000004b: 
-
+	mov #13, %r1
+	mov #1, %r0
+	cmp 4[%r11], %r1
+	jze [__bbcc_00000029]
+	mov #0, %r0
+__bbcc_00000029:
 \ JmpNotZero
-lda &70
-beq __bbcc_0000004c
-__bbcc_0000004c: jmp __bbcc_0000000c
-__bbcc_0000004d: 
-
+	cmp #0, %r0
+	jnz [__bbcc_0000000c]
 \ Jmp
-jmp __bbcc_0000000d
-
+	jmp [__bbcc_0000000d]
 \ Label
-__bbcc_0000000c: 
-
+__bbcc_0000000c:
 \ Set
-lda #&01
-sta &76
-
+	mov #1, %r3
 \ Label
-__bbcc_0000000d: 
-
+__bbcc_0000000d:
 \ Return
-lda &76
-sta &70
-jsr _bbcc_pulla
-sta &77
-jsr _bbcc_pulla
-sta &76
-jsr _bbcc_pulla
-sta &75
-jsr _bbcc_pulla
-sta &74
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r3, %r0
+	pop %r4
+	pop %r3
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: isxdigit
-isxdigit: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-lda &74
-jsr _bbcc_pusha
-lda &75
-jsr _bbcc_pusha
-lda &76
-jsr _bbcc_pusha
-lda &77
-jsr _bbcc_pusha
-
+isxdigit:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
+	push %r3
+	push %r4
 \ Set
-lda #&00
-sta &76
-
+	mov #0, %r3
 \ Set
-lda #&00
-sta &74
-
+	mov #0, %r2
 \ CallFunction
-ldy #&00
-lda (&8C),Y
-jsr _bbcc_pusha
-jsr isdigit
-clc
-lda &8E
-adc #&01
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-
+	mov 4[%r11], %r0
+	push %r0
+	call [isdigit]
+	add #2, %r13
 \ JmpNotZero
-lda &70
-beq __bbcc_0000004e
-__bbcc_0000004e: jmp __bbcc_00000014
-__bbcc_0000004f: 
-
+	cmp #0, %r0
+	jnz [__bbcc_00000014]
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ MoreEqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&61
-bvc __bbcc_00000051
-eor #&80
-__bbcc_00000051: bmi __bbcc_00000050
-lda #01
-sta &70
-__bbcc_00000050: 
-
+	mov #97, %r4
+	mov #1, %r0
+	cmp 4[%r11], %r4
+	jge [__bbcc_0000002a]
+	mov #0, %r0
+__bbcc_0000002a:
 \ JmpZero
-lda &70
-bne __bbcc_00000052
-jmp __bbcc_00000016
-__bbcc_00000052: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000016]
 \ LessEqualCmp
-lda #00
-sta &70
-clc
-ldy #&00
-lda (&8C),Y
-sbc #&66
-bvc __bbcc_00000054
-eor #&80
-__bbcc_00000054: bpl __bbcc_00000053
-lda #01
-sta &70
-__bbcc_00000053: 
-
+	mov #102, %r4
+	mov #1, %r0
+	cmp 4[%r11], %r4
+	jle [__bbcc_0000002b]
+	mov #0, %r0
+__bbcc_0000002b:
 \ JmpZero
-lda &70
-bne __bbcc_00000055
-jmp __bbcc_00000016
-__bbcc_00000055: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000016]
 \ Jmp
-jmp __bbcc_00000017
-
+	jmp [__bbcc_00000017]
 \ Label
-__bbcc_00000016: 
-
+__bbcc_00000016:
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ Label
-__bbcc_00000017: 
-
+__bbcc_00000017:
 \ JmpNotZero
-lda &72
-beq __bbcc_00000056
-__bbcc_00000056: jmp __bbcc_00000014
-__bbcc_00000057: 
-
+	cmp #0, %r1
+	jnz [__bbcc_00000014]
 \ Jmp
-jmp __bbcc_00000015
-
+	jmp [__bbcc_00000015]
 \ Label
-__bbcc_00000014: 
-
+__bbcc_00000014:
 \ Set
-lda #&01
-sta &74
-
+	mov #1, %r2
 \ Label
-__bbcc_00000015: 
-
+__bbcc_00000015:
 \ JmpNotZero
-lda &74
-beq __bbcc_00000058
-__bbcc_00000058: jmp __bbcc_00000012
-__bbcc_00000059: 
-
+	cmp #0, %r2
+	jnz [__bbcc_00000012]
 \ Set
-lda #&01
-sta &72
-
+	mov #1, %r1
 \ MoreEqualCmp
-lda #00
-sta &70
-ldy #&00
-lda (&8C),Y
-cmp #&41
-bvc __bbcc_0000005b
-eor #&80
-__bbcc_0000005b: bmi __bbcc_0000005a
-lda #01
-sta &70
-__bbcc_0000005a: 
-
+	mov #65, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jge [__bbcc_0000002c]
+	mov #0, %r0
+__bbcc_0000002c:
 \ JmpZero
-lda &70
-bne __bbcc_0000005c
-jmp __bbcc_00000018
-__bbcc_0000005c: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000018]
 \ LessEqualCmp
-lda #00
-sta &70
-clc
-ldy #&00
-lda (&8C),Y
-sbc #&46
-bvc __bbcc_0000005e
-eor #&80
-__bbcc_0000005e: bpl __bbcc_0000005d
-lda #01
-sta &70
-__bbcc_0000005d: 
-
+	mov #70, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jle [__bbcc_0000002d]
+	mov #0, %r0
+__bbcc_0000002d:
 \ JmpZero
-lda &70
-bne __bbcc_0000005f
-jmp __bbcc_00000018
-__bbcc_0000005f: 
-
+	cmp #0, %r0
+	jze [__bbcc_00000018]
 \ Jmp
-jmp __bbcc_00000019
-
+	jmp [__bbcc_00000019]
 \ Label
-__bbcc_00000018: 
-
+__bbcc_00000018:
 \ Set
-lda #&00
-sta &72
-
+	mov #0, %r1
 \ Label
-__bbcc_00000019: 
-
+__bbcc_00000019:
 \ JmpNotZero
-lda &72
-beq __bbcc_00000060
-__bbcc_00000060: jmp __bbcc_00000012
-__bbcc_00000061: 
-
+	cmp #0, %r1
+	jnz [__bbcc_00000012]
 \ Jmp
-jmp __bbcc_00000013
-
+	jmp [__bbcc_00000013]
 \ Label
-__bbcc_00000012: 
-
+__bbcc_00000012:
 \ Set
-lda #&01
-sta &76
-
+	mov #1, %r3
 \ Label
-__bbcc_00000013: 
-
+__bbcc_00000013:
 \ Return
-lda &76
-sta &70
-jsr _bbcc_pulla
-sta &77
-jsr _bbcc_pulla
-sta &76
-jsr _bbcc_pulla
-sta &75
-jsr _bbcc_pulla
-sta &74
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	mov %r3, %r0
+	pop %r4
+	pop %r3
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: toupper
-toupper: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-lda &74
-jsr _bbcc_pusha
-lda &75
-jsr _bbcc_pusha
-
+toupper:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
+	push %r3
 \ CallFunction
-ldy #&00
-lda (&8C),Y
-jsr _bbcc_pusha
-jsr islower
-clc
-lda &8E
-adc #&01
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-lda &70
-sta &74
-
-\ Not
-lda #&20
-eor #&FF
-sta &72
-lda #&00
-eor #&FF
-sta &73
-
+	mov 4[%r11], %r0
+	push %r0
+	call [islower]
+	add #2, %r13
+	mov %r0, %r3
+\ Neg
+	mov #-32, %r2
 \ Set
-ldy #&00
-lda (&8C),Y
-sta &70
-lda #0
-sta &71
-
+	mov WORD 4[%r11], %r1
 \ And
-lda &70
-and &72
-sta &70
-lda &71
-and &73
-sta &71
-
+	mov %r2, %r0
+	and %r1, %r0
 \ JmpZero
-lda &74
-bne __bbcc_00000062
-jmp __bbcc_0000001a
-__bbcc_00000062: 
-
+	cmp #0, %r3
+	jze [__bbcc_0000001a]
 \ Set
-
 \ Jmp
-jmp __bbcc_0000001b
-
+	jmp [__bbcc_0000001b]
 \ Label
-__bbcc_0000001a: 
-
+__bbcc_0000001a:
 \ Set
-ldy #&00
-lda (&8C),Y
-sta &70
-lda #0
-sta &71
-
+	mov WORD 4[%r11], %r0
 \ Label
-__bbcc_0000001b: 
-
+__bbcc_0000001b:
 \ Return
-jsr _bbcc_pulla
-sta &75
-jsr _bbcc_pulla
-sta &74
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
-
+	pop %r3
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
 \ Function: tolower
-tolower: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-
+tolower:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
 \ CallFunction
-ldy #&00
-lda (&8C),Y
-jsr _bbcc_pusha
-jsr isupper
-clc
-lda &8E
-adc #&01
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-lda &70
-sta &72
-
+	mov 4[%r11], %r0
+	push %r0
+	call [isupper]
+	add #2, %r13
+	mov %r0, %r2
 \ Set
-ldy #&00
-lda (&8C),Y
-sta &70
-lda #0
-sta &71
-
+	mov WORD 4[%r11], %r1
 \ IncOr
-lda &70
-ora #&20
-sta &70
-lda &71
-ora #&00
-sta &71
-
+	mov #32, %r0
+	or %r1, %r0
 \ JmpZero
-lda &72
-bne __bbcc_00000063
-jmp __bbcc_0000001c
-__bbcc_00000063: 
-
+	cmp #0, %r2
+	jze [__bbcc_0000001c]
 \ Set
-
 \ Jmp
-jmp __bbcc_0000001d
-
+	jmp [__bbcc_0000001d]
 \ Label
-__bbcc_0000001c: 
-
+__bbcc_0000001c:
 \ Set
-ldy #&00
-lda (&8C),Y
-sta &70
-lda #0
-sta &71
-
+	mov WORD 4[%r11], %r0
 \ Label
-__bbcc_0000001d: 
-
+__bbcc_0000001d:
 \ Return
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret

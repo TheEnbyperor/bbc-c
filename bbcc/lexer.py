@@ -18,9 +18,9 @@ class Lexer:
         else:
             return self.text[peek_pos]
 
-    def advance(self):
+    def advance(self, pos=1):
         """Advance the 'pos' pointer and set the 'current_char' variable."""
-        self.pos += 1
+        self.pos += pos
         if self.pos > len(self.text) - 1:
             self.current_char = None  # Indicates end of input
         else:
@@ -52,46 +52,47 @@ class Lexer:
     def char(self):
         if self.current_char == '\\':
             self.advance()
-            val = self.process_escape()
-            return val
-        return self.current_char
+            return self.process_escape()
+        return ord(self.current_char)
 
     def string(self):
-        result = ''
+        result = bytearray()
         while self.current_char is not None and self.current_char != '"' and self.current_char != '\n':
-            result += self.current_char
+            result.append(ord(self.current_char))
             self.advance()
             if self.current_char == "\\":
                 self.advance()
-                result += self.process_escape()
+                result.append(self.process_escape())
                 self.advance()
         return result
 
     def process_escape(self):
         if self.current_char == "n":
-            return "\n"
+            return ord("\n")
         elif self.current_char == "t":
-            return "\t"
+            return ord("\t")
         elif self.current_char == "v":
-            return "\v"
+            return ord("\v")
         elif self.current_char == "b":
-            return "\b"
+            return ord("\b")
         elif self.current_char == "r":
-            return "\r"
+            return ord("\r")
         elif self.current_char == "f":
-            return "\f"
+            return ord("\f")
         elif self.current_char == "a":
-            return "\a"
+            return ord("\a")
         elif self.current_char == "\\":
-            return "\\"
+            return ord("\\")
         elif self.current_char == "?":
-            return "?"
+            return ord("?")
         elif self.current_char == "'":
-            return "'"
+            return ord("'")
         elif self.current_char == "\"":
-            return "\""
-        elif self.current_char == "0":
-            return "\0"
+            return ord("\"")
+        elif self.current_char.isdigit():
+            num = self.integer()
+            self.advance(-1)
+            return num
 
     def h_string(self):
         result = ''
@@ -147,6 +148,11 @@ class Lexer:
                 self.advance()
                 self.advance()
                 tokens.append(Token(ELLIPSIS, "..."))
+
+            elif self.current_char == "-" and self.peek() == ">":
+                self.advance()
+                self.advance()
+                tokens.append(Token(ARROW, "->"))
 
             elif self.current_char == "|" and self.peek() == "|":
                 self.advance()
@@ -276,6 +282,9 @@ class Lexer:
             elif self.current_char == "^":
                 self.advance()
                 tokens.append(Token(HAT, "^"))
+            elif self.current_char == ".":
+                self.advance()
+                tokens.append(Token(DOT, "."))
 
             else:
                 self.error()

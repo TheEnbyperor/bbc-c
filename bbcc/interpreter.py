@@ -77,9 +77,7 @@ class Interpreter(ast.NodeVisitor):
         decl_info = self.scope.lookup_decl(id(node))
         func_name = decl_info.identifier.value
         self.il.start_function(func_name)
-        self.current_function = func_name
-        for name in decl_info.params:
-            name = name.value
+        self.current_function = decl_info
         for n in node.nodes.items:
             self.visit(n)
         should_return = True
@@ -91,7 +89,7 @@ class Interpreter(ast.NodeVisitor):
             else:
                 il_value = il.ILValue(ctypes.void)
             self.il.register_literal_value(il_value, 0)
-            self.il.add(il.Return(il_value, func_name))
+            self.il.add(il.Return(il_value))
         self.il.end_function()
         self.current_scope = old_scope
 
@@ -225,11 +223,14 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(left_val.type)
 
         if left.type.is_pointer():
-            type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, left.type.arg.size)
+            if left.type.arg.size != 1:
+                type_len = il.ILValue(ctypes.unsig_char)
+                self.il.register_literal_value(type_len, left.type.arg.size)
 
-            offset = il.ILValue(ctypes.unsig_int)
-            self.il.add(il.Mult(right_val, type_len, offset))
+                offset = il.ILValue(ctypes.unsig_int)
+                self.il.add(il.Mult(right_val, type_len, offset))
+            else:
+                offset = right_val
             self.il.add(il.Add(left_val, offset, output))
         else:
             self.il.add(il.Add(left_val, right_val, output))
@@ -246,11 +247,14 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(left.type)
 
         if left.type.is_pointer():
-            type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, left.type.arg.size)
+            if left.type.arg.size != 1:
+                type_len = il.ILValue(ctypes.unsig_char)
+                self.il.register_literal_value(type_len, left.type.arg.size)
 
-            offset = il.ILValue(ctypes.unsig_int)
-            self.il.add(il.Mult(right_val, type_len, offset))
+                offset = il.ILValue(ctypes.unsig_int)
+                self.il.add(il.Mult(right_val, type_len, offset))
+            else:
+                offset = right_val
             self.il.add(il.Add(left_val, offset, output))
         else:
             self.il.add(il.Sub(left_val, right_val, output))
@@ -399,7 +403,7 @@ class Interpreter(ast.NodeVisitor):
 
         output = il.ILValue(expr.type)
 
-        self.il.add(il.Not(expr, output))
+        self.il.add(il.Neg(expr, output))
         return output
 
     def visit_Conditional(self, node):
@@ -532,7 +536,27 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_Deref(self, node):
         value = self.visit(node.expr)
+        if value.type.arg.is_void():
+            raise SyntaxError("Can't dereference void pointer")
         return ast.IndirectLValue(value.val(self.il), value.type.arg)
+
+    def visit_ObjPtrMember(self, node):
+        head = self.visit(node.head)
+        if not head.type.is_pointer():
+            raise SyntaxError("Object is not pointer")
+        if not head.type.arg.is_struct_union():
+            raise SyntaxError("Object pointed to is not struct or union")
+        member = node.member
+        offset = head.type.arg.get_offset(member)
+        if offset[0] is None:
+            raise SyntaxError(f"{member} is not a member of the struct")
+        offset_val = il.ILValue(ctypes.unsig_char)
+        self.il.register_literal_value(offset_val, offset[0])
+
+        val = head.val(self.il)
+        pos = il.ILValue(ctypes.unsig_int)
+        self.il.add(il.Add(offset_val, val, pos))
+        return ast.IndirectLValue(pos, offset[1])
 
     def visit_ArraySubsc(self, node):
         head = self.visit(node.head)
@@ -667,8 +691,12 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Return(self, node):
-        value = self.visit(node.right).val(self.il)
-        self.il.add(il.Return(value, self.current_function))
+        if node.right is not None:
+            value = self.visit(node.right).val(self.il)
+        else:
+            value = il.ILValue(self.current_function.ctype.ret)
+            self.il.register_literal_value(value, 0)
+        self.il.add(il.Return(value))
 
     def interpret(self, ast_root) -> il.IL:
         self.visit(ast_root)

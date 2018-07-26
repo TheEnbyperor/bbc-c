@@ -50,16 +50,22 @@ class Bytes(ASTNode):
 
 
 class _ZeroValueNode(ASTNode):
+    num_values = 0
+
     def __init__(self):
         pass
 
 
 class _OneValueNode(ASTNode):
+    num_values = 1
+
     def __init__(self, value):
         self.value = value
 
 
 class _TwoValueNode(ASTNode):
+    num_values = 2
+
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -78,6 +84,38 @@ class Jze(_OneValueNode):
 
 
 class Jnz(_OneValueNode):
+    pass
+
+
+class Jl(_OneValueNode):
+    pass
+
+
+class Jle(_OneValueNode):
+    pass
+
+
+class Jg(_OneValueNode):
+    pass
+
+
+class Jge(_OneValueNode):
+    pass
+
+
+class Ja(_OneValueNode):
+    pass
+
+
+class Jae(_OneValueNode):
+    pass
+
+
+class Jb(_OneValueNode):
+    pass
+
+
+class Jbe(_OneValueNode):
     pass
 
 
@@ -114,6 +152,18 @@ class Cmp(_TwoValueNode):
 
 
 class Add(_TwoValueNode):
+    pass
+
+
+class Sub(_TwoValueNode):
+    pass
+
+
+class And(_TwoValueNode):
+    pass
+
+
+class Or(_TwoValueNode):
     pass
 
 

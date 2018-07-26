@@ -1,3 +1,11 @@
+class TempAsm:
+    def __init__(self):
+        self.asm = []
+
+    def add_inst(self, inst):
+        self.asm.append(inst)
+
+
 class ASM:
     def __init__(self):
         self.asm = []
@@ -10,6 +18,14 @@ class ASM:
 
     def add_inst(self, inst):
         self.asm.append(inst)
+
+    def merge_temp_asm(self, asm: TempAsm, used_regs):
+        for inst in asm.asm:
+            if isinstance(inst, PopUsed):
+                for r in used_regs[::-1]:
+                        self.asm.append(Pop(r, None, 2))
+            else:
+                self.asm.append(inst)
 
     def add_import(self, name):
         self.imports.append(name)
@@ -68,6 +84,11 @@ class Bytes:
         return ".byte " + ",".join(["#{}".format(b) for b in self.data])
 
 
+class PopUsed:
+    def __init__(self):
+        pass
+
+
 class Mov(_Inst):
     name = "mov"
 
@@ -92,12 +113,64 @@ class Jnz(_Inst):
     name = "jnz"
 
 
+class Jl(_Inst):
+    name = "jl"
+
+
+class Jle(_Inst):
+    name = "jle"
+
+
+class Jg(_Inst):
+    name = "jg"
+
+
+class Jge(_Inst):
+    name = "jge"
+
+
+class Ja(_Inst):
+    name = "ja"
+
+
+class Jae(_Inst):
+    name = "jae"
+
+
+class Jb(_Inst):
+    name = "jb"
+
+
+class Jbe(_Inst):
+    name = "jbe"
+
+
 class Sub(_Inst):
     name = "sub"
 
 
 class Add(_Inst):
     name = "add"
+
+
+class And(_Inst):
+    name = "and"
+
+
+class Or(_Inst):
+    name = "or"
+
+
+class Not(_Inst):
+    name = "not"
+
+
+class Xor(_Inst):
+    name = "xor"
+
+
+class Neg(_Inst):
+    name = "neg"
 
 
 class Inc(_Inst):

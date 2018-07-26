@@ -78,6 +78,9 @@ class Lexer:
                 tokens.append(Token(INTEGER, self.integer_hex()))
             elif self.current_char.isdigit():
                 tokens.append(Token(INTEGER, self.integer()))
+            elif self.current_char == '-':
+                self.advance()
+                tokens.append(Token(INTEGER, -self.integer()))
 
             elif self.current_char in string.ascii_letters+string.digits+"_":
                 tokens.append(self.id())

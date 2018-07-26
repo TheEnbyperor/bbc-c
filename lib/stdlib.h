@@ -1,1 +1,3 @@
-void itoa(int n, char *s);
+//void itoa(int n, char *s);
+
+void *malloc(unsigned int size);

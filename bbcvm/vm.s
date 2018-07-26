@@ -11,7 +11,10 @@ inst_jump_table_l:
       #0(and_mem_reg_long-1), #0(or_const_reg-1), #0(or_reg_reg-1), #0(or_mem_reg_short-1), #0(or_mem_reg_long-1),
       #0(xor_const_reg-1), #0(xor_reg_reg-1), #0(xor_mem_reg_short-1), #0(xor_mem_reg_long-1), #0(not_reg-1),
       #0(neg_reg-1), #0(cmp_const_reg-1), #0(cmp_reg_reg-1), #0(cmp_mem_reg_short-1), #0(cmp_mem_reg_long-1),
-      #0(call_subroutine-1), #0(call_6502-1), #0(jump-1), #0(jump_zero-1), #0(jump_not_zero-1)
+      #0(call_subroutine-1), #0(call_6502-1), #0(jump-1), #0(jump_zero-1), #0(jump_not_zero-1), #0(not_mem_short-1),
+      #0(not_mem_long-1), #0(neg_mem_short-1), #0(neg_mem_long-1), #0(inc_mem_short-1), #0(inc_mem_long-1),
+      #0(dec_mem_short-1), #0(dec_mem_long-1), #0(jump_above-1), #0(jump_above_equal-1), #0(jump_below-1),
+      #0(jump_below_equal-1), #0(jump_lesser-1), #0(jump_lesser_equal-1), #0(jump_greater-1), #0(jump_greater_equal-1)
 
 inst_jump_table_h:
 .byte #1(mov_const_reg-1), #1(mov_mem_reg_short-1), #1(mov_mem_reg_long-1), #1(mov_reg_mem_short-1),
@@ -24,13 +27,16 @@ inst_jump_table_h:
       #1(and_mem_reg_long-1), #1(or_const_reg-1), #1(or_reg_reg-1), #1(or_mem_reg_short-1), #1(or_mem_reg_long-1),
       #1(xor_const_reg-1), #1(xor_reg_reg-1), #1(xor_mem_reg_short-1), #1(xor_mem_reg_long-1), #1(not_reg-1),
       #1(neg_reg-1), #1(cmp_const_reg-1), #1(cmp_reg_reg-1), #1(cmp_mem_reg_short-1), #1(cmp_mem_reg_long-1),
-      #1(call_subroutine-1), #1(call_6502-1), #1(jump-1), #1(jump_zero-1), #1(jump_not_zero-1)
+      #1(call_subroutine-1), #1(call_6502-1), #1(jump-1), #1(jump_zero-1), #1(jump_not_zero-1), #1(not_mem_short-1),
+      #1(not_mem_long-1), #1(neg_mem_short-1), #1(neg_mem_long-1), #1(inc_mem_short-1), #1(inc_mem_long-1),
+      #1(dec_mem_short-1), #1(dec_mem_long-1), #1(jump_above-1), #1(jump_above_equal-1), #1(jump_below-1),
+      #1(jump_below_equal-1), #1(jump_lesser-1), #1(jump_lesser_equal-1), #1(jump_greater-1), #1(jump_greater_equal-1)
 
 other_inst_jump_table_l:
-.byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1)
+.byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1), #0(halt_and_catch_fire-1)
 
 other_inst_jump_table_h:
-.byte #1(set_carry-1), #1(clear_carry-1), #1(return-1), #1(exit_vm-1)
+.byte #1(set_carry-1), #1(clear_carry-1), #1(return-1), #1(exit_vm-1), #1(halt_and_catch_fire-1)
 
 _start_vm:
 \ Load PC and put back on stack
@@ -142,7 +148,8 @@ lda (&8C),y
 sta &8E
 jmp _get_mem_address
 _get_mem_rel_minus:
-ldy #1
+jsr inc_pc
+ldy #0
 lda &8C
 sec
 sbc (&8C),y
@@ -151,9 +158,10 @@ iny
 lda &8D
 sbc (&8C),y
 sta &8F
-jmp _get_mem_address
+jmp _get_mem_address_2
 _get_mem_rel_plus:
-ldy #1
+jsr inc_pc
+ldy #0
 lda &8C
 clc
 adc (&8C),y
@@ -162,7 +170,7 @@ iny
 lda &8D
 adc (&8C),y
 sta &8F
-jmp _get_mem_address
+jmp _get_mem_address_2
 _get_mem_indirect:
 txa
 pha
@@ -209,8 +217,17 @@ pla
 tax
 _get_mem_address:
 jsr inc_pc
+_get_mem_address_2:
 ldy #0
 jmp inc_pc
+
+dec_mem_address:
+lda &8E
+bne _dec_mem_address
+dec &8F
+_dec_mem_address:
+dec &8E
+rts
 
 \ Load 16 bit constant value into register
 mov_const_reg:
@@ -285,6 +302,7 @@ rts
 \ Push 8 bit memory location onto stack
 push_mem_short:
 jsr push_start
+jsr push_start
 jsr get_mem_address
 lda (&8E),y
 sta (&8A),y
@@ -292,10 +310,7 @@ rts
 
 \ Push 16 bit memory location onto stack
 push_mem_long:
-jsr push_start
-jsr push_start
-lda (&8E),y
-sta (&8A),y
+jsr push_mem_short
 iny
 lda (&8E),y
 sta (&8A),y
@@ -325,6 +340,7 @@ jsr get_mem_address
 ldy #1
 lda (&8A),y
 sta (&8E),y
+jsr pop_end
 jmp pop_end
 
 \ Pop 16 bit value off stack to memory
@@ -354,14 +370,17 @@ lda &88
 lsr a
 rts
 
-\ Set carry flag in status to 6502 carry
+\ Set carry and overflow flag in status to 6502 carry and overflow
 set_carry_status:
 lda &88
-and &FE
+and #&F6
 sta &88
 lda #0
 rol a
 ora &88
+bvc _set_carry_status
+ora #&08
+_set_carry_status:
 sta &88
 rts
 
@@ -429,10 +448,10 @@ jsr load_carry_status
 _add_reg_reg:
 lda &0070,y
 adc &70,x
-sta &70,x
+sta &0070,y
 lda &0071,y
 adc &71,x
-sta &71,x
+sta &0071,y
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
@@ -478,7 +497,7 @@ jmp set_sign_zero_from_reg
 \ Subtract constant from register
 sub_const_reg:
 sec
-bcc _sub_const_reg
+bcs _sub_const_reg
 \ Subtract with carry
 sub_carry_const_reg:
 jsr load_carry_status
@@ -516,17 +535,17 @@ jmp inc_pc
 \ Subtract register from register
 sub_reg_reg:
 sec
-bcc _sub_reg_reg
+bcs _sub_reg_reg
 \ Add with carry
 sub_carry_reg_reg:
 jsr load_carry_status
 _sub_reg_reg:
 lda &0070,y
 sbc &70,x
-sta &70,x
+sta &0070,y
 lda &0071,y
 sbc &71,x
-sta &70,x
+sta &0070,y
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
@@ -547,13 +566,13 @@ jmp set_sign_zero_from_reg
 sub_mem_reg_start:
 jsr get_mem_address
 lda &70,x
-sec
 sbc (&8E),y
+rts
 
 \ Subtract 8 bit memory from register
 sub_mem_reg_short:
 sec
-bcc _sub_mem_reg_short
+bcs _sub_mem_reg_short
 \ Add with carry
 sub_carry_mem_reg_short:
 jsr load_carry_status
@@ -568,7 +587,6 @@ jmp set_sign_zero_from_reg
 
 \ Compare 8 bit memory and register
 cmp_mem_reg_short:
-sec
 jsr sub_mem_reg_start
 sta &8E
 lda &71,x
@@ -581,7 +599,7 @@ jmp set_sign_zero_from_reg
 \ Subtract 16 bit memory from register
 sub_mem_reg_long:
 sec
-bcc _sub_mem_reg_long
+bcs _sub_mem_reg_long
 \ Add with carry
 sub_carry_mem_reg_long:
 jsr load_carry_status
@@ -597,7 +615,6 @@ jmp set_sign_zero_from_reg
 
 \ Compare 16 bit memory and register
 cmp_mem_reg_long:
-sec
 jsr sub_mem_reg_start
 sta &8E
 iny
@@ -608,6 +625,37 @@ jsr set_carry_status
 ldx #&1E
 jmp set_sign_zero_from_reg
 
+\ Multiply
+_multiply_op1_l: .byte #0
+_multiply_op1_h: .byte #0
+_multiply_op2_l: .byte #0
+_multiply_op2_h: .byte #0
+_multiply_result_l: .byte #0
+_multiply_result_h: .byte #0
+
+_multiply:
+lda #0
+sta _multiply_result_h
+sta _multiply_result_l
+ldx #16
+_multiply_1:
+lsr _multiply_op2_l
+ror _multiply_op2_h
+bcc _multiply_2
+clc
+lda _multiply_op1_l
+adc _multiply_result_l
+sta _multiply_result_l
+lda _multiply_op1_h
+adc _multiply_result_h
+sta _multiply_result_h
+_multiply_2:
+clc
+asl _multiply_op1_l
+rol _multiply_op1_h
+dex
+bne _multiply_1
+
 \ Increment register
 inc_reg:
 inc &70,x
@@ -616,13 +664,75 @@ inc &71,x
 _inc_reg:
 jmp set_sign_zero_from_reg
 
+\ Increment memory short
+inc_mem_short:
+jsr get_mem_address
+clc
+lda (&8E),y
+adc #1
+sta (&8E),y
+sta &8E
+ldx #&1E
+jmp set_sign_zero_from_reg
+
+\ Increment memory long
+_inc_mem_long_temp: .byte #0
+
+inc_mem_long:
+jsr get_mem_address
+clc
+lda (&8E),y
+adc #1
+sta (&8E),y
+sta _inc_mem_long_temp
+iny
+lda (&8E),y
+adc #0
+sta (&8E),y
+sta &8F
+lda _inc_mem_long_temp
+sta &8E
+ldx #&1E
+jmp set_sign_zero_from_reg
+
 \ Decrement register
 dec_reg:
 lda &70,x
-bne _inc_reg
+bne _dec_reg
 dec &71,x
-_inc_reg:
+_dec_reg:
 dec &70,x
+jmp set_sign_zero_from_reg
+
+\ Decrement memory short
+dec_mem_short:
+jsr get_mem_address
+sec
+lda (&8E),y
+sbc #1
+sta (&8E),y
+sta &8E
+ldx #&1E
+jmp set_sign_zero_from_reg
+
+\ Decrement memory long
+_dec_mem_long_temp: .byte #0
+
+dec_mem_long:
+jsr get_mem_address
+sec
+lda (&8E),y
+sbc #1
+sta (&8E),y
+sta _dec_mem_long_temp
+iny
+lda (&8E),y
+sbc #0
+sta (&8E),y
+sta &8F
+lda _dec_mem_long_temp
+sta &8E
+ldx #&1E
 jmp set_sign_zero_from_reg
 
 \ Logical and constant and register
@@ -644,10 +754,10 @@ jmp inc_pc
 and_reg_reg:
 lda &0070,y
 and &70,x
-sta &70,x
+sta &0070,y
 lda &0071,y
 and &71,x
-sta &71,x
+sta &0071,y
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
@@ -696,10 +806,10 @@ jmp inc_pc
 or_reg_reg:
 lda &0070,y
 ora &70,x
-sta &70,x
+sta &0070,y
 lda &0071,y
 ora &71,x
-sta &71,x
+sta &0071,y
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
@@ -746,10 +856,10 @@ jmp inc_pc
 xor_reg_reg:
 lda &0070,y
 eor &70,x
-sta &70,x
+sta &0070,y
 lda &0071,y
 eor &71,x
-sta &71,x
+sta &0071,y
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
@@ -789,6 +899,23 @@ eor #&ff
 sta &71,x
 rts
 
+\ Logical not memory short
+not_mem_short:
+jsr get_mem_address
+lda (&8E),y
+eor #&ff
+sta (&8E),y
+rts
+
+\ Logical not memory long
+not_mem_long:
+jsr not_mem_short
+iny
+lda (&8E),y
+eor #&ff
+sta (&8E),y
+rts
+
 \ 2's compliment negate register
 neg_reg:
 lda &70,x
@@ -802,8 +929,42 @@ adc #0
 sta &71,x
 jmp set_sign_zero_from_reg
 
+\ 2's compliment negate mem short
+neg_mem_short:
+jsr get_mem_address
+lda (&8E),y
+eor #&ff
+clc
+adc #1
+sta (&8E),y
+sta &8E
+jmp set_sign_zero_from_reg
+
+\ 2's compliment negate mem short
+_neg_not_mem_long_temp: .byte #0
+
+neg_mem_long:
+jsr get_mem_address
+lda (&8E),y
+eor #&ff
+clc
+adc #1
+sta (&8E),y
+sta _neg_not_mem_long_temp
+iny
+lda (&8E),y
+eor #&ff
+adc #0
+sta (&8E),y
+sta &8F
+lda _neg_not_mem_long_temp
+sta &8E
+jmp set_sign_zero_from_reg
+
+\ Push program counter and jump to memory location
 call_subroutine:
 jsr get_mem_address
+jsr dec_mem_address
 ldx #&1C
 jsr push_reg
 lda &8E
@@ -812,8 +973,10 @@ lda &8F
 sta &8D
 rts
 
+\ Jump to memory location
 jump:
 jsr get_mem_address
+jsr dec_mem_address
 lda &8E
 sta &8C
 lda &8F
@@ -822,40 +985,122 @@ rts
 
 _jump_zero_start:
 jsr get_mem_address
+jmp _jump_above_start_2
+
+\ Jump when result of comparison is zero
+jump_zero:
+jsr _jump_zero_start
+beq _jump_test_fail
+jmp _jump_test_end
+
+\ Jump when result of comparison is not zero
+jump_not_zero:
+jsr _jump_zero_start
+bne _jump_test_fail
+jmp _jump_test_end
+
+_jump_above_start_1:
+jsr get_mem_address
+_jump_above_start_2:
 lda &88
 and #&02
 rts
 
-_jump_zero_end:
+\ Jump when a >= b unsigned
+jump_above_equal:
+jsr _jump_above_start_1
+bne _jump_test_fail
+jmp _jump_test_end
+
+\ Jump when a > b unsigned
+jump_above:
+jsr _jump_above_start_2
+beq _jump_test_fail
+jsr _jump_above_start_1
+bne _jump_test_fail
+jmp _jump_test_end
+
+\ Jump when a < b unsigned
+jump_below:
+jsr _jump_above_start_1
+beq _jump_test_fail
+jmp _jump_test_end
+
+\ Jump when a <= b unsigned
+jump_below_equal:
+jsr _jump_above_start_1
+beq _jump_test_end
+jsr _jump_above_start_2
+bne _jump_test_end
+jmp _jump_test_fail
+
+_jump_lesser_temp: .byte #0
+
+_jump_lesser_start:
+jsr get_mem_address
+lda &88
+and #&04
+lsr a
+lsr a
+sta _jump_lesser_temp
+lda &88
+and #&08
+lsr a
+lsr a
+lsr a
+eor _jump_lesser_temp
+lsr a
+rts
+
+_jump_test_end:
+jsr dec_mem_address
 lda &8E
 sta &8C
 lda &8F
 sta &8D
-_jump_zero_fail:
+_jump_test_fail:
 rts
 
-jump_zero:
-jsr _jump_zero_start
-beq _jump_zero_fail
-jmp _jump_zero_end
+\ Jump when a < b signed
+jump_lesser:
+jsr _jump_above_start_2
+bcs _jump_test_fail
+jsr _jump_lesser_start
+bcs _jump_test_fail
+bcc _jump_test_end
 
-jump_not_zero:
-jsr _jump_zero_start
-bne _jump_zero_fail
-jmp _jump_zero_end
+\ Jump when a <= b signed
+jump_lesser_equal:
+jsr _jump_lesser_start
+bcs _jump_test_fail
+bcc _jump_test_end
 
+\ Jump when a >= b signed
+jump_greater_equal:
+jsr _jump_lesser_start
+bcs _jump_test_end
+jsr _jump_above_start_2
+bcs _jump_test_end
+bcc _jump_test_fail
+
+\ Jump when a > b signed
+jump_greater:
+jsr _jump_lesser_start
+bcc _jump_test_fail
+bcs _jump_test_end
+
+\ JSR to native 6502 code with accumulator set from a register and then the accumulator after RTS loaded into the register
 _call_6502_temp: .byte #0
+
 call_6502:
 jsr get_mem_address
-inc &8E
-bne __call_6502_2
-inc &8F
-__call_6502_2:
 stx _call_6502_temp
 lda &70,x
 jsr _call_6502
 ldx _call_6502_temp
 sta &70,x
+lda #0
+sta &71,x
 rts
 _call_6502:
 jmp (&8E)
@@ -870,3 +1115,6 @@ pla
 pla
 pla
 rts
+
+halt_and_catch_fire:
+.byte #2

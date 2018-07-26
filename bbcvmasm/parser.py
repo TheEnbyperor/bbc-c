@@ -33,6 +33,7 @@ class Parser:
         while True:
             try:
                 item, index = self.parse_line(index)
+                # print(item)
                 items.append(item)
             except SyntaxError:
                 break
@@ -93,20 +94,22 @@ class Parser:
         return ast.Label(self.tokens[index-2].value), index
 
     def parse_inst(self, index):
-        insts = [("push", 1, ast.Push), ("pop", 1, ast.Pop), ("ret", 0, ast.Ret), ("call", 1, ast.Call),
-                 ("calln", 2, ast.Calln), ("mov", 2, ast.Mov), ("add", 2, ast.Add), ("cmp", 2, ast.Cmp),
-                 ("jze", 1, ast.Jze), ("jnz", 1, ast.Jnz), ("jmp", 1, ast.Jmp), ("lea", 2, ast.Lea),
-                 ("inc", 1, ast.Inc), ("dec", 1, ast.Dec)]
+        insts = [("push", ast.Push), ("pop", ast.Pop), ("ret", ast.Ret), ("call",ast.Call),
+                 ("calln", ast.Calln), ("mov", ast.Mov), ("add", ast.Add), ("sub", ast.Sub), ("cmp", ast.Cmp),
+                 ("jze", ast.Jze), ("je", ast.Jze), ("jnz", ast.Jnz), ("jne", ast.Jnz), ("jl", ast.Jl),
+                 ("jle", ast.Jle), ("jg", ast.Jg), ("jge", ast.Jge), ("ja", ast.Ja), ("jae", ast.Jae),
+                 ("jb", ast.Jb), ("jbe", ast.Jbe), ("jmp", ast.Jmp), ("lea", ast.Lea), ("inc", ast.Inc),
+                 ("dec", ast.Dec), ("and", ast.And), ("or", ast.Or)]
 
         def parse(inst, index):
             index = self.eat_id(index, inst[0])
             args = []
-            for i in range(inst[1]):
+            for i in range(inst[1].num_values):
                 if i != 0:
                     index = self.eat(index, COMMA)
                 value, index = self.parse_value(index)
                 args.append(value)
-            return inst[2](*args), index
+            return inst[1](*args), index
 
         for inst in insts:
             try:

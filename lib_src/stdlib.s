@@ -1,258 +1,454 @@
-.import _bbcc_pusha
-.import _bbcc_pulla
-.import strlen
-.import strrev
-.export itoa
-
-\ Function: itoa
-itoa: 
-lda &8C
-jsr _bbcc_pusha
-lda &8D
-jsr _bbcc_pusha
-lda &8E
-sta &8C
-lda &8F
-sta &8D
-lda &72
-jsr _bbcc_pusha
-lda &73
-jsr _bbcc_pusha
-lda &74
-jsr _bbcc_pusha
-lda &75
-jsr _bbcc_pusha
-lda &76
-jsr _bbcc_pusha
-lda &77
-jsr _bbcc_pusha
-
+.import _HIMEM
+.export global_base
+.export mem_top
+.export get_block_ptr
+.export find_free_block
+.export request_space
+.export malloc
+.export free
+global_base:
+.byte #0,#0
+mem_top:
+.byte #0,#0
+\ Function: get_block_ptr
+get_block_ptr:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
 \ Set
-lda #&00
-sta &76
-lda #&00
-sta &77
-
-\ Label
-__bbcc_00000000: 
-
-\ Mod
-ldy #&00
-lda (&8C),Y
-sta &70
-ldy #&01
-lda (&8C),Y
-sta &71
-lda #&0A
-sta &70
-lda #&00
-sta &71
-lda #0
-sta &70
-sta &71
-ldx #&10
-__bbcc_00000002: 
-asl &70
-rol &71
-rol &70
-rol &71
-sec
-lda &70
-sbc &70
-pha
-lda &71
-sbc &71
-bcc __bbcc_00000003
-sta &71
-pla
-sta &70
-inc &70
-jmp __bbcc_00000004
-__bbcc_00000003: 
-pla
-__bbcc_00000004: dex
-bne __bbcc_00000002
-
+	mov WORD 4[%r11], %r2
+\ Set
+	mov #5, %r1
 \ Add
-clc
-lda &70
-adc #&30
-sta &74
-lda &71
-adc #&00
-sta &75
-
-\ Set
-lda &76
-sta &70
-lda &77
-sta &71
-
-\ Inc
-inc &76
-bne __bbcc_00000005
-inc &77
-__bbcc_00000005: 
-
-\ Add
-clc
-ldy #&02
-lda (&8C),Y
-adc &70
-sta &72
-ldy #&03
-lda (&8C),Y
-adc &71
-sta &73
-
-\ Set
-lda &74
-sta &70
-
-\ SetAt
-lda &70
-ldy #&00
-sta (&72),Y
-
-\ Div
-ldy #&00
-lda (&8C),Y
-sta &70
-ldy #&01
-lda (&8C),Y
-sta &71
-lda #&0A
-sta &70
-lda #&00
-sta &71
-lda #0
-sta &70
-sta &71
-ldx #&10
-__bbcc_00000006: 
-asl &70
-rol &71
-rol &70
-rol &71
-sec
-lda &70
-sbc &70
-pha
-lda &71
-sbc &71
-bcc __bbcc_00000007
-sta &71
-pla
-sta &70
-inc &70
-jmp __bbcc_00000008
-__bbcc_00000007: 
-pla
-__bbcc_00000008: dex
-bne __bbcc_00000006
-lda &70
-sta &70
-lda &71
-sta &71
-
-\ Set
-lda &70
-ldy #&00
-sta (&8C),Y
-lda &71
-ldy #&01
-sta (&8C),Y
-
-\ MoreThanCmp
-lda #00
-sta &70
-clc
-ldy #&00
-lda (&8C),Y
-sbc #&00
-ldy #&01
-lda (&8C),Y
-sbc #&00
-bvc __bbcc_0000000a
-eor #&80
-__bbcc_0000000a: bmi __bbcc_00000009
-lda #01
-sta &70
-__bbcc_00000009: 
-
-\ JmpZero
-lda &70
-bne __bbcc_0000000b
-jmp __bbcc_00000001
-__bbcc_0000000b: 
-
-\ Jmp
-jmp __bbcc_00000000
-
-\ Label
-__bbcc_00000001: 
-
-\ Add
-clc
-ldy #&02
-lda (&8C),Y
-adc &76
-sta &72
-ldy #&03
-lda (&8C),Y
-adc &77
-sta &73
-
-\ Set
-lda #&00
-sta &70
-
-\ SetAt
-lda &70
-ldy #&00
-sta (&72),Y
-
-\ Set
-ldy #&02
-lda (&8C),Y
-sta &70
-ldy #&03
-lda (&8C),Y
-sta &71
-
-\ CallFunction
-lda &71
-jsr _bbcc_pusha
-lda &70
-jsr _bbcc_pusha
-jsr strrev
-clc
-lda &8E
-adc #&02
-sta &8E
-lda &8F
-adc #&00
-sta &8F
-
+	mov %r1, %r0
+	add %r2, %r0
 \ Return
-jsr _bbcc_pulla
-sta &77
-jsr _bbcc_pulla
-sta &76
-jsr _bbcc_pulla
-sta &75
-jsr _bbcc_pulla
-sta &74
-jsr _bbcc_pulla
-sta &73
-jsr _bbcc_pulla
-sta &72
-lda &8C
-sta &8E
-lda &8D
-sta &8F
-jsr _bbcc_pulla
-sta &8D
-jsr _bbcc_pulla
-sta &8C
-rts
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Function: find_free_block
+find_free_block:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
+	push %r3
+	push %r4
+	push %r5
+	push %r6
+\ Set
+	mov WORD [global_base], %r0
+\ Set
+	mov %r0, %r4
+\ Label
+__bbcc_00000000:
+\ Set
+	mov #1, %r5
+\ JmpZero
+	cmp #0, %r4
+	jze [__bbcc_00000002]
+\ Set
+	mov #1, %r3
+\ Set
+	mov #1, %r2
+\ Add
+	mov %r4, %r0
+	add #4, %r0
+\ ReadAt
+	mov BYTE [%r0], %r0
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000006]
+\ Add
+	mov %r4, %r0
+	add #0, %r0
+\ ReadAt
+	mov WORD [%r0], %r1
+\ MoreEqualCmp
+	mov 6[%r11], %r6
+	mov #1, %r0
+	cmp %r1, %r6
+	jae [__bbcc_0000001e]
+	mov #0, %r0
+__bbcc_0000001e:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000006]
+\ Jmp
+	jmp [__bbcc_00000007]
+\ Label
+__bbcc_00000006:
+\ Set
+	mov #0, %r2
+\ Label
+__bbcc_00000007:
+\ JmpNotZero
+	cmp #0, %r2
+	jnz [__bbcc_00000004]
+\ Jmp
+	jmp [__bbcc_00000005]
+\ Label
+__bbcc_00000004:
+\ Set
+	mov #0, %r3
+\ Label
+__bbcc_00000005:
+\ JmpZero
+	cmp #0, %r3
+	jze [__bbcc_00000002]
+\ Jmp
+	jmp [__bbcc_00000003]
+\ Label
+__bbcc_00000002:
+\ Set
+	mov #0, %r5
+\ Label
+__bbcc_00000003:
+\ JmpZero
+	cmp #0, %r5
+	jze [__bbcc_00000001]
+\ Set
+	mov %r4, %r0
+\ SetAt
+	mov 4[%r11], %r1
+	mov %r0, WORD [%r1]
+\ Add
+	mov %r4, %r0
+	add #2, %r0
+\ ReadAt
+	mov WORD [%r0], %r0
+\ Set
+\ Set
+	mov %r0, %r4
+\ Jmp
+	jmp [__bbcc_00000000]
+\ Label
+__bbcc_00000001:
+\ Return
+	mov %r4, %r0
+	pop %r6
+	pop %r5
+	pop %r4
+	pop %r3
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Function: request_space
+request_space:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
+\ Set
+	mov #1, %r0
+\ JmpNotZero
+	mov [mem_top], %r1
+	cmp #0, %r1
+	jnz [__bbcc_00000008]
+\ Jmp
+	jmp [__bbcc_00000009]
+\ Label
+__bbcc_00000008:
+\ Set
+	mov #0, %r0
+\ Label
+__bbcc_00000009:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_0000000a]
+\ AddrOf
+	lea WORD [_HIMEM], %r0
+\ Set
+\ Set
+	mov %r0, WORD [mem_top]
+\ Label
+__bbcc_0000000a:
+\ Set
+	mov WORD [mem_top], %r0
+\ Set
+	mov %r0, %r2
+\ Add
+	mov #5, %r1
+	add WORD 6[%r11], %r1
+\ Add
+	mov %r1, %r0
+	add WORD [mem_top], %r0
+\ Set
+	mov %r0, WORD [mem_top]
+\ JmpZero
+	mov 4[%r11], %r0
+	cmp #0, %r0
+	jze [__bbcc_0000000b]
+\ Add
+	mov WORD 4[%r11], %r1
+	add #2, %r1
+\ Set
+	mov %r2, %r0
+\ SetAt
+	mov %r0, WORD [%r1]
+\ Label
+__bbcc_0000000b:
+\ Add
+	mov %r2, %r0
+	add #0, %r0
+\ SetAt
+	mov 6[%r11], %r1
+	mov %r1, WORD [%r0]
+\ Add
+	mov %r2, %r1
+	add #2, %r1
+\ Set
+	mov #0, %r0
+\ SetAt
+	mov %r0, WORD [%r1]
+\ Add
+	mov %r2, %r1
+	add #4, %r1
+\ Set
+	mov #0, %r0
+\ SetAt
+	mov %r0, BYTE [%r1]
+\ Return
+	mov %r2, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Function: malloc
+malloc:
+	push %r11
+	mov %r13, %r11
+	push %r1
+	push %r2
+\ LessEqualCmp
+	mov #0, %r1
+	mov #1, %r0
+	cmp 4[%r11], %r1
+	jle [__bbcc_0000001f]
+	mov #0, %r0
+__bbcc_0000001f:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_0000000c]
+\ Return
+	mov #0, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Label
+__bbcc_0000000c:
+\ Set
+	mov #1, %r0
+\ JmpNotZero
+	mov [global_base], %r1
+	cmp #0, %r1
+	jnz [__bbcc_0000000d]
+\ Jmp
+	jmp [__bbcc_0000000e]
+\ Label
+__bbcc_0000000d:
+\ Set
+	mov #0, %r0
+\ Label
+__bbcc_0000000e:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_0000000f]
+\ Set
+	mov #0, %r0
+\ CallFunction
+	mov 4[%r11], %r1
+	push %r1
+	push %r0
+	call [request_space]
+	add #4, %r13
+\ Set
+\ Set
+	mov %r0, %r2
+\ Set
+	mov #1, %r0
+\ JmpNotZero
+	cmp #0, %r2
+	jnz [__bbcc_00000010]
+\ Jmp
+	jmp [__bbcc_00000011]
+\ Label
+__bbcc_00000010:
+\ Set
+	mov #0, %r0
+\ Label
+__bbcc_00000011:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000012]
+\ Return
+	mov #0, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Label
+__bbcc_00000012:
+\ Set
+	mov %r2, %r0
+\ Set
+	mov %r0, WORD [global_base]
+\ Jmp
+	jmp [__bbcc_00000013]
+\ Label
+__bbcc_0000000f:
+\ Set
+	mov WORD [global_base], %r0
+\ Set
+	mov %r0, WORD 2[%r11]
+\ AddrOf
+	lea WORD 2[%r11], %r0
+\ Set
+\ CallFunction
+	mov 4[%r11], %r1
+	push %r1
+	push %r0
+	call [find_free_block]
+	add #4, %r13
+\ Set
+\ Set
+	mov %r0, %r2
+\ Set
+	mov #1, %r0
+\ JmpNotZero
+	cmp #0, %r2
+	jnz [__bbcc_00000014]
+\ Jmp
+	jmp [__bbcc_00000015]
+\ Label
+__bbcc_00000014:
+\ Set
+	mov #0, %r0
+\ Label
+__bbcc_00000015:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000016]
+\ Set
+	mov WORD 2[%r11], %r0
+\ CallFunction
+	mov 4[%r11], %r1
+	push %r1
+	push %r0
+	call [request_space]
+	add #4, %r13
+\ Set
+\ Set
+	mov %r0, %r2
+\ Set
+	mov #1, %r0
+\ JmpNotZero
+	cmp #0, %r2
+	jnz [__bbcc_00000017]
+\ Jmp
+	jmp [__bbcc_00000018]
+\ Label
+__bbcc_00000017:
+\ Set
+	mov #0, %r0
+\ Label
+__bbcc_00000018:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000019]
+\ Return
+	mov #0, %r0
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Label
+__bbcc_00000019:
+\ Jmp
+	jmp [__bbcc_0000001a]
+\ Label
+__bbcc_00000016:
+\ Add
+	mov %r2, %r1
+	add #4, %r1
+\ Set
+	mov #0, %r0
+\ SetAt
+	mov %r0, BYTE [%r1]
+\ Label
+__bbcc_0000001a:
+\ Label
+__bbcc_00000013:
+\ Set
+\ Set
+	mov #5, %r1
+\ Add
+	mov %r1, %r0
+	add %r2, %r0
+\ Return
+	pop %r2
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Function: free
+free:
+	push %r11
+	mov %r13, %r11
+	push %r1
+\ Set
+	mov #1, %r0
+\ JmpNotZero
+	mov 4[%r11], %r1
+	cmp #0, %r1
+	jnz [__bbcc_0000001b]
+\ Jmp
+	jmp [__bbcc_0000001c]
+\ Label
+__bbcc_0000001b:
+\ Set
+	mov #0, %r0
+\ Label
+__bbcc_0000001c:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_0000001d]
+\ Return
+	mov #0, %r0
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret
+\ Label
+__bbcc_0000001d:
+\ Set
+	mov WORD 4[%r11], %r0
+\ CallFunction
+	push %r0
+	call [get_block_ptr]
+	add #2, %r13
+\ Set
+\ Set
+\ Add
+	mov %r0, %r1
+	add #4, %r1
+\ Set
+	mov #1, %r0
+\ SetAt
+	mov %r0, BYTE [%r1]
+\ Return
+	mov #0, %r0
+	pop %r1
+	mov %r11, %r13
+	pop %r11
+	ret

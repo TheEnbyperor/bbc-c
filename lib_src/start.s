@@ -2,6 +2,6 @@
 .export _start
 
 _start:
-    mov #$1800, %r13
+    mov #$7C00, %r13
     call main
     exit

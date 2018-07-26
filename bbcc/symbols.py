@@ -85,8 +85,11 @@ class ScopedSymbolTable(object):
             return self.enclosing_scope.lookup(name)
 
     def lookup_struct_union(self, tag):
-        if tag in self.structs:
-            return self.structs[tag]
+        struct = self.structs.get(tag)
+        if struct is not None:
+            return struct
+        if self.enclosing_scope is not None:
+            return self.enclosing_scope.lookup_struct_union(tag)
 
     def add_struct_union(self, tag, ctype):
         if tag not in self.structs:
@@ -458,7 +461,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
             enclosing_scope=self.scope,
         )
         self.scope = procedure_scope
-        offset = 2
+        offset = 4
         for param, name in zip(decl_info.ctype.args, decl_info.params):
             name = name.value
             if self.scope.lookup(name, current_scope_only=True):
@@ -689,5 +692,9 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.scope.add_decl(id(node), decl)
         self.visit(node.expr)
 
+    def visit_ObjPtrMember(self, node):
+        self.visit(node.head)
+
     def visit_Return(self, node):
-        self.visit(node.right)
+        if node.right is not None:
+            self.visit(node.right)

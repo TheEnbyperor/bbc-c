@@ -580,6 +580,21 @@ class Cast(_RExprNode):
         self.expr = expr
 
 
+class _ObjLookup(_LExprNode):
+    def __init__(self, head, member):
+        super().__init__()
+        self.head = head
+        self.member = member
+
+
+class ObjMember(_ObjLookup):
+    pass
+
+
+class ObjPtrMember(_ObjLookup):
+    pass
+
+
 class NodeVisitor:
     def visit(self, node):
         method_name = 'visit_' + type(node).__name__

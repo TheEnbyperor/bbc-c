@@ -77,6 +77,7 @@ class Preproc:
 
         if not self.token_is(index, ID):
             self.error()
+
         macro_name = self.tokens[index].value
         self.eat(index)
 
@@ -175,7 +176,7 @@ class Preproc:
         if os.path.exists(file):
             f = open(file)
         else:
-            lib = os.path.join(os.path.dirname(__file__), "..", "lib", file)
+            lib = os.path.join(os.path.dirname(__file__), "..", "lib", file.decode())
             if os.path.exists(lib):
                 f = open(lib)
             else:

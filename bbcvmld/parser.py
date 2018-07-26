@@ -9,7 +9,7 @@ class Executable:
         self.pos = pos
 
     def __repr__(self):
-        return f"<Executable:{self.exports}:{self.imports}:{list(self.code)}>"
+        return f"<Executable:{self.exports}:{self.imports}:{self.pos}:{list(self.code)}>"
 
 
 class Parser:

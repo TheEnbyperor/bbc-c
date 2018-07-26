@@ -6,16 +6,16 @@ ID, INT, CHAR, VOID, BOOL, RETURN, LBRACE, RBRACE, LBRACK, RBRACK, COMMA, BREAK,
 SIGNED, UNSIGNED, STATIC, AUTO, CONST, EXTERN, \
 INCR, DECR, AMP, STAR, NOT, ELLIPSIS, TILDA, QMARK, VLINE, HAT, \
 IF, ELSE, WHILE, DO, FOR, SIZEOF, STRUCT, UNION, TYPEDEF, EOF, \
-HASH, NEWLINE = \
+HASH, NEWLINE, ARROW, DOT = \
     "INTEGER", "CHAR", "STRING", \
     "PLUS", "MINUS", "DIVIDE", "MOD", "LRAPEM", "RPAREM", "SEMI", "COLON", \
     "EQUALS", "PLUSEQUALS", "MINUSEQUALS", "STAREQUALS", "DIVEQUALS", "MODEQUALS", \
     "BOOLOR", "BOOLAND", "BOOLEQUALS", "BOOLNOT", "LESSTHAN", "MORETHAN", "LESSEQUAL", "MOREEQUAL", \
-    "ID", "int", "char", "void", "bool", "RETURN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", "COMMA", "BREAK", "CONTINUE", \
+    "ID", "int", "char", "void", "_Bool", "RETURN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", "COMMA", "BREAK", "CONTINUE", \
     "signed", "unsigned", "static", "auto", "const", "extern", \
     "INCR", "DECR", "AMP", "STAR", "NOT", "ELLIPSIS", "TILDA", "QMARK", "VLINE", "HAT", \
     "IF", "ELSE", "WHILE", "DO", "FOR", "SIZEOF", "STRUCT", "UNION", "TYPEDEF", "EOF", \
-    "HASH", "NEWLINE"
+    "HASH", "NEWLINE", "ARROW", "DOT"
 
 
 class Token:
@@ -43,7 +43,7 @@ TYPES = {
     'int': Token(INT, 'int'),
     'char': Token(CHAR, 'char'),
     'void': Token(VOID, 'void'),
-    'bool': Token(BOOL, 'bool'),
+    '_Bool': Token(BOOL, '_Bool'),
 }
 
 STORAGE = {

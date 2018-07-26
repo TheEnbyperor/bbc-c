@@ -16,9 +16,9 @@ A few registers have special purposes. Note the base pointer and return register
 
 The status register is as such, where X means not used.
 
-|  7   |  6   |  5   |  4   |  3   |  2   |  1   |   0   |
-| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :---: |
-|  X   |  X   |  X   |  X   |  X   | Sign | Zero | Carry |
+|  7   |  6   |  5   |  4   |    3     |  2   |  1   |   0   |
+| :--: | :--: | :--: | :--: | :------: | :--: | :--: | :---: |
+|  X   |  X   |  X   |  X   | Overflow | Sign | Zero | Carry |
 
 
 
@@ -433,6 +433,30 @@ Sign, zero
 | :-----: | :-------: | :-------------: |
 |  0x19   | Anything  | Register number |
 
+### inc BYTE\<mem>
+
+Increments the 8-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x36   | Addressing mode |  Anything  | Memory location |
+
+### inc \<mem\>
+
+Increments the 16-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x37   | Addressing mode |  Anything  | Memory location |
+
 ### dec \<reg\>
 
 Decrements the register
@@ -446,6 +470,30 @@ Sign, zero
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
 |  0x1A   | Anything  | Register number |
+
+### dec BYTE\<mem>
+
+Decrements the 8-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x38   | Addressing mode |  Anything  | Memory location |
+
+### dec \<mem\>
+
+Decrements the 16-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x39   | Addressing mode |  Anything  | Memory location |
 
 ### and \<const>, \<reg>
 
@@ -617,6 +665,30 @@ None
 | :-----: | :-------: | :-------------: |
 |  0x27   | Anything  | Register number |
 
+### not BYTE\<mem>
+
+Logical nots the 8-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x32   | Addressing mode |  Anything  | Memory location |
+
+### not \<mem\>
+
+Logical nots the 16-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x33   | Addressing mode |  Anything  | Memory location |
+
 ### neg \<reg\>
 
 Two's compliment negate of the register
@@ -630,6 +702,30 @@ Sign, zero
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
 |  0x28   | Anything  | Register number |
+
+### neg BYTE\<mem>
+
+Two's compliment negates the 8-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x34   | Addressing mode |  Anything  | Memory location |
+
+### neg \<mem\>
+
+Two's compliment negates the 16-bit value at the memory location
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x35   | Addressing mode |  Anything  | Memory location |
 
 ### cmp \<const>, \<reg\>
 
@@ -703,7 +799,7 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x2F   | Addressing mode |  Anything  | Memory location |
 
-### jze \<mem\>
+### jze/je \<mem\>
 
 Jumps to the memory location when the zero flag is set.  
 
@@ -715,7 +811,7 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x30   | Addressing mode |  Anything  | Memory location |
 
-### jnz \<mem\>
+### jnz/jne \<mem\>
 
 Jumps to the memory location when the zero flag is unset.  
 
@@ -727,7 +823,103 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x31   | Addressing mode |  Anything  | Memory location |
 
-### calln \<mem\>, \<reg\>
+### ja \<mem\>
+
+Jumps to the memory location when the unsigned comparison result is first operand > second operand.
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x3A   | Addressing mode |  Anything  | Memory location |
+
+### jae \<mem\>
+
+Jumps to the memory location when the unsigned comparison result is first operand >= second operand. 
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x3B   | Addressing mode |  Anything  | Memory location |
+
+### jb \<mem\>
+
+Jumps to the memory location when the unsigned comparison result is first operand < second operand.
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x3C   | Addressing mode |  Anything  | Memory location |
+
+### jbe \<mem\>
+
+Jumps to the memory location when when the unsigned comparison result is first operand <= second operand. 
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x3D   | Addressing mode |  Anything  | Memory location |
+
+### jl \<mem\>
+
+Jumps to the memory location when the signed comparison result is first operand < second operand.
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x3E   | Addressing mode |  Anything  | Memory location |
+
+### jle \<mem\>
+
+Jumps to the memory location when when the signed comparison result is first operand <= second operand. 
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x3F   | Addressing mode |  Anything  | Memory location |
+
+### jg \<mem\>
+
+Jumps to the memory location when the signed comparison result is first operand > second operand.
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x40   | Addressing mode |  Anything  | Memory location |
+
+### jge \<mem\>
+
+Jumps to the memory location when when the unsigned comparison result is first operand >= second operand. 
+
+#### Flags
+
+None
+
+| Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
+| :-----: | :-------------: | :--------: | :-------------: |
+|  0x41   | Addressing mode |  Anything  | Memory location |
+
+### ### calln \<mem\>, \<reg\>
 
 Performs a jsr to native 6502 code, with the accumulator set to the LSB of value of the register. The code at the location will return to the VM on rts, with the new accumulator value put in the LSB of register.
 
@@ -762,3 +954,15 @@ None
 | Bit 0-7 |
 | :-----: |
 |  0x83   |
+
+### hcf
+
+Irrecoverably (even interrupt can't recover) halts the 6502 processor using undocumented instruction 0x02 of the 6502.
+
+#### Flags
+
+None
+
+| Bit 0-7 |
+| :-----: |
+|  0x84   |
