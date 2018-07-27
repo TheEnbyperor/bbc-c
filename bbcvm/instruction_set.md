@@ -757,7 +757,7 @@ Subtracts the 8 bit value at the memory location from the the register but does 
 
 #### Flags
 
-Carry, sign, zero
+Carry, sign, zero, overflow
 
 | Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------------: | :-------------: | :-------------: |
@@ -769,7 +769,7 @@ Subtracts the 16 bit value at the memory location from the register but does not
 
 #### Flags
 
-Carry, sign, zero
+Carry, sign, zero, overflow
 
 | Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
 | :-----: | :-------------: | :-------------: | :-------------: |
@@ -919,7 +919,7 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x41   | Addressing mode |  Anything  | Memory location |
 
-### ### calln \<mem\>, \<reg\>
+### calln \<mem\>, \<reg\>
 
 Performs a jsr to native 6502 code, with the accumulator set to the LSB of value of the register. The code at the location will return to the VM on rts, with the new accumulator value put in the LSB of register.
 

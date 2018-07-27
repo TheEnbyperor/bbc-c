@@ -102,10 +102,19 @@ class Linker:
 
         return start_o + out
 
-    def link_shared(self, strip):
+    def link_shared(self, strip, static):
         for o in self.objects:
             self._parse_obj(o)
-        self._get_symbols(static=False)
+        self._get_symbols(static=static)
+        if static:
+            self._get_symbol("_start", static=True)
+
+            himem = 0
+            for e in self.executables:
+                if e.pos + len(e.code) > himem:
+                    himem = e.pos + len(e.code)
+
+            self.defined_symbols["_HIMEM"] = himem + 4
 
         out = bytearray([0xB, 0xB, 0xC, ord('V'), ord('M'), 0x0])
         code_out = bytearray()
@@ -143,17 +152,28 @@ class Linker:
         header = bytearray()
         for i, l in exports:
             header.append(0x0)
-            header.extend(struct.pack("<H", l))
+            header.extend(struct.pack("<H", l+4))
             header.extend(i.encode())
             header.append(0x0)
 
         for l in imports:
             lil, lal, lal2, lml, ln = l
             header.append(0x1)
-            header.extend(struct.pack("<HHBH", lil, lal, lal2, lml))
+            header.extend(struct.pack("<HHBH", lil+4, lal+4, lal2, lml+4))
             header.extend(ln.encode())
             header.append(0x0)
 
         out.extend(struct.pack("<H", len(header)))
+        out.extend(header)
 
-        return out + header + code_out
+        if static:
+            start_symbol = self.defined_symbols.get("_start")
+            if start_symbol is None:
+                raise LookupError("No _start symbol, don't know where to start execution")
+
+            out.extend([0x2F, 0x20])
+            out.extend(struct.pack("<h", start_symbol + 2))  # 2 is length of jump instruction excluding address
+
+        out.extend(code_out)
+
+        return out

@@ -7,7 +7,7 @@ def link_object_files_static(objects, sta):
     return bytes(out), exa
 
 
-def link_object_files_shared(objects, strip=False):
+def link_object_files_shared(objects, strip=False, staic=False):
     link = linker.Linker(objects, 0)
-    out = link.link_shared(strip)
+    out = link.link_shared(strip, staic)
     return bytes(out)

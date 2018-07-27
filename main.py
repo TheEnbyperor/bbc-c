@@ -27,7 +27,9 @@ def assemble_s(text: str, name: str, arg):
 
 
 def link_o(arg, *args, **kwargs):
-    if arg.static:
+    if arg.static and arg.shared:
+        link_o_static_shared(arg, *args, **kwargs)
+    elif arg.static:
         link_o_static(arg, *args, **kwargs)
     elif arg.shared:
         link_o_shared(arg, *args, **kwargs)
@@ -46,6 +48,14 @@ def link_o_static(arg, objs, name: str):
     if getattr(arg, "6502", False):
         make_tape(name, name, 0x1900, exa, out)
         make_disk([["$.{}".format(name.upper()), out, 0x1900, exa]], name)
+
+
+def link_o_static_shared(arg, objs, name: str):
+    if not getattr(arg, "6502", False):
+        out = bbcvmld.link_object_files_shared(objs, arg.strip, True)
+
+        out_file = open(name, "wb")
+        out_file.write(out)
 
 
 def link_o_shared(arg, objs, name: str):

@@ -618,8 +618,8 @@ cmp_mem_reg_long:
 jsr sub_mem_reg_start
 sta &8E
 iny
-lda (&8E),y
-sbc &71,x
+lda &71,x
+sbc (&8E),y
 sta &8F
 jsr set_carry_status
 ldx #&1E

@@ -89,7 +89,7 @@ class Linker:
         print(start_symbol)
         return out, start_symbol[1]
 
-    def link_shared(self, stip):
+    def link_shared(self, strip):
         for o in self.objects:
             self._parse_obj(o, False)
 
@@ -115,7 +115,7 @@ class Linker:
                 elif s.type == parser.Symbol.INTERNAL:
                     cur_val = struct.unpack("<H", bytes(e.code[s.addr:s.addr + 2]))[0]
                     e.code = e.code[:s.addr] + list(struct.pack("<H", cur_val + e.pos)) + e.code[s.addr + 2:]
-                    if stip:
+                    if strip:
                         name = ""
                     else:
                         name = s.name
@@ -126,7 +126,7 @@ class Linker:
                 elif s.type == parser.Symbol.INTERNAL_ADDR:
                     cur_val = struct.unpack("<B", bytes(e.code[s.addr:s.addr+1]))[0]
                     e.code = e.code[:s.addr] + list(struct.pack("<B", ((s.extra + e.pos) >> (cur_val*8)) & 0xff)) + e.code[s.addr+1:]
-                    if stip:
+                    if strip:
                         name = ""
                     else:
                         name = s.name
