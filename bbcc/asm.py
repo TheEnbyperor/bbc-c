@@ -1,3 +1,6 @@
+from . import spots
+
+
 class TempAsm:
     def __init__(self):
         self.asm = []
@@ -19,11 +22,10 @@ class ASM:
     def add_inst(self, inst):
         self.asm.append(inst)
 
-    def merge_temp_asm(self, asm: TempAsm, used_regs):
+    def merge_temp_asm(self, asm: TempAsm, ret_label):
         for inst in asm.asm:
-            if isinstance(inst, PopUsed):
-                for r in used_regs[::-1]:
-                        self.asm.append(Pop(r, None, 2))
+            if isinstance(inst, JmpRet):
+                self.asm.append(Jmp(spots.MemorySpot(ret_label)))
             else:
                 self.asm.append(inst)
 
@@ -84,7 +86,7 @@ class Bytes:
         return ".byte " + ",".join(["#{}".format(b) for b in self.data])
 
 
-class PopUsed:
+class JmpRet:
     def __init__(self):
         pass
 

@@ -42,9 +42,21 @@ class Emulator(gui.EmulatorFrame):
             0x07: (self.parse_pop_reg, self.run_pop_reg),
             0x08: (self.parse_lea, self.run_lea),
             0x09: (self.parse_add_const_reg, self.run_add_const_reg),
-            0x0B: (self.parse_add_reg_reg, self.run_add_reg_reg),
-            0x0D: (self.parse_add_mem_reg_short, self.run_add_mem_reg_short),
-            0x0F: (self.parse_add_mem_reg_long, self.run_add_mem_reg_long),
+            0x0a: (self.parse_adc_const_reg, self.run_adc_const_reg),
+            0x0b: (self.parse_add_reg_reg, self.run_add_reg_reg),
+            0x0c: (self.parse_adc_reg_reg, self.run_adc_reg_reg),
+            0x0d: (self.parse_add_mem_reg_short, self.run_add_mem_reg_short),
+            0x0e: (self.parse_adc_mem_reg_short, self.run_adc_mem_reg_short),
+            0x0f: (self.parse_add_mem_reg_long, self.run_add_mem_reg_long),
+            0x10: (self.parse_adc_mem_reg_long, self.run_adc_mem_reg_long),
+            0x11: (self.parse_sub_const_reg, self.run_sub_const_reg),
+            0x12: (self.parse_sbc_const_reg, self.run_sbc_const_reg),
+            0x13: (self.parse_sub_reg_reg, self.run_sub_reg_reg),
+            0x14: (self.parse_sbc_reg_reg, self.run_sbc_reg_reg),
+            0x15: (self.parse_sub_mem_reg_short, self.run_sub_mem_reg_short),
+            0x16: (self.parse_sbc_mem_reg_short, self.run_sbc_mem_reg_short),
+            0x17: (self.parse_sub_mem_reg_long, self.run_sub_mem_reg_long),
+            0x18: (self.parse_sbc_mem_reg_long, self.run_sbc_mem_reg_long),
             0x29: (self.parse_cmp_const_reg, self.run_cmp_const_reg),
             0x2a: (self.parse_cmp_reg_reg, self.run_cmp_reg_reg),
             0x2b: (self.parse_cmp_mem_reg_short, self.run_cmp_mem_reg_short),
@@ -58,7 +70,7 @@ class Emulator(gui.EmulatorFrame):
             0x83: (self.parse_exit, self.run_exit),
         }
 
-    def open_file(self, event):
+    def open_file(self, _):
         open_file_dialog = wx.FileDialog(self, "Open file", "", "",
                                          "Object Files (*.o)|*.o|All files|*",
                                          wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
@@ -112,33 +124,33 @@ class Emulator(gui.EmulatorFrame):
         if self.get_pc() in self.cur_breakpoints:
             self.cur_state = self.STATE_STOP
 
-    def step_into(self, event):
+    def step_into(self, _):
         self.cur_state = self.STATE_STEP
 
-    def step_over(self, event):
+    def step_over(self, _):
         self.cur_state = self.STATE_STEP_OVER
 
-    def run(self, event):
+    def run(self, _):
         self.cur_state = self.STATE_RUN
 
-    def add_breakpoint(self, event):
+    def add_breakpoint(self, _):
         mem_loc_str = self.m_textCtrl1.GetValue()
         mem_loc = int(mem_loc_str, 16)
         self.cur_breakpoints.append(mem_loc)
         self.update()
 
-    def remove_breakpoint(self, event):
+    def remove_breakpoint(self, _):
         index = self.breakpoints.GetSelection()
         del self.cur_breakpoints[index]
         self.update()
 
-    def break_on_label(self, event):
+    def break_on_label(self, _):
         index = self.labels.GetSelection()
         mem_loc = list(self.exec.exports.values())[index]
         self.cur_breakpoints.append(mem_loc+self.START_ADDR)
         self.update()
 
-    def view_page(self, event):
+    def view_page(self, _):
         mem_loc_str = self.mem_page.GetValue()
         mem_loc = int(mem_loc_str, 16)
         self.cur_mem_page = mem_loc & 0xFF00
@@ -150,9 +162,9 @@ class Emulator(gui.EmulatorFrame):
 
             self.breakpoints.Set(list(map(lambda m: f"{m:#06x}", self.cur_breakpoints)))
 
-            for val, label in zip(self.regs, [self.r0_val, self.r1_val, self.r2_val, self.r3_val, self.r4_val, self.r5_val,
-                                              self.r6_val, self.r7_val, self.r8_val, self.r9_val, self.r10_val,
-                                              self.r11_val, self.r12_val, self.r13_val, self.r14_val]):
+            for val, label in zip(self.regs, [self.r0_val, self.r1_val, self.r2_val, self.r3_val, self.r4_val,
+                                              self.r5_val, self.r6_val, self.r7_val, self.r8_val, self.r9_val,
+                                              self.r10_val, self.r11_val, self.r12_val, self.r13_val, self.r14_val]):
                 val = struct.unpack("<H", val)[0]
                 label.SetLabel(f"{val:#06x}")
 
@@ -249,7 +261,8 @@ class Emulator(gui.EmulatorFrame):
         return struct.unpack("<H", self.mem[pc+offset:pc+offset+2])[0]
 
     # Parameter decoding
-    def get_reg_params(self, byte):
+    @staticmethod
+    def get_reg_params(byte):
         reg_1 = byte & 0x0F
         reg_2 = (byte & 0xF0) >> 4
         return reg_1, reg_2
@@ -456,8 +469,8 @@ class Emulator(gui.EmulatorFrame):
         self.set_reg(reg, addr)
         self.inc_pc(3)
 
-    def run_add(self, op1, op2):
-        res = op2 + op1
+    def run_add(self, op1, op2, carry=0):
+        res = op2 + op1 + carry
         self.set_flags_from_result(op1, op2, res)
         return res
 
@@ -475,6 +488,21 @@ class Emulator(gui.EmulatorFrame):
         self.set_reg(reg, res)
         self.inc_pc(3)
 
+    def parse_adc_const_reg(self):
+        const = self.peek_word(2)
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"adc #${const:04x}, %r{reg}"
+
+    def run_adc_const_reg(self):
+        const = self.peek_word(2)
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op2 = self.get_reg(reg)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_add(const, op2, carry)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
     def parse_add_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
         return f"add %r{reg1}, %r{reg2}"
@@ -485,6 +513,20 @@ class Emulator(gui.EmulatorFrame):
         op1 = self.get_reg(reg1)
         op2 = self.get_reg(reg2)
         res = self.run_add(op1, op2)
+        self.set_reg(reg2, res)
+        self.inc_pc(1)
+
+    def parse_adc_reg_reg(self):
+        reg1, reg2 = self.get_reg_params(self.peek_byte(1))
+        return f"adc %r{reg1}, %r{reg2}"
+
+    def run_adc_reg_reg(self):
+        reg1, reg2 = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_reg(reg1)
+        op2 = self.get_reg(reg2)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_add(op1, op2, carry)
         self.set_reg(reg2, res)
         self.inc_pc(1)
 
@@ -503,6 +545,22 @@ class Emulator(gui.EmulatorFrame):
         self.set_reg(reg, res)
         self.inc_pc(3)
 
+    def parse_adc_mem_reg_short(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"adc BYTE {addr}, %r{reg}"
+
+    def run_adc_mem_reg_short(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_byte(addr)
+        op2 = self.get_reg(reg)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_add(op1, op2, carry)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
     def parse_add_mem_reg_long(self):
         addr = self.get_mem_address_str()
         reg, _ = self.get_reg_params(self.peek_byte(1))
@@ -518,10 +576,144 @@ class Emulator(gui.EmulatorFrame):
         self.set_reg(reg, res)
         self.inc_pc(3)
 
-    def run_sub(self, op1, op2):
-        res = op2 + (~op1 & 0xFFFF) + 1
+    def parse_adc_mem_reg_long(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"adc WORD {addr}, %r{reg}"
+
+    def run_adc_mem_reg_long(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_word(addr)
+        op2 = self.get_reg(reg)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_add(op1, op2, carry)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
+    def run_sub(self, op1, op2, carry=0):
+        res = op2 + (~op1 & 0xFFFF) + (~carry)
         self.set_flags_from_result(~op1 & 0xFFFF, op2, res)
         return res
+
+    def parse_sub_const_reg(self):
+        const = self.peek_word(2)
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sub #${const:04x}, %r{reg}"
+
+    def run_sub_const_reg(self):
+        const = self.peek_word(2)
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op2 = self.get_reg(reg)
+        res = self.run_sub(const, op2)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
+    def parse_sbc_const_reg(self):
+        const = self.peek_word(2)
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sbc #${const:04x}, %r{reg}"
+
+    def run_sbc_const_reg(self):
+        const = self.peek_word(2)
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op2 = self.get_reg(reg)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_sub(const, op2, carry)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
+    def parse_sub_reg_reg(self):
+        reg1, reg2 = self.get_reg_params(self.peek_byte(1))
+        return f"sub %r{reg2}, %r{reg1}"
+
+    def run_sub_reg_reg(self):
+        reg1, reg2 = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_reg(reg1)
+        op2 = self.get_reg(reg2)
+        res = self.run_sub(op1, op2)
+        self.set_reg(reg2, res)
+        self.inc_pc()
+
+    def parse_sbc_reg_reg(self):
+        reg1, reg2 = self.get_reg_params(self.peek_byte(1))
+        return f"sbc %r{reg2}, %r{reg1}"
+
+    def run_sbc_reg_reg(self):
+        reg1, reg2 = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_reg(reg1)
+        op2 = self.get_reg(reg2)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_sub(op1, op2, carry)
+        self.set_reg(reg2, res)
+        self.inc_pc()
+
+    def parse_sub_mem_reg_short(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sub BYTE {addr}, %r{reg}"
+
+    def run_sub_mem_reg_short(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_byte(addr)
+        op2 = self.get_reg(reg)
+        res = self.run_sub(op1, op2)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
+    def parse_sbc_mem_reg_short(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sbc BYTE {addr}, %r{reg}"
+
+    def run_sbc_mem_reg_short(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_byte(addr)
+        op2 = self.get_reg(reg)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_sub(op1, op2, carry)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
+    def parse_sub_mem_reg_long(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sub WORD {addr}, %r{reg}"
+
+    def run_sub_mem_reg_long(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_word(addr)
+        op2 = self.get_reg(reg)
+        res = self.run_sub(op1, op2)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
+
+    def parse_sbc_mem_reg_long(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sbc WORD {addr}, %r{reg}"
+
+    def run_sbc_mem_reg_long(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_word(addr)
+        op2 = self.get_reg(reg)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_sub(op1, op2, carry)
+        self.set_reg(reg, res)
+        self.inc_pc(3)
 
     def parse_cmp_const_reg(self):
         const = self.peek_word(2)
@@ -638,13 +830,15 @@ class Emulator(gui.EmulatorFrame):
         else:
             self.set_pc(addr - 1)
 
-    def parse_return(self):
+    @staticmethod
+    def parse_return():
         return f"ret"
 
     def run_return(self):
         self.pop_reg(14)
 
-    def parse_exit(self):
+    @staticmethod
+    def parse_exit():
         return f"exit"
 
     def run_exit(self):

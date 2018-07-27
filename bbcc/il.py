@@ -271,12 +271,8 @@ class Return(ILInst):
             if value != return_register:
                 assembly.add_inst(asm.Mov(value, return_register, self.value.type.size))
 
-        assembly.add_inst(asm.PopUsed())
-
-        assembly.add_inst(asm.Mov(spots.RBP, spots.RSP, 2))
-        assembly.add_inst(asm.Pop(spots.RBP, None, 2))
-
-        assembly.add_inst(asm.Ret())
+        if not il.is_last:
+            assembly.add_inst(asm.JmpRet())
 
 
 class CallFunction(ILInst):
@@ -1208,6 +1204,7 @@ class IL:
         self.assembly = assembly
         self.func_stack_size = {}
         self.used_regs = []
+        self.is_last = False
 
     def register_literal_value(self, il_value: ILValue, value):
         self.literals[il_value] = value
@@ -1329,9 +1326,6 @@ class IL:
     def _gen_func(self, commands, spotmap, live_vars):
         max_offset = max(spot.stack_offset() for spot in spotmap.values())
 
-        self.assembly.add_inst(asm.Push(spots.RBP, None, 2))
-        self.assembly.add_inst(asm.Mov(spots.RSP, spots.RBP, 2))
-
         used_regs = []
         for v in spotmap.values():
             if isinstance(v, spots.RegisterSpot):
@@ -1365,15 +1359,28 @@ class IL:
 
                 raise RuntimeError("get_reg can't find register")
 
+            self.is_last = (i + 1) == len(commands)
             c.gen_asm(temp_asm, spotmap, self, get_reg)
 
+        self.assembly.add_inst(asm.Push(spots.RBP, None, 2))
+        self.assembly.add_inst(asm.Mov(spots.RSP, spots.RBP, 2))
         for r in used_regs:
             self.assembly.add_inst(asm.Push(r, None, 2))
         if max_offset != 0:
             offset_spot = spots.LiteralSpot(max_offset)
             self.assembly.add_inst(asm.Sub(offset_spot, spots.RSP))
 
-        self.assembly.merge_temp_asm(temp_asm, used_regs)
+        end_label = self.get_label()
+        self.assembly.merge_temp_asm(temp_asm, end_label)
+
+        self.assembly.add_inst(asm.Label(end_label))
+        for r in used_regs[::-1]:
+            self.assembly.add_inst(asm.Pop(r, None, 2))
+
+        self.assembly.add_inst(asm.Mov(spots.RBP, spots.RSP, 2))
+        self.assembly.add_inst(asm.Pop(spots.RBP, None, 2))
+
+        self.assembly.add_inst(asm.Ret())
 
     @staticmethod
     def _print_spotmap(spotmap: dict):

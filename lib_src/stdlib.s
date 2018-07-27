@@ -24,6 +24,7 @@ get_block_ptr:
 	mov %r1, %r0
 	add %r2, %r0
 \ Return
+__bbcc_0000001e:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -71,9 +72,9 @@ __bbcc_00000000:
 	mov 6[%r11], %r6
 	mov #1, %r0
 	cmp %r1, %r6
-	jae [__bbcc_0000001e]
+	jae [__bbcc_0000001f]
 	mov #0, %r0
-__bbcc_0000001e:
+__bbcc_0000001f:
 \ JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000006]
@@ -129,6 +130,7 @@ __bbcc_00000003:
 __bbcc_00000001:
 \ Return
 	mov %r4, %r0
+__bbcc_00000020:
 	pop %r6
 	pop %r5
 	pop %r4
@@ -215,6 +217,7 @@ __bbcc_0000000b:
 	mov %r0, BYTE [%r1]
 \ Return
 	mov %r2, %r0
+__bbcc_00000021:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -230,19 +233,15 @@ malloc:
 	mov #0, %r1
 	mov #1, %r0
 	cmp 4[%r11], %r1
-	jle [__bbcc_0000001f]
+	jle [__bbcc_00000022]
 	mov #0, %r0
-__bbcc_0000001f:
+__bbcc_00000022:
 \ JmpZero
 	cmp #0, %r0
 	jze [__bbcc_0000000c]
 \ Return
 	mov #0, %r0
-	pop %r2
-	pop %r1
-	mov %r11, %r13
-	pop %r11
-	ret
+	jmp [__bbcc_00000023]
 \ Label
 __bbcc_0000000c:
 \ Set
@@ -291,11 +290,7 @@ __bbcc_00000011:
 	jze [__bbcc_00000012]
 \ Return
 	mov #0, %r0
-	pop %r2
-	pop %r1
-	mov %r11, %r13
-	pop %r11
-	ret
+	jmp [__bbcc_00000023]
 \ Label
 __bbcc_00000012:
 \ Set
@@ -367,11 +362,7 @@ __bbcc_00000018:
 	jze [__bbcc_00000019]
 \ Return
 	mov #0, %r0
-	pop %r2
-	pop %r1
-	mov %r11, %r13
-	pop %r11
-	ret
+	jmp [__bbcc_00000023]
 \ Label
 __bbcc_00000019:
 \ Jmp
@@ -396,6 +387,7 @@ __bbcc_00000013:
 	mov %r1, %r0
 	add %r2, %r0
 \ Return
+__bbcc_00000023:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -425,10 +417,7 @@ __bbcc_0000001c:
 	jze [__bbcc_0000001d]
 \ Return
 	mov #0, %r0
-	pop %r1
-	mov %r11, %r13
-	pop %r11
-	ret
+	jmp [__bbcc_00000024]
 \ Label
 __bbcc_0000001d:
 \ Set
@@ -448,6 +437,7 @@ __bbcc_0000001d:
 	mov %r0, BYTE [%r1]
 \ Return
 	mov #0, %r0
+__bbcc_00000024:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
