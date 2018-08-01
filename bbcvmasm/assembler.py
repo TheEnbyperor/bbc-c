@@ -273,7 +273,7 @@ class Assembler:
     @setup_labels
     def visit_Sub(self, node: ast.Mov):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x12)
+            self.insts.append(0x13)
             self.get_reg_val(node.left, node.right)
             self.loc += 1
         elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
@@ -281,6 +281,13 @@ class Assembler:
             self.get_reg_val(node.right, None)
             self.insts.extend(struct.pack("<h", node.left.val))
             self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x15)
+            elif node.left.length == 2:
+                self.insts.append(0x17)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
         else:
             raise SyntaxError(f"Can't subtract {node.left} from {node.right}")
 

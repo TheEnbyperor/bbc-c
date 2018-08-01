@@ -9,7 +9,10 @@
 static char key_buffer[KEY_BUF_LEN];
 
 int main() {
+    void *a = malloc(20);
     malloc(4);
+    free(a);
+    malloc(3);
 //    fputs(PROMPT);
 //    while (1) {
 //        char in = getchar();

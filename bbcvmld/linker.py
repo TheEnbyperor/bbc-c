@@ -114,7 +114,7 @@ class Linker:
                 if e.pos + len(e.code) > himem:
                     himem = e.pos + len(e.code)
 
-            self.defined_symbols["_HIMEM"] = himem + 4
+            self.defined_symbols["_HIMEM"] = himem
 
         out = bytearray([0xB, 0xB, 0xC, ord('V'), ord('M'), 0x0])
         code_out = bytearray()
@@ -149,17 +149,18 @@ class Linker:
 
             code_out.extend(code)
 
+        offset = 4 if static else 0
         header = bytearray()
         for i, l in exports:
             header.append(0x0)
-            header.extend(struct.pack("<H", l+4))
+            header.extend(struct.pack("<H", l+offset))
             header.extend(i.encode())
             header.append(0x0)
 
         for l in imports:
             lil, lal, lal2, lml, ln = l
             header.append(0x1)
-            header.extend(struct.pack("<HHBH", lil+4, lal+4, lal2, lml+4))
+            header.extend(struct.pack("<HHBH", lil+offset, lal+offset, lal2, lml+offset))
             header.extend(ln.encode())
             header.append(0x0)
 

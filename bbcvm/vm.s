@@ -536,7 +536,7 @@ jmp inc_pc
 sub_reg_reg:
 sec
 bcs _sub_reg_reg
-\ Add with carry
+\ Subtract with carry
 sub_carry_reg_reg:
 jsr load_carry_status
 _sub_reg_reg:
@@ -985,7 +985,9 @@ rts
 
 _jump_zero_start:
 jsr get_mem_address
-jmp _jump_above_start_2
+lda &88
+and #&02
+rts
 
 \ Jump when result of comparison is zero
 jump_zero:
@@ -1003,34 +1005,34 @@ _jump_above_start_1:
 jsr get_mem_address
 _jump_above_start_2:
 lda &88
-and #&02
+and #&01
 rts
 
 \ Jump when a >= b unsigned
 jump_above_equal:
-jsr _jump_above_start_1
+jsr _jump_zero_start
+bne _jump_test_end
+jsr _jump_above_start_2
 bne _jump_test_fail
 jmp _jump_test_end
 
 \ Jump when a > b unsigned
 jump_above:
-jsr _jump_above_start_2
-beq _jump_test_fail
 jsr _jump_above_start_1
 bne _jump_test_fail
 jmp _jump_test_end
 
 \ Jump when a < b unsigned
 jump_below:
-jsr _jump_above_start_1
-beq _jump_test_fail
-jmp _jump_test_end
+jsr _jump_zero_start
+bne _jump_test_fail
+jsr _jump_above_start_2
+bne _jump_test_end
+jmp _jump_test_fail
 
 \ Jump when a <= b unsigned
 jump_below_equal:
 jsr _jump_above_start_1
-beq _jump_test_end
-jsr _jump_above_start_2
 bne _jump_test_end
 jmp _jump_test_fail
 

@@ -215,17 +215,13 @@ class JmpZero(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         value = spotmap[self.value]
 
-        if isinstance(value, spots.LiteralSpot):
-            if value.value == 0:
-                assembly.add_inst(asm.Jmp(spots.MemorySpot(self.label)))
-        else:
-            if isinstance(value, spots.MemorySpot):
-                reg = get_reg([], [])
-                assembly.add_inst(asm.Mov(value, reg))
-                value = reg
-            assembly.add_inst(asm.Cmp(zero, value))
+        if not isinstance(value, spots.RegisterSpot):
+            reg = get_reg([], [])
+            assembly.add_inst(asm.Mov(value, reg, self.value.type.size))
+            value = reg
+        assembly.add_inst(asm.Cmp(zero, value))
 
-            assembly.add_inst(asm.Jze(spots.MemorySpot(self.label)))
+        assembly.add_inst(asm.Jze(spots.MemorySpot(self.label)))
 
 
 class JmpNotZero(ILInst):
@@ -242,17 +238,13 @@ class JmpNotZero(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         value = spotmap[self.value]
 
-        if isinstance(value, spots.LiteralSpot):
-            if value.value != 0:
-                assembly.add_inst(asm.Jmp(spots.MemorySpot(self.label)))
-        else:
-            if isinstance(value, spots.MemorySpot):
-                reg = get_reg([], [])
-                assembly.add_inst(asm.Mov(value, reg))
-                value = reg
-            assembly.add_inst(asm.Cmp(zero, value))
+        if not isinstance(value, spots.RegisterSpot):
+            reg = get_reg([], [])
+            assembly.add_inst(asm.Mov(value, reg, self.value.type.size))
+            value = reg
+        assembly.add_inst(asm.Cmp(zero, value))
 
-            assembly.add_inst(asm.Jnz(spots.MemorySpot(self.label)))
+        assembly.add_inst(asm.Jnz(spots.MemorySpot(self.label)))
 
 
 class Return(ILInst):
@@ -328,8 +320,11 @@ class Add(ILInst):
     def outputs(self):
         return [self.output]
 
+    def rel_spot_pref(self):
+        return {self.output: [self.right]}
+
     def rel_spot_conf(self):
-        return {self.output: [self.left, self.right]}
+        return {self.output: [self.left]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
@@ -668,8 +663,11 @@ class IncOr(ILInst):
     def outputs(self):
         return [self.output]
 
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
     def rel_spot_conf(self):
-        return {self.output: [self.left, self.right]}
+        return {self.output: [self.right]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
@@ -693,8 +691,11 @@ class ExcOr(ILInst):
     def outputs(self):
         return [self.output]
 
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
     def rel_spot_conf(self):
-        return {self.output: [self.left, self.right]}
+        return {self.output: [self.right]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
@@ -717,6 +718,9 @@ class Not(ILInst):
     def outputs(self):
         return [self.output]
 
+    def rel_spot_pref(self):
+        return {self.output: [self.expr]}
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         expr = spotmap[self.expr]
         output = spotmap[self.output]
@@ -736,6 +740,9 @@ class Neg(ILInst):
 
     def outputs(self):
         return [self.output]
+
+    def rel_spot_pref(self):
+        return {self.output: [self.expr]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         expr = spotmap[self.expr]
@@ -773,20 +780,10 @@ class EqualCmp(ILInst):
 
         label = il.get_label()
 
-        if isinstance(left, spots.LiteralSpot):
-            if isinstance(right, spots.RegisterSpot):
-                pass
-            elif isinstance(right, spots.LiteralSpot):
-                if left.value == right.value:
-                    assembly.add_inst(asm.Mov(one, output, self.output.type.size))
-                    return
-                else:
-                    assembly.add_inst(asm.Mov(zero, output, self.output.type.size))
-                    return
-        elif isinstance(left, spots.RegisterSpot):
+        if isinstance(left, spots.RegisterSpot):
             if isinstance(right, spots.LiteralSpot) or isinstance(right, spots.MemorySpot):
                 left, right = right, left
-        elif isinstance(left, spots.MemorySpot):
+        else:
             if isinstance(right, spots.LiteralSpot):
                 reg = get_reg([], [output])
                 assembly.add_inst(asm.Mov(right, reg))
@@ -821,20 +818,10 @@ class NotEqualCmp(ILInst):
 
         label = il.get_label()
 
-        if isinstance(left, spots.LiteralSpot):
-            if isinstance(right, spots.RegisterSpot):
-                pass
-            elif isinstance(right, spots.LiteralSpot):
-                if left.value != right.value:
-                    assembly.add_inst(asm.Mov(one, output))
-                    return
-                else:
-                    assembly.add_inst(asm.Mov(zero, output))
-                    return
-        elif isinstance(left, spots.RegisterSpot):
+        if isinstance(left, spots.RegisterSpot):
             if isinstance(right, spots.LiteralSpot):
                 left, right = right, left
-        elif isinstance(left, spots.MemorySpot):
+        else:
             if isinstance(right, spots.LiteralSpot):
                 reg = get_reg([], [output])
                 assembly.add_inst(asm.Mov(right, reg))
@@ -870,16 +857,13 @@ class LessThanCmp(ILInst):
         is_signed = self.left.type.is_signed() or self.right.type.is_signed()
         label = il.get_label()
 
-        if isinstance(left, spots.LiteralSpot):
-            if isinstance(right, spots.RegisterSpot):
-                pass
-            elif isinstance(right, spots.LiteralSpot):
-                if left.value < right.value:
-                    assembly.add_inst(asm.Mov(one, output))
-                    return
-                else:
-                    assembly.add_inst(asm.Mov(zero, output))
-                    return
+        if isinstance(left, spots.LiteralSpot) and isinstance(right, spots.LiteralSpot):
+            if left.value < right.value:
+                assembly.add_inst(asm.Mov(one, output))
+                return
+            else:
+                assembly.add_inst(asm.Mov(zero, output))
+                return
         if isinstance(left, spots.RegisterSpot) or isinstance(left, spots.MemorySpot):
             if isinstance(right, spots.LiteralSpot):
                 reg = get_reg([], [output, left])
@@ -926,16 +910,13 @@ class LessEqualCmp(ILInst):
         is_signed = self.left.type.is_signed() or self.right.type.is_signed()
         label = il.get_label()
 
-        if isinstance(left, spots.LiteralSpot):
-            if isinstance(right, spots.RegisterSpot):
-                pass
-            elif isinstance(right, spots.LiteralSpot):
-                if left.value <= right.value:
-                    assembly.add_inst(asm.Mov(one, output))
-                    return
-                else:
-                    assembly.add_inst(asm.Mov(zero, output))
-                    return
+        if isinstance(left, spots.LiteralSpot) and isinstance(right, spots.LiteralSpot):
+            if left.value <= right.value:
+                assembly.add_inst(asm.Mov(one, output))
+                return
+            else:
+                assembly.add_inst(asm.Mov(zero, output))
+                return
         if isinstance(left, spots.RegisterSpot) or isinstance(left, spots.MemorySpot):
             if isinstance(right, spots.LiteralSpot):
                 reg = get_reg([], [output, left])
@@ -982,16 +963,13 @@ class MoreThanCmp(ILInst):
         is_signed = self.left.type.is_signed() or self.right.type.is_signed()
         label = il.get_label()
 
-        if isinstance(left, spots.LiteralSpot):
-            if isinstance(right, spots.RegisterSpot):
-                pass
-            elif isinstance(right, spots.LiteralSpot):
-                if left.value > right.value:
-                    assembly.add_inst(asm.Mov(one, output))
-                    return
-                else:
-                    assembly.add_inst(asm.Mov(zero, output))
-                    return
+        if isinstance(left, spots.LiteralSpot) and isinstance(right, spots.LiteralSpot):
+            if left.value > right.value:
+                assembly.add_inst(asm.Mov(one, output))
+                return
+            else:
+                assembly.add_inst(asm.Mov(zero, output))
+                return
         if isinstance(left, spots.RegisterSpot) or isinstance(left, spots.MemorySpot):
             if isinstance(right, spots.LiteralSpot):
                 reg = get_reg([], [output, left])
@@ -1038,16 +1016,13 @@ class MoreEqualCmp(ILInst):
         is_signed = self.left.type.is_signed() or self.right.type.is_signed()
         label = il.get_label()
 
-        if isinstance(left, spots.LiteralSpot):
-            if isinstance(right, spots.RegisterSpot):
-                pass
-            elif isinstance(right, spots.LiteralSpot):
-                if left.value >= right.value:
-                    assembly.add_inst(asm.Mov(one, output))
-                    return
-                else:
-                    assembly.add_inst(asm.Mov(zero, output))
-                    return
+        if isinstance(left, spots.LiteralSpot) and isinstance(right, spots.LiteralSpot):
+            if left.value >= right.value:
+                assembly.add_inst(asm.Mov(one, output))
+                return
+            else:
+                assembly.add_inst(asm.Mov(zero, output))
+                return
         if isinstance(left, spots.RegisterSpot) or isinstance(left, spots.MemorySpot):
             if isinstance(right, spots.LiteralSpot):
                 reg = get_reg([], [output, left])
@@ -1233,7 +1208,7 @@ class IL:
     def gen_asm(self):
         global_spotmap = self._get_global_spotmap()
 
-        self._print_spotmap(global_spotmap)
+        # self._print_spotmap(global_spotmap)
 
         for func in self.functions:
             self.assembly.add_inst(asm.Comment("Function: {}".format(func)))
@@ -1241,8 +1216,7 @@ class IL:
             self._gen_asm(self.functions[func], global_spotmap)
 
     def _gen_asm(self, commands, global_spotmap):
-        self._print_commands(commands)
-        offset = 0
+        # self._print_commands(commands)
         free_values = self._get_free_values(commands, global_spotmap)
 
         move_to_mem = []
@@ -1255,17 +1229,18 @@ class IL:
 
         for v in free_values:
             if v.stack_offset is not None:
-                global_spotmap[v] = spots.MemorySpot(spots.RBP, v.stack_offset)
+                global_spotmap[v] = spots.MemorySpot(spots.RBP, v.stack_offset+4)
                 free_values.remove(v)
 
         for v in free_values:
             if v.type.size not in {1, 2}:
                 move_to_mem.append(v)
 
+        offset = 0
         for v in move_to_mem:
             if v in free_values:
                 offset += v.type.size
-                global_spotmap[v] = spots.MemorySpot(spots.RBP, offset)
+                global_spotmap[v] = spots.MemorySpot(spots.RBP, -offset)
                 free_values.remove(v)
 
         live_vars = self._get_live_vars(commands, free_values)
@@ -1314,17 +1289,16 @@ class IL:
 
         for v in spilled_nodes:
             offset += v.type.size
-            global_spotmap[v] = spots.MemorySpot(spots.RBP, offset)
+            global_spotmap[v] = spots.MemorySpot(spots.RBP, -offset)
 
         for v in global_spotmap:
             spotmap[v] = global_spotmap[v]
 
-        self._print_spotmap(spotmap)
+        # self._print_spotmap(spotmap)
 
-        self._gen_func(commands, spotmap, live_vars)
+        self._gen_func(commands, spotmap, live_vars, offset)
 
-    def _gen_func(self, commands, spotmap, live_vars):
-        max_offset = max(spot.stack_offset() for spot in spotmap.values())
+    def _gen_func(self, commands, spotmap, live_vars, stack_size):
 
         used_regs = []
         for v in spotmap.values():
@@ -1364,11 +1338,11 @@ class IL:
 
         self.assembly.add_inst(asm.Push(spots.RBP, None, 2))
         self.assembly.add_inst(asm.Mov(spots.RSP, spots.RBP, 2))
+        if stack_size != 0:
+            offset_spot = spots.LiteralSpot(stack_size)
+            self.assembly.add_inst(asm.Sub(offset_spot, spots.RSP))
         for r in used_regs:
             self.assembly.add_inst(asm.Push(r, None, 2))
-        if max_offset != 0:
-            offset_spot = spots.LiteralSpot(max_offset)
-            self.assembly.add_inst(asm.Sub(offset_spot, spots.RSP))
 
         end_label = self.get_label()
         self.assembly.merge_temp_asm(temp_asm, end_label)

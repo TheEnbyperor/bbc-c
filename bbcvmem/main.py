@@ -65,6 +65,7 @@ class Emulator(gui.EmulatorFrame):
             0x2f: (self.parse_jump, self.run_jump),
             0x30: (self.parse_jump_zero, self.run_jump_zero),
             0x31: (self.parse_jump_not_zero, self.run_jump_not_zero),
+            0x3b: (self.parse_jump_above_equal, self.run_jump_above_equal),
             0x3f: (self.parse_jump_lesser_equal, self.run_jump_lesser_equal),
             0x82: (self.parse_return, self.run_return),
             0x83: (self.parse_exit, self.run_exit),
@@ -116,6 +117,7 @@ class Emulator(gui.EmulatorFrame):
             else:
                 if last_state != self.STATE_STOP:
                     wx.CallAfter(self.update)
+                last_state = self.cur_state
                 time.sleep(0.1)
 
     def step(self):
@@ -218,7 +220,7 @@ class Emulator(gui.EmulatorFrame):
 
     # Flags
     def get_flag(self, flag):
-        return (self.get_reg(12) & flag) >> (flag - 2)
+        return 1 if self.get_reg(12) & flag else 0
 
     def set_flag(self, flag):
         self.set_reg(12, self.get_reg(12) | flag)
@@ -282,7 +284,7 @@ class Emulator(gui.EmulatorFrame):
             reg_val = self.get_reg(reg)
             offset = (param & 0x0F) | ((param & 0xFF00) >> 4)
             if offset & 0x800:
-                offset = -(offset & 0x7FF)
+                offset = offset - 4096
             return reg_val + offset
 
     def get_mem_address_str(self):
@@ -301,7 +303,7 @@ class Emulator(gui.EmulatorFrame):
             reg = (param & 0xF0) >> 4
             offset = (param & 0x0F) | ((param & 0xFF00) >> 4)
             if offset & 0x800:
-                offset = -(offset & 0x7FF)
+                offset = offset - 4096
             return f"{offset}[%r{reg}]"
 
     def get_export_for_address(self, addr):
@@ -592,10 +594,10 @@ class Emulator(gui.EmulatorFrame):
         self.set_reg(reg, res)
         self.inc_pc(3)
 
-    def run_sub(self, op1, op2, carry=0):
-        res = op2 + (~op1 & 0xFFFF) + (~carry)
+    def run_sub(self, op1, op2, carry=1):
+        res = (op2 + (~op1 & 0xFFFF) + carry)
         self.set_flags_from_result(~op1 & 0xFFFF, op2, res)
-        return res
+        return res & 0xFFFF
 
     def parse_sub_const_reg(self):
         const = self.peek_word(2)
@@ -735,7 +737,9 @@ class Emulator(gui.EmulatorFrame):
     def run_cmp_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
 
-        self.run_sub(reg1, reg2)
+        op1 = self.get_reg(reg1)
+        op2 = self.get_reg(reg2)
+        self.run_sub(op1, op2)
         self.inc_pc()
 
     def parse_cmp_mem_reg_short(self):
@@ -816,6 +820,20 @@ class Emulator(gui.EmulatorFrame):
         else:
             self.set_pc(addr - 1)
 
+    def parse_jump_above_equal(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        return f"jae {addr} {label}"
+
+    def run_jump_above_equal(self):
+        addr = self.get_mem_address()
+
+        if self.get_flag(self.CARRY) and not self.get_flag(self.ZERO):
+            self.inc_pc(3)
+        else:
+            self.set_pc(addr - 1)
+
     def parse_jump_lesser_equal(self):
         addr = self.get_mem_address_str()
         addr_num = self.get_mem_address()
@@ -843,6 +861,7 @@ class Emulator(gui.EmulatorFrame):
 
     def run_exit(self):
         self.cur_state = self.STATE_STOP
+        self.set_pc(0x1900)
 
 
 if __name__ == '__main__':

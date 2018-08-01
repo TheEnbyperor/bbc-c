@@ -1,6 +1,7 @@
 .import putchar
 .import getchar
 .import malloc
+.import free
 .import strlen
 .import strrev
 .import strcmp
@@ -36,6 +37,7 @@ __bbcc_00000000:
 __bbcc_00000001:
 \ Return
 	mov #0, %r0
+__bbcc_00000007:
 	mov %r11, %r13
 	pop %r11
 	ret
@@ -57,6 +59,7 @@ puts:
 	add #2, %r13
 \ Return
 	mov #0, %r0
+__bbcc_00000008:
 	mov %r11, %r13
 	pop %r11
 	ret
@@ -74,9 +77,9 @@ __bbcc_00000002:
 	mov #0, %r1
 	mov #1, %r0
 	cmp 6[%r11], %r1
-	jl [__bbcc_00000007]
+	jl [__bbcc_00000009]
 	mov #0, %r0
-__bbcc_00000007:
+__bbcc_00000009:
 \ JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000003]
@@ -94,9 +97,9 @@ __bbcc_00000007:
 \ EqualCmp
 	mov #1, %r0
 	cmp #10, %r1
-	jze [__bbcc_00000008]
+	jze [__bbcc_0000000a]
 	mov #0, %r0
-__bbcc_00000008:
+__bbcc_0000000a:
 \ JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000004]
@@ -114,6 +117,7 @@ __bbcc_00000003:
 	mov %r0, BYTE [%r2]
 \ Return
 	mov WORD 4[%r11], %r0
+__bbcc_0000000b:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -156,6 +160,7 @@ __bbcc_00000005:
 __bbcc_00000006:
 \ Return
 	mov #0, %r0
+__bbcc_0000000c:
 	pop %r2
 	pop %r1
 	mov %r11, %r13

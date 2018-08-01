@@ -127,6 +127,17 @@ class Interpreter(ast.NodeVisitor):
         self.il.register_literal_string(il_value, node.chars)
         return ast.DirectLValue(il_value)
 
+    def make_const_int(self, node):
+        if isinstance(node, ast.Number):
+            return node.number
+        elif isinstance(node, ast.Plus):
+            left = self.make_const_int(node.left)
+            right = self.make_const_int(node.right)
+            if left is not None and right is not None:
+                return left + right
+        else:
+            return None
+
     def visit_Compound(self, node):
         old_scope = self.current_scope
         self.current_scope = str(id(node))
@@ -150,12 +161,28 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_PlusEquals(self, node):
         left = self.visit(node.left)
-        right = self.visit(node.right).val(self.il)
+        right = self.visit(node.right)
         if not left.modable():
             raise TypeError("{} is not modable".format(left.type))
-        output = il.ILValue(left.type)
+
         left_val = left.val(self.il)
-        self.il.add(il.Add(left_val, right, output))
+        right_val = right.val(self.il)
+        left_val, right_val = self._arith_convert(left_val, right_val)
+
+        output = il.ILValue(left_val.type)
+
+        if left.type.is_pointer():
+            if left.type.arg.size != 1:
+                type_len = il.ILValue(ctypes.unsig_char)
+                self.il.register_literal_value(type_len, left.type.arg.size)
+
+                offset = il.ILValue(ctypes.unsig_int)
+                self.il.add(il.Mult(right_val, type_len, offset))
+            else:
+                offset = right_val
+            self.il.add(il.Add(left_val, offset, output))
+        else:
+            self.il.add(il.Add(left_val, right_val, output))
         left.set_to(output, self.il)
         return left
 
@@ -255,7 +282,7 @@ class Interpreter(ast.NodeVisitor):
                 self.il.add(il.Mult(right_val, type_len, offset))
             else:
                 offset = right_val
-            self.il.add(il.Add(left_val, offset, output))
+            self.il.add(il.Sub(left_val, offset, output))
         else:
             self.il.add(il.Sub(left_val, right_val, output))
         return output
@@ -299,9 +326,13 @@ class Interpreter(ast.NodeVisitor):
 
         left = self.visit(node.left).val(self.il)
         self.il.add(il.JmpZero(left, set_out))
+        left_conition, left_jmp_inst = self.simplify_condition(node.left)
+        left_conition = left_conition.val(self.il)
+        self.il.add(left_jmp_inst(left_conition, set_out))
 
-        right = self.visit(node.right).val(self.il)
-        self.il.add(il.JmpZero(right, set_out))
+        right_condition, right_jmp_inst = self.simplify_condition(node.right)
+        right_condition = right_condition.val(self.il)
+        self.il.add(right_jmp_inst(right_condition, set_out))
         self.il.add(il.Jmp(end))
 
         self.il.add(il.Label(set_out))
@@ -344,16 +375,13 @@ class Interpreter(ast.NodeVisitor):
         other = il.ILValue(ctypes.char)
         self.il.register_literal_value(other, 0)
 
-        set_out = self.il.get_label()
         end = self.il.get_label()
 
         self.il.add(il.Set(init, output))
 
-        expr = self.visit(node.expr).val(self.il)
-        self.il.add(il.JmpNotZero(expr, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
+        condition, jmp_inst = self.simplify_condition(node.expr)
+        condition = condition.val(self.il)
+        self.il.add(jmp_inst(condition, end))
         self.il.add(il.Set(other, output))
         self.il.add(il.Label(end))
 
@@ -407,7 +435,8 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Conditional(self, node):
-        condition = self.visit(node.condition).val(self.il)
+        condition, jmp_inst = self.simplify_condition(node.condition)
+        condition = condition.val(self.il)
         left = self.visit(node.statement)
         right = self.visit(node.else_statement)
 
@@ -416,7 +445,7 @@ class Interpreter(ast.NodeVisitor):
 
         else_label = self.il.get_label()
 
-        self.il.add(il.JmpZero(condition, else_label))
+        self.il.add(jmp_inst(condition, else_label))
         left_val = left.val(self.il)
         self.il.add(il.Set(left_val, output))
         else_end_label = self.il.get_label()
@@ -583,12 +612,19 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Add(head_val, offset, output))
         return ast.IndirectLValue(output, htype)
 
+    def simplify_condition(self, condition):
+        if isinstance(condition, ast.BoolNot):
+            return self.simplify_condition(condition.expr)[0], il.JmpNotZero
+        else:
+            return self.visit(condition), il.JmpZero
+
     def visit_IfStatement(self, node):
-        condition = self.visit(node.condition).val(self.il)
+        condition, jmp_inst = self.simplify_condition(node.condition)
+        condition = condition.val(self.il)
 
         end_label = self.il.get_label()
 
-        self.il.add(il.JmpZero(condition, end_label))
+        self.il.add(jmp_inst(condition, end_label))
         self.visit(node.statement)
         if node.else_statement is not None:
             else_end_label = self.il.get_label()
@@ -605,9 +641,10 @@ class Interpreter(ast.NodeVisitor):
         end_label = self.il.get_label()
 
         self.il.add(il.Label(start_label))
-        condition = self.visit(node.condition).val(self.il)
+        condition, jmp_inst = self.simplify_condition(node.condition)
+        condition = condition.val(self.il)
 
-        self.il.add(il.JmpZero(condition, end_label))
+        self.il.add(jmp_inst(condition, end_label))
 
         self.current_loop["start"] = start_label
         self.current_loop["end"] = end_label
@@ -627,8 +664,9 @@ class Interpreter(ast.NodeVisitor):
         self.current_loop["end"] = end_label
         self.visit(node.statement)
 
-        condition = self.visit(node.condition).val(self.il)
-        self.il.add(il.JmpZero(condition, end_label))
+        condition, jmp_inst = self.simplify_condition(node.condition)
+        condition = condition.val(self.il)
+        self.il.add(jmp_inst(condition, end_label))
         self.il.add(il.Jmp(start_label))
 
         self.il.add(il.Label(end_label))
@@ -642,8 +680,9 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Label(start_label))
 
         if node.second:
-            condition = self.visit(node.second).val(self.il)
-            self.il.add(il.JmpZero(condition, end_label))
+            condition, jmp_inst = self.simplify_condition(node.second)
+            condition = condition.val(self.il)
+            self.il.add(jmp_inst(condition, end_label))
 
         self.current_loop["start"] = start_label
         self.current_loop["end"] = end_label

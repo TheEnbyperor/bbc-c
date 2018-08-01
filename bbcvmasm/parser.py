@@ -94,7 +94,7 @@ class Parser:
         return ast.Label(self.tokens[index-2].value), index
 
     def parse_inst(self, index):
-        insts = [("push", ast.Push), ("pop", ast.Pop), ("ret", ast.Ret), ("call",ast.Call),
+        insts = [("push", ast.Push), ("pop", ast.Pop), ("ret", ast.Ret), ("call", ast.Call), ("exit", ast.Exit),
                  ("calln", ast.Calln), ("mov", ast.Mov), ("add", ast.Add), ("sub", ast.Sub), ("cmp", ast.Cmp),
                  ("jze", ast.Jze), ("je", ast.Jze), ("jnz", ast.Jnz), ("jne", ast.Jnz), ("jl", ast.Jl),
                  ("jle", ast.Jle), ("jg", ast.Jg), ("jge", ast.Jge), ("ja", ast.Ja), ("jae", ast.Jae),

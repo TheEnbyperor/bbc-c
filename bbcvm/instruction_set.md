@@ -331,7 +331,7 @@ Carry, sign, zero
 
 ### sub \<reg>, \<reg>
 
-Subtracts the value in the first register from the second register and stores back in the first register. Does not use the carry flag.
+Subtracts the value in the first register from the second register and stores back in the second register. Does not use the carry flag.
 
 *Does not clobber R15*
 
@@ -383,7 +383,7 @@ Carry, sign, zero
 
 ### sbc \<reg>, \<reg\>
 
-Subtracts the value in the first register and the carry from the second register and stores back in the first register.
+Subtracts the value in the first register and the carry from the second register and stores back in the second register.
 
 *Does not clobber R15*
 
