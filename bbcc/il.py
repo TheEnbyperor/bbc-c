@@ -20,7 +20,7 @@ class ILValue:
         return self
 
     def __str__(self):
-        return str("{:X}".format(id(self) % 10000))
+        return str("{:X}".format(id(self) % 1000))
 
     def __repr__(self):
         return self.__str__()
@@ -90,12 +90,13 @@ class Set(ILInst):
 
 
 class ReadAt(ILInst):
-    def __init__(self, value: ILValue, output: ILValue):
+    def __init__(self, value: ILValue, output: ILValue, offset: ILInst=None):
         self.value = value
         self.output = output
+        self.offset = offset
 
     def inputs(self):
-        return [self.value]
+        return [self.value, self.offset] if self.offset is not None else [self.value]
 
     def outputs(self):
         return [self.output]
@@ -103,6 +104,7 @@ class ReadAt(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         value = spotmap[self.value]
         output = spotmap[self.output]
+        offset = spotmap[self.offset] if self.offset is not None else spots.LiteralSpot(0)
 
         if not isinstance(output, spots.LiteralSpot):
             scratch = value
@@ -111,17 +113,29 @@ class ReadAt(ILInst):
                 scratch = get_reg([], [])
                 assembly.add_inst(asm.Mov(value, scratch, 2))
 
-            spot = spots.MemorySpot(scratch)
+            if not isinstance(offset, spots.LiteralSpot):
+                scratch = get_reg([], [])
+                assembly.add_inst(asm.Mov(value, scratch, 2))
+                assembly.add_inst(asm.Add(offset, scratch, 2))
+                spot = spots.MemorySpot(scratch)
+            else:
+                if offset.value > 0xfff:
+                    assembly.add_inst(asm.Add(offset, scratch, 2))
+                    spot = spots.MemorySpot(scratch)
+                else:
+                    spot = spots.MemorySpot(scratch, offset.value)
+
             assembly.add_inst(asm.Mov(spot, output, self.output.type.size))
 
 
 class SetAt(ILInst):
-    def __init__(self, value: ILValue, output: ILValue):
+    def __init__(self, value: ILValue, output: ILValue, offset: ILInst=None):
         self.value = value
         self.output = output
+        self.offset = offset
 
     def inputs(self):
-        return [self.value, self.output]
+        return [self.value, self.offset, self.output] if self.offset is not None else [self.value, self.output]
 
     def outputs(self):
         return []
@@ -129,13 +143,26 @@ class SetAt(ILInst):
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         value = spotmap[self.value]
         output = spotmap[self.output]
+        offset = spotmap[self.offset] if self.offset is not None else spots.LiteralSpot(0)
 
         if not isinstance(value, spots.LiteralSpot):
             if isinstance(value, spots.MemorySpot):
                 reg = get_reg([], [output])
                 assembly.add_inst(asm.Mov(value, reg))
                 value = reg
-            spot = spots.MemorySpot(value)
+
+            if not isinstance(offset, spots.LiteralSpot):
+                scratch = get_reg([], [output])
+                assembly.add_inst(asm.Mov(value, scratch, 2))
+                assembly.add_inst(asm.Add(offset, scratch, 2))
+                spot = spots.MemorySpot(scratch)
+            else:
+                if offset.value > 0xfff:
+                    assembly.add_inst(asm.Add(offset, value, 2))
+                    spot = spots.MemorySpot(value)
+                else:
+                    spot = spots.MemorySpot(value, offset.value)
+
             out = output
             if isinstance(output, spots.LiteralSpot):
                 reg = get_reg([], [])
@@ -1227,10 +1254,15 @@ class IL:
                     if v not in refs:
                         move_to_mem.append(v)
 
+        to_remove = []
         for v in free_values:
             if v.stack_offset is not None:
                 global_spotmap[v] = spots.MemorySpot(spots.RBP, v.stack_offset+4)
-                free_values.remove(v)
+                to_remove.append(v)
+
+        for v in to_remove:
+            free_values.remove(v)
+            pass
 
         for v in free_values:
             if v.type.size not in {1, 2}:

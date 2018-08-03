@@ -1,4 +1,4 @@
-//#include "string.h"
+#include "string.h"
 #include "stddef.h"
 #include "stdbool.h"
 
@@ -32,9 +32,13 @@ static void *global_base = NULL;
 static void *mem_top = NULL;
 
 #define META_SIZE sizeof(struct block_meta)
+#define MIN_BLOCK_SIZE 4
 
 static struct block_meta *get_block_ptr(void *ptr) {
   return (char *)ptr - META_SIZE;
+}
+static struct block_meta *get_data_ptr(void *ptr) {
+  return (char *)ptr + META_SIZE;
 }
 
 static struct block_meta *find_free_block(struct block_meta **last, unsigned int size) {
@@ -57,9 +61,9 @@ static struct block_meta *request_space(struct block_meta *last, unsigned int si
     return NULL;
   mem_top = (char *)mem_top + size + META_SIZE;
 
-  if (last) {
+  if (last)
     last->next = block;
-  }
+  block->prev = last;
   block->size = size;
   block->next = NULL;
   block->free = 0;
@@ -72,9 +76,12 @@ static void split_block(struct block_meta *block, unsigned int size) {
   new_block = (char *)block + META_SIZE + size;
   new_block->size = block->size - size - META_SIZE;
   new_block->next = block->next;
+  new_block->prev = block;
   new_block->free = 1;
   block->size = size;
   block->next = new_block;
+  if (new_block->next)
+    new_block->next->prev = new_block;
 }
 
 static struct block_meta *fusion(struct block_meta *block) {
@@ -106,7 +113,7 @@ void *malloc(unsigned int size) {
             return NULL;
           }
         } else {
-          if ((block->size - size) >= (META_SIZE + 4))
+          if ((block->size - size) >= (META_SIZE + MIN_BLOCK_SIZE))
             split_block(block, size);
           block->free = 0;
         }
@@ -137,11 +144,38 @@ void free(void *ptr) {
   }
 }
 
-//
-//void *realloc(void *p, unsigned int size) {
-//    unsigned int *cur_size = (unsigned int *)(((char *)p)-sizeof(int));
-//    if (size < *cur_size) {
-//        *cur_size = size;
-//
-//    }
-//}
+static void copy_block(struct block_meta *old_block, struct block_meta *new_block) {
+  char *old_data, *new_data;
+  old_data = get_data_ptr(old_block);
+  new_data = get_data_ptr(new_block);
+  for (unsigned int i = 0; i < old_block->size && i < new_block->size; ++i)
+    new_data[i] = old_data[i];
+}
+
+void *realloc(void *p, unsigned int size) {
+  if (!p)
+    return malloc(size);
+
+  struct block_meta *block, *new_block;
+  block = get_block_ptr(p);
+
+  if (block->size >= size) {
+    if ((block->size - size) >= (META_SIZE + MIN_BLOCK_SIZE))
+      split_block(block, size);
+  } else {
+    if (block->next && block->next->free && (block->size + META_SIZE + block->next->size) >= size) {
+      fusion(block);
+      if ((block->size - size) >= (META_SIZE + MIN_BLOCK_SIZE))
+        split_block(block, size);
+    } else {
+      void *newp = malloc(size);
+      if (!newp)
+        return NULL;
+      new_block = get_block_ptr(newp);
+      copy_block(block, new_block);
+      free(p);
+      return newp;
+    }
+  }
+  return p;
+}

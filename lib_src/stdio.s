@@ -2,9 +2,11 @@
 .import getchar
 .import malloc
 .import free
+.import realloc
 .import strlen
 .import strrev
 .import strcmp
+.import memset
 .import backspace
 .import append
 .export fputs

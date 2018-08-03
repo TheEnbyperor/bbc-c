@@ -315,27 +315,23 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(ctypes.char)
 
         init = il.ILValue(ctypes.char)
-        self.il.register_literal_value(init, 1)
+        self.il.register_literal_value(init, 0)
         other = il.ILValue(ctypes.char)
-        self.il.register_literal_value(other, 0)
+        self.il.register_literal_value(other, 1)
 
         set_out = self.il.get_label()
         end = self.il.get_label()
 
         self.il.add(il.Set(init, output))
 
-        left = self.visit(node.left).val(self.il)
-        self.il.add(il.JmpZero(left, set_out))
         left_conition, left_jmp_inst = self.simplify_condition(node.left)
         left_conition = left_conition.val(self.il)
-        self.il.add(left_jmp_inst(left_conition, set_out))
+        self.il.add(left_jmp_inst(left_conition, end))
 
         right_condition, right_jmp_inst = self.simplify_condition(node.right)
         right_condition = right_condition.val(self.il)
-        self.il.add(right_jmp_inst(right_condition, set_out))
-        self.il.add(il.Jmp(end))
+        self.il.add(right_jmp_inst(right_condition, end))
 
-        self.il.add(il.Label(set_out))
         self.il.add(il.Set(other, output))
         self.il.add(il.Label(end))
 
@@ -567,7 +563,9 @@ class Interpreter(ast.NodeVisitor):
         value = self.visit(node.expr)
         if value.type.arg.is_void():
             raise SyntaxError("Can't dereference void pointer")
-        return ast.IndirectLValue(value.val(self.il), value.type.arg)
+        offset = il.ILValue(ctypes.unsig_int)
+        self.il.register_literal_value(offset, 0)
+        return ast.IndirectLValue(value.val(self.il), value.type.arg, offset)
 
     def visit_ObjPtrMember(self, node):
         head = self.visit(node.head)
@@ -575,17 +573,17 @@ class Interpreter(ast.NodeVisitor):
             raise SyntaxError("Object is not pointer")
         if not head.type.arg.is_struct_union():
             raise SyntaxError("Object pointed to is not struct or union")
+
         member = node.member
         offset = head.type.arg.get_offset(member)
         if offset[0] is None:
             raise SyntaxError(f"{member} is not a member of the struct")
+
         offset_val = il.ILValue(ctypes.unsig_char)
         self.il.register_literal_value(offset_val, offset[0])
 
         val = head.val(self.il)
-        pos = il.ILValue(ctypes.unsig_int)
-        self.il.add(il.Add(offset_val, val, pos))
-        return ast.IndirectLValue(pos, offset[1])
+        return ast.IndirectLValue(val, offset[1], offset_val)
 
     def visit_ArraySubsc(self, node):
         head = self.visit(node.head)
@@ -608,9 +606,7 @@ class Interpreter(ast.NodeVisitor):
         else:
             offset = arg
 
-        output = il.ILValue(ctypes.unsig_int)
-        self.il.add(il.Add(head_val, offset, output))
-        return ast.IndirectLValue(output, htype)
+        return ast.IndirectLValue(head_val, htype, offset)
 
     def simplify_condition(self, condition):
         if isinstance(condition, ast.BoolNot):

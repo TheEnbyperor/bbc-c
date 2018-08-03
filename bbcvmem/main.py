@@ -23,7 +23,7 @@ class Emulator(gui.EmulatorFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.exec = None
-        self.regs = [bytearray([0, 0])] * 15
+        self.regs = [bytearray([0, 0])] * 16
         self.mem = bytearray([0]) * 0x8000
         self.cur_mem_page = 0
         self.cur_breakpoints = []
@@ -57,6 +57,8 @@ class Emulator(gui.EmulatorFrame):
             0x16: (self.parse_sbc_mem_reg_short, self.run_sbc_mem_reg_short),
             0x17: (self.parse_sub_mem_reg_long, self.run_sub_mem_reg_long),
             0x18: (self.parse_sbc_mem_reg_long, self.run_sbc_mem_reg_long),
+            0x19: (self.parse_inc_reg, self.run_inc_reg),
+            0x1a: (self.parse_dec_reg, self.run_dec_reg),
             0x29: (self.parse_cmp_const_reg, self.run_cmp_const_reg),
             0x2a: (self.parse_cmp_reg_reg, self.run_cmp_reg_reg),
             0x2b: (self.parse_cmp_mem_reg_short, self.run_cmp_mem_reg_short),
@@ -66,6 +68,7 @@ class Emulator(gui.EmulatorFrame):
             0x30: (self.parse_jump_zero, self.run_jump_zero),
             0x31: (self.parse_jump_not_zero, self.run_jump_not_zero),
             0x3b: (self.parse_jump_above_equal, self.run_jump_above_equal),
+            0x3c: (self.parse_jump_below, self.run_jump_below),
             0x3f: (self.parse_jump_lesser_equal, self.run_jump_lesser_equal),
             0x82: (self.parse_return, self.run_return),
             0x83: (self.parse_exit, self.run_exit),
@@ -630,7 +633,7 @@ class Emulator(gui.EmulatorFrame):
 
     def parse_sub_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
-        return f"sub %r{reg2}, %r{reg1}"
+        return f"sub %r{reg1}, %r{reg2}"
 
     def run_sub_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
@@ -643,7 +646,7 @@ class Emulator(gui.EmulatorFrame):
 
     def parse_sbc_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
-        return f"sbc %r{reg2}, %r{reg1}"
+        return f"sbc %r{reg1}, %r{reg2}"
 
     def run_sbc_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
@@ -732,7 +735,7 @@ class Emulator(gui.EmulatorFrame):
 
     def parse_cmp_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
-        return f"cmp %r{reg2}, %r{reg1}"
+        return f"cmp %r{reg1}, %r{reg2}"
 
     def run_cmp_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
@@ -769,6 +772,24 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         self.run_sub(op1, op2)
         self.inc_pc(3)
+
+    def parse_inc_reg(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"inc %r{reg}"
+
+    def run_inc_reg(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.set_reg(reg, self.get_reg(reg)+1)
+        self.inc_pc()
+
+    def parse_dec_reg(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"dec %r{reg}"
+
+    def run_dec_reg(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.set_reg(reg, self.get_reg(reg)-1)
+        self.inc_pc()
 
     def parse_call(self):
         addr = self.get_mem_address_str()
@@ -834,6 +855,20 @@ class Emulator(gui.EmulatorFrame):
         else:
             self.set_pc(addr - 1)
 
+    def parse_jump_below(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        return f"jb {addr} {label}"
+
+    def run_jump_below(self):
+        addr = self.get_mem_address()
+
+        if self.get_flag(self.ZERO) or not self.get_flag(self.CARRY):
+            self.inc_pc(3)
+        else:
+            self.set_pc(addr - 1)
+
     def parse_jump_lesser_equal(self):
         addr = self.get_mem_address_str()
         addr_num = self.get_mem_address()
@@ -861,7 +896,7 @@ class Emulator(gui.EmulatorFrame):
 
     def run_exit(self):
         self.cur_state = self.STATE_STOP
-        self.set_pc(0x1900)
+        self.set_pc(0x1900-1)
 
 
 if __name__ == '__main__':

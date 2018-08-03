@@ -17,7 +17,7 @@ isupper:
 	push %r1
 	push %r2
 \ Set
-	mov #1, %r1
+	mov #0, %r1
 \ MoreEqualCmp
 	mov #65, %r2
 	mov #1, %r0
@@ -27,38 +27,24 @@ isupper:
 __bbcc_0000001d:
 \ JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000000]
-\ MoreEqualCmp
-	mov #65, %r2
-	mov #1, %r0
-	cmp 4[%r11], %r2
-	jge [__bbcc_0000001e]
-	mov #0, %r0
-__bbcc_0000001e:
-\ JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000000]
+	jze [__bbcc_00000001]
 \ LessEqualCmp
 	mov #90, %r2
 	mov #1, %r0
 	cmp 4[%r11], %r2
-	jle [__bbcc_0000001f]
+	jle [__bbcc_0000001e]
 	mov #0, %r0
-__bbcc_0000001f:
+__bbcc_0000001e:
 \ JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000000]
-\ Jmp
-	jmp [__bbcc_00000001]
-\ Label
-__bbcc_00000000:
+	jze [__bbcc_00000001]
 \ Set
-	mov #0, %r1
+	mov #1, %r1
 \ Label
 __bbcc_00000001:
 \ Return
 	mov %r1, %r0
-__bbcc_00000020:
+__bbcc_0000001f:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -71,48 +57,34 @@ islower:
 	push %r1
 	push %r2
 \ Set
-	mov #1, %r1
+	mov #0, %r1
 \ MoreEqualCmp
 	mov #97, %r2
 	mov #1, %r0
 	cmp 4[%r11], %r2
-	jge [__bbcc_00000021]
+	jge [__bbcc_00000020]
 	mov #0, %r0
-__bbcc_00000021:
+__bbcc_00000020:
 \ JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000002]
-\ MoreEqualCmp
-	mov #97, %r2
-	mov #1, %r0
-	cmp 4[%r11], %r2
-	jge [__bbcc_00000022]
-	mov #0, %r0
-__bbcc_00000022:
-\ JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000002]
+	jze [__bbcc_00000003]
 \ LessEqualCmp
 	mov #122, %r2
 	mov #1, %r0
 	cmp 4[%r11], %r2
-	jle [__bbcc_00000023]
+	jle [__bbcc_00000021]
 	mov #0, %r0
-__bbcc_00000023:
+__bbcc_00000021:
 \ JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000002]
-\ Jmp
-	jmp [__bbcc_00000003]
-\ Label
-__bbcc_00000002:
+	jze [__bbcc_00000003]
 \ Set
-	mov #0, %r1
+	mov #1, %r1
 \ Label
 __bbcc_00000003:
 \ Return
 	mov %r1, %r0
-__bbcc_00000024:
+__bbcc_00000022:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -151,7 +123,7 @@ __bbcc_00000004:
 __bbcc_00000005:
 \ Return
 	mov %r1, %r0
-__bbcc_00000025:
+__bbcc_00000023:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
@@ -171,12 +143,12 @@ isdigit:
 	mov #9, %r2
 	mov #1, %r1
 	cmp %r0, %r2
-	jle [__bbcc_00000026]
+	jle [__bbcc_00000024]
 	mov #0, %r1
-__bbcc_00000026:
+__bbcc_00000024:
 \ Return
 	mov %r1, %r0
-__bbcc_00000027:
+__bbcc_00000025:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -215,7 +187,7 @@ __bbcc_00000006:
 __bbcc_00000007:
 \ Return
 	mov %r1, %r0
-__bbcc_00000028:
+__bbcc_00000026:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
@@ -245,7 +217,7 @@ isascii:
 __bbcc_00000008:
 \ Return
 	mov %r3, %r0
-__bbcc_00000029:
+__bbcc_00000027:
 	pop %r3
 	pop %r2
 	pop %r1
@@ -264,9 +236,9 @@ isblank:
 	mov #9, %r2
 	mov #1, %r0
 	cmp 4[%r11], %r2
-	jze [__bbcc_0000002a]
+	jze [__bbcc_00000028]
 	mov #0, %r0
-__bbcc_0000002a:
+__bbcc_00000028:
 \ JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000009]
@@ -274,9 +246,9 @@ __bbcc_0000002a:
 	mov #32, %r2
 	mov #1, %r0
 	cmp 4[%r11], %r2
-	jze [__bbcc_0000002b]
+	jze [__bbcc_00000029]
 	mov #0, %r0
-__bbcc_0000002b:
+__bbcc_00000029:
 \ JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000009]
@@ -290,7 +262,7 @@ __bbcc_00000009:
 __bbcc_0000000a:
 \ Return
 	mov %r1, %r0
-__bbcc_0000002c:
+__bbcc_0000002a:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -305,11 +277,11 @@ iscntrl:
 	mov #32, %r1
 	mov #1, %r0
 	cmp 4[%r11], %r1
-	jl [__bbcc_0000002d]
+	jl [__bbcc_0000002b]
 	mov #0, %r0
-__bbcc_0000002d:
+__bbcc_0000002b:
 \ Return
-__bbcc_0000002e:
+__bbcc_0000002c:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
@@ -332,9 +304,9 @@ isspace:
 	mov #32, %r4
 	mov #1, %r0
 	cmp 4[%r11], %r4
-	jze [__bbcc_0000002f]
+	jze [__bbcc_0000002d]
 	mov #0, %r0
-__bbcc_0000002f:
+__bbcc_0000002d:
 \ JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_0000000f]
@@ -342,9 +314,9 @@ __bbcc_0000002f:
 	mov #10, %r4
 	mov #1, %r0
 	cmp 4[%r11], %r4
-	jze [__bbcc_00000030]
+	jze [__bbcc_0000002e]
 	mov #0, %r0
-__bbcc_00000030:
+__bbcc_0000002e:
 \ JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_0000000f]
@@ -363,9 +335,9 @@ __bbcc_00000010:
 	mov #9, %r1
 	mov #1, %r0
 	cmp 4[%r11], %r1
-	jze [__bbcc_00000031]
+	jze [__bbcc_0000002f]
 	mov #0, %r0
-__bbcc_00000031:
+__bbcc_0000002f:
 \ JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_0000000d]
@@ -384,9 +356,9 @@ __bbcc_0000000e:
 	mov #13, %r1
 	mov #1, %r0
 	cmp 4[%r11], %r1
-	jze [__bbcc_00000032]
+	jze [__bbcc_00000030]
 	mov #0, %r0
-__bbcc_00000032:
+__bbcc_00000030:
 \ JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_0000000b]
@@ -400,7 +372,7 @@ __bbcc_0000000b:
 __bbcc_0000000c:
 \ Return
 	mov %r3, %r0
-__bbcc_00000033:
+__bbcc_00000031:
 	pop %r4
 	pop %r3
 	pop %r2
@@ -417,9 +389,9 @@ isxdigit:
 	push %r3
 	push %r4
 \ Set
-	mov #0, %r2
-\ Set
 	mov #0, %r3
+\ Set
+	mov #0, %r2
 \ CallFunction
 	mov 4[%r11], %r0
 	push %r0
@@ -429,43 +401,29 @@ isxdigit:
 	cmp #0, %r0
 	jnz [__bbcc_00000013]
 \ Set
-	mov #1, %r1
+	mov #0, %r1
 \ MoreEqualCmp
 	mov #97, %r4
 	mov #1, %r0
 	cmp 4[%r11], %r4
-	jge [__bbcc_00000034]
+	jge [__bbcc_00000032]
 	mov #0, %r0
-__bbcc_00000034:
+__bbcc_00000032:
 \ JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000015]
-\ MoreEqualCmp
-	mov #97, %r4
-	mov #1, %r0
-	cmp 4[%r11], %r4
-	jge [__bbcc_00000035]
-	mov #0, %r0
-__bbcc_00000035:
-\ JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000015]
+	jze [__bbcc_00000016]
 \ LessEqualCmp
 	mov #102, %r4
 	mov #1, %r0
 	cmp 4[%r11], %r4
-	jle [__bbcc_00000036]
+	jle [__bbcc_00000033]
 	mov #0, %r0
-__bbcc_00000036:
+__bbcc_00000033:
 \ JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000015]
-\ Jmp
-	jmp [__bbcc_00000016]
-\ Label
-__bbcc_00000015:
+	jze [__bbcc_00000016]
 \ Set
-	mov #0, %r1
+	mov #1, %r1
 \ Label
 __bbcc_00000016:
 \ JmpNotZero
@@ -476,50 +434,36 @@ __bbcc_00000016:
 \ Label
 __bbcc_00000013:
 \ Set
-	mov #1, %r3
+	mov #1, %r2
 \ Label
 __bbcc_00000014:
 \ JmpNotZero
-	cmp #0, %r3
+	cmp #0, %r2
 	jnz [__bbcc_00000011]
 \ Set
-	mov #1, %r1
-\ MoreEqualCmp
-	mov #65, %r3
-	mov #1, %r0
-	cmp 4[%r11], %r3
-	jge [__bbcc_00000037]
-	mov #0, %r0
-__bbcc_00000037:
-\ JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000017]
-\ MoreEqualCmp
-	mov #65, %r3
-	mov #1, %r0
-	cmp 4[%r11], %r3
-	jge [__bbcc_00000038]
-	mov #0, %r0
-__bbcc_00000038:
-\ JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000017]
-\ LessEqualCmp
-	mov #70, %r3
-	mov #1, %r0
-	cmp 4[%r11], %r3
-	jle [__bbcc_00000039]
-	mov #0, %r0
-__bbcc_00000039:
-\ JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000017]
-\ Jmp
-	jmp [__bbcc_00000018]
-\ Label
-__bbcc_00000017:
-\ Set
 	mov #0, %r1
+\ MoreEqualCmp
+	mov #65, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jge [__bbcc_00000034]
+	mov #0, %r0
+__bbcc_00000034:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000018]
+\ LessEqualCmp
+	mov #70, %r2
+	mov #1, %r0
+	cmp 4[%r11], %r2
+	jle [__bbcc_00000035]
+	mov #0, %r0
+__bbcc_00000035:
+\ JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000018]
+\ Set
+	mov #1, %r1
 \ Label
 __bbcc_00000018:
 \ JmpNotZero
@@ -530,12 +474,12 @@ __bbcc_00000018:
 \ Label
 __bbcc_00000011:
 \ Set
-	mov #1, %r2
+	mov #1, %r3
 \ Label
 __bbcc_00000012:
 \ Return
-	mov %r2, %r0
-__bbcc_0000003a:
+	mov %r3, %r0
+__bbcc_00000036:
 	pop %r4
 	pop %r3
 	pop %r2
@@ -576,7 +520,7 @@ __bbcc_00000019:
 \ Label
 __bbcc_0000001a:
 \ Return
-__bbcc_0000003b:
+__bbcc_00000037:
 	pop %r3
 	pop %r2
 	pop %r1
@@ -612,7 +556,7 @@ __bbcc_0000001b:
 \ Label
 __bbcc_0000001c:
 \ Return
-__bbcc_0000003c:
+__bbcc_00000038:
 	pop %r1
 	mov %r11, %r13
 	pop %r11

@@ -653,8 +653,9 @@ class DirectLValue(LValue):
 
 
 class IndirectLValue(LValue):
-    def __init__(self, addr_val: il.ILValue, ctype: ctypes.CType):
+    def __init__(self, addr_val: il.ILValue, ctype: ctypes.CType, offset: il.ILValue):
         self.il_value = addr_val
+        self.offset = offset
         self.ctype = ctype
 
     @property
@@ -662,12 +663,12 @@ class IndirectLValue(LValue):
         return self.ctype
 
     def set_to(self, rvalue, il_code: il.IL):
-        il_code.add(il.SetAt(self.il_value.val(il), rvalue))
+        il_code.add(il.SetAt(self.il_value.val(il), rvalue, self.offset.val(il)))
 
     def addr(self, il_code: il.IL):
         return self.il_value
 
     def val(self, il_code: il.IL):
         output = il.ILValue(self.ctype)
-        il_code.add(il.ReadAt(self.il_value.val(il_code), output))
+        il_code.add(il.ReadAt(self.il_value.val(il_code), output, self.offset.val(il)))
         return output

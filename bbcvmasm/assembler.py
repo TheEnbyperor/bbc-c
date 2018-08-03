@@ -454,6 +454,28 @@ class Assembler:
             raise SyntaxError(f"Can't jump on above or equal to {node.value}")
 
     @setup_labels
+    def visit_Jb(self, node: ast.Call):
+        if isinstance(node.value, ast.MemoryValue):
+            if node.value.length == 1:
+                raise SyntaxError("Can't jump on on below to a byte pointer")
+            self.insts.append(0x3C)
+            self.get_mem_val(node.value, 1, 0, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't jump on below to {node.value}")
+
+    @setup_labels
+    def visit_Jbe(self, node: ast.Call):
+        if isinstance(node.value, ast.MemoryValue):
+            if node.value.length == 1:
+                raise SyntaxError("Can't jump on below or equal to a byte pointer")
+            self.insts.append(0x3D)
+            self.get_mem_val(node.value, 1, 0, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't jump on below or equal to {node.value}")
+
+    @setup_labels
     def visit_Call(self, node: ast.Call):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:

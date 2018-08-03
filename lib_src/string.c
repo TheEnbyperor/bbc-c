@@ -23,6 +23,11 @@ int strcmp(char s1[], char s2[]) {
     return s1[i] - s2[i];
 }
 
+void *memset(char *s, char c, unsigned int n) {
+  for (unsigned int i = 0; i < n; ++i)
+    s[i] = c;
+}
+
 void backspace(char *s) {
     int len = strlen(s);
     s[len-1] = '\0';
