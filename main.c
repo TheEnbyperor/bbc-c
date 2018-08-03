@@ -2,18 +2,18 @@
 #include "stdlib.h"
 #include "string.h"
 
-#define PROMPT "$\129"
+#define PROMPT "$ "
 #define EXIT "exit"
 #define CLEAR "clear"
 #define KEY_BUF_LEN 20
 static char key_buffer[KEY_BUF_LEN];
 
 int main() {
-    void *a = malloc(30);
-    realloc(a, 4);
-    realloc(a, 10);
-    realloc(a, 40);
-//    fputs(PROMPT);
+//    void *a = malloc(30);
+//    realloc(a, 4);
+//    realloc(a, 10);
+//    realloc(a, 40);
+    fputs(PROMPT);
 //    while (1) {
 //        char in = getchar();
 //        if (in == 27) {

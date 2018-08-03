@@ -3,6 +3,7 @@ import gui
 import sys
 import threading
 import time
+import readchar
 import struct
 sys.path.append("..")
 import bbcvmld
@@ -64,6 +65,7 @@ class Emulator(gui.EmulatorFrame):
             0x2b: (self.parse_cmp_mem_reg_short, self.run_cmp_mem_reg_short),
             0x2c: (self.parse_cmp_mem_reg_long, self.run_cmp_mem_reg_long),
             0x2d: (self.parse_call, self.run_call),
+            0x2e: (self.parse_call_native, self.run_call_native),
             0x2f: (self.parse_jump, self.run_jump),
             0x30: (self.parse_jump_zero, self.run_jump_zero),
             0x31: (self.parse_jump_not_zero, self.run_jump_not_zero),
@@ -803,6 +805,25 @@ class Emulator(gui.EmulatorFrame):
         self.push_reg(14)
         self.set_pc(addr - 1)
 
+    def parse_call_native(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"calln {addr} {label}, %r{reg}"
+
+    def run_call_native(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(3)
+
+        if addr == 0xFFEE:
+            sys.stdout.write(chr(self.get_reg(reg) & 0xFF))
+            sys.stdout.flush()
+        elif addr == 0xFFE0:
+            char = readchar.readchar(True)
+            self.set_reg(reg, ord(char))
+
     def parse_jump(self):
         addr = self.get_mem_address_str()
         addr_num = self.get_mem_address()
@@ -812,6 +833,7 @@ class Emulator(gui.EmulatorFrame):
     def run_jump(self):
         addr = self.get_mem_address()
         self.set_pc(addr - 1)
+
 
     def parse_jump_zero(self):
         addr = self.get_mem_address_str()
