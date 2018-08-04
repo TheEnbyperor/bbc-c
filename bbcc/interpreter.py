@@ -506,53 +506,73 @@ class Interpreter(ast.NodeVisitor):
     def visit_PreIncr(self, node):
         expr = self.visit(node.expr)
         value = expr.val(self.il)
+        new_val = il.ILValue(expr.type)
 
         if expr.type.is_pointer() and expr.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
             self.il.register_literal_value(type_len, expr.type.arg.size)
-            self.il.add(il.Add(value, type_len, value))
+            self.il.add(il.Add(value, type_len, new_val))
+            expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Inc(value))
+            one = il.ILValue(expr.type)
+            self.il.register_literal_value(one, 1)
+            self.il.add(il.Add(one, value, new_val))
+            expr.set_to(new_val, self.il)
         return value
 
     def visit_PostIncr(self, node):
-        value = self.visit(node.expr)
-        value_val = value.val(self.il)
-        output = il.ILValue(value.type)
+        expr = self.visit(node.expr)
+        value = expr.val(self.il)
+        output = il.ILValue(expr.type)
+        new_val = il.ILValue(expr.type)
 
-        self.il.add(il.Set(value_val, output))
+        self.il.add(il.Set(value, output))
         if value.type.is_pointer() and value.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, value.type.arg.size)
-            self.il.add(il.Add(value_val, type_len, value_val))
+            self.il.register_literal_value(type_len, expr.type.arg.size)
+            self.il.add(il.Add(value, type_len, new_val))
+            expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Inc(value_val))
+            one = il.ILValue(expr.type)
+            self.il.register_literal_value(one, 1)
+            self.il.add(il.Add(one, value, new_val))
+            expr.set_to(new_val, self.il)
         return output
 
     def visit_PreDecr(self, node):
         expr = self.visit(node.expr)
         value = expr.val(self.il)
+        new_val = il.ILValue(expr.type)
 
         if expr.type.is_pointer() and expr.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
             self.il.register_literal_value(type_len, expr.type.arg.size)
-            self.il.add(il.Sub(value, type_len, value))
+            self.il.add(il.Sub(value, type_len, new_val))
+            expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Dec(value))
+            one = il.ILValue(expr.type)
+            self.il.register_literal_value(one, 1)
+            self.il.add(il.Sub(one, value, new_val))
+            expr.set_to(new_val, self.il)
         return value
 
     def visit_PostDecr(self, node):
-        value = self.visit(node.expr)
-        value_val = value.val(self.il)
-        output = il.ILValue(value.type)
+        expr = self.visit(node.expr)
+        value = expr.val(self.il)
+        output = il.ILValue(expr.type)
+        new_val = il.ILValue(expr.type)
 
-        self.il.add(il.Set(value_val, output))
+        self.il.add(il.Set(value, output))
         if value.type.is_pointer() and value.type.arg.size != 1:
             type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, value.type.arg.size)
-            self.il.add(il.Sub(value_val, type_len, value_val))
+            self.il.register_literal_value(type_len, expr.type.arg.size)
+            self.il.add(il.Sub(value, type_len, new_val))
+            expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Dec(value_val))
+            one = il.ILValue(expr.type)
+            self.il.register_literal_value(one, 1)
+            self.il.add(il.Sub(one, value, new_val))
+            expr.set_to(new_val, self.il)
         return output
 
     def visit_AddrOf(self, node):
@@ -669,6 +689,7 @@ class Interpreter(ast.NodeVisitor):
         
     def visit_ForStatement(self, node):
         start_label = self.il.get_label()
+        mod_label = self.il.get_label()
         end_label = self.il.get_label()
 
         if node.first:
@@ -680,10 +701,11 @@ class Interpreter(ast.NodeVisitor):
             condition = condition.val(self.il)
             self.il.add(jmp_inst(condition, end_label))
 
-        self.current_loop["start"] = start_label
+        self.current_loop["start"] = mod_label
         self.current_loop["end"] = end_label
         self.visit(node.statement)
 
+        self.il.add(il.Label(mod_label))
         if node.third:
             self.visit(node.third)
 

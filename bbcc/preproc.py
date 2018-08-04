@@ -114,6 +114,7 @@ class Preproc:
         self.eat(index)
 
         if self.macros.get(macro_name) is None:
+            old_depth = self.if_depth
             self.if_depth += 1
             while not self.token_is(index, EOF):
                 self.eat(index)
@@ -126,7 +127,7 @@ class Preproc:
                         self.eat(index)
                         self.if_depth -= 1
 
-                if self.if_depth == 0:
+                if self.if_depth == old_depth:
                     break
         else:
             self.if_depth += 1
@@ -144,6 +145,7 @@ class Preproc:
         self.eat(index)
 
         if self.macros.get(macro_name) is not None:
+            old_depth = self.if_depth
             self.if_depth += 1
             while not self.token_is(index, EOF):
                 self.eat(index)
@@ -156,7 +158,7 @@ class Preproc:
                         self.eat(index)
                         self.if_depth -= 1
 
-                if self.if_depth == 0:
+                if self.if_depth == old_depth:
                     break
         else:
             self.if_depth += 1
@@ -174,7 +176,7 @@ class Preproc:
     @staticmethod
     def read_file(file):
         if os.path.exists(file):
-            f = open(file)
+            f = open(file.decode())
         else:
             lib = os.path.join(os.path.dirname(__file__), "..", "lib", file.decode())
             if os.path.exists(lib):

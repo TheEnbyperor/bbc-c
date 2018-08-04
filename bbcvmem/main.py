@@ -3,7 +3,6 @@ import gui
 import sys
 import threading
 import time
-import readchar
 import struct
 sys.path.append("..")
 import bbcvmld
@@ -69,9 +68,15 @@ class Emulator(gui.EmulatorFrame):
             0x2f: (self.parse_jump, self.run_jump),
             0x30: (self.parse_jump_zero, self.run_jump_zero),
             0x31: (self.parse_jump_not_zero, self.run_jump_not_zero),
+            0x36: (self.parse_inc_mem_short, self.run_inc_mem_short),
+            0x37: (self.parse_inc_mem_long, self.run_inc_mem_long),
+            0x38: (self.parse_dec_mem_short, self.run_dec_mem_short),
+            0x39: (self.parse_dec_mem_long, self.run_dec_mem_long),
             0x3b: (self.parse_jump_above_equal, self.run_jump_above_equal),
             0x3c: (self.parse_jump_below, self.run_jump_below),
+            0x3e: (self.parse_jump_lesser, self.run_jump_lesser),
             0x3f: (self.parse_jump_lesser_equal, self.run_jump_lesser_equal),
+            0x41: (self.parse_jump_greater_equal, self.run_jump_greater_equal),
             0x82: (self.parse_return, self.run_return),
             0x83: (self.parse_exit, self.run_exit),
         }
@@ -99,30 +104,28 @@ class Emulator(gui.EmulatorFrame):
         self.update()
 
     def run_thread(self):
-        last_state = self.cur_state
+        prev_state = self.cur_state
         while True:
             if self.cur_state == self.STATE_STEP:
-                last_state = self.cur_state
                 self.step()
+                prev_state = self.cur_state
                 self.cur_state = self.STATE_STOP
-                wx.CallAfter(self.update)
             elif self.cur_state == self.STATE_STEP_OVER:
-                last_state = self.cur_state
                 if self.is_subroutine():
                     next_addr = self.addr_after_subroutine()
                     while self.get_pc() != next_addr and self.cur_state == self.STATE_STEP_OVER:
                         self.step()
                 else:
                     self.step()
+                prev_state = self.cur_state
                 self.cur_state = self.STATE_STOP
-                wx.CallAfter(self.update)
             elif self.cur_state == self.STATE_RUN:
-                last_state = self.cur_state
                 self.step()
+                prev_state = self.cur_state
             else:
-                if last_state != self.STATE_STOP:
+                if self.cur_state != prev_state:
                     wx.CallAfter(self.update)
-                last_state = self.cur_state
+                prev_state = self.cur_state
                 time.sleep(0.1)
 
     def step(self):
@@ -793,6 +796,42 @@ class Emulator(gui.EmulatorFrame):
         self.set_reg(reg, self.get_reg(reg)-1)
         self.inc_pc()
 
+    def parse_inc_mem_short(self):
+        addr = self.get_mem_address_str()
+        return f"inc BYTE {addr}"
+
+    def run_inc_mem_short(self):
+        addr = self.get_mem_address()
+        self.set_mem_byte(addr, self.get_mem_byte(addr)+1)
+        self.inc_pc(3)
+
+    def parse_inc_mem_long(self):
+        addr = self.get_mem_address_str()
+        return f"inc WORD {addr}"
+
+    def run_inc_mem_long(self):
+        addr = self.get_mem_address()
+        self.set_mem_word(addr, self.get_mem_word(addr)+1)
+        self.inc_pc(3)
+
+    def parse_dec_mem_short(self):
+        addr = self.get_mem_address_str()
+        return f"dec BYTE {addr}"
+
+    def run_dec_mem_short(self):
+        addr = self.get_mem_address()
+        self.set_mem_byte(addr, self.get_mem_byte(addr)-1)
+        self.inc_pc(3)
+
+    def parse_dec_mem_long(self):
+        addr = self.get_mem_address_str()
+        return f"dec WORD {addr}"
+
+    def run_dec_mem_long(self):
+        addr = self.get_mem_address()
+        self.set_mem_word(addr, self.get_mem_word(addr)-1)
+        self.inc_pc(3)
+
     def parse_call(self):
         addr = self.get_mem_address_str()
         addr_num = self.get_mem_address()
@@ -821,8 +860,8 @@ class Emulator(gui.EmulatorFrame):
             sys.stdout.write(chr(self.get_reg(reg) & 0xFF))
             sys.stdout.flush()
         elif addr == 0xFFE0:
-            char = readchar.readchar(True)
-            self.set_reg(reg, ord(char))
+            char = sys.stdin.read(1)
+            self.set_reg(reg, ord(char[0]))
 
     def parse_jump(self):
         addr = self.get_mem_address_str()
@@ -891,6 +930,20 @@ class Emulator(gui.EmulatorFrame):
         else:
             self.set_pc(addr - 1)
 
+    def parse_jump_lesser(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        return f"jl {addr} {label}"
+
+    def run_jump_lesser(self):
+        addr = self.get_mem_address()
+
+        if self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN) or self.get_flag(self.ZERO):
+            self.inc_pc(3)
+        else:
+            self.set_pc(addr - 1)
+
     def parse_jump_lesser_equal(self):
         addr = self.get_mem_address_str()
         addr_num = self.get_mem_address()
@@ -901,6 +954,20 @@ class Emulator(gui.EmulatorFrame):
         addr = self.get_mem_address()
 
         if self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN):
+            self.inc_pc(3)
+        else:
+            self.set_pc(addr - 1)
+
+    def parse_jump_greater_equal(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        return f"jge {addr} {label}"
+
+    def run_jump_greater_equal(self):
+        addr = self.get_mem_address()
+
+        if not ((self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN)) or self.get_flag(self.ZERO)):
             self.inc_pc(3)
         else:
             self.set_pc(addr - 1)

@@ -147,30 +147,34 @@ class SetAt(ILInst):
 
         if not isinstance(value, spots.LiteralSpot):
             if isinstance(value, spots.MemorySpot):
-                reg = get_reg([], [output])
+                reg = get_reg([], [output, offset])
                 assembly.add_inst(asm.Mov(value, reg))
                 value = reg
 
             if not isinstance(offset, spots.LiteralSpot):
-                scratch = get_reg([], [output])
-                assembly.add_inst(asm.Mov(value, scratch, 2))
+                if not isinstance(spotmap[self.value], spots.MemorySpot):
+                    scratch = get_reg([], [output, offset])
+                    assembly.add_inst(asm.Mov(value, scratch, 2))
+                else:
+                    scratch = value
                 assembly.add_inst(asm.Add(offset, scratch, 2))
                 spot = spots.MemorySpot(scratch)
             else:
                 if offset.value > 0xfff:
-                    assembly.add_inst(asm.Add(offset, value, 2))
+                    if not isinstance(spotmap[self.value], spots.MemorySpot):
+                        scratch = get_reg([], [output, offset])
+                        assembly.add_inst(asm.Mov(value, scratch, 2))
+                    else:
+                        scratch = value
+                    assembly.add_inst(asm.Add(offset, scratch, 2))
                     spot = spots.MemorySpot(value)
                 else:
                     spot = spots.MemorySpot(value, offset.value)
 
             out = output
-            if isinstance(output, spots.LiteralSpot):
-                reg = get_reg([], [])
-                assembly.add_inst(asm.Mov(output, reg))
-                out = reg
-            elif isinstance(output, spots.MemorySpot):
+            if isinstance(output, spots.LiteralSpot) or isinstance(output, spots.MemorySpot):
                 reg = get_reg([], [value])
-                assembly.add_inst(asm.Mov(out, reg))
+                assembly.add_inst(asm.Mov(output, reg))
                 out = reg
 
             assembly.add_inst(asm.Mov(out, spot, self.output.type.size))

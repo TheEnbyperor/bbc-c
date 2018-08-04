@@ -37,12 +37,12 @@ int printf(const char *format, ...) {
     ap = &format+sizeof(format);
 
     for (; c = *format; ++format) {
-//        if (c == '%') {
-//            ++format;
-//            c = *format;
-//            if (c == 0) {
-//                break;
-//            }
+        if (c == '%') {
+            ++format;
+            c = *format;
+            if (c == 0) {
+                break;
+            }
 //            if (c == 'c') {
 //                char c = *((char *)ap);
 //                ap += sizeof(char);
@@ -50,13 +50,13 @@ int printf(const char *format, ...) {
 //				++i;
 //                continue;
 //            }
-//            if (c == 's') {
-//                char* s = *((char **)ap);
-//                ap += sizeof(char *);
-//				_puts(s);
-//				i+= strlen(s);
-//                continue;
-//            }
+            if (c == 's') {
+                char* s = *((char **)ap);
+                ap = (char*)ap + sizeof(char *);
+				fputs(s);
+				i += strlen(s);
+                continue;
+            }
 //            if (c == 'i' || c == 'd') {
 //                char out[6] = {0};
 //                int i = *((int *)ap);
@@ -66,8 +66,8 @@ int printf(const char *format, ...) {
 //				i += strlen(out);
 //                continue;
 //            }
-//            putchar(c);
-//        }
+            putchar(c);
+        }
         putchar(c);
         ++i;
     }

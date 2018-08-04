@@ -6,6 +6,8 @@ class Lexer:
     def __init__(self, text):
         self.text = text
         self.pos = 0
+        if len(text) == 0:
+            self.text = " "
         self.current_char = self.text[self.pos]
 
     def error(self):
