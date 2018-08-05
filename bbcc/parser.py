@@ -402,6 +402,9 @@ class Parser:
         elif self.token_is(index, NOT):
             node, index = self.parse_cast(index + 1)
             return ast.BoolNot(node), index
+        elif self.token_is(index, MINUS):
+            node, index = self.parse_cast(index + 1)
+            return ast.Negate(node), index
         elif self.token_is(index, TILDA):
             node, index = self.parse_cast(index + 1)
             return ast.Negate(node), index

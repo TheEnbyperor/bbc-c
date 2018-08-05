@@ -139,6 +139,10 @@ class Dec(_OneValueNode):
     pass
 
 
+class Neg(_OneValueNode):
+    pass
+
+
 class Mov(_TwoValueNode):
     pass
 
@@ -156,6 +160,18 @@ class Add(_TwoValueNode):
 
 
 class Sub(_TwoValueNode):
+    pass
+
+
+class Mul(_TwoValueNode):
+    pass
+
+
+class Div(_TwoValueNode):
+    pass
+
+
+class Mod(_TwoValueNode):
     pass
 
 

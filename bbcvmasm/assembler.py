@@ -181,7 +181,7 @@ class Assembler:
             raise SyntaxError(f"Can't pop {node.value}")
 
     @setup_labels
-    def visit_Inc(self, node: ast.Pop):
+    def visit_Inc(self, node: ast.Inc):
         if isinstance(node.value, ast.RegisterValue):
             self.insts.append(0x19)
             self.get_reg_val(node.value, None)
@@ -197,7 +197,7 @@ class Assembler:
             raise SyntaxError(f"Can't increment {node.value}")
 
     @setup_labels
-    def visit_Dec(self, node: ast.Pop):
+    def visit_Dec(self, node: ast.Dec):
         if isinstance(node.value, ast.RegisterValue):
             self.insts.append(0x1A)
             self.get_reg_val(node.value, None)
@@ -211,6 +211,22 @@ class Assembler:
             self.loc += 1
         else:
             raise SyntaxError(f"Can't decrement {node.value}")
+
+    @setup_labels
+    def visit_Neg(self, node: ast.Neg):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x28)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        elif isinstance(node.value, ast.MemoryValue):
+            if node.value.length == 1:
+                self.insts.append(0x34)
+            elif node.value.length == 2:
+                self.insts.append(0x35)
+            self.get_mem_val(node.value, 1, 0, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't negate {node.value}")
 
     @setup_labels
     def visit_Mov(self, node: ast.Mov):
@@ -241,7 +257,7 @@ class Assembler:
             raise SyntaxError(f"Can't mov {node.left} into {node.right}")
 
     @setup_labels
-    def visit_Lea(self, node: ast.Calln):
+    def visit_Lea(self, node: ast.Lea):
         if isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x08)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
@@ -250,7 +266,7 @@ class Assembler:
             raise SyntaxError(f"Can't put effective address of {node.left} into {node.right}")
 
     @setup_labels
-    def visit_Add(self, node: ast.Mov):
+    def visit_Add(self, node: ast.Add):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x0B)
             self.get_reg_val(node.left, node.right)
@@ -271,7 +287,7 @@ class Assembler:
             raise SyntaxError(f"Can't add {node.left} to {node.right}")
 
     @setup_labels
-    def visit_Sub(self, node: ast.Mov):
+    def visit_Sub(self, node: ast.Sub):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x13)
             self.get_reg_val(node.left, node.right)
@@ -292,7 +308,70 @@ class Assembler:
             raise SyntaxError(f"Can't subtract {node.left} from {node.right}")
 
     @setup_labels
-    def visit_Cmp(self, node: ast.Mov):
+    def visit_Mul(self, node: ast.Mul):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x43)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x42)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x44)
+            elif node.left.length == 2:
+                self.insts.append(0x45)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't multiply {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Div(self, node: ast.Div):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x47)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x46)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x48)
+            elif node.left.length == 2:
+                self.insts.append(0x49)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't divide {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Mod(self, node: ast.Mod):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x4b)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x4a)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x4c)
+            elif node.left.length == 2:
+                self.insts.append(0x4d)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't modulo {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Cmp(self, node: ast.Cmp):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x2A)
             self.get_reg_val(node.left, node.right)
@@ -313,7 +392,7 @@ class Assembler:
             raise SyntaxError(f"Can't compare {node.left} and {node.right}")
 
     @setup_labels
-    def visit_And(self, node: ast.Mov):
+    def visit_And(self, node: ast.And):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x1C)
             self.get_reg_val(node.left, node.right)
@@ -331,10 +410,10 @@ class Assembler:
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         else:
-            raise SyntaxError(f"Can't compare {node.left} and {node.right}")
+            raise SyntaxError(f"Can't and {node.left} and {node.right}")
 
     @setup_labels
-    def visit_Or(self, node: ast.Mov):
+    def visit_Or(self, node: ast.Or):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x20)
             self.get_reg_val(node.left, node.right)
@@ -352,10 +431,10 @@ class Assembler:
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         else:
-            raise SyntaxError(f"Can't compare {node.left} and {node.right}")
+            raise SyntaxError(f"Can't or {node.left} and {node.right}")
 
     @setup_labels
-    def visit_Jmp(self, node: ast.Call):
+    def visit_Jmp(self, node: ast.Jmp):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump to a byte pointer")
@@ -366,7 +445,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump to {node.value}")
 
     @setup_labels
-    def visit_Jze(self, node: ast.Call):
+    def visit_Jze(self, node: ast.Jze):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on zero to a byte pointer")
@@ -377,7 +456,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on zero to {node.value}")
 
     @setup_labels
-    def visit_Jnz(self, node: ast.Call):
+    def visit_Jnz(self, node: ast.Jnz):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on not zero to a byte pointer")
@@ -388,7 +467,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on not zero to {node.value}")
 
     @setup_labels
-    def visit_Jl(self, node: ast.Call):
+    def visit_Jl(self, node: ast.Jl):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on lesser to a byte pointer")
@@ -399,7 +478,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on lesser to {node.value}")
 
     @setup_labels
-    def visit_Jle(self, node: ast.Call):
+    def visit_Jle(self, node: ast.Jle):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on lesser or equal to a byte pointer")
@@ -410,7 +489,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on lesser or equal to {node.value}")
 
     @setup_labels
-    def visit_Jg(self, node: ast.Call):
+    def visit_Jg(self, node: ast.Jg):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on on greater to a byte pointer")
@@ -421,7 +500,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on greater to {node.value}")
 
     @setup_labels
-    def visit_Jge(self, node: ast.Call):
+    def visit_Jge(self, node: ast.Jge):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on greater or equal to a byte pointer")
@@ -432,7 +511,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on greater or equal to {node.value}")
 
     @setup_labels
-    def visit_Ja(self, node: ast.Call):
+    def visit_Ja(self, node: ast.Ja):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on on above to a byte pointer")
@@ -443,7 +522,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on above to {node.value}")
 
     @setup_labels
-    def visit_Jae(self, node: ast.Call):
+    def visit_Jae(self, node: ast.Jae):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on above or equal to a byte pointer")
@@ -454,7 +533,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on above or equal to {node.value}")
 
     @setup_labels
-    def visit_Jb(self, node: ast.Call):
+    def visit_Jb(self, node: ast.Jb):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on on below to a byte pointer")
@@ -465,7 +544,7 @@ class Assembler:
             raise SyntaxError(f"Can't jump on below to {node.value}")
 
     @setup_labels
-    def visit_Jbe(self, node: ast.Call):
+    def visit_Jbe(self, node: ast.Jbe):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
                 raise SyntaxError("Can't jump on below or equal to a byte pointer")

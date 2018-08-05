@@ -35,9 +35,9 @@ get_data_ptr:
 	mov %r13, %r11
 	push %r1
 \ Set
-	mov WORD 4[%r11], %r1
+	mov WORD 4[%r11], %r0
 \ Set
-	mov #7, %r0
+	mov #7, %r1
 \ Add
 	add %r1, %r0
 \ Return
@@ -145,26 +145,26 @@ __bbcc_00000006:
 \ Set
 	mov WORD [mem_top], %r0
 \ Set
-	mov %r0, %r2
+	mov %r0, %r1
 \ Set
 	mov WORD [mem_top], %r0
 \ Set
-	mov WORD 6[%r11], %r1
+	mov WORD 6[%r11], %r2
 \ Add
-	add %r0, %r1
+	add %r2, %r0
 \ Set
-	mov #7, %r0
+	mov #7, %r2
 \ Add
-	add %r1, %r0
+	add %r2, %r0
 \ MoreEqualCmp
 	mov #31744, %r3
-	mov #1, %r1
+	mov #1, %r2
 	cmp %r0, %r3
 	jge [__bbcc_00000033]
-	mov #0, %r1
+	mov #0, %r2
 __bbcc_00000033:
 \ JmpZero
-	cmp #0, %r1
+	cmp #0, %r2
 	jze [__bbcc_00000007]
 \ Return
 	mov #0, %r0
@@ -174,13 +174,13 @@ __bbcc_00000007:
 \ Set
 	mov WORD [mem_top], %r0
 \ Set
-	mov WORD 6[%r11], %r1
+	mov WORD 6[%r11], %r2
 \ Add
-	add %r0, %r1
+	add %r2, %r0
 \ Set
-	mov #7, %r0
+	mov #7, %r2
 \ Add
-	add %r1, %r0
+	add %r2, %r0
 \ Set
 \ Set
 	mov %r0, WORD [mem_top]
@@ -189,29 +189,29 @@ __bbcc_00000007:
 	cmp #0, %r0
 	jze [__bbcc_00000008]
 \ Set
-	mov %r2, %r0
+	mov %r1, %r0
 \ SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 2[%r1]
+	mov 4[%r11], %r2
+	mov %r0, WORD 2[%r2]
 \ Label
 __bbcc_00000008:
 \ Set
 	mov WORD 4[%r11], %r0
 \ SetAt
-	mov %r0, WORD 4[%r2]
+	mov %r0, WORD 4[%r1]
 \ SetAt
 	mov 6[%r11], %r0
-	mov %r0, WORD [%r2]
+	mov %r0, WORD [%r1]
 \ Set
 	mov #0, %r0
 \ SetAt
-	mov %r0, WORD 2[%r2]
+	mov %r0, WORD 2[%r1]
 \ Set
 	mov #0, %r0
 \ SetAt
-	mov %r0, BYTE 6[%r2]
+	mov %r0, BYTE 6[%r1]
 \ Return
-	mov %r2, %r0
+	mov %r1, %r0
 __bbcc_00000034:
 	pop %r3
 	pop %r2
@@ -230,9 +230,9 @@ split_block:
 \ Set
 	mov #7, %r1
 \ Add
-	add %r0, %r1
+	add %r1, %r0
 \ Set
-	mov WORD 6[%r11], %r0
+	mov WORD 6[%r11], %r1
 \ Add
 	add %r1, %r0
 \ Set
@@ -324,10 +324,11 @@ __bbcc_0000000b:
 \ ReadAt
 	mov WORD [%r0], %r0
 \ Add
-	add #7, %r0
+	mov #7, %r1
+	add %r0, %r1
 \ ReadAt
-	mov WORD 4[%r11], %r1
-	mov WORD [%r1], %r1
+	mov WORD 4[%r11], %r0
+	mov WORD [%r0], %r0
 \ Add
 	add %r1, %r0
 \ SetAt
@@ -462,21 +463,22 @@ __bbcc_00000013:
 \ Label
 __bbcc_00000012:
 \ ReadAt
-	mov WORD [%r3], %r1
+	mov WORD [%r3], %r0
 \ Sub
-	sub WORD 4[%r11], %r1
+	sub WORD 4[%r11], %r0
 \ Set
-	mov #4, %r0
+	mov #4, %r1
 \ Add
-	add #7, %r0
+	mov #7, %r2
+	add %r1, %r2
 \ MoreEqualCmp
-	mov #1, %r2
-	cmp %r1, %r0
+	mov #1, %r1
+	cmp %r0, %r2
 	jae [__bbcc_00000038]
-	mov #0, %r2
+	mov #0, %r1
 __bbcc_00000038:
 \ JmpZero
-	cmp #0, %r2
+	cmp #0, %r1
 	jze [__bbcc_00000015]
 \ Set
 	mov %r3, %r0
@@ -497,9 +499,9 @@ __bbcc_00000014:
 \ Label
 __bbcc_00000011:
 \ Set
-	mov %r3, %r1
+	mov %r3, %r0
 \ Set
-	mov #7, %r0
+	mov #7, %r1
 \ Add
 	add %r1, %r0
 \ Return
@@ -651,54 +653,57 @@ copy_block:
 \ Set
 	mov #0, %r0
 \ Set
+	mov %r0, %r3
 \ Label
 __bbcc_0000001e:
 \ Set
-	mov #0, %r3
+	mov #0, %r2
 \ ReadAt
-	mov WORD 4[%r11], %r1
-	mov WORD [%r1], %r2
+	mov WORD 4[%r11], %r0
+	mov WORD [%r0], %r1
 \ LessThanCmp
-	mov #1, %r1
-	cmp %r0, %r2
+	mov #1, %r0
+	cmp %r3, %r1
 	jb [__bbcc_0000003b]
-	mov #0, %r1
+	mov #0, %r0
 __bbcc_0000003b:
 \ JmpZero
-	cmp #0, %r1
+	cmp #0, %r0
 	jze [__bbcc_00000022]
 \ ReadAt
-	mov WORD 6[%r11], %r1
-	mov WORD [%r1], %r2
+	mov WORD 6[%r11], %r0
+	mov WORD [%r0], %r1
 \ LessThanCmp
-	mov #1, %r1
-	cmp %r0, %r2
+	mov #1, %r0
+	cmp %r3, %r1
 	jb [__bbcc_0000003c]
-	mov #0, %r1
+	mov #0, %r0
 __bbcc_0000003c:
 \ JmpZero
-	cmp #0, %r1
+	cmp #0, %r0
 	jze [__bbcc_00000022]
 \ Set
-	mov #1, %r3
+	mov #1, %r2
 \ Label
 __bbcc_00000022:
 \ JmpZero
-	cmp #0, %r3
+	cmp #0, %r2
 	jze [__bbcc_00000020]
 \ ReadAt
-	mov %r4, %r1
-	add %r0, %r1
-	mov BYTE [%r1], %r1
+	mov %r4, %r0
+	add %r3, %r0
+	mov BYTE [%r0], %r0
 \ SetAt
-	mov %r5, %r2
-	add %r0, %r2
-	mov %r1, BYTE [%r2]
+	mov %r5, %r1
+	add %r3, %r1
+	mov %r0, BYTE [%r1]
 \ Label
 __bbcc_0000001f:
 \ Add
-	add #1, %r0
+	mov #1, %r0
+	add %r3, %r0
 \ Set
+	mov %r0, %r3
 \ Jmp
 	jmp [__bbcc_0000001e]
 \ Label
@@ -743,13 +748,13 @@ __bbcc_00000023:
 	add #2, %r13
 \ Set
 \ Set
-	mov %r0, %r2
+	mov %r0, %r1
 \ ReadAt
-	mov WORD [%r2], %r1
+	mov WORD [%r1], %r2
 \ MoreEqualCmp
 	mov 6[%r11], %r3
 	mov #1, %r0
-	cmp %r1, %r3
+	cmp %r2, %r3
 	jae [__bbcc_0000003e]
 	mov #0, %r0
 __bbcc_0000003e:
@@ -757,27 +762,28 @@ __bbcc_0000003e:
 	cmp #0, %r0
 	jze [__bbcc_00000024]
 \ ReadAt
-	mov WORD [%r2], %r1
+	mov WORD [%r1], %r0
 \ Sub
-	sub WORD 6[%r11], %r1
+	sub WORD 6[%r11], %r0
 \ Set
-	mov #4, %r0
+	mov #4, %r2
 \ Add
-	add #7, %r0
+	mov #7, %r3
+	add %r2, %r3
 \ MoreEqualCmp
-	mov #1, %r3
-	cmp %r1, %r0
+	mov #1, %r2
+	cmp %r0, %r3
 	jae [__bbcc_0000003f]
-	mov #0, %r3
+	mov #0, %r2
 __bbcc_0000003f:
 \ JmpZero
-	cmp #0, %r3
+	cmp #0, %r2
 	jze [__bbcc_00000025]
 \ Set
-	mov %r2, %r0
+	mov %r1, %r0
 \ CallFunction
-	mov 6[%r11], %r1
-	push %r1
+	mov 6[%r11], %r2
+	push %r2
 	push %r0
 	call [split_block]
 	add #4, %r13
@@ -790,46 +796,45 @@ __bbcc_00000024:
 \ Set
 	mov #0, %r3
 \ Set
-	mov #0, %r1
+	mov #0, %r2
 \ ReadAt
-	mov WORD 2[%r2], %r0
+	mov WORD 2[%r1], %r0
 \ JmpZero
 	cmp #0, %r0
 	jze [__bbcc_0000002a]
 \ ReadAt
-	mov WORD 2[%r2], %r0
+	mov WORD 2[%r1], %r0
 \ ReadAt
 	mov BYTE 6[%r0], %r0
 \ JmpZero
 	cmp #0, %r0
 	jze [__bbcc_0000002a]
 \ Set
-	mov #1, %r1
+	mov #1, %r2
 \ Label
 __bbcc_0000002a:
 \ JmpZero
-	cmp #0, %r1
+	cmp #0, %r2
 	jze [__bbcc_00000028]
 \ ReadAt
-	mov WORD [%r2], %r0
+	mov WORD [%r1], %r0
 \ Add
-	mov #7, %r1
-	add %r0, %r1
+	add #7, %r0
 \ ReadAt
-	mov WORD 2[%r2], %r0
+	mov WORD 2[%r1], %r2
 \ ReadAt
-	mov WORD [%r0], %r0
+	mov WORD [%r2], %r2
 \ Add
-	add %r1, %r0
+	add %r2, %r0
 \ MoreEqualCmp
 	mov 6[%r11], %r4
-	mov #1, %r1
+	mov #1, %r2
 	cmp %r0, %r4
 	jae [__bbcc_00000040]
-	mov #0, %r1
+	mov #0, %r2
 __bbcc_00000040:
 \ JmpZero
-	cmp #0, %r1
+	cmp #0, %r2
 	jze [__bbcc_00000028]
 \ Set
 	mov #1, %r3
@@ -839,33 +844,34 @@ __bbcc_00000028:
 	cmp #0, %r3
 	jze [__bbcc_0000002b]
 \ Set
-	mov %r2, %r0
+	mov %r1, %r0
 \ CallFunction
 	push %r0
 	call [fusion]
 	add #2, %r13
 \ ReadAt
-	mov WORD [%r2], %r1
+	mov WORD [%r1], %r0
 \ Sub
-	sub WORD 6[%r11], %r1
+	sub WORD 6[%r11], %r0
 \ Set
-	mov #4, %r0
+	mov #4, %r2
 \ Add
-	add #7, %r0
+	mov #7, %r3
+	add %r2, %r3
 \ MoreEqualCmp
-	mov #1, %r3
-	cmp %r1, %r0
+	mov #1, %r2
+	cmp %r0, %r3
 	jae [__bbcc_00000041]
-	mov #0, %r3
+	mov #0, %r2
 __bbcc_00000041:
 \ JmpZero
-	cmp #0, %r3
+	cmp #0, %r2
 	jze [__bbcc_0000002c]
 \ Set
-	mov %r2, %r0
+	mov %r1, %r0
 \ CallFunction
-	mov 6[%r11], %r1
-	push %r1
+	mov 6[%r11], %r2
+	push %r2
 	push %r0
 	call [split_block]
 	add #4, %r13
@@ -882,9 +888,9 @@ __bbcc_0000002b:
 	add #2, %r13
 \ Set
 \ Set
-	mov %r0, %r3
+	mov %r0, %r2
 \ JmpNotZero
-	cmp #0, %r3
+	cmp #0, %r2
 	jnz [__bbcc_0000002e]
 \ Return
 	mov #0, %r0
@@ -892,7 +898,7 @@ __bbcc_0000002b:
 \ Label
 __bbcc_0000002e:
 \ Set
-	mov %r3, %r0
+	mov %r2, %r0
 \ CallFunction
 	push %r0
 	call [get_block_ptr]
@@ -900,7 +906,6 @@ __bbcc_0000002e:
 \ Set
 \ Set
 \ Set
-	mov %r2, %r1
 \ Set
 \ CallFunction
 	push %r0
@@ -914,7 +919,7 @@ __bbcc_0000002e:
 	call [free]
 	add #2, %r13
 \ Return
-	mov %r3, %r0
+	mov %r2, %r0
 	jmp [__bbcc_00000042]
 \ Label
 __bbcc_0000002d:

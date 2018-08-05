@@ -155,6 +155,18 @@ class Add(_Inst):
     name = "add"
 
 
+class Mul(_Inst):
+    name = "mul"
+
+
+class Div(_Inst):
+    name = "div"
+
+
+class Mod(_Inst):
+    name = "mod"
+
+
 class And(_Inst):
     name = "and"
 

@@ -16,8 +16,8 @@ growCapacity:
 	mov #0, %r0
 __bbcc_00000003:
 \ Add
-	mov #8, %r1
-	add WORD 4[%r11], %r1
+	mov WORD 4[%r11], %r1
+	add #8, %r1
 \ JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000000]

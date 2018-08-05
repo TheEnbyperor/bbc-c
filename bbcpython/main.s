@@ -34,6 +34,17 @@ main:
 	lea WORD -6[%r11], %r0
 \ Set
 	mov %r0, %r1
+\ Set
+	mov #0, %r0
+\ CallFunction
+	push %r0
+	push %r1
+	call [writeChunk]
+	add #4, %r13
+\ AddrOf
+	lea WORD -6[%r11], %r0
+\ Set
+	mov %r0, %r1
 \ AddrOf
 	lea WORD [__bbcc_00000000], %r0
 \ Set

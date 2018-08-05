@@ -95,11 +95,11 @@ class Parser:
 
     def parse_inst(self, index):
         insts = [("push", ast.Push), ("pop", ast.Pop), ("ret", ast.Ret), ("call", ast.Call), ("exit", ast.Exit),
-                 ("calln", ast.Calln), ("mov", ast.Mov), ("add", ast.Add), ("sub", ast.Sub), ("cmp", ast.Cmp),
-                 ("jze", ast.Jze), ("je", ast.Jze), ("jnz", ast.Jnz), ("jne", ast.Jnz), ("jl", ast.Jl),
-                 ("jle", ast.Jle), ("jg", ast.Jg), ("jge", ast.Jge), ("ja", ast.Ja), ("jae", ast.Jae),
-                 ("jb", ast.Jb), ("jbe", ast.Jbe), ("jmp", ast.Jmp), ("lea", ast.Lea), ("inc", ast.Inc),
-                 ("dec", ast.Dec), ("and", ast.And), ("or", ast.Or)]
+                 ("calln", ast.Calln), ("mov", ast.Mov), ("add", ast.Add), ("sub", ast.Sub), ("mul", ast.Mul),
+                 ("div", ast.Div), ("mod", ast.Mod), ("cmp", ast.Cmp), ("jze", ast.Jze), ("je", ast.Jze),
+                 ("jnz", ast.Jnz), ("jne", ast.Jnz), ("jl", ast.Jl), ("jle", ast.Jle), ("jg", ast.Jg), ("jge", ast.Jge),
+                 ("ja", ast.Ja), ("jae", ast.Jae), ("jb", ast.Jb), ("jbe", ast.Jbe), ("jmp", ast.Jmp), ("lea", ast.Lea),
+                 ("inc", ast.Inc), ("dec", ast.Dec), ("and", ast.And), ("or", ast.Or), ("neg", ast.Neg)]
 
         def parse(inst, index):
             index = self.eat_id(index, inst[0])

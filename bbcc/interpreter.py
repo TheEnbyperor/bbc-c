@@ -172,6 +172,8 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(left_val.type)
 
         if left.type.is_pointer():
+            if not left.type.is_complete():
+                raise SyntaxError("Pointer arithmetic on incomplete type")
             if left.type.arg.size != 1:
                 type_len = il.ILValue(ctypes.unsig_char)
                 self.il.register_literal_value(type_len, left.type.arg.size)
@@ -250,6 +252,8 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(left_val.type)
 
         if left.type.is_pointer():
+            if not left.type.is_complete():
+                raise SyntaxError("Pointer arithmetic on incomplete type")
             if left.type.arg.size != 1:
                 type_len = il.ILValue(ctypes.unsig_char)
                 self.il.register_literal_value(type_len, left.type.arg.size)
@@ -274,6 +278,8 @@ class Interpreter(ast.NodeVisitor):
         output = il.ILValue(left.type)
 
         if left.type.is_pointer():
+            if not left.type.is_complete():
+                raise SyntaxError("Pointer arithmetic on incomplete type")
             if left.type.arg.size != 1:
                 type_len = il.ILValue(ctypes.unsig_char)
                 self.il.register_literal_value(type_len, left.type.arg.size)

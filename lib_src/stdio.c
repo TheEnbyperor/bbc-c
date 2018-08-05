@@ -1,6 +1,8 @@
 #include "stdio.h"
+#include "stdbool.h"
 #include "stdlib.h"
 #include "string.h"
+#include "ctype.h"
 
 int fputs(const char *s) {
     char c;
@@ -29,43 +31,77 @@ char *gets(char *s, int n) {
     return s;
 }
 
+
+void itoa(int n, char *s, bool unsig, unsigned int zero_pad) {
+  int i, sign;
+  bool negative = false;
+
+  if (!unsig && n < 0) {
+    negative = true;
+    n = -n;
+  }
+
+  i = 0;
+  do {       /* generate digits in reverse order */
+    s[i++] = n % 10 + '0';   /* get next digit */
+  } while ((n /= 10) > 0);     /* delete it */
+
+  for (;i < zero_pad;)
+    s[i++] = '0';
+
+  if (negative)
+    s[i++] = '-';
+
+  s[i] = '\0';
+  strrev(s);
+}
+
+
 int printf(const char *format, ...) {
     void *ap;
     char c;
+    char bf[24];
     int i;
 
     ap = &format+sizeof(format);
 
     for (; c = *format; ++format) {
         if (c == '%') {
-            ++format;
-            c = *format;
+            char zero_pad = 0;
+
+            c = *(++format);
+
+            if (c == '0') {
+				c = *(++format);
+				if (c == '\0')
+					break;
+				if (isdigit(c))
+					zero_pad = c - '0';
+				c = *(++format);
+            }
+
             if (c == 0) {
                 break;
-            }
-//            if (c == 'c') {
-//                char c = *((char *)ap);
-//                ap += sizeof(char);
-//				putchar(c);
-//				++i;
-//                continue;
-//            }
-            if (c == 's') {
+            } else if (c == 'c') {
+                char c = *((char *)ap);
+                ap = (char*)ap + sizeof(char);
+				putchar(c);
+				++i;
+                continue;
+            } else if (c == 's') {
                 char* s = *((char **)ap);
                 ap = (char*)ap + sizeof(char *);
 				fputs(s);
 				i += strlen(s);
                 continue;
+            } else if (c == 'u') {
+                int i = *((int *)ap);
+                ap = (char*)ap + sizeof(int);
+                itoa(i, bf, true, zero_pad);
+                fputs(bf);
+				i += strlen(bf);
+                continue;
             }
-//            if (c == 'i' || c == 'd') {
-//                char out[6] = {0};
-//                int i = *((int *)ap);
-//                ap += sizeof(int);
-//                itoa(i, out);
-//                _puts(out);
-//				i += strlen(out);
-//                continue;
-//            }
             putchar(c);
         }
         putchar(c);

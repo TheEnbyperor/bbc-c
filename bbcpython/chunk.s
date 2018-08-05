@@ -41,16 +41,15 @@ writeChunk:
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r0
 \ Add
-	mov #1, %r1
-	add %r0, %r1
+	add #1, %r0
 \ LessThanCmp
-	mov #1, %r0
-	cmp %r2, %r1
+	mov #1, %r1
+	cmp %r2, %r0
 	jl [__bbcc_00000002]
-	mov #0, %r0
+	mov #0, %r1
 __bbcc_00000002:
 \ JmpZero
-	cmp #0, %r0
+	cmp #0, %r1
 	jze [__bbcc_00000000]
 \ ReadAt
 	mov WORD 4[%r11], %r0
@@ -96,9 +95,10 @@ __bbcc_00000000:
 	mov %r1, BYTE [%r0]
 \ ReadAt
 	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov WORD [%r0], %r1
 \ Add
-	add #1, %r0
+	mov #1, %r0
+	add %r1, %r0
 \ SetAt
 	mov 4[%r11], %r1
 	mov %r0, WORD [%r1]

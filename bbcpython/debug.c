@@ -12,7 +12,7 @@ void disassembleChunk(struct Chunk* chunk, const char* name) {
 }
 
 int disassembleInstruction(struct Chunk* chunk, int offset) {
-//  printf("%04d ", offset);
+  printf("%04u ", offset);
 
   uint8_t instruction = chunk->code[offset];
   if (instruction == OP_RETURN) {

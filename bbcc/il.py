@@ -352,20 +352,19 @@ class Add(ILInst):
         return [self.output]
 
     def rel_spot_pref(self):
-        return {self.output: [self.right]}
+        return {self.output: [self.left]}
 
     def rel_spot_conf(self):
-        return {self.output: [self.left]}
+        return {self.output: [self.right]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        if right != output:
-            assembly.add_inst(asm.Mov(right, output, self.output.type.size))
-
-        assembly.add_inst(asm.Add(left, output, self.output.type.size))
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output, self.output.type.size))
+        assembly.add_inst(asm.Add(right, output, self.output.type.size))
 
 
 class Sub(ILInst):
@@ -410,74 +409,20 @@ class Mult(ILInst):
     def outputs(self):
         return [self.output]
 
-    def scratch_spaces(self):
-        return [self.scratch1, self.scratch2]
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
+    def rel_spot_conf(self):
+        return {self.output: [self.right]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        if isinstance(left, spots.LiteralSpot):
-            if isinstance(right, spots.LiteralSpot):
-                val = spots.LiteralSpot(left.value * right.value)
-                assembly.add_inst(asm.Mov(val, output, self.output.type.size))
-                return
-
-        if isinstance(left, spots.LiteralSpot):
-            if left.value == 1:
-                if right != output:
-                    assembly.add_inst(asm.Mov(right, output, self.output.type.size))
-                return
-        if isinstance(right, spots.LiteralSpot):
-            if right.value == 1:
-                if left != output:
-                    assembly.add_inst(asm.Mov(left, output, self.output.type.size))
-                return
-
-        scratch1 = spotmap[self.scratch1]
-        for i in range(scratch1.type.size):
-            left.asm(assembly, "LDA", i)
-            scratch1.asm(assembly, "STA", i)
-
-        left = scratch1
-
-        scratch2 = spotmap[self.scratch2]
-        for i in range(scratch2.type.size):
-            right.asm(assembly, "LDA", i)
-            scratch2.asm(assembly, "STA", i)
-        right = scratch2
-
-        label1 = il.get_label()
-        label2 = il.get_label()
-
-        assembly.add_inst("LDA", "#0")
-        for i in range(output.type.size):
-            output.asm(assembly, "STA", i)
-        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(right.type.size * 8)))
-        assembly.add_inst(label=label1)
-        for i in reversed(range(right.type.size)):
-            if i == right.type.size - 1:
-                right.asm(assembly, "LSR", i)
-            else:
-                right.asm(assembly, "ROR", i)
-        assembly.add_inst("BCC", label2)
-        assembly.add_inst("CLC")
-        for i in range(output.type.size):
-            if i < left.type.size:
-                left.asm(assembly, "LDA", i)
-            else:
-                assembly.add_inst("LDA", "#0")
-            output.asm(assembly, "ADC", i)
-            output.asm(assembly, "STA", i)
-        assembly.add_inst("CLC", label=label2)
-        for i in range(left.type.size):
-            if i == 0:
-                left.asm(assembly, "ASL", i)
-            else:
-                left.asm(assembly, "ROL", i)
-        assembly.add_inst("DEX")
-        assembly.add_inst("BNE", label1)
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output, self.output.type.size))
+        assembly.add_inst(asm.Mul(right, output, self.output.type.size))
 
 
 class Div(ILInst):
@@ -495,69 +440,20 @@ class Div(ILInst):
     def outputs(self):
         return [self.output]
 
-    def scratch_spaces(self):
-        return [self.scratch1, self.scratch2, self.scratch3]
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
+    def rel_spot_conf(self):
+        return {self.output: [self.right]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
         right = spotmap[self.right]
         output = spotmap[self.output]
-        scratch3 = spotmap[self.scratch3]
 
-        scratch1 = spotmap[self.scratch1]
-        for i in range(scratch1.type.size):
-            left.asm(assembly, "LDA", i)
-            scratch1.asm(assembly, "STA", i)
-
-        left = scratch1
-
-        scratch2 = spotmap[self.scratch2]
-        for i in range(scratch2.type.size):
-            right.asm(assembly, "LDA", i)
-            scratch2.asm(assembly, "STA", i)
-        right = scratch2
-
-        label1 = il.get_label()
-        label2 = il.get_label()
-        label3 = il.get_label()
-
-        assembly.add_inst("LDA", "#0")
-        for i in range(output.type.size):
-            scratch3.asm(assembly, "STA", i)
-        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(left.type.size * 8)))
-        assembly.add_inst(label=label1)
-        for i in range(left.type.size):
-            if i == 0:
-                left.asm(assembly, "ASL", i)
-            else:
-                left.asm(assembly, "ROL", i)
-        for i in range(scratch3.type.size):
-            scratch3.asm(assembly, "ROL", i)
-        assembly.add_inst("SEC")
-        for i in range(scratch3.type.size):
-            scratch3.asm(assembly, "LDA", i)
-            right.asm(assembly, "SBC", i)
-            if i != scratch3.type.size - 1:
-                assembly.add_inst("PHA")
-        assembly.add_inst("BCC", label2)
-        for i in reversed(range(scratch3.type.size)):
-            if i != scratch3.type.size - 1:
-                assembly.add_inst("PLA")
-            scratch3.asm(assembly, "STA", i)
-        left.asm(assembly, "INC", 0)
-        assembly.add_inst("JMP", label3)
-        assembly.add_inst(label=label2)
-        for i in range(scratch3.type.size - 1):
-            assembly.add_inst("PLA")
-        assembly.add_inst("DEX", label=label3)
-        assembly.add_inst("BNE", label1)
-
-        for i in range(output.type.size):
-            if i < left.type.size:
-                left.asm(assembly, "LDA", i)
-            else:
-                assembly.add_inst("LDA", "#0")
-            output.asm(assembly, "STA", i)
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output, self.output.type.size))
+        assembly.add_inst(asm.Div(right, output, self.output.type.size))
 
 
 class Mod(ILInst):
@@ -574,61 +470,20 @@ class Mod(ILInst):
     def outputs(self):
         return [self.output]
 
-    def scratch_spaces(self):
-        return [self.scratch1, self.scratch2]
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
+    def rel_spot_conf(self):
+        return {self.output: [self.right]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        scratch1 = spotmap[self.scratch1]
-        for i in range(scratch1.type.size):
-            left.asm(assembly, "LDA", i)
-            scratch1.asm(assembly, "STA", i)
-
-        left = scratch1
-
-        scratch2 = spotmap[self.scratch2]
-        for i in range(scratch2.type.size):
-            right.asm(assembly, "LDA", i)
-            scratch2.asm(assembly, "STA", i)
-        right = scratch2
-
-        label1 = il.get_label()
-        label2 = il.get_label()
-        label3 = il.get_label()
-
-        assembly.add_inst("LDA", "#0")
-        for i in range(output.type.size):
-            output.asm(assembly, "STA", i)
-        assembly.add_inst("LDX", "#&{}".format(assembly.to_hex(left.type.size * 8)))
-        assembly.add_inst(label=label1)
-        for i in range(left.type.size):
-            if i == 0:
-                left.asm(assembly, "ASL", i)
-            else:
-                left.asm(assembly, "ROL", i)
-        for i in range(output.type.size):
-            output.asm(assembly, "ROL", i)
-        assembly.add_inst("SEC")
-        for i in range(output.type.size):
-            output.asm(assembly, "LDA", i)
-            right.asm(assembly, "SBC", i)
-            if i != output.type.size - 1:
-                assembly.add_inst("PHA")
-        assembly.add_inst("BCC", label2)
-        for i in reversed(range(output.type.size)):
-            if i != output.type.size - 1:
-                assembly.add_inst("PLA")
-            output.asm(assembly, "STA", i)
-        left.asm(assembly, "INC", 0)
-        assembly.add_inst("JMP", label3)
-        assembly.add_inst(label=label2)
-        for i in range(output.type.size - 1):
-            assembly.add_inst("PLA")
-        assembly.add_inst("DEX", label=label3)
-        assembly.add_inst("BNE", label1)
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output, self.output.type.size))
+        assembly.add_inst(asm.Mod(right, output, self.output.type.size))
 
 
 class Inc(ILInst):

@@ -419,6 +419,102 @@ Carry, sign, zero
 | :-----: | :-------------: | :-------------: | :-------------: |
 |  0x18   | Addressing mode | Register number | Memory location |
 
+###  mul \<const>, \<reg>
+
+Multiplies the register by the constant value and stores back in the register.
+
+| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
+| :-----: | :-------: | :-------------: | :--------: |
+|  0x42   | Anything  | Register number |  Constant  |
+
+### mul \<reg>, \<reg>
+
+Multiplies the second register by the first register and stores back in the second register.
+
+| Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
+| :-----: | :--------------------: | :-------------------: |
+|  0x43   | Second register number | First register number |
+
+### mul BYTE\<mem\>, \<reg\>
+
+Multiplies the register by the 8 bit value at the memory location and stores in the register.
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x44   | Addressing mode | Register number | Memory location |
+
+### mul \<mem\>, \<reg\>
+
+Multiplies the register by the 16 bit value at the memory location and stores in the register.
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x45   | Addressing mode | Register number | Memory location |
+
+### div \<const>, \<reg>
+
+Divides the register by the constant value and stores back in the register.
+
+| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
+| :-----: | :-------: | :-------------: | :--------: |
+|  0x46   | Anything  | Register number |  Constant  |
+
+### div \<reg>, \<reg>
+
+Divides the second register by the first register and stores back in the second register.
+
+| Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
+| :-----: | :--------------------: | :-------------------: |
+|  0x47   | Second register number | First register number |
+
+### div BYTE\<mem\>, \<reg\>
+
+Divides the register by the 8 bit value at the memory location and stores in the register.
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x48   | Addressing mode | Register number | Memory location |
+
+### div \<mem\>, \<reg\>
+
+Divides the register by the 16 bit value at the memory location and stores in the register.
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x49   | Addressing mode | Register number | Memory location |
+
+### mod \<const>, \<reg>
+
+Divides the register by the constant value and stores the remainder back in the register.
+
+| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
+| :-----: | :-------: | :-------------: | :--------: |
+|  0x4A   | Anything  | Register number |  Constant  |
+
+### mod \<reg>, \<reg>
+
+Divides the second register by the first register and stores the remainder back in the second register.
+
+| Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
+| :-----: | :--------------------: | :-------------------: |
+|  0x4B   | Second register number | First register number |
+
+### mod BYTE\<mem\>, \<reg\>
+
+Divides the register by the 8 bit value at the memory location and stores the remainder in the register.
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x4C   | Addressing mode | Register number | Memory location |
+
+### mod \<mem\>, \<reg\>
+
+Divides the register by the 16 bit value at the memory location and stores the remainder in the register.
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x4D   | Addressing mode | Register number | Memory location |
+
 ### inc \<reg\>
 
 Increments the register
