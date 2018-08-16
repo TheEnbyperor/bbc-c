@@ -1,7 +1,5 @@
-#include "stdlib.h"
-
-#include "common.h"
 #include "memory.h"
+#include "stdlib.h"
 
 int growCapacity(int oldCapacity) {
     return ((oldCapacity) < 8 ? 8 : (oldCapacity) + 8);

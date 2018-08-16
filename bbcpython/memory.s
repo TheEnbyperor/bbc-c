@@ -1,3 +1,8 @@
+.import putchar
+.import getchar
+.import printf
+.import fputs
+.import puts
 .import malloc
 .import free
 .import realloc
