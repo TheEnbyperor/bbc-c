@@ -19,26 +19,34 @@
 .import freeChunk
 .import writeChunk
 .import addConstant
+.import initVM
+.import interpret
+.import freeVM
 .export main
-__bbcc_00000000:
-.byte #116,#101,#115,#116,#32,#99,#104,#117,#110,#107,#0
 \ Function: main
 main:
 	push %r11
 	mov %r13, %r11
-	sub #18, %r13
+	sub #22, %r13
 	push %r1
 	push %r2
 	push %r3
 \ AddrOf
-	lea WORD -18[%r11], %r0
+	lea WORD -4[%r11], %r0
+\ Set
+\ CallFunction
+	push %r0
+	call [initVM]
+	add #2, %r13
+\ AddrOf
+	lea WORD -22[%r11], %r0
 \ Set
 \ CallFunction
 	push %r0
 	call [initChunk]
 	add #2, %r13
 \ AddrOf
-	lea WORD -18[%r11], %r0
+	lea WORD -22[%r11], %r0
 \ Set
 \ CallFunction
 	mov #2, %r1
@@ -49,7 +57,7 @@ main:
 \ Set
 	mov %r0, %r3
 \ AddrOf
-	lea WORD -18[%r11], %r0
+	lea WORD -22[%r11], %r0
 \ Set
 	mov %r0, %r2
 \ Set
@@ -63,7 +71,7 @@ main:
 	call [writeChunk]
 	add #6, %r13
 \ AddrOf
-	lea WORD -18[%r11], %r0
+	lea WORD -22[%r11], %r0
 \ Set
 	mov %r0, %r2
 \ Set
@@ -77,7 +85,7 @@ main:
 	call [writeChunk]
 	add #6, %r13
 \ AddrOf
-	lea WORD -18[%r11], %r0
+	lea WORD -22[%r11], %r0
 \ Set
 	mov %r0, %r2
 \ Set
@@ -91,19 +99,26 @@ main:
 	call [writeChunk]
 	add #6, %r13
 \ AddrOf
-	lea WORD -18[%r11], %r0
+	lea WORD -4[%r11], %r0
 \ Set
 	mov %r0, %r1
 \ AddrOf
-	lea WORD [__bbcc_00000000], %r0
+	lea WORD -22[%r11], %r0
 \ Set
 \ CallFunction
 	push %r0
 	push %r1
-	call [disassembleChunk]
+	call [interpret]
 	add #4, %r13
 \ AddrOf
-	lea WORD -18[%r11], %r0
+	lea WORD -4[%r11], %r0
+\ Set
+\ CallFunction
+	push %r0
+	call [freeVM]
+	add #2, %r13
+\ AddrOf
+	lea WORD -22[%r11], %r0
 \ Set
 \ CallFunction
 	push %r0
@@ -111,7 +126,7 @@ main:
 	add #2, %r13
 \ Return
 	mov #0, %r0
-__bbcc_00000001:
+__bbcc_00000000:
 	pop %r3
 	pop %r2
 	pop %r1
