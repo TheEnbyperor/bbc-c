@@ -71,7 +71,7 @@ class Lexer:
             elif self.current_char == "\n":
                 self.advance()
 
-            elif self.current_char == "\\":
+            elif self.current_char == "/" and self.peek() == "/":
                 self.advance()
                 self.skip_line_comment()
 

@@ -50,122 +50,122 @@ __bbcc_00000039:
 .byte #37,#115,#32,#37,#48,#52,#117,#32,#39,#0
 __bbcc_0000003a:
 .byte #39,#10,#0
-\ Function: initLineInfoArray
+// Function: initLineInfoArray
 initLineInfoArray:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #0, %r0
-\ SetAt
+// SetAt
 	mov 4[%r11], %r1
 	mov %r0, WORD 4[%r1]
-\ Set
+// Set
 	mov #0, %r0
-\ SetAt
+// SetAt
 	mov 4[%r11], %r1
 	mov %r0, WORD 2[%r1]
-\ Set
+// Set
 	mov #0, %r0
-\ SetAt
+// SetAt
 	mov 4[%r11], %r1
 	mov %r0, WORD [%r1]
-\ Return
+// Return
 	mov #0, %r0
 __bbcc_0000003b:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: writeLineInfoArray
+// Function: writeLineInfoArray
 writeLineInfoArray:
 	push %r11
 	mov %r13, %r11
 	sub #4, %r13
 	push %r1
 	push %r2
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r0
-\ Set
+// Set
 	mov #1, %r1
-\ Add
+// Add
 	add %r1, %r0
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r1
 	mov WORD 2[%r1], %r1
-\ MoreEqualJmp
+// MoreEqualJmp
 	cmp %r1, %r0
 	jae [__bbcc_00000000]
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 2[%r0], %r0
-\ Set
-\ Set
-\ CallFunction
+// Set
+// Set
+// CallFunction
 	push %r0
 	call [growCapacity]
 	add #2, %r13
-\ Set
-\ SetAt
+// Set
+// SetAt
 	mov 4[%r11], %r1
 	mov %r0, WORD 2[%r1]
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 4[%r0], %r0
-\ Set
+// Set
 	mov %r0, %r1
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 2[%r0], %r0
-\ Mult
+// Mult
 	mul #4, %r0
-\ CallFunction
+// CallFunction
 	push %r0
 	push %r1
 	call [reallocate]
 	add #4, %r13
-\ Set
-\ Set
-\ SetAt
+// Set
+// Set
+// SetAt
 	mov 4[%r11], %r1
 	mov %r0, WORD 4[%r1]
-\ Label
+// Label
 __bbcc_00000000:
-\ ReadAt
+// ReadAt
 	mov WORD 6[%r11], %r0
 	mov WORD [%r0], %r1
 	mov %r1, WORD -4[%r11]
 	mov WORD 2[%r0], %r1
 	mov %r1, WORD -2[%r11]
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 4[%r0], %r2
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r1
-\ Mult
+// Mult
 	mov #4, %r0
 	mul %r1, %r0
-\ SetAt
+// SetAt
 	mov %r2, %r1
 	add %r0, %r1
 	mov -4[%r11], %r0
 	mov %r0, WORD [%r1]
 	mov -2[%r11], %r0
 	mov %r0, WORD 2[%r1]
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r1
-\ Set
+// Set
 	mov %r1, %r0
-\ Add
+// Add
 	mov #1, %r0
 	add %r1, %r0
-\ SetAt
+// SetAt
 	mov 4[%r11], %r1
 	mov %r0, WORD [%r1]
-\ Return
+// Return
 	mov #0, %r0
 __bbcc_0000003c:
 	pop %r2
@@ -173,78 +173,78 @@ __bbcc_0000003c:
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: freeLineInfoArray
+// Function: freeLineInfoArray
 freeLineInfoArray:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 4[%r0], %r0
-\ Set
+// Set
 	mov %r0, %r1
-\ Set
+// Set
 	mov #0, %r0
-\ CallFunction
+// CallFunction
 	push %r0
 	push %r1
 	call [reallocate]
 	add #4, %r13
-\ Set
+// Set
 	mov WORD 4[%r11], %r0
-\ CallFunction
+// CallFunction
 	push %r0
 	call [initLineInfoArray]
 	add #2, %r13
-\ Return
+// Return
 	mov #0, %r0
 __bbcc_0000003d:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: getLastLine
+// Function: getLastLine
 getLastLine:
 	push %r11
 	mov %r13, %r11
 	push %r1
 	push %r2
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r0
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #0, %r0
 	jnz [__bbcc_00000001]
-\ Return
+// Return
 	mov #0, %r0
 	jmp [__bbcc_0000003e]
-\ Label
+// Label
 __bbcc_00000001:
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 4[%r0], %r1
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r0
-\ Set
+// Set
 	mov #1, %r2
-\ Sub
+// Sub
 	sub %r2, %r0
-\ Mult
+// Mult
 	mov #4, %r2
 	mul %r0, %r2
-\ Add
+// Add
 	add %r2, %r1
-\ ReadAt
+// ReadAt
 	mov WORD 2[%r1], %r0
-\ Return
+// Return
 __bbcc_0000003e:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: getLine
+// Function: getLine
 getLine:
 	push %r11
 	mov %r13, %r11
@@ -253,75 +253,75 @@ getLine:
 	push %r2
 	push %r3
 	push %r4
-\ Set
+// Set
 	mov #0, %r0
-\ Set
+// Set
 	mov %r0, %r3
-\ Set
+// Set
 	mov #0, %r0
-\ Set
+// Set
 	mov %r0, %r2
-\ Label
+// Label
 __bbcc_00000002:
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r0
-\ MoreEqualJmp
+// MoreEqualJmp
 	cmp %r2, %r0
 	jae [__bbcc_00000004]
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 4[%r0], %r1
-\ Mult
+// Mult
 	mov #4, %r0
 	mul %r2, %r0
-\ ReadAt
+// ReadAt
 	add %r0, %r1
 	mov WORD [%r1], %r4
 	mov %r4, WORD -8[%r11]
 	mov WORD 2[%r1], %r4
 	mov %r4, WORD -6[%r11]
-\ Set
+// Set
 	mov WORD -8[%r11], %r0
 	mov %r0, WORD -4[%r11]
 	mov WORD -6[%r11], %r0
 	mov %r0, WORD -2[%r11]
-\ AddrOf
+// AddrOf
 	lea WORD -4[%r11], %r0
-\ ReadAt
+// ReadAt
 	mov WORD [%r0], %r0
-\ MoreThanJmp
+// MoreThanJmp
 	mov 6[%r11], %r1
 	cmp %r0, %r1
 	ja [__bbcc_00000005]
-\ AddrOf
+// AddrOf
 	lea WORD -4[%r11], %r0
-\ ReadAt
+// ReadAt
 	mov WORD 2[%r0], %r0
-\ Set
+// Set
 	mov %r0, %r3
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000006]
-\ Label
+// Label
 __bbcc_00000005:
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000004]
-\ Label
+// Label
 __bbcc_00000006:
-\ Label
+// Label
 __bbcc_00000003:
-\ Set
+// Set
 	mov %r2, %r0
-\ Add
+// Add
 	mov #1, %r0
 	add %r2, %r0
-\ Set
+// Set
 	mov %r0, %r2
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000002]
-\ Label
+// Label
 __bbcc_00000004:
-\ Return
+// Return
 	mov %r3, %r0
 __bbcc_0000003f:
 	pop %r4
@@ -331,88 +331,88 @@ __bbcc_0000003f:
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: writeLine
+// Function: writeLine
 writeLine:
 	push %r11
 	mov %r13, %r11
 	sub #4, %r13
 	push %r1
-\ AddrOf
+// AddrOf
 	lea WORD -4[%r11], %r0
-\ SetAt
+// SetAt
 	mov 6[%r11], %r1
 	mov %r1, WORD [%r0]
-\ AddrOf
+// AddrOf
 	lea WORD -4[%r11], %r0
-\ SetAt
+// SetAt
 	mov 8[%r11], %r1
 	mov %r1, WORD 2[%r0]
-\ Set
+// Set
 	mov WORD 4[%r11], %r1
-\ AddrOf
+// AddrOf
 	lea WORD -4[%r11], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r0
 	push %r1
 	call [writeLineInfoArray]
 	add #4, %r13
-\ Return
+// Return
 	mov #0, %r0
 __bbcc_00000040:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: disassembleChunk
+// Function: disassembleChunk
 disassembleChunk:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000027], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r1
 	push %r1
 	push %r0
 	call [printf]
 	add #4, %r13
-\ Set
+// Set
 	mov #0, %r0
-\ Set
+// Set
 	mov %r0, %r1
-\ Label
+// Label
 __bbcc_00000007:
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r0
-\ MoreEqualJmp
+// MoreEqualJmp
 	cmp %r1, %r0
 	jae [__bbcc_00000009]
-\ Set
+// Set
 	mov WORD 4[%r11], %r0
-\ CallFunction
+// CallFunction
 	push %r1
 	push %r0
 	call [disassembleInstruction]
 	add #4, %r13
-\ Set
+// Set
 	mov %r0, %r1
-\ Label
+// Label
 __bbcc_00000008:
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000007]
-\ Label
+// Label
 __bbcc_00000009:
-\ Return
+// Return
 	mov #0, %r0
 __bbcc_00000041:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: disassembleInstruction
+// Function: disassembleInstruction
 disassembleInstruction:
 	push %r11
 	mov %r13, %r11
@@ -420,371 +420,371 @@ disassembleInstruction:
 	push %r2
 	push %r3
 	push %r4
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000028], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r1
 	push %r1
 	push %r0
 	call [printf]
 	add #4, %r13
-\ Add
+// Add
 	mov WORD 4[%r11], %r0
 	add #12, %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r1
 	push %r1
 	push %r0
 	call [getLine]
 	add #4, %r13
-\ Set
+// Set
 	mov %r0, %r2
-\ Set
+// Set
 	mov #0, %r4
-\ LessEqualJmp
+// LessEqualJmp
 	mov #0, %r0
 	cmp 6[%r11], %r0
 	jle [__bbcc_0000000b]
-\ Add
+// Add
 	mov WORD 4[%r11], %r0
 	add #12, %r0
-\ Set
+// Set
 	mov %r0, %r3
-\ Set
+// Set
 	mov #1, %r1
-\ Sub
+// Sub
 	mov WORD 6[%r11], %r0
 	sub %r1, %r0
-\ CallFunction
+// CallFunction
 	push %r0
 	push %r3
 	call [getLine]
 	add #4, %r13
-\ NotEqualJmp
+// NotEqualJmp
 	cmp %r0, %r2
 	jnz [__bbcc_0000000b]
-\ Set
+// Set
 	mov #1, %r4
-\ Label
+// Label
 __bbcc_0000000b:
-\ JmpZero
+// JmpZero
 	cmp #0, %r4
 	jze [__bbcc_0000000a]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000029], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r0
 	call [printf]
 	add #2, %r13
-\ Jmp
+// Jmp
 	jmp [__bbcc_0000000c]
-\ Label
+// Label
 __bbcc_0000000a:
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000028], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r2
 	push %r0
 	call [printf]
 	add #4, %r13
-\ Label
+// Label
 __bbcc_0000000c:
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 4[%r0], %r0
-\ ReadAt
+// ReadAt
 	add WORD 6[%r11], %r0
 	mov BYTE [%r0], %r0
-\ Set
+// Set
 	mov %r0, %r1
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #0, %r1
 	jnz [__bbcc_0000000d]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000002a], %r0
-\ Set
+// Set
 	mov %r0, %r2
-\ Set
+// Set
 	mov WORD 4[%r11], %r0
-\ CallFunction
+// CallFunction
 	mov 6[%r11], %r3
 	push %r3
 	push %r0
 	push %r2
 	call [constantInstruction]
 	add #6, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_0000000e]
-\ Label
+// Label
 __bbcc_0000000d:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #1, %r1
 	jnz [__bbcc_0000000f]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000002b], %r0
-\ Set
+// Set
 	mov %r0, %r2
-\ Set
+// Set
 	mov WORD 4[%r11], %r0
-\ CallFunction
+// CallFunction
 	mov 6[%r11], %r3
 	push %r3
 	push %r0
 	push %r2
 	call [longConstantInstruction]
 	add #6, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000010]
-\ Label
+// Label
 __bbcc_0000000f:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #2, %r1
 	jnz [__bbcc_00000011]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000002c], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000012]
-\ Label
+// Label
 __bbcc_00000011:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #3, %r1
 	jnz [__bbcc_00000013]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000002d], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000014]
-\ Label
+// Label
 __bbcc_00000013:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #4, %r1
 	jnz [__bbcc_00000015]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000002e], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000016]
-\ Label
+// Label
 __bbcc_00000015:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #5, %r1
 	jnz [__bbcc_00000017]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000002f], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000018]
-\ Label
+// Label
 __bbcc_00000017:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #6, %r1
 	jnz [__bbcc_00000019]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000030], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_0000001a]
-\ Label
+// Label
 __bbcc_00000019:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #7, %r1
 	jnz [__bbcc_0000001b]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000031], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_0000001c]
-\ Label
+// Label
 __bbcc_0000001b:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #8, %r1
 	jnz [__bbcc_0000001d]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000032], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_0000001e]
-\ Label
+// Label
 __bbcc_0000001d:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #9, %r1
 	jnz [__bbcc_0000001f]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000033], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000020]
-\ Label
+// Label
 __bbcc_0000001f:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #10, %r1
 	jnz [__bbcc_00000021]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000034], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000022]
-\ Label
+// Label
 __bbcc_00000021:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #11, %r1
 	jnz [__bbcc_00000023]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000035], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000024]
-\ Label
+// Label
 __bbcc_00000023:
-\ NotEqualJmp
+// NotEqualJmp
 	cmp #12, %r1
 	jnz [__bbcc_00000025]
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000036], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 6[%r11], %r2
 	push %r2
 	push %r0
 	call [simpleInstruction]
 	add #4, %r13
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Jmp
+// Jmp
 	jmp [__bbcc_00000026]
-\ Label
+// Label
 __bbcc_00000025:
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000037], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r1
 	push %r0
 	call [printf]
 	add #4, %r13
-\ Set
+// Set
 	mov #1, %r1
-\ Add
+// Add
 	mov WORD 6[%r11], %r0
 	add %r1, %r0
-\ Return
+// Return
 	jmp [__bbcc_00000042]
-\ Label
+// Label
 __bbcc_00000026:
-\ Label
+// Label
 __bbcc_00000024:
-\ Label
+// Label
 __bbcc_00000022:
-\ Label
+// Label
 __bbcc_00000020:
-\ Label
+// Label
 __bbcc_0000001e:
-\ Label
+// Label
 __bbcc_0000001c:
-\ Label
+// Label
 __bbcc_0000001a:
-\ Label
+// Label
 __bbcc_00000018:
-\ Label
+// Label
 __bbcc_00000016:
-\ Label
+// Label
 __bbcc_00000014:
-\ Label
+// Label
 __bbcc_00000012:
-\ Label
+// Label
 __bbcc_00000010:
-\ Label
+// Label
 __bbcc_0000000e:
-\ Return
+// Return
 	mov #0, %r0
 __bbcc_00000042:
 	pop %r4
@@ -794,154 +794,154 @@ __bbcc_00000042:
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: simpleInstruction
+// Function: simpleInstruction
 simpleInstruction:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000038], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	mov 4[%r11], %r1
 	push %r1
 	push %r0
 	call [printf]
 	add #4, %r13
-\ Set
+// Set
 	mov #1, %r1
-\ Add
+// Add
 	mov WORD 6[%r11], %r0
 	add %r1, %r0
-\ Return
+// Return
 __bbcc_00000043:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: constantInstruction
+// Function: constantInstruction
 constantInstruction:
 	push %r11
 	mov %r13, %r11
 	push %r1
 	push %r2
-\ ReadAt
+// ReadAt
 	mov WORD 6[%r11], %r0
 	mov WORD 4[%r0], %r2
-\ Set
+// Set
 	mov #1, %r1
-\ Add
+// Add
 	mov WORD 8[%r11], %r0
 	add %r1, %r0
-\ ReadAt
+// ReadAt
 	mov %r2, %r1
 	add %r0, %r1
 	mov BYTE [%r1], %r0
-\ Set
+// Set
 	mov %r0, %r2
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000039], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r2
 	mov 4[%r11], %r1
 	push %r1
 	push %r0
 	call [printf]
 	add #6, %r13
-\ Add
+// Add
 	mov WORD 6[%r11], %r0
 	add #6, %r0
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r0], %r0
-\ Mult
+// Mult
 	mov #4, %r1
 	mul %r2, %r1
-\ Add
+// Add
 	add %r1, %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r0
 	call [printValue]
 	add #2, %r13
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000003a], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r0
 	call [printf]
 	add #2, %r13
-\ Set
+// Set
 	mov #2, %r1
-\ Add
+// Add
 	mov WORD 8[%r11], %r0
 	add %r1, %r0
-\ Return
+// Return
 __bbcc_00000044:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: longConstantInstruction
+// Function: longConstantInstruction
 longConstantInstruction:
 	push %r11
 	mov %r13, %r11
 	push %r1
 	push %r2
-\ ReadAt
+// ReadAt
 	mov WORD 6[%r11], %r0
 	mov WORD 4[%r0], %r0
-\ Set
+// Set
 	mov #1, %r2
-\ Add
+// Add
 	mov WORD 8[%r11], %r1
 	add %r2, %r1
-\ Add
+// Add
 	add %r1, %r0
-\ Set
-\ ReadAt
+// Set
+// ReadAt
 	mov WORD [%r0], %r0
-\ Set
+// Set
 	mov %r0, %r2
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_00000039], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r2
 	mov 4[%r11], %r1
 	push %r1
 	push %r0
 	call [printf]
 	add #6, %r13
-\ Add
+// Add
 	mov WORD 6[%r11], %r0
 	add #6, %r0
-\ ReadAt
+// ReadAt
 	mov WORD 4[%r0], %r0
-\ Mult
+// Mult
 	mov #4, %r1
 	mul %r2, %r1
-\ Add
+// Add
 	add %r1, %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r0
 	call [printValue]
 	add #2, %r13
-\ AddrOf
+// AddrOf
 	lea WORD [__bbcc_0000003a], %r0
-\ Set
-\ CallFunction
+// Set
+// CallFunction
 	push %r0
 	call [printf]
 	add #2, %r13
-\ Set
+// Set
 	mov #3, %r1
-\ Add
+// Add
 	mov WORD 8[%r11], %r0
 	add %r1, %r0
-\ Return
+// Return
 __bbcc_00000045:
 	pop %r2
 	pop %r1

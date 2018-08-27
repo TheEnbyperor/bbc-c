@@ -75,7 +75,7 @@ class Comment:
         self.comment = comment
 
     def __str__(self):
-        return "\ " + self.comment
+        return "// " + self.comment
 
 
 class Bytes:
