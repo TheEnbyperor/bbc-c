@@ -1,8 +1,9 @@
+#include "stddef.h"
 #include "stdio.h"
 #include "stdbool.h"
-#include "stdlib.h"
 #include "string.h"
 #include "ctype.h"
+#include "stdlib.h"
 
 int fputs(const char *s) {
     char c;
@@ -20,20 +21,32 @@ int puts(const char *s) {
 }
 
 char *gets(char *s, int n) {
-    char *cs;
+  char *cs;
+  char c;
 
-    while(--n < 0) {
-        if ((*cs++ = getchar()) == '\n') {
-            break;
-        }
+  cs = s;
+  while(--n > 0) {
+    c = getchar();
+    if (c == 3) {
+      return NULL;
     }
-    *cs = 0;
-    return s;
+    putchar(c);
+    if (c == '\b') {
+      *--cs = '\0';
+      continue;
+    }
+    if ((*cs++ = c) == '\n') {
+      --c;
+      break;
+    }
+  }
+  *cs = '\0';
+  return s;
 }
 
 
 void itoa(int n, char *s, bool unsig, unsigned int zero_pad) {
-  int i, sign;
+  int i;
   bool negative = false;
 
   if (!unsig && n < 0) {
@@ -46,11 +59,9 @@ void itoa(int n, char *s, bool unsig, unsigned int zero_pad) {
     s[i++] = n % 10 + '0';   /* get next digit */
   } while ((n /= 10) > 0);     /* delete it */
 
-  for (;i < zero_pad;)
-    s[i++] = '0';
+  for (;i < zero_pad;) s[i++] = '0';
 
-  if (negative)
-    s[i++] = '-';
+  if (negative) s[i++] = '-';
 
   s[i] = '\0';
   strrev(s);
@@ -63,7 +74,7 @@ int printf(const char *format, ...) {
     char bf[24];
     int i;
 
-    ap = &format+sizeof(format);
+    ap = &format+1;
 
     for (; c = *format; ++format) {
         if (c == '%') {
@@ -80,11 +91,11 @@ int printf(const char *format, ...) {
 				c = *(++format);
             }
 
-            if (c == 0) {
+            if (c == '\0') {
                 break;
             } else if (c == 'c') {
                 char c = *((char *)ap);
-                ap = (char*)ap + sizeof(char);
+                ap = (char*)ap + sizeof(int);
 				putchar(c);
 				++i;
                 continue;
@@ -98,6 +109,13 @@ int printf(const char *format, ...) {
                 int i = *((int *)ap);
                 ap = (char*)ap + sizeof(int);
                 itoa(i, bf, true, zero_pad);
+                fputs(bf);
+				i += strlen(bf);
+                continue;
+            } else if (c == 'd') {
+                int i = *((int *)ap);
+                ap = (char*)ap + sizeof(int);
+                itoa(i, bf, false, zero_pad);
                 fputs(bf);
 				i += strlen(bf);
                 continue;

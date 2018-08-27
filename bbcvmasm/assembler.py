@@ -99,7 +99,7 @@ class Assembler:
                 raise SyntaxError("Indirect with label as constant is not supported")
             label = value.const_loc.label
             if label in self.labels:
-                if self.labels[label] < self.loc:
+                if self.labels[label] <= self.loc:
                     am = 0x1
                     mv = ml - self.labels[label]
                 else:
@@ -553,6 +553,96 @@ class Assembler:
             self.loc += 1
         else:
             raise SyntaxError(f"Can't jump on below or equal to {node.value}")
+
+    @setup_labels
+    def visit_Sze(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x4e)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on zero with {node.value}")
+
+    @setup_labels
+    def visit_Snz(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x4f)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on not zero with {node.value}")
+
+    @setup_labels
+    def visit_Sa(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x50)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on above with {node.value}")
+
+    @setup_labels
+    def visit_Sae(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x51)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on above or equal with {node.value}")
+
+    @setup_labels
+    def visit_Sb(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x52)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on below with {node.value}")
+
+    @setup_labels
+    def visit_Sbe(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x53)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on below or equal with {node.value}")
+
+    @setup_labels
+    def visit_Sl(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x54)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on lower with {node.value}")
+
+    @setup_labels
+    def visit_Sle(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x55)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on lower or equal with {node.value}")
+
+    @setup_labels
+    def visit_Sg(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x56)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on greater with {node.value}")
+
+    @setup_labels
+    def visit_Sge(self, node: ast.Jze):
+        if isinstance(node.value, ast.RegisterValue):
+            self.insts.append(0x57)
+            self.get_reg_val(node.value, None)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't set on greater or equal with {node.value}")
 
     @setup_labels
     def visit_Call(self, node: ast.Call):

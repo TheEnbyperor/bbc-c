@@ -146,6 +146,45 @@ class Jb(_Inst):
 class Jbe(_Inst):
     name = "jbe"
 
+class Sze(_Inst):
+    name = "sze"
+
+
+class Snz(_Inst):
+    name = "snz"
+
+
+class Sl(_Inst):
+    name = "sl"
+
+
+class Sle(_Inst):
+    name = "sle"
+
+
+class Sg(_Inst):
+    name = "sg"
+
+
+class Sge(_Inst):
+    name = "sge"
+
+
+class Sa(_Inst):
+    name = "sa"
+
+
+class Sae(_Inst):
+    name = "sae"
+
+
+class Sb(_Inst):
+    name = "sb"
+
+
+class Sbe(_Inst):
+    name = "sbe"
+
 
 class Sub(_Inst):
     name = "sub"

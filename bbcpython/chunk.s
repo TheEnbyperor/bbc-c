@@ -1,20 +1,10 @@
-.import putchar
-.import getchar
-.import printf
-.import fputs
-.import puts
 .import initValueArray
 .import writeValueArray
 .import freeValueArray
-.import printValue
 .import initLineInfoArray
-.import writeLineInfoArray
 .import freeLineInfoArray
 .import getLastLine
-.import getLine
 .import writeLine
-.import disassembleChunk
-.import disassembleInstruction
 .import growCapacity
 .import reallocate
 .export initChunk
@@ -72,23 +62,17 @@ writeChunk:
 	push %r2
 \ ReadAt
 	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r2
-\ ReadAt
-	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r0
 \ Set
 	mov #1, %r1
 \ Add
 	add %r1, %r0
-\ LessThanCmp
-	mov #1, %r1
-	cmp %r2, %r0
-	jb [__bbcc_00000003]
-	mov #0, %r1
-__bbcc_00000003:
-\ JmpZero
-	cmp #0, %r1
-	jze [__bbcc_00000000]
+\ ReadAt
+	mov WORD 4[%r11], %r1
+	mov WORD 2[%r1], %r1
+\ MoreEqualJmp
+	cmp %r1, %r0
+	jae [__bbcc_00000000]
 \ ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD 2[%r0], %r0
@@ -129,15 +113,8 @@ __bbcc_00000000:
 	push %r0
 	call [getLastLine]
 	add #2, %r13
-	mov %r0, %r1
-\ NotEqualCmp
-	mov #0, %r0
-	cmp 8[%r11], %r1
-	jze [__bbcc_00000004]
-	mov #1, %r0
-__bbcc_00000004:
-\ JmpZero
-	cmp #0, %r0
+\ EqualJmp
+	cmp 8[%r11], %r0
 	jze [__bbcc_00000001]
 \ Add
 	mov WORD 4[%r11], %r0
@@ -158,14 +135,15 @@ __bbcc_00000004:
 __bbcc_00000001:
 \ ReadAt
 	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r1
+	mov WORD 4[%r0], %r1
 \ ReadAt
 	mov WORD 4[%r11], %r0
-	mov WORD 4[%r0], %r0
+	mov WORD [%r0], %r0
 \ SetAt
-	add %r1, %r0
-	mov 6[%r11], %r1
-	mov %r1, BYTE [%r0]
+	mov %r1, %r2
+	add %r0, %r2
+	mov 6[%r11], %r0
+	mov %r0, BYTE [%r2]
 \ ReadAt
 	mov WORD 4[%r11], %r0
 	mov WORD [%r0], %r1
@@ -177,7 +155,7 @@ __bbcc_00000001:
 	mov %r0, WORD [%r1]
 \ Return
 	mov #0, %r0
-__bbcc_00000005:
+__bbcc_00000003:
 	pop %r2
 	pop %r1
 	mov %r11, %r13
@@ -192,10 +170,12 @@ addConstant:
 	mov WORD 4[%r11], %r0
 	add #6, %r0
 \ Set
+	mov %r0, %r1
+\ Set
+	mov WORD 6[%r11], %r0
 \ CallFunction
-	mov 6[%r11], %r1
-	push %r1
 	push %r0
+	push %r1
 	call [writeValueArray]
 	add #4, %r13
 \ Add
@@ -208,7 +188,7 @@ addConstant:
 \ Sub
 	sub %r1, %r0
 \ Return
-__bbcc_00000006:
+__bbcc_00000004:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
@@ -254,7 +234,7 @@ freeChunk:
 	add #2, %r13
 \ Return
 	mov #0, %r0
-__bbcc_00000007:
+__bbcc_00000005:
 	pop %r1
 	mov %r11, %r13
 	pop %r11

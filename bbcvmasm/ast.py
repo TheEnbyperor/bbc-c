@@ -119,6 +119,46 @@ class Jbe(_OneValueNode):
     pass
 
 
+class Sze(_OneValueNode):
+    pass
+
+
+class Snz(_OneValueNode):
+    pass
+
+
+class Sl(_OneValueNode):
+    pass
+
+
+class Sle(_OneValueNode):
+    pass
+
+
+class Sg(_OneValueNode):
+    pass
+
+
+class Sge(_OneValueNode):
+    pass
+
+
+class Sa(_OneValueNode):
+    pass
+
+
+class Sae(_OneValueNode):
+    pass
+
+
+class Sb(_OneValueNode):
+    pass
+
+
+class Sbe(_OneValueNode):
+    pass
+
+
 class Calln(_TwoValueNode):
     pass
 

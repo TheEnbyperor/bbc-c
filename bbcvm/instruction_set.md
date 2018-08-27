@@ -907,9 +907,21 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x30   | Addressing mode |  Anything  | Memory location |
 
+### sze/se \<reg\>
+
+Sets the register to 0 when the zero flag is set, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x4e   | Anything  |  Register  |
+
 ### jnz/jne \<mem\>
 
-Jumps to the memory location when the zero flag is unset.  
+Jumps to the memory location when the zero flag is clear.  
 
 #### Flags
 
@@ -918,6 +930,18 @@ None
 | Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x31   | Addressing mode |  Anything  | Memory location |
+
+### snz/sne \<reg\>
+
+Sets the register to 0 when the zero flag is clear, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x4f   | Anything  |  Register  |
 
 ### ja \<mem\>
 
@@ -931,7 +955,19 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x3A   | Addressing mode |  Anything  | Memory location |
 
-### jae \<mem\>
+### sa \<reg\>
+
+Sets the register to 0 when the unsigned comparison result is first operand > second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x50   | Anything  |  Register  |
+
+### ### jae \<mem\>
 
 Jumps to the memory location when the unsigned comparison result is first operand >= second operand. 
 
@@ -942,6 +978,18 @@ None
 | Bit 0-7 |    Bits 8-11    | Bits 12-15 |   Bits 16-31    |
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x3B   | Addressing mode |  Anything  | Memory location |
+
+### sae \<reg\>
+
+Sets the register to 0 when the unsigned comparison result is first operand >= second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x51   | Anything  |  Register  |
 
 ### jb \<mem\>
 
@@ -955,7 +1003,19 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x3C   | Addressing mode |  Anything  | Memory location |
 
-### jbe \<mem\>
+### sb \<reg\>
+
+Sets the register to 0 when the unsigned comparison result is first operand < second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x52   | Anything  |  Register  |
+
+### ### jbe \<mem\>
 
 Jumps to the memory location when when the unsigned comparison result is first operand <= second operand. 
 
@@ -967,7 +1027,19 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x3D   | Addressing mode |  Anything  | Memory location |
 
-### jl \<mem\>
+### sbe \<reg\>
+
+Sets the register to 0 when the unsigned comparison result is first operand <= second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x53   | Anything  |  Register  |
+
+### ### jl \<mem\>
 
 Jumps to the memory location when the signed comparison result is first operand < second operand.
 
@@ -979,7 +1051,19 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x3E   | Addressing mode |  Anything  | Memory location |
 
-### jle \<mem\>
+### sl \<reg\>
+
+Sets the register to 0 when the signed comparison result is first operand < second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x54   | Anything  |  Register  |
+
+### ### jle \<mem\>
 
 Jumps to the memory location when when the signed comparison result is first operand <= second operand. 
 
@@ -991,7 +1075,19 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x3F   | Addressing mode |  Anything  | Memory location |
 
-### jg \<mem\>
+### sle \<reg\>
+
+Sets the register to 0 when the signed comparison result is first operand <= second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x55   | Anything  |  Register  |
+
+### ### jg \<mem\>
 
 Jumps to the memory location when the signed comparison result is first operand > second operand.
 
@@ -1003,7 +1099,19 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x40   | Addressing mode |  Anything  | Memory location |
 
-### jge \<mem\>
+### sg \<reg\>
+
+Sets the register to 0 when the signed comparison result is first operand > second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x56   | Anything  |  Register  |
+
+### ### jge \<mem\>
 
 Jumps to the memory location when when the unsigned comparison result is first operand >= second operand. 
 
@@ -1015,7 +1123,19 @@ None
 | :-----: | :-------------: | :--------: | :-------------: |
 |  0x41   | Addressing mode |  Anything  | Memory location |
 
-### calln \<mem\>, \<reg\>
+### sge \<reg\>
+
+Sets the register to 0 when the signed comparison result is first operand >= second operand, 0 otherwise
+
+#### Flags
+
+None
+
+| Bit 0-7 | Bits 8-11 | Bits 12-15 |
+| :-----: | :-------: | :--------: |
+|  0x57   | Anything  |  Register  |
+
+### ### calln \<mem\>, \<reg\>
 
 Performs a jsr to native 6502 code, with the accumulator set to the LSB of value of the register. The code at the location will return to the VM on rts, with the new accumulator value put in the LSB of register.
 

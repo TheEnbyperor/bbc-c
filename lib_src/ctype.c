@@ -1,54 +1,49 @@
-char isupper(char c) {
+#include "stdbool.h"
+
+bool isupper(int c) {
 	return c >= 'A' && c <= 'Z';
 }
 
-char islower(char c) {
+bool islower(int c) {
 	return c >= 'a' && c <= 'z';
 }
 
-char isalpha(char c) {
+bool isalpha(int c) {
 	return islower(c) || isupper(c);
 }
 
-char isdigit(char c) {
-	return ((unsigned char)c - '0') <= 9;
+bool isdigit(int c) {
+	return c >= '0' && c <= '9';
 }
 
-char isalnum(char c) {
+bool isalnum(int c) {
 	return isalpha(c) || isdigit(c);
 }
 
-char isascii(char c)
-{
-	return !(c & ~127);
+bool isascii(int c) {
+	return c <= 127;
 }
 
-char isblank(char c)
-{
+bool isblank(int c) {
 	return (c == '\t') || (c == ' ');
 }
 
-char iscntrl(char c)
-{
+bool iscntrl(int c) {
 	return c < 32;
 }
 
-char isspace(char c)
-{
+bool isspace(int c) {
 	return c == ' ' || c == '\n' || c == '\t' || c == '\r';
 }
 
-char isxdigit(char c)
-{
+bool isxdigit(int c) {
 	return isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
 
-char toupper(char c)
-{
+bool toupper(int c) {
 	return islower(c) ? (c & ~32) : c;
 }
 
-char tolower(char c)
-{
+bool tolower(int c) {
 	return isupper(c) ? (c | 32) : c;
 }

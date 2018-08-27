@@ -1,7 +1,3 @@
-from . import asm
-from . import il
-
-
 class Spot:
     def __init__(self, detail):
         self.detail = detail
@@ -67,6 +63,9 @@ class MemorySpot(Spot):
             simple = f"{self.offset}[{base_str}]"
         else:
             simple = f"-{-self.offset}[{base_str}]"
+
+        if size is not None and size not in self.size_map.keys():
+            raise SyntaxError(f"Invalid memory spot length: {size}")
 
         size_desc = self.size_map.get(size, "")
         return f"{size_desc}{simple}"

@@ -98,7 +98,9 @@ class Parser:
                  ("calln", ast.Calln), ("mov", ast.Mov), ("add", ast.Add), ("sub", ast.Sub), ("mul", ast.Mul),
                  ("div", ast.Div), ("mod", ast.Mod), ("cmp", ast.Cmp), ("jze", ast.Jze), ("je", ast.Jze),
                  ("jnz", ast.Jnz), ("jne", ast.Jnz), ("jl", ast.Jl), ("jle", ast.Jle), ("jg", ast.Jg), ("jge", ast.Jge),
-                 ("ja", ast.Ja), ("jae", ast.Jae), ("jb", ast.Jb), ("jbe", ast.Jbe), ("jmp", ast.Jmp), ("lea", ast.Lea),
+                 ("ja", ast.Ja), ("jae", ast.Jae), ("jb", ast.Jb), ("jbe", ast.Jbe), ("sze", ast.Sze), ("se", ast.Sze),
+                 ("snz", ast.Snz), ("sne", ast.Snz), ("sl", ast.Sl), ("sle", ast.Sle), ("sg", ast.Sg), ("sge", ast.Sge),
+                 ("sa", ast.Sa), ("sae", ast.Sae), ("sb", ast.Sb), ("sbe", ast.Sbe), ("jmp", ast.Jmp), ("lea", ast.Lea),
                  ("inc", ast.Inc), ("dec", ast.Dec), ("and", ast.And), ("or", ast.Or), ("neg", ast.Neg)]
 
         def parse(inst, index):

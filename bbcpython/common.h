@@ -6,7 +6,8 @@
 #include "stddef.h"
 #include "stdint.h"
 
+#define DEBUG_PRINT_TOKENS
+#define DEBUG_PRINT_CODE
 #define DEBUG_TRACE_EXECUTION
-
 
 #endif

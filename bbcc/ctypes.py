@@ -130,11 +130,11 @@ class ArrayCType(CType):
 
 
 class FunctionCType(CType):
-    def __init__(self, args, ret, is_varags=False):
+    def __init__(self, args, ret, is_varargs=False):
         """Initialize type."""
         self.args = args
         self.ret = ret
-        self.is_varargs = is_varags
+        self.is_varargs = is_varargs
         super().__init__(0)
 
     def is_complete(self):

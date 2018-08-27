@@ -644,7 +644,7 @@ class DirectLValue(LValue):
         il_code.add(il.Set(rvalue, self.il_value))
 
     def addr(self, il_code: il.IL):
-        output = il.ILValue(ctypes.unsig_int)
+        output = il.ILValue(ctypes.PointerCType(self.il_value.type))
         il_code.add(il.AddrOf(self.il_value, output))
         return output
 
@@ -666,7 +666,10 @@ class IndirectLValue(LValue):
         il_code.add(il.SetAt(self.il_value.val(il), rvalue, self.offset.val(il)))
 
     def addr(self, il_code: il.IL):
-        return self.il_value
+        out = il.ILValue(self.il_value.type)
+        val = self.il_value.val(il_code)
+        il_code.add(il.Add(val, self.offset, out))
+        return out
 
     def val(self, il_code: il.IL):
         output = il.ILValue(self.ctype)

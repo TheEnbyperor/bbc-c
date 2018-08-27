@@ -58,11 +58,12 @@ class Lexer:
     def string(self):
         result = bytearray()
         while self.current_char is not None and self.current_char != '"' and self.current_char != '\n':
-            result.append(ord(self.current_char))
-            self.advance()
             if self.current_char == "\\":
                 self.advance()
                 result.append(self.process_escape())
+                self.advance()
+            else:
+                result.append(ord(self.current_char))
                 self.advance()
         return result
 

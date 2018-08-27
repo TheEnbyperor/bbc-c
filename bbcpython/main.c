@@ -2,25 +2,26 @@
 #include "debug.h"
 #include "vm.h"
 
+static void repl(struct VM *vm) {
+  char line[255];
+  for (;;) {
+    printf(">>> ");
+
+    if (!gets(line, sizeof(line))) {
+      printf("\n");
+      break;
+    }
+
+    interpret(vm, line);
+  }
+}
+
 int main() {
   struct VM vm;
-  struct Chunk chunk;
-
   initVM(&vm);
-  initChunk(&chunk);
 
-  int constant = addConstant(&chunk, 2);
-  writeChunk(&chunk, OP_CONSTANT, 123);
-  writeChunk(&chunk, constant, 123);
-
-  writeChunk(&chunk, OP_RETURN, 123);
-
-  disassembleChunk(&chunk, "test chunk");
-
-  interpret(&vm, &chunk);
+  repl(vm);
 
   freeVM(&vm);
-  freeChunk(&chunk);
-
   return 0;
 }

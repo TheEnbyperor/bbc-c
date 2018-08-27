@@ -26,16 +26,6 @@ class VarSymbol(Symbol):
     __repr__ = __str__
 
 
-class FunctionSymbol(Symbol):
-    def __init__(self, name, ctype, storage):
-        super(FunctionSymbol, self).__init__(name, storage, ctype)
-
-    def __str__(self):
-        return '<FUNCTION({name}:{type})>'.format(name=self.name, type=self.type)
-
-    __repr__ = __str__
-
-
 class ScopedSymbolTable(object):
     def __init__(self, scope_name, scope_level, enclosing_scope=None):
         self.symbols = collections.OrderedDict()
@@ -434,25 +424,19 @@ class SymbolTableBuilder(ast.NodeVisitor):
         decl_infos = self.get_decl_infos(node.node)
         self.scope.add_decl(id(node), decl_infos)
         for d in decl_infos:
-            if type(d.ctype) == ctypes.FunctionCType:
-                func_name = d.identifier.value
-                if self.scope.lookup(func_name, current_scope_only=True):
-                    raise SyntaxError("Duplicate identifier '%s' found" % func_name)
-                self.scope.define(FunctionSymbol(func_name, d.ctype, d.storage))
-            else:
-                var_name = d.identifier.value
-                if self.scope.lookup(var_name, current_scope_only=True):
-                    raise SyntaxError("Duplicate identifier '%s' found" % var_name)
-                self.scope.define(VarSymbol(var_name, d.ctype, d.storage))
-                if d.init is not None:
-                    self.visit(d.init)
+            var_name = d.identifier.value
+            if self.scope.lookup(var_name, current_scope_only=True):
+                raise SyntaxError("Duplicate identifier '%s' found" % var_name)
+            self.scope.define(VarSymbol(var_name, d.ctype, d.storage))
+            if d.init is not None:
+                self.visit(d.init)
 
     def visit_Function(self, node):
         decl_info = self.get_decl_infos(node.decl)[0]
         if decl_info.identifier.value == "main":
             if decl_info.ctype.ret != ctypes.integer:
                 raise TypeError("main must be of int type")
-        func_symbol = FunctionSymbol(decl_info.identifier.value, decl_info.ctype, decl_info.storage)
+        func_symbol = VarSymbol(decl_info.identifier.value, decl_info.ctype, decl_info.storage)
         self.scope.define(func_symbol)
         self.scope.add_decl(id(node), decl_info)
         procedure_scope = ScopedSymbolTable(
@@ -668,12 +652,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
         pass
 
     def visit_FuncCall(self, node):
-        func_name = node.func.identifier.value
-        func = self.scope.lookup(func_name)
-        if func is None:
-            raise NameError(repr(func_name))
-        if len(func.type.args) > len(node.args) or (len(func.type.args) != len(node.args) and not func.type.is_varargs):
-            raise NameError("Calling " + str(func.name) + " with wrong number of params")
+        self.visit(node.func)
         for a in node.args:
             self.visit(a)
 
@@ -691,6 +670,9 @@ class SymbolTableBuilder(ast.NodeVisitor):
         decl = self.get_decl_infos(node.type)[0]
         self.scope.add_decl(id(node), decl)
         self.visit(node.expr)
+
+    def visit_ObjMember(self, node):
+        self.visit(node.head)
 
     def visit_ObjPtrMember(self, node):
         self.visit(node.head)

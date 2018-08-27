@@ -1,4 +1,6 @@
 import wx
+import tty
+import termios
 import gui
 import sys
 import threading
@@ -75,10 +77,13 @@ class Emulator(gui.EmulatorFrame):
             0x37: (self.parse_inc_mem_long, self.run_inc_mem_long),
             0x38: (self.parse_dec_mem_short, self.run_dec_mem_short),
             0x39: (self.parse_dec_mem_long, self.run_dec_mem_long),
+            0x3a: (self.parse_jump_above, self.run_jump_above),
             0x3b: (self.parse_jump_above_equal, self.run_jump_above_equal),
             0x3c: (self.parse_jump_below, self.run_jump_below),
+            0x3d: (self.parse_jump_below_equal, self.run_jump_below_equal),
             0x3e: (self.parse_jump_lesser, self.run_jump_lesser),
             0x3f: (self.parse_jump_lesser_equal, self.run_jump_lesser_equal),
+            0x40: (self.parse_jump_greater, self.run_jump_greater),
             0x41: (self.parse_jump_greater_equal, self.run_jump_greater_equal),
             0x42: (self.parse_mul_const_reg, self.run_mul_const_reg),
             0x43: (self.parse_mul_reg_reg, self.run_mul_reg_reg),
@@ -92,6 +97,16 @@ class Emulator(gui.EmulatorFrame):
             0x4b: (self.parse_mod_reg_reg, self.run_mod_reg_reg),
             0x4c: (self.parse_mod_mem_reg_short, self.run_mod_mem_reg_short),
             0x4d: (self.parse_mod_mem_reg_long, self.run_mod_mem_reg_long),
+            0x4e: (self.parse_set_zero, self.run_set_zero),
+            0x4f: (self.parse_set_not_zero, self.run_set_not_zero),
+            0x50: (self.parse_set_above, self.run_set_above),
+            0x51: (self.parse_set_above_equal, self.run_set_above_equal),
+            0x52: (self.parse_set_below, self.run_set_below),
+            0x53: (self.parse_set_below_equal, self.run_set_below_equal),
+            0x54: (self.parse_set_lesser, self.run_set_lesser),
+            0x55: (self.parse_set_lesser_equal, self.run_set_lesser_equal),
+            0x56: (self.parse_set_greater, self.run_set_greater),
+            0x57: (self.parse_set_greater_equal, self.run_set_greater_equal),
             0x82: (self.parse_return, self.run_return),
             0x83: (self.parse_exit, self.run_exit),
         }
@@ -113,6 +128,9 @@ class Emulator(gui.EmulatorFrame):
         parser = bbcvmld.parser.Parser(code)
         self.exec = parser.parse()
 
+        self.regs = [bytearray([0, 0])] * 16
+        self.mem = bytearray([0]) * 0x8000
+        self.cur_breakpoints = []
         self.mem = self.mem[:self.START_ADDR] + self.exec.code + self.mem[self.START_ADDR+len(self.exec.code):]
         self.set_reg(14, self.START_ADDR)
 
@@ -122,21 +140,21 @@ class Emulator(gui.EmulatorFrame):
         prev_state = self.cur_state
         while True:
             if self.cur_state == self.STATE_STEP:
-                self.step()
                 prev_state = self.cur_state
+                self.step()
                 self.cur_state = self.STATE_STOP
             elif self.cur_state == self.STATE_STEP_OVER:
+                prev_state = self.cur_state
                 if self.is_subroutine():
                     next_addr = self.addr_after_subroutine()
                     while self.get_pc() != next_addr and self.cur_state == self.STATE_STEP_OVER:
                         self.step()
                 else:
                     self.step()
-                prev_state = self.cur_state
                 self.cur_state = self.STATE_STOP
             elif self.cur_state == self.STATE_RUN:
-                self.step()
                 prev_state = self.cur_state
+                self.step()
             else:
                 if self.cur_state != prev_state:
                     wx.CallAfter(self.update)
@@ -382,6 +400,7 @@ class Emulator(gui.EmulatorFrame):
 
     def parse_default(self):
         inst = self.get_inst()
+        self.cur_state = self.STATE_STOP
         return f"Invalid instruction ({inst:#06x})"
 
     # Running
@@ -1079,6 +1098,14 @@ class Emulator(gui.EmulatorFrame):
         reg, _ = self.get_reg_params(self.peek_byte(1))
         return f"calln {addr} {label}, %r{reg}"
 
+    def raw_read(self):
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
     def run_call_native(self):
         addr = self.get_mem_address()
         reg, _ = self.get_reg_params(self.peek_byte(1))
@@ -1088,7 +1115,7 @@ class Emulator(gui.EmulatorFrame):
             sys.stdout.write(chr(self.get_reg(reg) & 0xFF))
             sys.stdout.flush()
         elif addr == 0xFFE0:
-            char = sys.stdin.read(1)
+            char = self.raw_read()
             self.set_reg(reg, ord(char[0]))
 
     def parse_jump(self):
@@ -1135,6 +1162,20 @@ class Emulator(gui.EmulatorFrame):
         label = self.get_export_for_address(addr_num)
         return f"jae {addr} {label}"
 
+    def parse_jump_above(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        return f"ja {addr} {label}"
+
+    def run_jump_above(self):
+        addr = self.get_mem_address()
+
+        if self.get_flag(self.CARRY):
+            self.inc_pc(3)
+        else:
+            self.set_pc(addr - 1)
+
     def run_jump_above_equal(self):
         addr = self.get_mem_address()
 
@@ -1153,6 +1194,20 @@ class Emulator(gui.EmulatorFrame):
         addr = self.get_mem_address()
 
         if self.get_flag(self.ZERO) or not self.get_flag(self.CARRY):
+            self.inc_pc(3)
+        else:
+            self.set_pc(addr - 1)
+
+    def parse_jump_below_equal(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        return f"jbe {addr} {label}"
+
+    def run_jump_below_equal(self):
+        addr = self.get_mem_address()
+
+        if not self.get_flag(self.CARRY):
             self.inc_pc(3)
         else:
             self.set_pc(addr - 1)
@@ -1185,6 +1240,20 @@ class Emulator(gui.EmulatorFrame):
         else:
             self.set_pc(addr - 1)
 
+    def parse_jump_greater(self):
+        addr = self.get_mem_address_str()
+        addr_num = self.get_mem_address()
+        label = self.get_export_for_address(addr_num)
+        return f"jg {addr} {label}"
+
+    def run_jump_greater(self):
+        addr = self.get_mem_address()
+
+        if not (self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN)):
+            self.inc_pc(3)
+        else:
+            self.set_pc(addr - 1)
+
     def parse_jump_greater_equal(self):
         addr = self.get_mem_address_str()
         addr_num = self.get_mem_address()
@@ -1198,6 +1267,136 @@ class Emulator(gui.EmulatorFrame):
             self.inc_pc(3)
         else:
             self.set_pc(addr - 1)
+
+    def parse_set_zero(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sze %r{reg}"
+
+    def run_set_zero(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if not self.get_flag(self.ZERO):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_not_zero(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sne %r{reg}"
+
+    def run_set_not_zero(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if self.get_flag(self.ZERO):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_above_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sae %r{reg}"
+
+    def parse_set_above(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sa %r{reg}"
+
+    def run_set_above(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if self.get_flag(self.CARRY):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def run_set_above_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if self.get_flag(self.CARRY) and not self.get_flag(self.ZERO):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_below(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sb %r{reg}"
+
+    def run_set_below(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if self.get_flag(self.ZERO) or not self.get_flag(self.CARRY):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_below_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sbe %r{reg}"
+
+    def run_set_below_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if not self.get_flag(self.CARRY):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_lesser(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sl %r{reg}"
+
+    def run_set_lesser(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN) or self.get_flag(self.ZERO):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_lesser_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sle %r{reg}"
+
+    def run_set_lesser_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_greater(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sg %r{reg}"
+
+    def run_set_greater(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if not (self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN)):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
+
+    def parse_set_greater_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sge %r{reg}"
+
+    def run_set_greater_equal(self):
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        self.inc_pc(1)
+
+        if not ((self.get_flag(self.OVERFLOW) ^ self.get_flag(self.SIGN)) or self.get_flag(self.ZERO)):
+            self.set_reg(reg, 0)
+        else:
+            self.set_reg(reg, 1)
 
     @staticmethod
     def parse_return():

@@ -4,6 +4,7 @@
 #include "common.h"
 
 int growCapacity(int oldCapacity);
+int shrinkCapacity(int oldCapacity, int count);
 void* reallocate(void* previous, size_t newSize);
 
 #endif

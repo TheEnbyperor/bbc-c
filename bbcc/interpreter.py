@@ -1,4 +1,5 @@
 import itertools
+import copy
 from . import ast
 from . import il
 from . import ctypes
@@ -13,6 +14,7 @@ class Interpreter(ast.NodeVisitor):
         self.current_scope = ""
         self.branch_count = 1
         self.current_function = None
+        self.visit_raw = False
         self.current_loop = {
             "start": "",
             "end": ""
@@ -94,38 +96,62 @@ class Interpreter(ast.NodeVisitor):
         self.current_scope = old_scope
 
     def visit_FuncCall(self, node):
-        func_name = node.func.identifier.value
-        func = self.scope.lookup(func_name, self.current_scope)
+        self.visit_raw = True
+        func = self.visit(node.func)
+        self.visit_raw = False
+
+        if (not func.type.is_function()) and (not func.type.is_pointer() or not func.type.arg.is_function()):
+            raise SyntaxError("Called object is not a function pointer")
+
+        if func.type.is_pointer():
+            func_type = func.type.arg
+        else:
+            func_type = func.type
+        func = func.val(self.il)
 
         args = []
-        for a, fa in itertools.zip_longest(node.args, func.type.args):
+        if func_type.is_varargs:
+            if len(node.args) < len(func_type.args):
+                raise SyntaxError(f"Not enough parameters for {func.name}")
+        else:
+            if len(node.args) != len(func_type.args):
+                raise SyntaxError(f"Wrong number parameters for {func.name}")
+
+        for a, fa in itertools.zip_longest(node.args, func_type.args):
             arg = self.visit(a)
-            if arg.type.is_array():
-                arg = arg.addr(self.il)
 
             arg_val = arg.val(self.il)
             if fa is not None:
                 arg_val = self._set_type(arg_val, fa)
             args.append(arg_val)
 
-        output = il.ILValue(func.type.ret)
-        self.il.add(il.CallFunction(func_name, args, output))
+        output = il.ILValue(func_type.ret)
+        self.il.add(il.CallFunction(func, args, output))
         return output
+
+    def lvalue(self, val):
+        if not self.visit_raw:
+            if val.type.is_array() or val.type.is_function():
+                addr = val.addr(self.il)
+                if val.type.is_array():
+                    addr.type = ctypes.PointerCType(val.type.el)
+                return addr
+        return val
 
     def visit_Identifier(self, node):
         var_name = node.identifier.value
         val = self.scope.lookup(var_name, self.current_scope)
-        return ast.DirectLValue(val.il_value)
+        return self.lvalue(ast.DirectLValue(val.il_value))
 
     def visit_Number(self, node):
         il_value = il.ILValue(ctypes.integer)
         self.il.register_literal_value(il_value, node.number)
-        return il_value
+        return self.lvalue(il_value)
 
     def visit_String(self, node):
         il_value = il.ILValue(ctypes.ArrayCType(ctypes.char, len(node.chars)))
         self.il.register_literal_string(il_value, node.chars)
-        return ast.DirectLValue(il_value)
+        return self.lvalue(ast.DirectLValue(il_value))
 
     def make_const_int(self, node):
         if isinstance(node, ast.Number):
@@ -135,6 +161,8 @@ class Interpreter(ast.NodeVisitor):
             right = self.make_const_int(node.right)
             if left is not None and right is not None:
                 return left + right
+            else:
+                return None
         else:
             return None
 
@@ -277,7 +305,19 @@ class Interpreter(ast.NodeVisitor):
 
         output = il.ILValue(left.type)
 
-        if left.type.is_pointer():
+        if left.type.is_pointer() and right.type.is_pointer():
+            if not left.type.is_complete() or not right.type.is_complete():
+                raise SyntaxError("Pointer arithmetic on incomplete type")
+            if left.type.arg.size != 1:
+                offset = il.ILValue(ctypes.unsig_int)
+                self.il.add(il.Sub(left_val, right_val, offset))
+
+                type_len = il.ILValue(ctypes.unsig_char)
+                self.il.register_literal_value(type_len, left.type.arg.size)
+                self.il.add(il.Div(offset, type_len, output))
+            else:
+                self.il.add(il.Sub(left_val, right_val, output))
+        elif left.type.is_pointer():
             if not left.type.is_complete():
                 raise SyntaxError("Pointer arithmetic on incomplete type")
             if left.type.arg.size != 1:
@@ -318,25 +358,30 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_BoolAnd(self, node):
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
-        init = il.ILValue(ctypes.char)
+        init = il.ILValue(ctypes.bool_t)
         self.il.register_literal_value(init, 0)
-        other = il.ILValue(ctypes.char)
+        other = il.ILValue(ctypes.bool_t)
         self.il.register_literal_value(other, 1)
 
-        set_out = self.il.get_label()
         end = self.il.get_label()
 
         self.il.add(il.Set(init, output))
 
-        left_conition, left_jmp_inst = self.simplify_condition(node.left)
-        left_conition = left_conition.val(self.il)
-        self.il.add(left_jmp_inst(left_conition, end))
+        def parse_left(left):
+            if isinstance(left, ast.BoolAnd):
+                parse_left(left.left)
+                jmp_inst = self.simplify_condition(left.right, end)
+                self.il.add(jmp_inst)
+            else:
+                jmp_inst = self.simplify_condition(left, end)
+                self.il.add(jmp_inst)
 
-        right_condition, right_jmp_inst = self.simplify_condition(node.right)
-        right_condition = right_condition.val(self.il)
-        self.il.add(right_jmp_inst(right_condition, end))
+        parse_left(node.left)
+
+        right_jmp_inst = self.simplify_condition(node.right, end)
+        self.il.add(right_jmp_inst)
 
         self.il.add(il.Set(other, output))
         self.il.add(il.Label(end))
@@ -344,46 +389,50 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_BoolOr(self, node):
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
-        init = il.ILValue(ctypes.char)
-        self.il.register_literal_value(init, 0)
-        other = il.ILValue(ctypes.char)
-        self.il.register_literal_value(other, 1)
-
-        set_out = self.il.get_label()
-        end = self.il.get_label()
-
-        self.il.add(il.Set(init, output))
-
-        left = self.visit(node.left).val(self.il)
-        self.il.add(il.JmpNotZero(left, set_out))
-
-        right = self.visit(node.right).val(self.il)
-        self.il.add(il.JmpNotZero(right, set_out))
-        self.il.add(il.Jmp(end))
-
-        self.il.add(il.Label(set_out))
-        self.il.add(il.Set(other, output))
-        self.il.add(il.Label(end))
-
-        return output
-
-    def visit_BoolNot(self, node):
-        output = il.ILValue(ctypes.char)
-
-        init = il.ILValue(ctypes.char)
+        init = il.ILValue(ctypes.bool_t)
         self.il.register_literal_value(init, 1)
-        other = il.ILValue(ctypes.char)
+        other = il.ILValue(ctypes.bool_t)
         self.il.register_literal_value(other, 0)
 
         end = self.il.get_label()
 
         self.il.add(il.Set(init, output))
 
-        condition, jmp_inst = self.simplify_condition(node.expr)
-        condition = condition.val(self.il)
-        self.il.add(jmp_inst(condition, end))
+        def parse_left(left):
+            if isinstance(left, ast.BoolOr):
+                parse_left(left.left)
+                jmp_inst = self.simplify_condition(left.right, end, False)
+                self.il.add(jmp_inst)
+            else:
+                jmp_inst = self.simplify_condition(left, end, False)
+                self.il.add(jmp_inst)
+
+        parse_left(node.left)
+
+        jmp_inst = self.simplify_condition(node.right, end, False)
+        self.il.add(jmp_inst)
+
+        self.il.add(il.Set(other, output))
+        self.il.add(il.Label(end))
+
+        return output
+
+    def visit_BoolNot(self, node):
+        output = il.ILValue(ctypes.bool_t)
+
+        init = il.ILValue(ctypes.bool_t)
+        self.il.register_literal_value(init, 1)
+        other = il.ILValue(ctypes.bool_t)
+        self.il.register_literal_value(other, 0)
+
+        end = self.il.get_label()
+
+        self.il.add(il.Set(init, output))
+
+        jmp_inst = self.simplify_condition(node.expr, end)
+        self.il.add(jmp_inst)
         self.il.add(il.Set(other, output))
         self.il.add(il.Label(end))
 
@@ -437,23 +486,21 @@ class Interpreter(ast.NodeVisitor):
         return output
 
     def visit_Conditional(self, node):
-        condition, jmp_inst = self.simplify_condition(node.condition)
-        condition = condition.val(self.il)
-        left = self.visit(node.statement)
-        right = self.visit(node.else_statement)
-
-        max_len = max([left.type, right.type], key=lambda v: v.size)
-        output = il.ILValue(max_len)
-
         else_label = self.il.get_label()
+        else_end_label = self.il.get_label()
 
-        self.il.add(jmp_inst(condition, else_label))
+        jmp_inst = self.simplify_condition(node.condition, else_label)
+        self.il.add(jmp_inst)
+
+        left = self.visit(node.statement)
+        output = il.ILValue(left.type)
+
         left_val = left.val(self.il)
         self.il.add(il.Set(left_val, output))
-        else_end_label = self.il.get_label()
         self.il.add(il.Jmp(else_end_label))
 
         self.il.add(il.Label(else_label))
+        right = self.visit(node.else_statement)
         right_val = right.val(self.il)
         self.il.add(il.Set(right_val, output))
         self.il.add(il.Label(else_end_label))
@@ -463,7 +510,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Equality(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
         self.il.add(il.EqualCmp(left, right, output))
         return output
@@ -471,7 +518,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_Inequality(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
         self.il.add(il.NotEqualCmp(left, right, output))
         return output
@@ -479,7 +526,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_LessThan(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
         self.il.add(il.LessThanCmp(left, right, output))
         return output
@@ -488,7 +535,7 @@ class Interpreter(ast.NodeVisitor):
 
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
         self.il.add(il.MoreThanCmp(left, right, output))
         return output
@@ -496,7 +543,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_LessEqual(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
         self.il.add(il.LessEqualCmp(left, right, output))
         return output
@@ -504,7 +551,7 @@ class Interpreter(ast.NodeVisitor):
     def visit_MoreEqual(self, node):
         left = self.visit(node.left).val(self.il)
         right = self.visit(node.right).val(self.il)
-        output = il.ILValue(ctypes.char)
+        output = il.ILValue(ctypes.bool_t)
 
         self.il.add(il.MoreEqualCmp(left, right, output))
         return output
@@ -558,7 +605,7 @@ class Interpreter(ast.NodeVisitor):
         else:
             one = il.ILValue(expr.type)
             self.il.register_literal_value(one, 1)
-            self.il.add(il.Sub(one, value, new_val))
+            self.il.add(il.Sub(value, one, new_val))
             expr.set_to(new_val, self.il)
         return value
 
@@ -577,7 +624,7 @@ class Interpreter(ast.NodeVisitor):
         else:
             one = il.ILValue(expr.type)
             self.il.register_literal_value(one, 1)
-            self.il.add(il.Sub(one, value, new_val))
+            self.il.add(il.Sub(value, one, new_val))
             expr.set_to(new_val, self.il)
         return output
 
@@ -592,6 +639,22 @@ class Interpreter(ast.NodeVisitor):
         offset = il.ILValue(ctypes.unsig_int)
         self.il.register_literal_value(offset, 0)
         return ast.IndirectLValue(value.val(self.il), value.type.arg, offset)
+
+    def visit_ObjMember(self, node):
+        head = self.visit(node.head)
+        if not head.type.is_struct_union():
+            raise SyntaxError("Object is not struct or union")
+
+        member = node.member
+        offset = head.type.get_offset(member)
+        if offset[0] is None:
+            raise SyntaxError(f"{member} is not a member of the struct")
+
+        offset_val = il.ILValue(ctypes.unsig_char)
+        self.il.register_literal_value(offset_val, offset[0])
+
+        val = head.addr(self.il)
+        return ast.IndirectLValue(val, offset[1], offset_val)
 
     def visit_ObjPtrMember(self, node):
         head = self.visit(node.head)
@@ -613,7 +676,6 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_ArraySubsc(self, node):
         head = self.visit(node.head)
-        arg = self.visit(node.arg).val(self.il)
 
         htype = None
         if head.type.is_array():
@@ -623,30 +685,89 @@ class Interpreter(ast.NodeVisitor):
             htype = head.type.arg
             head_val = head.val(self.il)
 
-        if htype.size != 1:
-            type_len = il.ILValue(ctypes.unsig_char)
-            self.il.register_literal_value(type_len, htype.size)
+        const_arg = self.make_const_int(node.arg)
 
-            offset = il.ILValue(ctypes.unsig_int)
-            self.il.add(il.Mult(type_len, arg, offset))
+        if const_arg is None:
+            arg = self.visit(node.arg).val(self.il)
+            if htype.size != 1:
+                type_len = il.ILValue(ctypes.unsig_char)
+                self.il.register_literal_value(type_len, htype.size)
+
+                offset = il.ILValue(ctypes.unsig_int)
+                self.il.add(il.Mult(type_len, arg, offset))
+            else:
+                offset = arg
         else:
-            offset = arg
+            offset = il.ILValue(ctypes.unsig_int)
+            self.il.register_literal_value(offset, const_arg*htype.size)
 
         return ast.IndirectLValue(head_val, htype, offset)
 
-    def simplify_condition(self, condition):
+    def simplify_condition(self, condition, label, inverse=True):
+        if isinstance(condition, ast.ParenExpr):
+            condition = condition.expr
+
         if isinstance(condition, ast.BoolNot):
-            return self.simplify_condition(condition.expr)[0], il.JmpNotZero
+            return self.simplify_condition(condition.expr, label, not inverse)
+        elif isinstance(condition, ast.Equality):
+            left = self.visit(condition.left)
+            right = self.visit(condition.right)
+
+            if inverse:
+                return il.NotEqualJmp(left.val(self.il), right.val(self.il), label)
+            else:
+                return il.EqualJmp(left.val(self.il), right.val(self.il), label)
+        elif isinstance(condition, ast.Inequality):
+            left = self.visit(condition.left)
+            right = self.visit(condition.right)
+
+            if inverse:
+                return il.EqualJmp(left.val(self.il), right.val(self.il), label)
+            else:
+                return il.NotEqualJmp(left.val(self.il), right.val(self.il), label)
+        elif isinstance(condition, ast.MoreEqual):
+            left = self.visit(condition.left)
+            right = self.visit(condition.right)
+
+            if inverse:
+                return il.LessThanJmp(left.val(self.il), right.val(self.il), label)
+            else:
+                return il.MoreEqualJmp(left.val(self.il), right.val(self.il), label)
+        elif isinstance(condition, ast.MoreThan):
+            left = self.visit(condition.left)
+            right = self.visit(condition.right)
+
+            if inverse:
+                return il.LessEqualJmp(left.val(self.il), right.val(self.il), label)
+            else:
+                return il.MoreThanJmp(left.val(self.il), right.val(self.il), label)
+        elif isinstance(condition, ast.LessEqual):
+            left = self.visit(condition.left)
+            right = self.visit(condition.right)
+
+            if inverse:
+                return il.MoreThanJmp(left.val(self.il), right.val(self.il), label)
+            else:
+                return il.LessEqualJmp(left.val(self.il), right.val(self.il), label)
+        elif isinstance(condition, ast.LessThan):
+            left = self.visit(condition.left)
+            right = self.visit(condition.right)
+
+            if inverse:
+                return il.MoreEqualJmp(left.val(self.il), right.val(self.il), label)
+            else:
+                return il.LessThanJmp(left.val(self.il), right.val(self.il), label)
         else:
-            return self.visit(condition), il.JmpZero
+            if inverse:
+                return il.JmpZero(self.visit(condition).val(self.il), label)
+            else:
+                return il.JmpNotZero(self.visit(condition).val(self.il), label)
 
     def visit_IfStatement(self, node):
-        condition, jmp_inst = self.simplify_condition(node.condition)
-        condition = condition.val(self.il)
-
         end_label = self.il.get_label()
+        jmp_inst = self.simplify_condition(node.condition, end_label)
+        self.il.add(jmp_inst)
 
-        self.il.add(jmp_inst(condition, end_label))
         self.visit(node.statement)
         if node.else_statement is not None:
             else_end_label = self.il.get_label()
@@ -663,11 +784,11 @@ class Interpreter(ast.NodeVisitor):
         end_label = self.il.get_label()
 
         self.il.add(il.Label(start_label))
-        condition, jmp_inst = self.simplify_condition(node.condition)
-        condition = condition.val(self.il)
 
-        self.il.add(jmp_inst(condition, end_label))
+        jmp_inst = self.simplify_condition(node.condition, end_label)
+        self.il.add(jmp_inst)
 
+        old_loop = copy.copy(self.current_loop)
         self.current_loop["start"] = start_label
         self.current_loop["end"] = end_label
         self.visit(node.statement)
@@ -675,6 +796,7 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Jmp(start_label))
 
         self.il.add(il.Label(end_label))
+        self.current_loop = old_loop
 
     def visit_DoWhileStatement(self, node):
         start_label = self.il.get_label()
@@ -682,16 +804,17 @@ class Interpreter(ast.NodeVisitor):
 
         self.il.add(il.Label(start_label))
 
+        old_loop = copy.copy(self.current_loop)
         self.current_loop["start"] = start_label
         self.current_loop["end"] = end_label
         self.visit(node.statement)
 
-        condition, jmp_inst = self.simplify_condition(node.condition)
-        condition = condition.val(self.il)
-        self.il.add(jmp_inst(condition, end_label))
+        jmp_inst = self.simplify_condition(node.condition, end_label)
+        self.il.add(jmp_inst)
         self.il.add(il.Jmp(start_label))
 
         self.il.add(il.Label(end_label))
+        self.current_loop = old_loop
         
     def visit_ForStatement(self, node):
         start_label = self.il.get_label()
@@ -703,10 +826,10 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.Label(start_label))
 
         if node.second:
-            condition, jmp_inst = self.simplify_condition(node.second)
-            condition = condition.val(self.il)
-            self.il.add(jmp_inst(condition, end_label))
+            jmp_inst = self.simplify_condition(node.second, end_label)
+            self.il.add(jmp_inst)
 
+        old_loop = copy.copy(self.current_loop)
         self.current_loop["start"] = mod_label
         self.current_loop["end"] = end_label
         self.visit(node.statement)
@@ -717,6 +840,7 @@ class Interpreter(ast.NodeVisitor):
 
         self.il.add(il.Jmp(start_label))
         self.il.add(il.Label(end_label))
+        self.current_loop = old_loop
         
     def visit_Break(self, node):
         if self.current_loop["end"] == "":
@@ -740,7 +864,9 @@ class Interpreter(ast.NodeVisitor):
         return val
 
     def visit_Sizeof(self, node):
+        self.visit_raw = True
         node_val = self.visit(node.expr)
+        self.visit_raw = False
         val = il.ILValue(ctypes.unsig_int)
         self.il.register_literal_value(val, node_val.type.size)
         return val
@@ -769,7 +895,7 @@ class Interpreter(ast.NodeVisitor):
         if il_value.type.is_void():
             raise RuntimeError("Can't do anything with void type")
         if il_value.type == ctype:
-            return il_value.val(self.il)
+            return self.lvalue(il_value.val(self.il))
         else:
             output = il.ILValue(ctype)
             if isinstance(il_value, il.ILValue):

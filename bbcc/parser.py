@@ -574,7 +574,10 @@ class Parser:
     def parse_intializer_list(self, index):
         inits = []
         while True:
-            init, index = self.parse_initializer(index)
+            try:
+              init, index = self.parse_initializer(index)
+            except SyntaxError:
+                break
             inits.append(init)
             if not self.token_is(index, COMMA):
                 break
@@ -844,20 +847,16 @@ class Parser:
         elif start + 1 == end and self.tokens[start].type == ID:
             return decl_tree.Identifier(self.tokens[start])
 
-        # First and last elements make a parenthesis pair
-        elif self.tokens[start].type == LPAREM and self.find_pair_forward(start) == end - 1:
-            return self.parse_declarator(start + 1, end - 1)
-
         elif self.tokens[start].type == STAR:
             return decl_tree.Pointer(self.parse_declarator(start + 1, end))
 
-        # Last element indicates a function type
-        elif self.tokens[end - 1].type == RPAREM:
-            open_paren = self.find_pair_backward(end - 1)
-            params, index = self.parse_parameter_list(open_paren + 1)
-            if index == end - 1:
-                return decl_tree.Function(
-                    params, self.parse_declarator(start, open_paren))
+        func_decl = self.try_parse_func_decl(start, end)
+        if func_decl:
+            return func_decl
+
+        # First and last elements make a parenthesis pair
+        elif self.tokens[start].type == LPAREM and self.find_pair_forward(start) == end - 1:
+            return self.parse_declarator(start + 1, end - 1)
 
         # Last element indicates an array type
         elif self.tokens[end - 1].type == RBRACK:
@@ -869,6 +868,19 @@ class Parser:
                 return decl_tree.Array(None, self.parse_declarator(start, end - 2))
 
         self.error()
+
+    def try_parse_func_decl(self, start, end):
+        if self.tokens[end - 1].type != RPAREM:
+            return None
+        open_paren = self.find_pair_backward(end - 1)
+        try:
+            params, index = self.parse_parameter_list(open_paren + 1)
+            if index == end - 1:
+                return decl_tree.Function(
+                    params, self.parse_declarator(start, open_paren))
+        except SyntaxError:
+            pass
+        return None
 
     def parse_parameter_list(self, index):
         """Parse a function parameter list.

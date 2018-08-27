@@ -17,10 +17,20 @@ void strrev(char *s) {
 
 int strcmp(char s1[], char s2[]) {
     int i;
-    for (i = 0; s1[i] == s2[i]; i++) {
+    for (i = 0; s1[i] == s2[i]; ++i) {
         if (s1[i] == '\0') return 0;
     }
     return s1[i] - s2[i];
+}
+
+int memcmp(const void *str1, const void *str2, unsigned int n) {
+  char *s1, *s2;
+  s1 = str1;
+  s2 = str2;
+  for (unsigned int i = 0; s1[i] == s2[i]; ++i) {
+    if ((i + 1) == n) return 0;
+  }
+  return s1[i] - s2[i];
 }
 
 void *memset(char *s, char c, unsigned int n) {
