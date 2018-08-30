@@ -1,4 +1,6 @@
 #include "memory.h"
+#include "object.h"
+#include "vm.h"
 #include "stdlib.h"
 
 int growCapacity(int oldCapacity) {
@@ -16,4 +18,22 @@ void* reallocate(void* previous, size_t newSize) {
   }
 
   return realloc(previous, newSize);
+}
+
+static void freeObject(struct Obj* object) {
+    ObjType type = object->type;
+    if (type == OBJ_STRING) {
+        struct ObjString *string = (struct ObjString *) object;
+        reallocate(string->chars, 0);
+        reallocate(object, 0);
+    }
+}
+
+void freeObjects(struct VM *vm) {
+    struct Obj *object = vm->objects;
+    while (object != NULL) {
+        struct Obj *next = object->next;
+        freeObject(object);
+        object = next;
+    }
 }

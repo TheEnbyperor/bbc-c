@@ -2,6 +2,7 @@
 #define bbc_python_vm_h
 
 #include "chunk.h"
+#include "object.h"
 
 #define InterpretResult unsigned int
 #define INTERPRET_OK 0
@@ -18,6 +19,7 @@ struct VM {
   struct Chunk* chunk;
   uint8_t* ip;
   struct Stack stack;
+  struct Obj* objects;
 };
 
 void initStack(struct Stack* stack);

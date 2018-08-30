@@ -11,7 +11,7 @@ import bbcvmld
 
 
 class Emulator(gui.EmulatorFrame):
-    START_ADDR = 0x1900
+    START_ADDR = 0x0
     CARRY = 0b0001
     ZERO = 0b0010
     SIGN = 0b0100

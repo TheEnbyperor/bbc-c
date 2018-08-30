@@ -20,7 +20,7 @@ int main() {
   struct VM vm;
   initVM(&vm);
 
-  repl(vm);
+  repl(&vm);
 
   freeVM(&vm);
   return 0;

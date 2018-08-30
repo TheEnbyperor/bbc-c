@@ -855,7 +855,7 @@ constantInstruction:
 // ReadAt
 	mov WORD 4[%r0], %r0
 // Mult
-	mov #4, %r1
+	mov #3, %r1
 	mul %r2, %r1
 // Add
 	add %r1, %r0
@@ -920,7 +920,7 @@ longConstantInstruction:
 // ReadAt
 	mov WORD 4[%r0], %r0
 // Mult
-	mov #4, %r1
+	mov #3, %r1
 	mul %r2, %r1
 // Add
 	add %r1, %r0

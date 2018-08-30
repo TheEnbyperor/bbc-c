@@ -35,11 +35,13 @@ struct Parser {
   bool hadError;
   bool panicMode;
   struct Chunk *currentChunk;
+  struct Scanner *scanner;
+  struct VM *vm;
 };
 
 struct ParseRule {
-  void (*prefix)(struct Parser *parser, struct Scanner *scanner);
-  void (*suffix)(struct Parser *parser, struct Scanner *scanner);
+  void (*prefix)(struct Parser *parser);
+  void (*suffix)(struct Parser *parser);
   Precedence precedence;
 };
 
@@ -77,12 +79,12 @@ static void error(struct Parser *parser, const char* message) {
   errorAt(parser, &parser->previous, message);
 }
 
-static void advance(struct Parser *parser, struct Scanner *scanner) {
+static void advance(struct Parser *parser) {
   parser->previous = parser->current;
 
   for (;;) {
     struct Token token;
-    scanToken(scanner, &token);
+    scanToken(parser->scanner, &token);
 
     #ifdef DEBUG_PRINT_TOKENS
       printf("%04u %02u ", token.line, token.type);
@@ -99,9 +101,9 @@ static void advance(struct Parser *parser, struct Scanner *scanner) {
   }
 }
 
-static void consume(struct Parser *parser, struct Scanner *scanner, TokenType type, const char* message) {
+static void consume(struct Parser *parser, TokenType type, const char* message) {
   if (parser->current.type == type) {
-    advance(parser, scanner);
+    advance(parser);
     return;
   }
 
@@ -148,7 +150,7 @@ static void endCompiler(struct Parser *parser) {
 
 static void expression();
 static struct ParseRule* getRule(TokenType type);
-static void parsePrecedence(struct Parser *parser, struct Scanner *scanner, Precedence precedence);
+static void parsePrecedence(struct Parser *parser, Precedence precedence);
 
 static void number(struct Parser *parser) {
   struct Value value;
@@ -157,20 +159,25 @@ static void number(struct Parser *parser) {
   intVal(number, &value);
   emitConstant(parser, &value);
 }
-
-static void newline(struct Parser *parser, struct Scanner *scanner) {
+static void string(struct Parser *parser) {
+  struct Value value;
+  objVal(copyString(parser->previous.start + 1, parser->previous.length - 2, parser->vm), &value);
+  emitConstant(parser, &value);
 }
 
-static void grouping(struct Parser *parser, struct Scanner *scanner) {
-  expression(parser, scanner);
-  consume(parser, scanner, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+static void newline(struct Parser *parser) {
 }
 
-static void binary(struct Parser *parser, struct Scanner *scanner) {
+static void grouping(struct Parser *parser) {
+  expression(parser);
+  consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+}
+
+static void binary(struct Parser *parser) {
   TokenType operatorType = parser->previous.type;
 
   struct ParseRule* rule = getRule(operatorType);
-  parsePrecedence(parser, scanner, (Precedence)(rule->precedence + 1));
+  parsePrecedence(parser, (Precedence)(rule->precedence + 1));
 
   if (operatorType == TOKEN_PLUS) {
     emitByte(parser, OP_ADD);
@@ -195,10 +202,10 @@ static void binary(struct Parser *parser, struct Scanner *scanner) {
   }
 }
 
-static void unary(struct Parser *parser, struct Scanner *scanner) {
+static void unary(struct Parser *parser) {
   TokenType operatorType = parser->previous.type;
 
-  parsePrecedence(parser, scanner, PREC_UNARY);
+  parsePrecedence(parser, PREC_UNARY);
 
   if (operatorType == TOKEN_MINUS) {
     emitByte(parser, OP_NEGATE);
@@ -207,7 +214,7 @@ static void unary(struct Parser *parser, struct Scanner *scanner) {
   }
 }
 
-static void literal(struct Parser *parser, struct Scanner *scanner) {
+static void literal(struct Parser *parser) {
   TokenType operatorType = parser->previous.type;
   struct Value value;
 
@@ -229,36 +236,37 @@ static struct ParseRule* getRule(TokenType type) {
   return &rules[type];
 }
 
-static void initRule(struct ParseRule *rule, void (*prefix)(struct Parser *parser, struct Scanner *scanner),
-                     void (*suffix)(struct Parser *parser, struct Scanner *scanner), Precedence precedence) {
+static void initRule(struct ParseRule *rule, void (*prefix)(struct Parser *parser),
+                     void (*suffix)(struct Parser *parser), Precedence precedence) {
   rule->prefix = prefix;
   rule->suffix = suffix;
   rule->precedence = precedence;
 }
 
-static void expression(struct Parser *parser, struct Scanner *scanner) {
-  parsePrecedence(parser, scanner, PREC_NEWLINE);
+static void expression(struct Parser *parser) {
+  parsePrecedence(parser, PREC_NEWLINE);
 }
 
-void parsePrecedence(struct Parser *parser, struct Scanner *scanner, Precedence precedence) {
-  advance(parser, scanner);
-  void (*prefixRule)(struct Parser *parser, struct Scanner *scanner) = (getRule(parser->previous.type))->prefix;
+void parsePrecedence(struct Parser *parser, Precedence precedence) {
+  advance(parser);
+  void (*prefixRule)(struct Parser *parser) = (getRule(parser->previous.type))->prefix;
   if (prefixRule == NULL) {
     error(parser, "Expect expression.");
     return;
   }
 
-  prefixRule(parser, scanner);
+  prefixRule(parser);
 
   while (precedence <= (getRule(parser->current.type))->precedence) {
-    advance(parser, scanner);
-    void (*suffixRule)(struct Parser *parser, struct Scanner *scanner) = (getRule(parser->previous.type))->suffix;
-    suffixRule(parser, scanner);
+    advance(parser);
+    void (*suffixRule)(struct Parser *parser) = (getRule(parser->previous.type))->suffix;
+    suffixRule(parser);
   }
 }
 
-bool compile(const char* source, struct Chunk *chunk) {
+bool compile(const char* source, struct Chunk *chunk, struct VM *vm) {
   initRule(&rules[TOKEN_NUMBER], number, NULL, PREC_NONE);
+  initRule(&rules[TOKEN_STRING], string, NULL, PREC_NONE);
   initRule(&rules[TOKEN_NONE], literal, NULL, PREC_NONE);
   initRule(&rules[TOKEN_TRUE], literal, NULL, PREC_NONE);
   initRule(&rules[TOKEN_FALSE], literal, NULL, PREC_NONE);
@@ -284,6 +292,8 @@ bool compile(const char* source, struct Chunk *chunk) {
   initScanner(&scanner, source);
 
   parser.currentChunk = chunk;
+  parser.scanner = &scanner;
+  parser.vm = vm;
   parser.hadError = false;
   parser.panicMode = false;
 
@@ -291,9 +301,9 @@ bool compile(const char* source, struct Chunk *chunk) {
     printf("START PARSE\n");
   #endif
 
-  advance(&parser, &scanner);
-  expression(&parser, &scanner);
-  consume(&parser, &scanner, TOKEN_EOF, "Expected end of expression.");
+  advance(&parser);
+  expression(&parser);
+  consume(&parser, TOKEN_EOF, "Expected end of expression.");
   endCompiler(&parser);
   return !parser.hadError;
 }

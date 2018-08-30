@@ -75,22 +75,23 @@ __bbcc_00000006:
 main:
 	push %r11
 	mov %r13, %r11
-	sub #10, %r13
+	sub #12, %r13
 // AddrOf
-	lea WORD -10[%r11], %r0
+	lea WORD -12[%r11], %r0
 // Set
 // CallFunction
 	push %r0
 	call [initVM]
 	add #2, %r13
+// AddrOf
+	lea WORD -12[%r11], %r0
 // Set
-	mov WORD -10[%r11], %r0
 // CallFunction
 	push %r0
 	call [repl]
 	add #2, %r13
 // AddrOf
-	lea WORD -10[%r11], %r0
+	lea WORD -12[%r11], %r0
 // Set
 // CallFunction
 	push %r0

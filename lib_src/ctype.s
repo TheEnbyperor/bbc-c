@@ -10,292 +10,292 @@
 .export isxdigit
 .export toupper
 .export tolower
-\ Function: isupper
+// Function: isupper
 isupper:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #0, %r0
-\ LessThanJmp
+// LessThanJmp
 	mov #65, %r1
 	cmp 4[%r11], %r1
 	jl [__bbcc_00000000]
-\ MoreThanJmp
+// MoreThanJmp
 	mov #90, %r1
 	cmp 4[%r11], %r1
 	jg [__bbcc_00000000]
-\ Set
+// Set
 	mov #1, %r0
-\ Label
+// Label
 __bbcc_00000000:
-\ Return
+// Return
 __bbcc_0000000e:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: islower
+// Function: islower
 islower:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #0, %r0
-\ LessThanJmp
+// LessThanJmp
 	mov #97, %r1
 	cmp 4[%r11], %r1
 	jl [__bbcc_00000001]
-\ MoreThanJmp
+// MoreThanJmp
 	mov #122, %r1
 	cmp 4[%r11], %r1
 	jg [__bbcc_00000001]
-\ Set
+// Set
 	mov #1, %r0
-\ Label
+// Label
 __bbcc_00000001:
-\ Return
+// Return
 __bbcc_0000000f:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: isalpha
+// Function: isalpha
 isalpha:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #1, %r1
-\ CallFunction
+// CallFunction
 	mov 4[%r11], %r0
 	push %r0
 	call [islower]
 	add #2, %r13
-\ JmpNotZero
+// JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000002]
-\ CallFunction
+// CallFunction
 	mov 4[%r11], %r0
 	push %r0
 	call [isupper]
 	add #2, %r13
-\ JmpNotZero
+// JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000002]
-\ Set
+// Set
 	mov #0, %r1
-\ Label
+// Label
 __bbcc_00000002:
-\ Return
+// Return
 	mov %r1, %r0
 __bbcc_00000010:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: isdigit
+// Function: isdigit
 isdigit:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #0, %r0
-\ LessThanJmp
+// LessThanJmp
 	mov #48, %r1
 	cmp 4[%r11], %r1
 	jl [__bbcc_00000003]
-\ MoreThanJmp
+// MoreThanJmp
 	mov #57, %r1
 	cmp 4[%r11], %r1
 	jg [__bbcc_00000003]
-\ Set
+// Set
 	mov #1, %r0
-\ Label
+// Label
 __bbcc_00000003:
-\ Return
+// Return
 __bbcc_00000011:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: isalnum
+// Function: isalnum
 isalnum:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #1, %r1
-\ CallFunction
+// CallFunction
 	mov 4[%r11], %r0
 	push %r0
 	call [isalpha]
 	add #2, %r13
-\ JmpNotZero
+// JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000004]
-\ CallFunction
+// CallFunction
 	mov 4[%r11], %r0
 	push %r0
 	call [isdigit]
 	add #2, %r13
-\ JmpNotZero
+// JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000004]
-\ Set
+// Set
 	mov #0, %r1
-\ Label
+// Label
 __bbcc_00000004:
-\ Return
+// Return
 	mov %r1, %r0
 __bbcc_00000012:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: isascii
+// Function: isascii
 isascii:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ LessEqualCmp
+// LessEqualCmp
 	mov #127, %r1
 	cmp 4[%r11], %r1
 	sle %r0
-\ Return
+// Return
 __bbcc_00000013:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: isblank
+// Function: isblank
 isblank:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #1, %r0
-\ EqualJmp
+// EqualJmp
 	mov #9, %r1
 	cmp 4[%r11], %r1
 	jze [__bbcc_00000005]
-\ EqualJmp
+// EqualJmp
 	mov #32, %r1
 	cmp 4[%r11], %r1
 	jze [__bbcc_00000005]
-\ Set
+// Set
 	mov #0, %r0
-\ Label
+// Label
 __bbcc_00000005:
-\ Return
+// Return
 __bbcc_00000014:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: iscntrl
+// Function: iscntrl
 iscntrl:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ LessThanCmp
+// LessThanCmp
 	mov #32, %r1
 	cmp 4[%r11], %r1
 	sl %r0
-\ Return
+// Return
 __bbcc_00000015:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: isspace
+// Function: isspace
 isspace:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ Set
+// Set
 	mov #1, %r0
-\ EqualJmp
+// EqualJmp
 	mov #32, %r1
 	cmp 4[%r11], %r1
 	jze [__bbcc_00000006]
-\ EqualJmp
+// EqualJmp
 	mov #10, %r1
 	cmp 4[%r11], %r1
 	jze [__bbcc_00000006]
-\ EqualJmp
+// EqualJmp
 	mov #9, %r1
 	cmp 4[%r11], %r1
 	jze [__bbcc_00000006]
-\ EqualJmp
+// EqualJmp
 	mov #13, %r1
 	cmp 4[%r11], %r1
 	jze [__bbcc_00000006]
-\ Set
+// Set
 	mov #0, %r0
-\ Label
+// Label
 __bbcc_00000006:
-\ Return
+// Return
 __bbcc_00000016:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: isxdigit
+// Function: isxdigit
 isxdigit:
 	push %r11
 	mov %r13, %r11
 	push %r1
 	push %r2
-\ Set
+// Set
 	mov #1, %r1
-\ CallFunction
+// CallFunction
 	mov 4[%r11], %r0
 	push %r0
 	call [isdigit]
 	add #2, %r13
-\ JmpNotZero
+// JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000007]
-\ Set
+// Set
 	mov #0, %r0
-\ LessThanJmp
+// LessThanJmp
 	mov #97, %r2
 	cmp 4[%r11], %r2
 	jl [__bbcc_00000008]
-\ MoreThanJmp
+// MoreThanJmp
 	mov #102, %r2
 	cmp 4[%r11], %r2
 	jg [__bbcc_00000008]
-\ Set
+// Set
 	mov #1, %r0
-\ Label
+// Label
 __bbcc_00000008:
-\ JmpNotZero
+// JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000007]
-\ Set
+// Set
 	mov #0, %r0
-\ LessThanJmp
+// LessThanJmp
 	mov #65, %r2
 	cmp 4[%r11], %r2
 	jl [__bbcc_00000009]
-\ MoreThanJmp
+// MoreThanJmp
 	mov #70, %r2
 	cmp 4[%r11], %r2
 	jg [__bbcc_00000009]
-\ Set
+// Set
 	mov #1, %r0
-\ Label
+// Label
 __bbcc_00000009:
-\ JmpNotZero
+// JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_00000007]
-\ Set
+// Set
 	mov #0, %r1
-\ Label
+// Label
 __bbcc_00000007:
-\ Return
+// Return
 	mov %r1, %r0
 __bbcc_00000017:
 	pop %r2
@@ -303,64 +303,64 @@ __bbcc_00000017:
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: toupper
+// Function: toupper
 toupper:
 	push %r11
 	mov %r13, %r11
 	push %r1
-\ CallFunction
+// CallFunction
 	mov 4[%r11], %r0
 	push %r0
 	call [islower]
 	add #2, %r13
-\ JmpZero
+// JmpZero
 	cmp #0, %r0
 	jze [__bbcc_0000000a]
-\ Neg
+// Neg
 	mov #-32, %r1
-\ And
+// And
 	mov %r1, %r0
 	and 4[%r11], %r0
-\ Set
-\ Jmp
+// Set
+// Jmp
 	jmp [__bbcc_0000000b]
-\ Label
+// Label
 __bbcc_0000000a:
-\ Set
+// Set
 	mov WORD 4[%r11], %r0
-\ Label
+// Label
 __bbcc_0000000b:
-\ Return
+// Return
 __bbcc_00000018:
 	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
-\ Function: tolower
+// Function: tolower
 tolower:
 	push %r11
 	mov %r13, %r11
-\ CallFunction
+// CallFunction
 	mov 4[%r11], %r0
 	push %r0
 	call [isupper]
 	add #2, %r13
-\ JmpZero
+// JmpZero
 	cmp #0, %r0
 	jze [__bbcc_0000000c]
-\ IncOr
+// IncOr
 	mov #32, %r0
 	or 4[%r11], %r0
-\ Set
-\ Jmp
+// Set
+// Jmp
 	jmp [__bbcc_0000000d]
-\ Label
+// Label
 __bbcc_0000000c:
-\ Set
+// Set
 	mov WORD 4[%r11], %r0
-\ Label
+// Label
 __bbcc_0000000d:
-\ Return
+// Return
 __bbcc_00000019:
 	mov %r11, %r13
 	pop %r11

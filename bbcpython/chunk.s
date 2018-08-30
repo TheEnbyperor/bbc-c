@@ -1,10 +1,10 @@
-.import initValueArray
-.import writeValueArray
-.import freeValueArray
 .import initLineInfoArray
 .import freeLineInfoArray
 .import getLastLine
 .import writeLine
+.import initValueArray
+.import writeValueArray
+.import freeValueArray
 .import growCapacity
 .import reallocate
 .export initChunk

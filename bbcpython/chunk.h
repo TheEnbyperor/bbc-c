@@ -2,8 +2,8 @@
 #define bbc_python_chunk_h
 
 #include "common.h"
-#include "value.h"
 #include "debug.h"
+#include "value.h"
 
 #define OpCode uint8_t
 
