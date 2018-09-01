@@ -66,6 +66,12 @@ inc 3(_r_pc)
 _inc_pc:
 rts
 
+inc_pc_4:
+jsr inc_pc
+jsr inc_pc
+jsr inc_pc
+jmp inc_pc
+
 _load_offset: .byte #0
 _load_byte_pc:
 clc
@@ -382,10 +388,7 @@ sta 2(_r_0),x
 iny
 jsr _load_byte_pc
 sta 3(_r_0),x
-jsr inc_pc
-jsr inc_pc
-jsr inc_pc
-jmp inc_pc
+jmp inc_pc_4
 
 // Moves register to register
 mov_reg_reg:
@@ -643,18 +646,25 @@ bcc _add_const_reg
 add_carry_const_reg:
 jsr load_carry_status
 _add_const_reg:
-lda $70,x
 ldy #1
-adc ($8C),y
-sta $70,x
+jsr _load_byte_pc
+sbc 0(_r_0),x
+sta 0(_r_0),x
 iny
-lda $71,x
-adc ($8C),y
-sta $71,x
+jsr _load_byte_pc
+sbc 1(_r_0),x
+sta 1(_r_0),x
+iny
+jsr
+sbc 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_pc
+sbc 3(_r_0),x
+sta 3(_r_0),x
 jsr set_carry_status
 jsr set_sign_zero_from_reg
-jsr inc_pc
-jmp inc_pc
+jmp inc_pc_4
 
 // Add register to register
 add_reg_reg:
@@ -664,12 +674,18 @@ bcc _add_reg_reg
 add_carry_reg_reg:
 jsr load_carry_status
 _add_reg_reg:
-lda $0070,y
-adc $70,x
-sta $0070,y
-lda $0071,y
-adc $71,x
-sta $0071,y
+lda 0(_r_0),y
+adc 0(_r_0),x
+sta 0(_r_0),y
+lda 1(_r_0),y
+adc 1(_r_0),x
+sta 1(_r_0),y
+lda 2(_r_0),y
+adc 2(_r_0),x
+sta 2(_r_0),y
+lda 3(_r_0),y
+adc 3(_r_0),x
+sta 3(_r_0),y
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
