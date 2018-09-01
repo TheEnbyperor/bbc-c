@@ -44,6 +44,8 @@ class MemVal(Value):
         self.loc = loc
 
     def __repr__(self):
+        if isinstance(self.loc, LabelVal):
+            return "MemVal({})".format(self.loc)
         return "MemVal(0x{:x})".format(self.loc)
 
     def val(self):
@@ -56,7 +58,7 @@ class LabelVal(Value):
         self.offset = offset
 
     def __repr__(self):
-        return "LabelVal({})".format(self.label)
+        return "LabelVal({}, {})".format(self.label, self.offset)
 
     def val(self):
         raise NotImplementedError
@@ -80,6 +82,8 @@ class MemXVal(Value):
         self.loc = loc
 
     def __repr__(self):
+        if isinstance(self.loc, LabelVal):
+            return "MemXVal({})".format(self.loc)
         return "MemXVal(0x{:x})".format(self.loc)
 
     def val(self):
@@ -91,6 +95,8 @@ class MemYVal(Value):
         self.loc = loc
 
     def __repr__(self):
+        if isinstance(self.loc, LabelVal):
+            return "MemYVal({})".format(self.loc)
         return "MemYVal(0x{:x})".format(self.loc)
 
     def val(self):

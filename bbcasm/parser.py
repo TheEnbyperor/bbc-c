@@ -89,6 +89,8 @@ class Parser:
             self.error()
         if self.tokens[index].value > 255:
             self.error()
+        if self.tokens[index+1].type == LPAREM:
+            self.error()
         return insts.ZpVal(self.tokens[index].value), index + 1
 
     def parse_MemVal(self, index):

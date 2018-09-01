@@ -51,7 +51,7 @@ class Assemble:
                     loc = i.value.loc.offset
                     self.symbols.append(Symbol(i.value.loc.label, addr + inst_len, Symbol.IMPORT))
                 else:
-                    loc = self.labels[i.value.loc.label]
+                    loc = self.labels[i.value.loc.label] + i.value.loc.offset
                     if not i.is_relative():
                         self.symbols.append(Symbol(i.value.loc.label, addr + inst_len, Symbol.INTERNAL))
                 self.prog.insts[n].value.loc = loc

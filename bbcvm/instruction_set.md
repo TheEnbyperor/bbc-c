@@ -2,29 +2,29 @@
 
 ## Registers
 
-There are 15 registers available R0-R14. Each register is 16-bits long. R15 does exist but it is used by many instructions as a scratch space, as such its use is not recommended. Instructions that don't clobber R15 are marked as such.
+There are 16 registers available R0-R15. Each register is 32-bits long. 
 
 A few registers have special purposes. Note the base pointer and return register are not enforced anywhere in the VM, they are just convention.
 
 | Register | Purpose                |
 | -------- | ---------------------- |
-| R14      | Program counter        |
-| R13      | Stack pointer          |
-| R12      | Status register in LSB |
-| R11      | Base pointer           |
+| R15      | Program counter        |
+| R14      | Stack pointer          |
+| R13      | Status register in LSB |
+| R12      | Base pointer           |
 | R0       | Return register        |
 
 The status register is as such, where X means not used.
 
-|  7   |  6   |  5   |  4   |    3     |  2   |  1   |   0   |
-| :--: | :--: | :--: | :--: | :------: | :--: | :--: | :---: |
-|  X   |  X   |  X   |  X   | Overflow | Sign | Zero | Carry |
+|  7     |  6     |  5     |  4     |    3       |  2     |  1     | 0       |
+| :----: | :----: | :----: | :----: | :--------: | :----: | :----: | :-----: |
+|  X     |  X     |  X     |  X     | Overflow   | Sign   | Zero   | Carry   |
 
 
 
 ## Entering the VM
 
-The VM in entered by a jsr to the start address (label _start). All data following is interpreted by the VM.
+The VM in entered by a jsr to the start address (label _start_vm). Execution starts from address 0x000000 in extended memory.
 
 ## General layout of each instruction
 
@@ -55,29 +55,27 @@ When relative addressing is used it is relative to the address of memory locatio
 
 When using absolute addressing the memory location - 1 must be stored as the program counter is incremented before a fetch.
 
-Register indirect allows using the value stored in a register plus a 12-bit signed offset. The data is stored in the memory location as such:
+Register indirect allows using the value stored in a register plus a 28-bit signed offset. The data is stored in the memory location as such:
 
-| Bits 0-3        | Bits 4-7         | Bits 8-15        |
-| --------------- | ---------------- | ---------------- |
-| Register number | Offset value LSB | Offset value MSB |
-
+| Bits 0-3        | Bits 4-7         | Bits 8-15     | Bits 16-23   | Bits 24-31       |
+| --------------- | ---------------- | ------------- | ------------ | ---------------- |
+| Register number | Offset value LSB | Offset value  | Offset Value | Offset value MSB |
+0ABBCCDD
 
 
 ## List of instructions
 
-The instructions available are similar to x86 16-bit mode, but with a few simplifications.
+The instructions available are similar to x86 32-bit mode, but with a few simplifications.
 
 ### mov \<const\>, \<reg\>
 
-Moves the 16 bit constant into the register
-
-*Does not clobber R15*
+Moves the 32 bit constant into the register
 
 #### Flags
 
 None affected
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-31 |
+| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-47 |
 | :-----: | :-------: | :-------------: | :--------: |
 |  0x00   | Anything  | Register number |  Constant  |
 
@@ -89,11 +87,11 @@ Moves the 8 bit value at the memory location into the LSB of the register and 0 
 
 None affected
 
-| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
 | :-----: | :-------------: | :-------------: | :-------------: |
 |  0x01   | Addressing mode | Register number | Memory location |
 
-### mov \<mem\>, \<reg\>
+### mov WORD\<mem\>, \<reg\>
 
 Moves the 16 bit value at the memory location into the register
 
@@ -101,9 +99,22 @@ Moves the 16 bit value at the memory location into the register
 
 None affected
 
-| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
 | :-----: | :-------------: | :-------------: | :-------------: |
 |  0x02   | Addressing mode | Register number | Memory location |
+
+
+### mov DWORD\<mem\>, \<reg\>
+
+Moves the 32 bit value at the memory location into the register
+
+#### Flags
+
+None affected
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x03   | Addressing mode | Register number | Memory location |
 
 ### mov \<reg\>, BYTE\<mem\>
 
@@ -113,27 +124,37 @@ Moves the LSB of the register to the memory location
 
 None affected
 
-| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
 | :-----: | :-------------: | :-------------: | :-------------: |
-|  0x03   | Addressing mode | Register number | Memory location |
+|  0x04   | Addressing mode | Register number | Memory location |
 
-### mov \<reg\>, \<mem\>
+### mov \<reg\>, WORD\<mem\>
 
-Moves the register to the 16-bit memory location
+Moves the lower half of the register to the 16-bit memory location
 
 #### Flags
 
 None affected
 
-| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
 | :-----: | :-------------: | :-------------: | :-------------: |
-|  0x04   | Addressing mode | Register number | Memory location |
+|  0x05   | Addressing mode | Register number | Memory location |
+
+### mov \<reg\>, DWORD\<mem\>
+
+Moves the register to the 32-bit memory location
+
+#### Flags
+
+None affected
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x06   | Addressing mode | Register number | Memory location |
 
 ### mov \<reg\>, \<reg\>
 
 Moves the first register to the second register
-
-*Does not clobber R15*
 
 #### Flags
 
@@ -141,27 +162,23 @@ None affected
 
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
-|  0x05   | Second register number | First register number |
+|  0x07   | Second register number | First register number |
 
 ### push \<reg\>
 
 Pushes the register onto the stack
 
-*Does not clobber R15*
-
 #### Flags
 
 None affected
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
-|  0x06   | Anything  | Register number |
+|  0x08   | Anything  | Register number |
 
 ### pop \<reg\>
 
-Pops the 16-value off the top of the stack and puts it in the register
-
-*Does not clobber R15*
+Pops the 32-value off the top of the stack and puts it in the register*
 
 #### Flags
 
@@ -169,7 +186,7 @@ None affected
 
 | Bit 0-7 | Bits 8-11 |   Bits 12-15    |
 | :-----: | :-------: | :-------------: |
-|  0x07   | Anything  | Register number |
+|  0x09   | Anything  | Register number |
 
 ### lea \<mem\>, \<reg\>
 
@@ -179,15 +196,13 @@ Loads the address which data would be read from into the register.
 
 None affected
 
-| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-32    |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
 | :-----: | :-------------: | :-------------: | :-------------: |
-|  0x08   | Addressing mode | Register number | Memory location |
+|  0x0a   | Addressing mode | Register number | Memory location |
 
 ### sec
 
 Sets the carry flag
-
-*Does not clobber R15*
 
 #### Flags
 
@@ -201,8 +216,6 @@ Carry
 
 Clears the carry flag
 
-*Does not clobber R15*
-
 #### Flags
 
 Carry
@@ -215,21 +228,18 @@ Carry
 
 Adds the constant value to the register and stores back in the register. Does not use the carry flag.
 
-*Does not clobber R15*
-
 #### Flags
 
 Carry, sign, zero
 
-| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-32 |
+| Bit 0-7 | Bits 8-11 |   Bits 12-15    | Bits 16-47 |
 | :-----: | :-------: | :-------------: | :--------: |
-|  0x09   | Anything  | Register number |  Constant  |
+|  0x0b   | Anything  | Register number |  Constant  |
 
 ###add \<reg>, \<reg>
 
 Adds the value in the first register to the second register and stores back in the first register. Does not use the carry flag.
 
-*Does not clobber R15*
 
 #### Flags
 
@@ -237,7 +247,7 @@ Carry, sign, zero
 
 | Bit 0-7 |       Bits 8-11        |      Bits 12-15       |
 | :-----: | :--------------------: | :-------------------: |
-|  0x0B   | Second register number | First register number |
+|  0x0c   | Second register number | First register number |
 
 ### add BYTE\<mem\>, \<reg\>
 
@@ -247,11 +257,11 @@ Adds the 8 bit value at the memory location into the the register and stores in 
 
 Carry, sign, zero
 
-| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
 | :-----: | :-------------: | :-------------: | :-------------: |
-|  0x0D   | Addressing mode | Register number | Memory location |
+|  0x0d   | Addressing mode | Register number | Memory location |
 
-### add \<mem\>, \<reg\>
+### add WORD\<mem\>, \<reg\>
 
 Adds the 16 bit value at the memory location to the register and stores in the register. Does not use the carry flag.
 
@@ -259,7 +269,19 @@ Adds the 16 bit value at the memory location to the register and stores in the r
 
 Carry, sign, zero
 
-| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-31    |
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
+| :-----: | :-------------: | :-------------: | :-------------: |
+|  0x0e   | Addressing mode | Register number | Memory location |
+
+### add DWORD\<mem\>, \<reg\>
+
+Adds the 32 bit value at the memory location to the register and stores in the register. Does not use the carry flag.
+
+#### Flags
+
+Carry, sign, zero
+
+| Bit 0-7 |    Bits 8-11    |   Bits 12-15    |   Bits 16-47    |
 | :-----: | :-------------: | :-------------: | :-------------: |
 |  0x0F   | Addressing mode | Register number | Memory location |
 

@@ -44,7 +44,8 @@ class Lexer:
     def integer_hex(self):
         """Return a integer consumed from the input."""
         result = ''
-        while self.current_char is not None and (self.current_char.isdigit() or self.current_char.lower() in ["a", "b", "c", "d", "e", "f"]):
+        while self.current_char is not None and \
+                (self.current_char.isdigit() or self.current_char.lower() in ["a", "b", "c", "d", "e", "f"]):
             result += self.current_char
             self.advance()
         return int(result, 16)
@@ -65,7 +66,8 @@ class Lexer:
             elif self.current_char == "\n":
                 self.advance()
 
-            elif self.current_char == "\\":
+            elif self.current_char == "/" and self.peek() == "/":
+                self.advance()
                 self.advance()
                 self.skip_line_comment()
 
@@ -76,7 +78,7 @@ class Lexer:
                 self.advance()
                 tokens.append(Token(PERIOD, "."))
 
-            elif self.current_char == "&":
+            elif self.current_char == "$":
                 self.advance()
                 tokens.append(Token(INTEGER, self.integer_hex()))
             elif self.current_char.isdigit():
