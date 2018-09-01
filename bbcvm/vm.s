@@ -33,6 +33,7 @@ _r_12:     .byte #0,#0,#0,#0
 _r_status: .byte #0,#0,#0,#0
 _r_stack:  .byte #0,#0,#0,#0
 _r_pc:     .byte #0,#0,#0,#0
+_r_temp:   .byte #0,#0,#0,#0
 
 _start_vm:
 // Set PC and status register
@@ -692,9 +693,17 @@ jmp set_sign_zero_from_reg
 // Helper for memory to register add
 add_mem_reg_start:
 jsr get_mem_address
-lda ($8E),y
-adc $70,x
-sta $70,x
+jsr _load_byte_temp
+adc 0(_r_0),x
+sta 0(_r_0),x
+rts
+
+add_mem_reg_start_2:
+jsr add_mem_reg_start
+iny
+jsr _load_byte_temp
+adc 1(_r_0),x
+sta 1(_r_0),x
 rts
 
 // Add 8 bit memory to register
@@ -707,8 +716,12 @@ jsr load_carry_status
 _add_mem_reg_short:
 jsr add_mem_reg_start
 lda #0
-adc $71,x
-sta $71,x
+adc 1(_r_0),x
+sta 1(_r_0),x
+adc 2(_r_0),x
+sta 2(_r_0),x
+adc 3(_r_0),x
+sta 3(_r_0),x
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
@@ -720,15 +733,36 @@ bcc _add_mem_reg_long
 add_carry_mem_reg_long:
 jsr load_carry_status
 _add_mem_reg_long:
-jsr add_mem_reg_start
-iny
-lda ($8E),y
-adc $71,x
-sta $71,x
+jsr add_mem_reg_start_2
+lda #0
+adc 2(_r_0),x
+sta 2(_r_0),x
+adc 3(_r_0),x
+sta 3(_r_0),x
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
-// Subtract constant from register
+// Add 32 bit memory to register
+add_mem_reg_double:
+clc
+bcc _add_mem_reg_long
+// Add with carry
+add_carry_mem_reg_long:
+jsr load_carry_status
+_add_mem_reg_long:
+jsr add_mem_reg_start_2
+iny
+jsr _load_byte_temp
+adc 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_temp
+adc 3(_r_0),x
+sta 3(_r_0),x
+jsr set_carry_status
+jmp set_sign_zero_from_reg
+
+// Subtract 32 bit constant from register
 sub_const_reg:
 sec
 bcs _sub_const_reg
@@ -736,14 +770,30 @@ bcs _sub_const_reg
 sub_carry_const_reg:
 jsr load_carry_status
 _sub_const_reg:
-lda $70,x
 ldy #1
-sbc ($8C),y
-sta $70,x
+jsr _load_byte_pc
+sta 0(_r_temp)
+lda 0(_r_0),x
+sbc 0(_r_temp)
+sta 0(_r_0),x
 iny
-lda $71,x
-sbc ($8C),y
-sta $71,x
+jsr _load_byte_pc
+sta 0(_r_temp)
+lda 1(_r_0),x
+sbc 0(_r_temp)
+sta 1(_r_0),x
+iny
+jsr _load_byte_pc
+sta 0(_r_temp)
+lda 2(_r_0),x
+sbc 0(_r_temp)
+sta 2(_r_0),x
+iny
+jsr _load_byte_pc
+sta 0(_r_temp)
+lda 3(_r_0),x
+sbc 0(_r_temp)
+sta 3(_r_0),x
 jsr set_carry_status
 jsr set_sign_zero_from_reg
 jsr inc_pc
