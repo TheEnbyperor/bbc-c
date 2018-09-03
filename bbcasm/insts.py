@@ -204,8 +204,8 @@ class Inst:
 
 
 class ADC(Inst):
-    modes = [(LiteralVal, 0x69), (IndirectXVal, 0x61), (IndirectYVal, 0x71), (ZpXVal, 0x75), (ZpVal, 0x65),
-             (MemVal, 0x6D), (MemXVal, 0x7D), (MemYVal, 0x79)]
+    modes = [(LiteralVal, 0x69), (IndirectXVal, 0x61), (IndirectYVal, 0x71), (ZpXVal, 0x75), (MemXVal, 0x7D),
+             (MemYVal, 0x79), (ZpVal, 0x65), (MemVal, 0x6D)]
 
     def __init__(self, value):
         self.value = value
@@ -215,8 +215,8 @@ class ADC(Inst):
 
 
 class AND(Inst):
-    modes = [(LiteralVal, 0x29), (IndirectXVal, 0x21), (IndirectYVal, 0x31), (ZpXVal, 0x35), (ZpVal, 0x25),
-             (MemVal, 0x2D), (MemXVal, 0x3D), (MemYVal, 0x39)]
+    modes = [(LiteralVal, 0x29), (IndirectXVal, 0x21), (IndirectYVal, 0x31), (ZpXVal, 0x35), (MemXVal, 0x3D),
+             (MemYVal, 0x39), (ZpVal, 0x25), (MemVal, 0x2D)]
 
     def __init__(self, value):
         self.value = value
@@ -355,8 +355,8 @@ class BRK(Inst):
 
 
 class CMP(Inst):
-    modes = [(LiteralVal, 0xC9), (IndirectXVal, 0xC1), (IndirectYVal, 0xD1), (ZpXVal, 0xD5), (ZpVal, 0xC5),
-             (MemVal, 0xCD), (MemXVal, 0xDD), (MemYVal, 0xD9)]
+    modes = [(LiteralVal, 0xC9), (IndirectXVal, 0xC1), (IndirectYVal, 0xD1), (ZpXVal, 0xD5), (MemXVal, 0xDD),
+             (MemYVal, 0xD9), (ZpVal, 0xC5), (MemVal, 0xCD)]
 
     def __init__(self, value):
         self.value = value
@@ -386,7 +386,7 @@ class CPY(Inst):
 
 
 class DEC(Inst):
-    modes = [(ZpXVal, 0xD6), (ZpVal, 0xC6), (MemVal, 0xCE), (MemXVal, 0xDE)]
+    modes = [(ZpXVal, 0xD6), (MemXVal, 0xDE), (ZpVal, 0xC6), (MemVal, 0xCE)]
 
     def __init__(self, value):
         self.value = value
@@ -396,8 +396,8 @@ class DEC(Inst):
 
 
 class EOR(Inst):
-    modes = [(LiteralVal, 0xE9), (IndirectXVal, 0x41), (IndirectYVal, 0x51), (ZpXVal, 0x55), (ZpVal, 0x45),
-             (MemVal, 0x4D), (MemXVal, 0x5D), (MemYVal, 0x59)]
+    modes = [(LiteralVal, 0xE9), (IndirectXVal, 0x41), (IndirectYVal, 0x51), (ZpXVal, 0x55), (MemXVal, 0x5D),
+             (MemYVal, 0x59), (ZpVal, 0x45), (MemVal, 0x4D)]
 
     def __init__(self, value):
         self.value = value
@@ -456,7 +456,7 @@ class SED(Inst):
 
 
 class INC(Inst):
-    modes = [(ZpXVal, 0xF6), (ZpVal, 0xE6), (MemVal, 0xEE), (MemXVal, 0xFE)]
+    modes = [(ZpXVal, 0xF6), (MemXVal, 0xFE), (ZpVal, 0xE6), (MemVal, 0xEE)]
 
     def __init__(self, value):
         self.value = value
@@ -540,8 +540,8 @@ class NOP(Inst):
 
 
 class ORA(Inst):
-    modes = [(LiteralVal, 0x09), (IndirectXVal, 0x01), (IndirectYVal, 0x11), (ZpXVal, 0x15), (ZpVal, 0x05),
-             (MemVal, 0x0D), (MemXVal, 0x1D), (MemYVal, 0x19)]
+    modes = [(LiteralVal, 0x09), (IndirectXVal, 0x01), (IndirectYVal, 0x11), (ZpXVal, 0x15), (MemXVal, 0x1D),
+             (MemYVal, 0x19), (ZpVal, 0x05), (MemVal, 0x0D)]
 
     def __init__(self, value):
         self.value = value
@@ -641,8 +641,8 @@ class RTS(Inst):
 
 
 class SBC(Inst):
-    modes = [(LiteralVal, 0xE9), (IndirectXVal, 0xE1), (IndirectYVal, 0xF1), (ZpXVal, 0xF5), (ZpVal, 0xE5),
-             (MemVal, 0xED), (MemXVal, 0xFD), (MemYVal, 0xF9)]
+    modes = [(LiteralVal, 0xE9), (IndirectXVal, 0xE1), (IndirectYVal, 0xF1), (ZpXVal, 0xF5), (MemXVal, 0xFD),
+             (MemYVal, 0xF9), (ZpVal, 0xE5), (MemVal, 0xED)]
 
     def __init__(self, value):
         self.value = value

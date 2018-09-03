@@ -649,19 +649,19 @@ jsr load_carry_status
 _add_const_reg:
 ldy #1
 jsr _load_byte_pc
-sbc 0(_r_0),x
+adc 0(_r_0),x
 sta 0(_r_0),x
 iny
 jsr _load_byte_pc
-sbc 1(_r_0),x
+adc 1(_r_0),x
 sta 1(_r_0),x
 iny
-jsr
-sbc 2(_r_0),x
+jsr _load_byte_pc
+adc 2(_r_0),x
 sta 2(_r_0),x
 iny
 jsr _load_byte_pc
-sbc 3(_r_0),x
+adc 3(_r_0),x
 sta 3(_r_0),x
 jsr set_carry_status
 jsr set_sign_zero_from_reg
@@ -718,8 +718,10 @@ jsr add_mem_reg_start
 lda #0
 adc 1(_r_0),x
 sta 1(_r_0),x
+lda #0
 adc 2(_r_0),x
 sta 2(_r_0),x
+lda #0
 adc 3(_r_0),x
 sta 3(_r_0),x
 jsr set_carry_status
@@ -737,6 +739,7 @@ jsr add_mem_reg_start_2
 lda #0
 adc 2(_r_0),x
 sta 2(_r_0),x
+lda #0
 adc 3(_r_0),x
 sta 3(_r_0),x
 jsr set_carry_status
@@ -796,25 +799,39 @@ sbc 0(_r_temp)
 sta 3(_r_0),x
 jsr set_carry_status
 jsr set_sign_zero_from_reg
-jsr inc_pc
-jmp inc_pc
+jmp inc_pc_4
 
-// Compare constant and register
+// Compare a 32 constant and register
 cmp_const_reg:
 sec
-lda $70,x
 ldy #1
-sbc ($8C),y
-sta $8E
+jsr _load_byte_pc
+sta 0(_r_temp)
+lda 0(_r_0),x
+sbc 0(_r_temp)
+sta 0(_r_temp)
 iny
-lda $71,x
-sbc ($8C),y
-sta $8F
+jsr _load_byte_pc
+sta 1(_r_temp)
+lda 1(_r_0),x
+sbc 1(_r_temp)
+sta 1(_r_temp)
+iny
+jsr _load_byte_pc
+sta 2(_r_temp)
+lda 2(_r_0),x
+sbc 2(_r_temp)
+sta 2(_r_temp)
+iny
+jsr _load_byte_pc
+sta 3(_r_temp)
+lda 3(_r_0),x
+sbc 3(_r_temp)
+sta 3(_r_temp)
 jsr set_carry_status
-ldx #$1E
+ldx #$40
 jsr set_sign_zero_from_reg
-jsr inc_pc
-jmp inc_pc
+jmp inc_pc_4
 
 // Subtract register from register
 sub_reg_reg:
@@ -824,33 +841,58 @@ bcs _sub_reg_reg
 sub_carry_reg_reg:
 jsr load_carry_status
 _sub_reg_reg:
-lda $0070,y
-sbc $70,x
-sta $0070,y
-lda $0071,y
-sbc $71,x
-sta $0070,y
+lda 0(_r_0),y
+sbc 0(_r_0),x
+sta 0(_r_0),y
+lda 1(_r_0),y
+sbc 1(_r_0),x
+sta 1(_r_0),y
+lda 2(_r_0),y
+sbc 2(_r_0),x
+sta 2(_r_0),y
+lda 3(_r_0),y
+sbc 3(_r_0),x
+sta 3(_r_0),y
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
 // Compare register and register
 cmp_reg_reg:
 sec
-lda $0070,y
-sbc $70,x
-sta $8E
-lda $0071,y
-sbc $71,x
-sta $8F
+lda 0(_r_0),y
+sbc 0(_r_0),x
+sta 0(_r_temp)
+lda 1(_r_0),y
+sbc 1(_r_0),x
+sta 1(_r_temp)
+lda 2(_r_0),y
+sbc 2(_r_0),x
+sta 2(_r_temp)
+lda 3(_r_0),y
+sbc 3(_r_0),x
+sta 3(_r_temp)
 jsr set_carry_status
-ldx #$1E
+ldx #$40
 jmp set_sign_zero_from_reg
 
 // Helper for memory from register subtract
 sub_mem_reg_start:
 jsr get_mem_address
-lda $70,x
-sbc ($8E),y
+jsr _load_byte_temp
+sta 0(_r_temp)
+lda 0(_r_0),x
+sbc 0(_r_temp)
+rts
+
+sub_mem_reg_start_2:
+jsr sub_mem_reg_start
+sta 0(_r_0),x
+iny
+jsr _load_byte_temp
+sta 0(_r_temp)
+lda 1(_r_0),x
+sbc 0(_r_temp)
+sta 1(_r_0),x
 rts
 
 // Subtract 8 bit memory from register
@@ -862,22 +904,34 @@ sub_carry_mem_reg_short:
 jsr load_carry_status
 _sub_mem_reg_short:
 jsr sub_mem_reg_start
-sta $70,x
-lda $71,x
+sta 0(_r_0),x
+lda 1(_r_0),x
 sbc #0
-sta $71,x
+sta 1(_r_0),x
+lda 2(_r_0),x
+sbc #0
+sta 2(_r_0),x
+lda 3(_r_0),x
+sbc #0
+sta 3(_r_0),x
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
 // Compare 8 bit memory and register
 cmp_mem_reg_short:
 jsr sub_mem_reg_start
-sta $8E
-lda $71,x
+sta 0(_r_temp)
+lda 1(_r_0),x
 sbc #0
-sta $8F
+sta 1(_r_temp)
+lda 2(_r_0),x
+sbc #0
+sta 2(_r_temp)
+lda 3(_r_0),x
+sbc #0
+sta 3(_r_temp)
 jsr set_carry_status
-ldx #$1E
+ldx #$40
 jmp set_sign_zero_from_reg
 
 // Subtract 16 bit memory from register
@@ -888,25 +942,84 @@ bcs _sub_mem_reg_long
 sub_carry_mem_reg_long:
 jsr load_carry_status
 _sub_mem_reg_long:
-jsr sub_mem_reg_start
-sta $70,x
-iny
-lda $71,x
-sbc ($8E),y
-sta $71,x
+jsr sub_mem_reg_start_2
+lda 2(_r_0),x
+sbc #0
+sta 2(_r_0),x
+lda 3(_r_0),x
+sbc #0
+sta 3(_r_0),x
 jsr set_carry_status
 jmp set_sign_zero_from_reg
 
 // Compare 16 bit memory and register
 cmp_mem_reg_long:
 jsr sub_mem_reg_start
-sta $8E
+sta 0(_r_temp)
 iny
-lda $71,x
-sbc ($8E),y
-sta $8F
+jsr _load_byte_temp
+sta 1(_r_temp)
+lda 1(_r_0),x
+sbc 1(_r_temp)
+sta 1(_r_temp)
+lda 2(_r_0),x
+sbc #0
+sta 2(_r_temp)
+lda 3(_r_0),x
+sbc #0
+sta 3(_r_temp)
 jsr set_carry_status
-ldx #$1E
+ldx #$40
+jmp set_sign_zero_from_reg
+
+// Subtract 32 bit memory from register
+sub_mem_reg_double:
+sec
+bcs _sub_mem_reg_long
+// Add with carry
+sub_carry_mem_reg_long:
+jsr load_carry_status
+_sub_mem_reg_long:
+jsr sub_mem_reg_start_2
+iny
+jsr _load_byte_temp
+sta 0(_r_temp)
+lda 2(_r_0),x
+sbc 0(_r_temp)
+sta 2(_r_0),x
+iny
+jsr _load_byte_temp
+sta 0(_r_temp)
+lda 3(_r_0),x
+sbc 0(_r_temp)
+sta 3(_r_0),x
+jsr set_carry_status
+jmp set_sign_zero_from_reg
+
+// Compare 32 bit memory and register
+cmp_mem_reg_double:
+jsr sub_mem_reg_start
+sta 0(_r_temp)
+iny
+jsr _load_byte_temp
+sta 1(_r_temp)
+lda 1(_r_0),x
+sbc 1(_r_temp)
+sta 1(_r_temp)
+iny
+jsr _load_byte_temp
+sta 2(_r_temp)
+lda 2(_r_0),x
+sbc 2(_r_temp)
+sta 2(_r_temp)
+iny
+jsr _load_byte_temp
+sta 3(_r_temp)
+lda 3(_r_0),x
+sbc 3(_r_temp)
+sta 3(_r_temp)
+jsr set_carry_status
+ldx #$40
 jmp set_sign_zero_from_reg
 
 // Multiply
@@ -942,334 +1055,624 @@ bne _multiply_1
 
 // Increment register
 inc_reg:
-inc $70,x
+inc 0(_r_0),x
 bne _inc_reg
-inc $71,x
+inc 1(_r_0),x
+bne _inc_reg
+inc 2(_r_0),x
+bne _inc_reg
+inc 3(_r_0),x
 _inc_reg:
 jmp set_sign_zero_from_reg
 
-// Increment memory short
+// Increment 8bit memory
 inc_mem_short:
 jsr get_mem_address
 clc
-lda ($8E),y
+jsr _load_byte_temp
 adc #1
-sta ($8E),y
-sta $8E
-ldx #$1E
+jsr _save_byte_temp
+sta 0(_r_temp)
+lda #0
+sta 1(_r_temp)
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
 jmp set_sign_zero_from_reg
 
-// Increment memory long
-_inc_mem_long_temp: .byte #0
-
+// Increment 16bit memory
 inc_mem_long:
 jsr get_mem_address
 clc
-lda ($8E),y
+jsr _load_byte_temp
 adc #1
-sta ($8E),y
-sta _inc_mem_long_temp
+jsr _save_byte_temp
+sta 0(_r_temp)
 iny
-lda ($8E),y
+jsr _load_byte_temp
 adc #0
-sta ($8E),y
-sta $8F
-lda _inc_mem_long_temp
-sta $8E
-ldx #$1E
+jsr _save_byte_temp
+sta 1(_r_temp)
+lda #0
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
+jmp set_sign_zero_from_reg
+
+// Increment 32bit memory
+inc_mem_double:
+jsr get_mem_address
+clc
+jsr _load_byte_temp
+adc #1
+jsr _save_byte_temp
+sta 0(_r_temp)
+iny
+jsr _load_byte_temp
+adc #0
+jsr _save_byte_temp
+sta 1(_r_temp)
+iny
+jsr _load_byte_temp
+adc #0
+jsr _save_byte_temp
+sta 2(_r_temp)
+iny
+jsr _load_byte_temp
+adc #0
+jsr _save_byte_temp
+sta 3(_r_temp)
+ldx #$40
 jmp set_sign_zero_from_reg
 
 // Decrement register
 dec_reg:
-lda $70,x
-bne _dec_reg
-dec $71,x
-_dec_reg:
-dec $70,x
+lda 0(_r_0),x
+bne _dec_reg_1
+lda 1(_r_0),x
+bne _dec_reg_2
+lda 2(_r_0),x
+bne _dec_reg_3
+dec 3(_r_0),x
+_dec_reg_3:
+dec 2(_r_0),x
+_dec_reg_2:
+dec 1(_r_0),x
+_dec_reg_1:
+dec 0(_r_0),x
 jmp set_sign_zero_from_reg
 
-// Decrement memory short
-dec_mem_short:
+dec_mem_1:
 jsr get_mem_address
 sec
-lda ($8E),y
-sbc #1
-sta ($8E),y
-sta $8E
-ldx #$1E
-jmp set_sign_zero_from_reg
-
-// Decrement memory long
-_dec_mem_long_temp: .byte #0
-
-dec_mem_long:
-jsr get_mem_address
-sec
-lda ($8E),y
-sbc #1
-sta ($8E),y
-sta _dec_mem_long_temp
-iny
-lda ($8E),y
+jsr _load_byte_temp
 sbc #0
-sta ($8E),y
-sta $8F
-lda _dec_mem_long_temp
-sta $8E
-ldx #$1E
+jsr _save_byte_temp
+sta 0(_r_temp)
+rts
+
+dec_mem_2:
+jsr dec_mem_1
+iny
+jsr _load_byte_temp
+sbc #0
+jsr _save_byte_temp
+sta 1(_r_temp)
+rts
+
+// Decrement 8bit memory
+dec_mem_short:
+jsr dec_mem_1
+lda #0
+sta 1(_r_temp)
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
+jmp set_sign_zero_from_reg
+
+// Decrement 16bit memory
+dec_mem_long:
+jsr dec_mem_2
+lda #0
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
+jmp set_sign_zero_from_reg
+
+// Decrement 32bit memory
+dec_mem_double:
+jsr dec_mem_2
+iny
+jsr _load_byte_temp
+sbc #0
+jsr _save_byte_temp
+sta 2(_r_temp)
+iny
+jsr _load_byte_temp
+sbc #0
+jsr _save_byte_temp
+sta 3(_r_temp)
+ldx #$40
 jmp set_sign_zero_from_reg
 
 // Logical and constant and register
 and_const_reg:
-lda $70,x
 ldy #1
-and ($8C),y
-sta $70,x
+jsr _load_byte_pc
+and 0(_r_0),x
+sta 0(_r_0),x
 iny
-lda $71,x
-and ($8C),y
-sta $71,x
+jsr _load_byte_pc
+and 1(_r_0),x
+sta 1(_r_0),x
+iny
+jsr _load_byte_pc
+and 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_pc
+and 3(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jsr clear_carry
-jsr inc_pc
-jmp inc_pc
+jmp inc_pc_4
 
 // Logical and register and register
 and_reg_reg:
-lda $0070,y
-and $70,x
-sta $0070,y
-lda $0071,y
-and $71,x
-sta $0071,y
+lda 0(_r_0),y
+and 0(_r_0),x
+sta 0(_r_0),y
+lda 1(_r_0),y
+and 1(_r_0),x
+sta 1(_r_0),y
+lda 2(_r_0),y
+and 2(_r_0),x
+sta 2(_r_0),y
+lda 3(_r_0),y
+and 3(_r_0),x
+sta 3(_r_0),y
+tya
+tax
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // Helper for memory and register logical and
 and_mem_reg_start:
 jsr get_mem_address
-lda ($8E),y
-and $70,x
-sta $70,x
+jsr _load_byte_temp
+and 0(_r_0),x
+sta 0(_r_0),x
+rts
+
+and_mem_reg_start_2:
+jsr and_mem_reg_start
+iny
+jsr _load_byte_temp
+and 1(_r_0),x
+sta 1(_r_0),x
 rts
 
 // 8 bit logical and memory anh register
 and_mem_reg_short:
 jsr and_mem_reg_start
 lda #0
-sta $71,x
+sta 1(_r_0),x
+sta 2(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // 16 bit logical and memory and register
 and_mem_reg_long:
-jsr and_mem_reg_start
+jsr and_mem_reg_start_2
+lda #0
+sta 2(_r_0),x
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+// 32 bit logical and memory and register
+and_mem_reg_double:
+jsr and_mem_reg_start_2
 iny
-lda ($8E),y
-and $71,x
-sta $71,x
+jsr _load_byte_temp
+and 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_temp
+and 3(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // Logical or constant and register
 or_const_reg:
-lda $70,x
 ldy #1
-ora ($8C),y
-sta $70,x
+jsr _load_byte_pc
+ora 0(_r_0),x
+sta 0(_r_0),x
 iny
-lda $71,x
-ora ($8C),y
-sta $71,x
+jsr _load_byte_pc
+ora 1(_r_0),x
+sta 1(_r_0),x
+iny
+jsr _load_byte_pc
+ora 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_pc
+ora 3(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jsr clear_carry
-jsr inc_pc
-jmp inc_pc
+jmp inc_pc_4
 
 // Logical or register and register
 or_reg_reg:
-lda $0070,y
-ora $70,x
-sta $0070,y
-lda $0071,y
-ora $71,x
-sta $0071,y
+lda 0(_r_0),y
+ora 0(_r_0),x
+sta 0(_r_0),y
+lda 1(_r_0),y
+ora 1(_r_0),x
+sta 1(_r_0),y
+lda 2(_r_0),y
+ora 2(_r_0),x
+sta 2(_r_0),y
+lda 3(_r_0),y
+ora 3(_r_0),x
+sta 3(_r_0),y
+tya
+tax
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // Helper for memory and register logical or
 or_mem_reg_start:
 jsr get_mem_address
-lda ($8E),y
-ora $70,x
-sta $70,x
-iny
-lda ($8E),y
+jsr _load_byte_temp
+ora 0(_r_0),x
+sta 0(_r_0),x
 rts
 
-// 8 bit logical or memory and register
+or_mem_reg_start_2:
+jsr or_mem_reg_start
+iny
+jsr _load_byte_temp
+ora 1(_r_0),x
+sta 1(_r_0),x
+rts
+
+// 8 bit logical or memory anh register
 or_mem_reg_short:
 jsr or_mem_reg_start
-sta $71,x
-rts
+lda #0
+sta 1(_r_0),x
+sta 2(_r_0),x
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 // 16 bit logical or memory and register
 or_mem_reg_long:
-jsr or_mem_reg_start
-ora $71,x
-sta $71,x
+jsr or_mem_reg_start_2
+lda #0
+sta 2(_r_0),x
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+// 32 bit logical or memory and register
+or_mem_reg_double:
+jsr or_mem_reg_start_2
+iny
+jsr _load_byte_temp
+ora 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_temp
+ora 3(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // Logical xor constant and register
 xor_const_reg:
-lda $70,x
 ldy #1
-eor ($8C),y
-sta $70,x
+jsr _load_byte_pc
+eor 0(_r_0),x
+sta 0(_r_0),x
 iny
-lda $71,x
-eor ($8C),y
-sta $71,x
+jsr _load_byte_pc
+eor 1(_r_0),x
+sta 1(_r_0),x
+iny
+jsr _load_byte_pc
+eor 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_pc
+eor 3(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jsr clear_carry
-jsr inc_pc
-jmp inc_pc
+jmp inc_pc_4
 
 // Logical xor register and register
 xor_reg_reg:
-lda $0070,y
-eor $70,x
-sta $0070,y
-lda $0071,y
-eor $71,x
-sta $0071,y
+lda 0(_r_0),y
+eor 0(_r_0),x
+sta 0(_r_0),y
+lda 1(_r_0),y
+eor 1(_r_0),x
+sta 1(_r_0),y
+lda 2(_r_0),y
+eor 2(_r_0),x
+sta 2(_r_0),y
+lda 3(_r_0),y
+eor 3(_r_0),x
+sta 3(_r_0),y
+tya
+tax
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // Helper for memory and register logical xor
 xor_mem_reg_start:
 jsr get_mem_address
-lda ($8E),y
-eor $70,x
-sta $70,x
-iny
-lda ($8E),y
+jsr _load_byte_temp
+eor 0(_r_0),x
+sta 0(_r_0),x
 rts
 
-// 8 bit logical xor memory and register
+xor_mem_reg_start_2:
+jsr or_mem_reg_start
+iny
+jsr _load_byte_temp
+eor 1(_r_0),x
+sta 1(_r_0),x
+rts
+
+// 8 bit logical xor memory anh register
 xor_mem_reg_short:
 jsr xor_mem_reg_start
-eor #0
-sta $71,x
+lda #0
+sta 1(_r_0),x
+sta 2(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // 16 bit logical xor memory and register
 xor_mem_reg_long:
-jsr xor_mem_reg_start
-eor $71,x
-sta $71,x
+jsr xor_mem_reg_start_2
+lda #0
+sta 2(_r_0),x
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+// 32 bit logical xor memory and register
+xor_mem_reg_double:
+jsr or_mem_reg_start_2
+iny
+jsr _load_byte_temp
+eor 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_temp
+eor 3(_r_0),x
+sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // Logical not register
 not_reg:
-lda $70,x
+lda 0(_r_0),x
 eor #$ff
-sta $70,x
-lda $71,x
+sta 0(_r_0),x
+lda 1(_r_0),x
 eor #$ff
-sta $71,x
-rts
+sta 1(_r_0),x
+lda 2(_r_0),x
+eor #$ff
+sta 2(_r_0),x
+lda 3(_r_0),x
+eor #$ff
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
-// Logical not memory short
+// Logical not 8bit memory
 not_mem_short:
 jsr get_mem_address
-lda ($8E),y
+jsr _load_byte_temp
 eor #$ff
-sta ($8E),y
-rts
+jsr _save_byte_temp
+sta 0(_r_temp)
+sta 1(_r_temp)
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
-// Logical not memory long
+// Logical not 16bit memory
 not_mem_long:
 jsr not_mem_short
 iny
-lda ($8E),y
+jsr _load_byte_temp
 eor #$ff
-sta ($8E),y
-rts
+jsr _save_byte_temp
+sta 1(_r_temp)
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+// Logical not 32bit memory
+not_mem_double:
+jsr not_mem_long
+iny
+jsr _load_byte_temp
+eor #$ff
+jsr _save_byte_temp
+sta 2(_r_temp)
+iny
+jsr _load_byte_temp
+eor #$ff
+jsr _save_byte_temp
+sta 3(_r_temp)
+ldx #$40
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 // 2's compliment negate register
 neg_reg:
-lda $70,x
-eor #$ff
-clc
-adc #1
-sta $70,x
-lda $71,x
-eor #$ff
-adc #0
-sta $71,x
-jmp set_sign_zero_from_reg
+sec
+lda #0
+sbc 0(_r_0),x
+sta 0(_r_0),x
+lda #0
+sbc 1(_r_0),x
+sta 1(_r_0),x
+lda #0
+sbc 2(_r_0),x
+sta 2(_r_0),x
+lda #0
+sbc 3(_r_0),x
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
-// 2's compliment negate mem short
+// 2's compliment negate 8bit memory
 neg_mem_short:
 jsr get_mem_address
-lda ($8E),y
-eor #$ff
-clc
-adc #1
-sta ($8E),y
-sta $8E
-jmp set_sign_zero_from_reg
+jsr _load_byte_temp
+sta 0(_r_temp)
+sec
+lda #0
+sbc 0(_r_temp)
+jsr _save_byte_temp
+sta 0(_r_temp)
+asl 0(_r_temp)
+bcs _neg_mem_short_1
+lda #0
+bcc _neg_mem_short_2
+_neg_mem_short_1:
+lda #$FF
+_neg_mem_short_2:
+ror 0(_r_temp)
+sta 1(_r_temp)
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
-// 2's compliment negate mem short
-_neg_not_mem_long_temp: .byte #0
-
+// 2's compliment negate 16bit memory
 neg_mem_long:
 jsr get_mem_address
-lda ($8E),y
-eor #$ff
-clc
-adc #1
-sta ($8E),y
-sta _neg_not_mem_long_temp
+jsr _load_byte_temp
+sta 0(_r_temp)
+sec
+lda #0
+sbc 0(_r_temp)
+jsr _save_byte_temp
+sta 0(_r_temp)
 iny
-lda ($8E),y
-eor #$ff
-adc #0
-sta ($8E),y
-sta $8F
-lda _neg_not_mem_long_temp
-sta $8E
-jmp set_sign_zero_from_reg
+jsr _load_byte_temp
+sta 1(_r_temp)
+sec
+lda #0
+sbc 1(_r_temp)
+jsr _save_byte_temp
+sta 1(_r_temp)
+asl 1(_r_temp)
+bcs _neg_mem_short_1
+lda #0
+bcc _neg_mem_short_2
+_neg_mem_short_1:
+lda #$FF
+_neg_mem_short_2:
+ror 1(_r_temp)
+sta 2(_r_temp)
+sta 3(_r_temp)
+ldx #$40
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+// 2's compliment negate 32bit memory
+neg_mem_double:
+jsr get_mem_address
+jsr _load_byte_temp
+sta 0(_r_temp)
+sec
+lda #0
+sbc 0(_r_temp)
+jsr _save_byte_temp
+sta 0(_r_temp)
+iny
+jsr _load_byte_temp
+sta 1(_r_temp)
+sec
+lda #0
+sbc 1(_r_temp)
+jsr _save_byte_temp
+sta 1(_r_temp)
+iny
+jsr _load_byte_temp
+sta 2(_r_temp)
+sec
+lda #0
+sbc 2(_r_temp)
+jsr _save_byte_temp
+sta 2(_r_temp)
+iny
+jsr _load_byte_temp
+sta 3(_r_temp)
+sec
+lda #0
+sbc 3(_r_temp)
+jsr _save_byte_temp
+sta 3(_r_temp)
+ldx #$40
+jsr set_sign_zero_from_reg
+jmp clear_carry
 
 // Push program counter and jump to memory location
 call_subroutine:
 jsr get_mem_address
 jsr dec_mem_address
-ldx #$1C
+ldx #$3C
 jsr push_reg
-lda $8E
-sta $8C
-lda $8F
-sta $8D
+lda $8a
+sta 0(_r_pc)
+lda $8b
+sta 1(_r_pc)
+lda $8c
+sta 2(_r_pc)
+lda $8d
+sta 3(_r_pc)
 rts
 
 // Jump to memory location
 jump:
 jsr get_mem_address
 jsr dec_mem_address
-lda $8E
-sta $8C
-lda $8F
-sta $8D
+lda $8a
+sta 0(_r_pc)
+lda $8b
+sta 1(_r_pc)
+lda $8c
+sta 2(_r_pc)
+lda $8d
+sta 3(_r_pc)
 rts
 
 _jump_zero_start:
 jsr get_mem_address
-lda $88
+lda 0(_r_status)
 and #$02
 rts
 
@@ -1288,7 +1691,7 @@ jmp _jump_test_end
 _jump_above_start_1:
 jsr get_mem_address
 _jump_above_start_2:
-lda $88
+lda 0(_r_status)
 and #$01
 rts
 
@@ -1320,30 +1723,32 @@ jsr _jump_above_start_1
 bne _jump_test_end
 jmp _jump_test_fail
 
-_jump_lesser_temp: .byte #0
-
 _jump_lesser_start:
 jsr get_mem_address
-lda $88
+lda 0(_r_status)
 and #$04
 lsr a
 lsr a
-sta _jump_lesser_temp
-lda $88
+sta 0(_r_temp)
+lda 0(_r_status)
 and #$08
 lsr a
 lsr a
 lsr a
-eor _jump_lesser_temp
+eor 0(_r_temp)
 lsr a
 rts
 
 _jump_test_end:
 jsr dec_mem_address
-lda $8E
-sta $8C
-lda $8F
-sta $8D
+lda $8a
+sta 0(_r_pc)
+lda $8b
+sta 1(_r_pc)
+lda $8c
+sta 2(_r_pc)
+lda $8d
+sta 3(_r_pc)
 _jump_test_fail:
 rts
 
@@ -1376,28 +1781,26 @@ bcc _jump_test_fail
 bcs _jump_test_end
 
 // JSR to native 6502 code with accumulator set from a register and then the accumulator after RTS loaded into the register
-_call_6502_temp: .byte #0
-
 call_6502:
 jsr get_mem_address
-stx _call_6502_temp
-lda $70,x
+stx 0(_r_temp)
+lda 0(_r_0),x
 jsr _call_6502
-ldx _call_6502_temp
-sta $70,x
+ldx 0(_r_temp)
+sta 0(_r_0),x
 lda #0
-sta $71,x
+sta 1(_r_0),x
+sta 2(_r_0),x
+sta 3(_r_0),x
 rts
 _call_6502:
-jmp ($8E)
+jmp ($8a)
 
 return:
-ldx #$1C
+ldx #$3C
 jmp pop_reg
 
 exit_vm:
-pla
-pla
 pla
 pla
 rts

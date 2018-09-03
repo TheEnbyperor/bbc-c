@@ -31,6 +31,7 @@ class ScopedSymbolTable(object):
         self.symbols = collections.OrderedDict()
         self.structs = collections.OrderedDict()
         self.decl_infos = collections.OrderedDict()
+        self.typedefs = collections.OrderedDict()
         self.scope_name = scope_name
         self.scope_level = scope_level
         self.enclosing_scope = enclosing_scope
@@ -93,6 +94,20 @@ class ScopedSymbolTable(object):
 
     def add_decl(self, tag, decl):
         self.decl_infos[tag] = decl
+
+    def lookup_typedef(self, name):
+        typedef = self.typedefs.get(name)
+        if typedef is not None:
+            return typedef
+
+        if self.enclosing_scope is not None:
+            return self.enclosing_scope.lookup_typedef(name)
+
+    def add_typedef(self, name, ctype):
+        if name not in self.typedefs:
+            self.typedefs[name] = ctype
+
+        return self.typedefs[name]
 
 
 class SymbolTable(object):
@@ -172,6 +187,12 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 param_identifiers = self.extract_params(decl)
             else:
                 param_identifiers = []
+
+            if storage == ast.DeclInfo.TYPEDEF:
+                if init:
+                    raise SyntaxError("Typedef can't have initaliser")
+
+                self.scope.add_typedef(identifier.value, ctype)
 
             out.append(ast.DeclInfo(
                 identifier, ctype, storage, init, param_identifiers))
@@ -275,16 +296,17 @@ class SymbolTableBuilder(ast.NodeVisitor):
             redec = not any_dec and storage is None
             base_type = self.parse_struct_union_spec(node, redec)
 
-        # # is a typedef
-        # elif any(s.kind == token_kinds.identifier for s in specs):
-        #     ident = [s for s in specs if s.kind == token_kinds.identifier][0]
-        #     base_type = self.symbol_table.lookup_typedef(ident)
-        #
+        # is a typedef
+        elif any(s.type == tokens.ID for s in specs):
+            ident = [s for s in specs if s.type == tokens.ID][0]
+            base_type = self.scope.lookup_typedef(ident.value)
+
         else:
             base_type = self.get_base_ctype(specs)
 
         if const:
             base_type = base_type.make_const()
+
         return base_type, storage
 
     def parse_struct_union_spec(self, node, redec):
@@ -401,7 +423,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
     def get_storage(self, spec_kinds):
         storage_classes = {tokens.AUTO: ast.DeclInfo.AUTO,
                            tokens.STATIC: ast.DeclInfo.STATIC,
-                           tokens.EXTERN: ast.DeclInfo.EXTERN}
+                           tokens.EXTERN: ast.DeclInfo.EXTERN,
+                           tokens.TYPEDEF: ast.DeclInfo.TYPEDEF}
 
         storage = None
         for kind in spec_kinds:

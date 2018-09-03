@@ -4,9 +4,32 @@ from . import ctypes
 from .tokens import *
 
 
+class SimpleSymbolTable:
+    def __init__(self):
+        self.symbols = []
+        self.new_scope()
+
+    def new_scope(self):
+        self.symbols.append({})
+
+    def end_scope(self):
+        self.symbols.pop()
+
+    def add_symbol(self, identifier, is_typedef):
+        self.symbols[-1][identifier.value] = is_typedef
+
+    def is_typedef(self, identifier):
+        name = identifier.value
+        for table in self.symbols[::-1]:
+            if name in table:
+                return table[name]
+        return False
+
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
+        self.symbols = SimpleSymbolTable()
 
     def error(self):
         raise SyntaxError("Invalid syntax")
@@ -114,6 +137,7 @@ class Parser:
         statements/declarations, enclosed in braces.
         """
         index = self.eat(index, LBRACE)
+        p.symbols.new_scope()
 
         # Read block items (statements/declarations) until there are no more.
         items = []
@@ -133,6 +157,7 @@ class Parser:
                 # When both of our parsing attempts fail, break out of the loop
                 break
 
+        p.symbols.end_scope()
         index = self.eat(index, RBRACE)
 
         return ast.Compound(items), index
@@ -482,7 +507,7 @@ class Parser:
             return ast.ParenExpr(node), index
         elif self.token_is(index, INTEGER):
             return ast.Number(self.tokens[index].value), index + 1
-        elif self.token_is(index, ID):
+        elif self.token_is(index, ID) and not self.symbols.is_typedef(self.tokens[index]):
             return ast.Identifier(self.tokens[index]), index + 1
         elif self.token_is(index, STRING):
             return ast.String(self.tokens[index].value + bytes([0])), index + 1
@@ -535,14 +560,17 @@ class Parser:
         if self.token_is(index, SEMI):
             return decl_tree.Root(specs, [], []), index + 1
 
+        is_typedef = any(t.type == TYPEDEF for t in specs)
+
         decls = []
         inits = []
 
         while True:
             end = self.find_decl_end(index)
-            decls.append(self.parse_declarator(index, end))
-
+            node = self.parse_declarator(index, end, is_typedef)
+            decls.append(node)
             index = end
+
             if self.token_is(index, EQUALS) and parse_inits:
                 expr, index = self.parse_initializer(index + 1)
                 inits.append(expr)
@@ -584,37 +612,50 @@ class Parser:
             index += 1
         return ast.InitializerList(inits), index
 
-    def parse_decl_specifiers(self, index):
+    def parse_decl_specifiers(self, index, _spec_qual=False):
         """Parse a declaration specifier list.
         Examples:
             int
             const char
             typedef int
         """
+        type_specs = set(ctypes.simple_types.keys())
+        type_specs |= set(TYPE_MODS.keys())
+
+        type_quals = set(QUALIFIERS.keys())
+
+        storage_specs = set(STORAGE.keys())
 
         specs = []
 
-        try:
-            node, index = self.parse_type_specifier(index)
-            specs.append(node)
-        except SyntaxError:
-            try:
-                node, index = self.parse_type_qualifier(index)
+        while True:
+            if self.token_is(index, STRUCT) or self.token_is(index, UNION):
+                node, index = self.parse_struct_or_union_specifier(index)
                 specs.append(node)
-            except SyntaxError:
-                try:
-                    node, index = self.parse_storage_class_specifier(index)
-                    specs.append(node)
-                except SyntaxError:
-                    pass
+
+            elif self.token_is(index, ID) and self.symbols.is_typedef(self.tokens[index]):
+                specs.append(self.tokens[index])
+                index += 1
+
+            elif self.tokens[index].value in type_specs:
+                specs.append(self.tokens[index])
+                index += 1
+
+            elif self.tokens[index].value in type_quals:
+                specs.append(self.tokens[index])
+                index += 1
+
+            elif self.tokens[index].value in storage_specs:
+                if not _spec_qual:
+                    specs.append(self.tokens[index])
+                else:
+                    self.error()
+                index += 1
+
+            else:
+                break
 
         if specs:
-            try:
-                nodes, index = self.parse_decl_specifiers(index)
-                specs.extend(nodes)
-            except SyntaxError:
-                pass
-
             return specs, index
         else:
             self.error()
@@ -629,25 +670,7 @@ class Parser:
         return decl_tree.Root(t, [d]), end
 
     def parse_specifier_qualifier_list(self, index):
-        specs = []
-
-        try:
-            spec, index = self.parse_type_specifier(index)
-            specs.append(spec)
-        except SyntaxError:
-            spec, index = self.parse_type_qualifier(index)
-            specs.append(spec)
-
-        try:
-            spec, index = self.parse_specifier_qualifier_list(index)
-            specs.extend(spec)
-        except SyntaxError:
-            pass
-
-        if specs:
-            return specs, index
-        else:
-            self.error()
+        return self.parse_decl_specifiers(index, True)
 
     def parse_storage_class_specifier(self, index):
         specifiers = list(STORAGE.keys())
@@ -834,7 +857,7 @@ class Parser:
             # then this must be the end of the declaration.
             return index
 
-    def parse_declarator(self, start, end):
+    def parse_declarator(self, start, end, is_typedef=False):
         """Parse the given tokens that comprises a declarator.
         This function parses both declarator and abstract-declarators. For
         an abstract declarator, the Identifier node at the leaf of the
@@ -845,31 +868,32 @@ class Parser:
         if start == end:
             return decl_tree.Identifier(None)
         elif start + 1 == end and self.tokens[start].type == ID:
+            self.symbols.add_symbol(self.tokens[start], is_typedef)
             return decl_tree.Identifier(self.tokens[start])
 
         elif self.tokens[start].type == STAR:
-            return decl_tree.Pointer(self.parse_declarator(start + 1, end))
+            return decl_tree.Pointer(self.parse_declarator(start + 1, end, is_typedef))
 
-        func_decl = self.try_parse_func_decl(start, end)
+        func_decl = self.try_parse_func_decl(start, end, is_typedef)
         if func_decl:
             return func_decl
 
         # First and last elements make a parenthesis pair
         elif self.tokens[start].type == LPAREM and self.find_pair_forward(start) == end - 1:
-            return self.parse_declarator(start + 1, end - 1)
+            return self.parse_declarator(start + 1, end - 1, is_typedef)
 
         # Last element indicates an array type
         elif self.tokens[end - 1].type == RBRACK:
             first = self.tokens[end - 3].type == LBRACK or self.tokens[end - 2].type == LBRACK
             number = self.tokens[end - 2].type == INTEGER
             if first and number:
-                return decl_tree.Array(int(self.tokens[end - 2].value), self.parse_declarator(start, end - 3))
+                return decl_tree.Array(int(self.tokens[end - 2].value), self.parse_declarator(start, end - 3, is_typedef))
             elif first:
-                return decl_tree.Array(None, self.parse_declarator(start, end - 2))
+                return decl_tree.Array(None, self.parse_declarator(start, end - 2, is_typedef))
 
         self.error()
 
-    def try_parse_func_decl(self, start, end):
+    def try_parse_func_decl(self, start, end, is_typedef=False):
         if self.tokens[end - 1].type != RPAREM:
             return None
         open_paren = self.find_pair_backward(end - 1)
@@ -877,7 +901,7 @@ class Parser:
             params, index = self.parse_parameter_list(open_paren + 1)
             if index == end - 1:
                 return decl_tree.Function(
-                    params, self.parse_declarator(start, open_paren))
+                    params, self.parse_declarator(start, open_paren, is_typedef))
         except SyntaxError:
             pass
         return None

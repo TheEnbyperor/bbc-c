@@ -50,6 +50,7 @@ STORAGE = {
     'auto': Token(AUTO, 'auto'),
     'static': Token(STATIC, 'static'),
     'extern': Token(EXTERN, 'extern'),
+    'typedef': Token(TYPEDEF, 'typedef'),
 }
 
 QUALIFIERS = {

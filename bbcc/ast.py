@@ -100,6 +100,7 @@ class DeclInfo:
     AUTO = 1
     STATIC = 2
     EXTERN = 3
+    TYPEDEF = 4
 
     def __init__(self, identifier, ctype, storage=None, init=None, params=None):
         if params is None:
