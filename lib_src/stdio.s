@@ -3,11 +3,17 @@
 .import strlen
 .import strrev
 .import isdigit
+.export size_t
+.export ptrdiff_t
 .export printf
 .export fputs
 .export puts
 .export gets
 .export itoa
+size_t:
+.byte #0,#0
+ptrdiff_t:
+.byte #0,#0
 // Function: fputs
 fputs:
 	push %r11

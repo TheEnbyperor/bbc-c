@@ -1,4 +1,7 @@
-.export _start_vm
+.export _start
+
+_start:
+jmp _start_vm
 
 // ZP Locations
 // $8e-f: Indirect for extended memory
@@ -6,10 +9,108 @@
 // $86-9: Temporary store 2 for addresses
 
 inst_jump_table_l:
-.byte #0(mov_const_reg-1)
+.byte #0(mov_const_reg-1),#0(mov_mem_reg_short-1),#0(mov_mem_reg_long-1),#0(mov_mem_reg_double-1),
+      #0(mov_reg_mem_short-1),#0(mov_reg_mem_long-1),#0(mov_reg_mem_double-1),#0(mov_reg_reg-1),
+
+      // Stack
+      #0(push_reg-1),#0(push_mem-1),#0(pop_reg-1),#0(pop_mem-1),
+
+      #0(load_address_reg-1),
+
+      // Add
+      #0(add_const_reg-1),#0(add_carry_const_reg-1),#0(add_reg_reg-1),#0(add_carry_reg_reg-1),#0(add_mem_reg_short-1),
+      #0(add_carry_mem_reg_short-1),#0(add_mem_reg_long-1),#0(add_carry_mem_reg_long-1),#0(add_mem_reg_double-1),
+      #0(add_carry_mem_reg_double-1),
+
+      // Subtract
+      #0(sub_const_reg-1),#0(sub_carry_const_reg-1),#0(sub_reg_reg-1),#0(sub_carry_reg_reg-1),#0(sub_mem_reg_short-1),
+      #0(sub_carry_mem_reg_short-1),#0(sub_mem_reg_long-1),#0(sub_carry_mem_reg_long-1),#0(sub_mem_reg_double-1),
+      #0(sub_carry_mem_reg_double-1),
+
+      // Compare
+      #0(cmp_const_reg-1),#0(cmp_reg_reg-1),#0(cmp_mem_reg_short-1),#0(cmp_mem_reg_long-1),
+      #0(cmp_mem_reg_double-1),
+
+      // Multiply
+      #0,#0,#0,#0,#0,
+
+      // Divide
+      #0,#0,#0,#0,#0,
+
+      // Modulo
+      #0,#0,#0,#0,#0,
+
+      // Increment decrement
+      #0(inc_reg-1),#0(inc_mem_short-1),#0(inc_mem_long-1),#0(inc_mem_double-1),
+      #0(dec_reg-1),#0(dec_mem_short-1),#0(dec_mem_long-1),#0(dec_mem_double-1),
+
+      // Not
+      #0(not_reg-1),#0(not_mem_short-1),#0(not_mem_long-1),#0(not_mem_double-1),
+      // Neg
+      #0(neg_reg-1),#0(neg_mem_short-1),#0(neg_mem_long-1),#0(neg_mem_double-1),
+
+      // Call
+      #0(call_subroutine-1),#0(call_6502-1),
+
+      // Jump
+      #0(jump-1),#0(jump_zero-1),#0(jump_not_zero-1),#0(jump_above-1),#0(jump_above_equal-1),#0(jump_below-1),
+      #0(jump_below_equal-1),#0(jump_lesser-1),#0(jump_lesser_equal-1),#0(jump_greater-1),
+      #0(jump_greater_equal-1),
+
+      // Set on x
+      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0
 
 inst_jump_table_h:
-.byte #1(mov_const_reg-1)
+.byte #1(mov_const_reg-1),#1(mov_mem_reg_short-1),#1(mov_mem_reg_long-1),#1(mov_mem_reg_double-1),
+      #1(mov_reg_mem_short-1),#1(mov_reg_mem_long-1),#1(mov_reg_mem_double-1),#1(mov_reg_reg-1),
+
+      // Stack
+      #1(push_reg-1),#1(push_mem-1),#1(pop_reg-1),#1(pop_mem-1),
+
+      #1(load_address_reg-1),
+
+      // Add
+      #1(add_const_reg-1),#1(add_carry_const_reg-1),#1(add_reg_reg-1),#1(add_carry_reg_reg-1),#1(add_mem_reg_short-1),
+      #1(add_carry_mem_reg_short-1),#1(add_mem_reg_long-1),#1(add_carry_mem_reg_long-1),#1(add_mem_reg_double-1),
+      #1(add_carry_mem_reg_double-1),
+
+      // Subtract
+      #1(sub_const_reg-1),#1(sub_carry_const_reg-1),#1(sub_reg_reg-1),#1(sub_carry_reg_reg-1),#1(sub_mem_reg_short-1),
+      #1(sub_carry_mem_reg_short-1),#1(sub_mem_reg_long-1),#1(sub_carry_mem_reg_long-1),#1(sub_mem_reg_double-1),
+      #1(sub_carry_mem_reg_double-1),
+
+      // Compare
+      #1(cmp_const_reg-1),#1(cmp_reg_reg-1),#1(cmp_mem_reg_short-1),#1(cmp_mem_reg_long-1),
+      #1(cmp_mem_reg_double-1),
+
+      // Multiply
+      #0,#0,#0,#0,#0,
+
+      // Divide
+      #0,#0,#0,#0,#0,
+
+      // Modulo
+      #0,#0,#0,#0,#0,
+
+      // Increment decrement
+      #1(inc_reg-1),#1(inc_mem_short-1),#1(inc_mem_long-1),#1(inc_mem_double-1),
+      #1(dec_reg-1),#1(dec_mem_short-1),#1(dec_mem_long-1),#1(dec_mem_double-1),
+
+      // Not
+      #1(not_reg-1),#1(not_mem_short-1),#1(not_mem_long-1),#1(not_mem_double-1),
+      // Neg
+      #1(neg_reg-1),#1(neg_mem_short-1),#1(neg_mem_long-1),#1(neg_mem_double-1),
+
+      // Call
+      #1(call_subroutine-1),#1(call_6502-1),
+
+      // Jump
+      #1(jump-1),#1(jump_zero-1),#1(jump_not_zero-1),#1(jump_above-1),#1(jump_above_equal-1),#1(jump_below-1),
+      #1(jump_below_equal-1),#1(jump_lesser-1),#1(jump_lesser_equal-1),#1(jump_greater-1),
+      #1(jump_greater_equal-1),
+
+      // Set on x
+      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0
 
 other_inst_jump_table_l:
 .byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1), #0(halt_and_catch_fire-1)
@@ -36,16 +137,6 @@ _r_pc:     .byte #0,#0,#0,#0
 _r_temp:   .byte #0,#0,#0,#0
 
 _start_vm:
-// Set PC and status register
-lda #$00
-sta 0(_r_status)
-sta 1(_r_status)
-sta 2(_r_status)
-sta 3(_r_status)
-sta 0(_r_pc)
-sta 1(_r_pc)
-sta 2(_r_pc)
-sta 3(_r_pc)
 // Set ZP for memory access
 lda #$fd
 sta $8f
@@ -53,6 +144,7 @@ sta $8f
 // Run loop
 _init_1:
 jsr interpret
+jsr inc_pc
 jmp _init_1
 
 // Increment PC
@@ -75,6 +167,7 @@ jmp inc_pc
 
 _load_offset: .byte #0
 _load_byte_pc:
+php
 clc
 sty _load_offset
 lda 0(_r_pc)
@@ -93,20 +186,26 @@ sta $FC02
 _load_byte:
 ldy #0
 lda ($8e),y
+ldy _load_offset
+plp
 rts
 
 _save_byte:
 ldy #0
 pla
 sta ($8e),y
+ldy _load_offset
+plp
 rts
 
 _save_byte_temp:
+php
 pha
 sec
 php
 bcs _load_byte_temp_1
 _load_byte_temp:
+php
 clc
 php
 _load_byte_temp_1:
@@ -131,11 +230,13 @@ _load_byte_temp_2:
 jmp _save_byte
 
 _save_byte_temp_spot_2:
+php
 pha
 sec
 php
 bcs _load_byte_temp_spot_2_1
 _load_byte_temp_spot_2:
+php
 clc
 php
 _load_byte_temp_spot_2_1:
@@ -160,9 +261,8 @@ _load_byte_temp_spot_2_2:
 jmp _save_byte
 
 interpret:
-jsr inc_pc
-
 // Load first byte of instruction
+ldy #0
 jsr _load_byte_pc
 jsr inc_pc
 
@@ -246,26 +346,26 @@ jmp _get_mem_address
 _get_mem_rel_minus:
 jsr inc_pc
 ldy #0
-lda _load_byte_pc
+jsr _load_byte_pc
 sta _get_mem_address_temp_1
 lda 0(_r_pc)
 sec
 sbc _get_mem_address_temp_1
 sta $8a
 iny
-lda _load_byte_pc
+jsr _load_byte_pc
 sta _get_mem_address_temp_1
 lda 1(_r_pc)
 sbc _get_mem_address_temp_1
 sta $8b
 iny
-lda _load_byte_pc
+jsr _load_byte_pc
 sta _get_mem_address_temp_1
 lda 2(_r_pc)
 sbc _get_mem_address_temp_1
 sta $8c
 iny
-lda _load_byte_pc
+jsr _load_byte_pc
 sta _get_mem_address_temp_1
 lda 3(_r_pc)
 sbc _get_mem_address_temp_1
@@ -274,29 +374,21 @@ jmp _get_mem_address_2
 _get_mem_rel_plus:
 jsr inc_pc
 ldy #0
-lda _load_byte_pc
-sta _get_mem_address_temp_1
-lda 0(_r_pc)
+jsr _load_byte_pc
 clc
-adc _get_mem_address_temp_1
+adc 0(_r_pc)
 sta $8a
 iny
-lda _load_byte_pc
-sta _get_mem_address_temp_1
-lda 1(_r_pc)
-adc _get_mem_address_temp_1
+jsr _load_byte_pc
+adc 1(_r_pc)
 sta $8b
 iny
-lda _load_byte_pc
-sta _get_mem_address_temp_1
-lda 2(_r_pc)
-adc _get_mem_address_temp_1
+jsr _load_byte_pc
+adc 2(_r_pc)
 sta $8c
 iny
-lda _load_byte_pc
-sta _get_mem_address_temp_1
-lda 3(_r_pc)
-adc _get_mem_address_temp_1
+jsr _load_byte_pc
+adc 3(_r_pc)
 sta $8d
 jmp _get_mem_address_2
 _get_mem_indirect:
@@ -304,50 +396,54 @@ txa
 pha
 ldy #1
 jsr _load_byte_pc
+pha
 and #$F0
 lsr a
 lsr a
-lsr a
 tax
-jsr _load_byte_pc
+pla
 and #$0F
-sta _get_mem_address_temp_1
-iny
-jsr _load_byte_pc
-sta _get_mem_address_temp_2
+pha
+lda #0
+sta _get_mem_address_temp_4
 iny
 jsr _load_byte_pc
 sta _get_mem_address_temp_3
 iny
 jsr _load_byte_pc
-sta _get_mem_address_temp_4
-ldy #4
+sta _get_mem_address_temp_2
+iny
+jsr _load_byte_pc
+sta _get_mem_address_temp_1
 _get_mem_indirect_loop:
-asl _get_mem_address_temp_4
-rol _get_mem_address_temp_3
-rol _get_mem_address_temp_2
-rol _get_mem_address_temp_1
+lsr _get_mem_address_temp_1
+ror _get_mem_address_temp_2
+ror _get_mem_address_temp_3
+ror _get_mem_address_temp_4
 dey
 bne _get_mem_indirect_loop
-lda _get_mem_address_temp_4
+pla
+ora _get_mem_address_temp_4
+sta _get_mem_address_temp_4
+lda _get_mem_address_temp_1
 and #$08
 beq _get_mem_indirect_2
-lda _get_mem_address_temp_4
+lda _get_mem_address_temp_1
 ora #$F0
-sta _get_mem_address_temp_4
+sta _get_mem_address_temp_1
 _get_mem_indirect_2:
 clc
 lda 0(_r_0),x
-adc _get_mem_address_temp_1
+adc _get_mem_address_temp_4
 sta $8a
 lda 1(_r_0),x
-adc _get_mem_address_temp_2
+adc _get_mem_address_temp_3
 sta $8b
 lda 2(_r_0),x
-adc _get_mem_address_temp_3
+adc _get_mem_address_temp_2
 sta $8c
 lda 3(_r_0),x
-adc _get_mem_address_temp_4
+adc _get_mem_address_temp_1
 sta $8d
 pla
 tax
@@ -463,7 +559,7 @@ iny
 jsr _save_byte_temp
 rts
 
-push_start:
+push_start_1:
 lda 0(_r_stack)
 bne _push_start_1
 lda 1(_r_stack)
@@ -477,6 +573,13 @@ _push_start_2:
 dec 1(_r_stack)
 _push_start_1:
 dec 0(_r_stack)
+rts
+
+push_start:
+jsr push_start_1
+jsr push_start_1
+jsr push_start_1
+jsr push_start_1
 jmp pop_start
 
 // Push register onto stack
@@ -524,7 +627,7 @@ lda 3(_r_stack)
 sta $89
 rts
 
-pop_end:
+pop_end_1:
 inc 0(_r_stack)
 bne _pop_end
 inc 1(_r_stack)
@@ -534,6 +637,12 @@ bne _pop_end
 inc 3(_r_stack)
 _pop_end:
 rts
+
+pop_end:
+jsr pop_end_1
+jsr pop_end_1
+jsr pop_end_1
+jmp pop_end_1
 
 // Pop value off stack into register
 pop_reg:
@@ -750,9 +859,9 @@ add_mem_reg_double:
 clc
 bcc _add_mem_reg_long
 // Add with carry
-add_carry_mem_reg_long:
+add_carry_mem_reg_double:
 jsr load_carry_status
-_add_mem_reg_long:
+_add_mem_reg_double:
 jsr add_mem_reg_start_2
 iny
 jsr _load_byte_temp
@@ -977,9 +1086,9 @@ sub_mem_reg_double:
 sec
 bcs _sub_mem_reg_long
 // Add with carry
-sub_carry_mem_reg_long:
+sub_carry_mem_reg_double:
 jsr load_carry_status
-_sub_mem_reg_long:
+_sub_mem_reg_double:
 jsr sub_mem_reg_start_2
 iny
 jsr _load_byte_temp
@@ -1268,7 +1377,6 @@ jsr and_mem_reg_start_2
 lda #0
 sta 2(_r_0),x
 sta 3(_r_0),x
-jsr set_sign_zero_from_reg
 jmp clear_carry
 
 // 32 bit logical and memory and register
@@ -1672,6 +1780,7 @@ rts
 
 _jump_zero_start:
 jsr get_mem_address
+jsr dec_mem_address
 lda 0(_r_status)
 and #$02
 rts
@@ -1690,6 +1799,7 @@ jmp _jump_test_end
 
 _jump_above_start_1:
 jsr get_mem_address
+jsr dec_mem_address
 _jump_above_start_2:
 lda 0(_r_status)
 and #$01
@@ -1725,6 +1835,7 @@ jmp _jump_test_fail
 
 _jump_lesser_start:
 jsr get_mem_address
+jsr dec_mem_address
 lda 0(_r_status)
 and #$04
 lsr a
@@ -1740,7 +1851,6 @@ lsr a
 rts
 
 _jump_test_end:
-jsr dec_mem_address
 lda $8a
 sta 0(_r_pc)
 lda $8b

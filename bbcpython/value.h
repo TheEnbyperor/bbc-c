@@ -2,58 +2,55 @@
 #define bbc_python_value_h
 
 #include "common.h"
+#include "memory.h"
 
-#define ValueType unsigned char
+typedef uint8_t ValueType;
 #define VAL_NONE 0
 #define VAL_INT 1
 #define VAL_BOOL 2
 #define VAL_OBJ 3
 
-struct Obj;
+typedef struct sObj Obj;
 
-struct Value {
+typedef struct {
     ValueType type;
     union {
         bool boolean;
         int number;
         struct Obj *obj;
     } as;
-};
+} Value;
 
-struct ValueArray {
-    unsigned int count;
-    unsigned int capacity;
-    struct Value *values;
-};
+typedef struct {
+    ArrayMeta meta;
+    Value *values;
+} ValueArray;
 
-void initValueArray(struct ValueArray *array);
 
-void writeValueArray(struct ValueArray *array, struct Value *value);
+void writeValueArray(ValueArray *array, Value *value);
 
-void freeValueArray(struct ValueArray *array);
+void boolVal(bool val, Value *value);
 
-void boolVal(bool val, struct Value *value);
+void noneVal(Value *value);
 
-void noneVal(struct Value *value);
+void intVal(int val, Value *value);
 
-void intVal(int val, struct Value *value);
+void objVal(Obj *val, Value *value);
 
-void objVal(struct Obj *val, struct Value *value);
+bool isBool(Value *value);
 
-bool isBool(struct Value *value);
+bool isNone(Value *value);
 
-bool isNone(struct Value *value);
+bool isInt(Value *value);
 
-bool isInt(struct Value *value);
+bool isObj(Value *value);
 
-bool isObj(struct Value *value);
+bool asBool(Value *value);
 
-bool asBool(struct Value *value);
+int asInt(Value *value);
 
-int asInt(struct Value *value);
+Obj *asObj(Value *value);
 
-struct Obj *asObj(struct Value *value);
-
-void printValue(struct Value *value);
+void printValue(Value *value);
 
 #endif

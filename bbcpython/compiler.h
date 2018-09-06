@@ -4,6 +4,6 @@
 #include "chunk.h"
 #include "vm.h"
 
-bool compile(const char* source, struct Chunk *chunk, struct VM *vm);
+bool compile(const char* source, Chunk *chunk, VM *vm);
 
 #endif

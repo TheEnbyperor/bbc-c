@@ -85,7 +85,7 @@ class Linker:
                 else:
                     code[lal] = (code[lal] & 0xF0) | (am & 0x0F)
 
-                code[i[4]:i[4]+2] = struct.pack("<h", mv)
+                code[i[4]:i[4]+4] = struct.pack("<I", mv)
 
             out.extend(code)
 
@@ -93,12 +93,9 @@ class Linker:
         if start_symbol is None:
             raise LookupError("No _start symbol, don't know where to start execution")
 
-        cur_dir = os.path.dirname(__file__)
-        with open(os.path.join(cur_dir, "start.o"), "rb") as f:
-            start_o = bytearray(f.read())
-
-        start_o.extend([0x2F, 0x20])
-        start_o.extend(struct.pack("<h", start_symbol + 2))  # 2 is length of jump instruction excluding address
+        start_o = bytearray()
+        start_o.extend([0x47, 0x20])
+        start_o.extend(struct.pack("<I", start_symbol + 4))
 
         return start_o + out
 
@@ -149,22 +146,22 @@ class Linker:
 
             code_out.extend(code)
 
-        offset = 4 if static else 0
+        offset = 6 if static else 0
         header = bytearray()
         for i, l in exports:
             header.append(0x0)
-            header.extend(struct.pack("<H", l+offset))
+            header.extend(struct.pack("<I", l+offset))
             header.extend(i.encode())
             header.append(0x0)
 
         for l in imports:
             lil, lal, lal2, lml, ln = l
             header.append(0x1)
-            header.extend(struct.pack("<HHBH", lil+offset, lal+offset, lal2, lml+offset))
+            header.extend(struct.pack("<IIBI", lil+offset, lal+offset, lal2, lml+offset))
             header.extend(ln.encode())
             header.append(0x0)
 
-        out.extend(struct.pack("<H", len(header)))
+        out.extend(struct.pack("<I", len(header)))
         out.extend(header)
 
         if static:
@@ -172,8 +169,8 @@ class Linker:
             if start_symbol is None:
                 raise LookupError("No _start symbol, don't know where to start execution")
 
-            out.extend([0x2F, 0x20])
-            out.extend(struct.pack("<h", start_symbol + 2))  # 2 is length of jump instruction excluding address
+            out.extend([0x47, 0x20])
+            out.extend(struct.pack("<I", start_symbol + 4))
 
         out.extend(code_out)
 

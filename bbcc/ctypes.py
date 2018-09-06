@@ -203,15 +203,15 @@ bool_t = IntegerCType(1, False)
 char = IntegerCType(1, True)
 unsig_char = IntegerCType(1, False)
 
-integer = IntegerCType(2, True)
-unsig_int = IntegerCType(2, False)
-int_max = 32767
-int_min = -32768
+integer = IntegerCType(4, True)
+unsig_int = IntegerCType(4, False)
+int_max = 2147483647
+int_min = -2147483648
 
-longint = IntegerCType(4, True)
-unsig_longint = IntegerCType(4, False)
-longint_max = 2147483647
-longint_min = -2147483648
+longint = IntegerCType(8, True)
+unsig_longint = IntegerCType(8, False)
+longint_max = 9223372036854775807
+longint_min = -9223372036854775808
 
 simple_types = {tokens.VOID: void,
                 tokens.BOOL: bool_t,

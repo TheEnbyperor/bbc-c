@@ -2,7 +2,7 @@
 .export getchar
 
 putchar:
-    mov 2[%r13], %r0
+    mov 4[%r14], %r0
     calln $FFEE, %r0
     cmp #10, %r0
     jne _putchar

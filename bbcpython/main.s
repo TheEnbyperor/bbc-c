@@ -3,11 +3,74 @@
 .import initVM
 .import interpret
 .import freeVM
+.export size_t
+.export ptrdiff_t
+.export int8_t
+.export uint8_t
+.export int16_t
+.export uint16_t
+.export ArrayMeta
+.export DynamicArray
+.export LineInfo
+.export LineInfoArray
+.export ValueType
+.export Obj
+.export Value
+.export ValueArray
+.export OpCode
+.export Chunk
+.export InterpretResult
+.export Stack
+.export VM
+.export ObjType
+.export ObjString
 .export main
 __bbcc_00000004:
 .byte #62,#62,#62,#32,#0
 __bbcc_00000005:
 .byte #10,#0
+size_t:
+.byte #0,#0
+ptrdiff_t:
+.byte #0,#0
+int8_t:
+.byte #0
+uint8_t:
+.byte #0
+int16_t:
+.byte #0,#0
+uint16_t:
+.byte #0,#0
+ArrayMeta:
+.byte #0,#0,#0,#0
+DynamicArray:
+.byte #0,#0,#0,#0,#0,#0
+LineInfo:
+.byte #0,#0,#0,#0
+LineInfoArray:
+.byte #0,#0,#0,#0,#0,#0
+ValueType:
+.byte #0
+Obj:
+.byte #0,#0,#0
+Value:
+.byte #0,#0,#0
+ValueArray:
+.byte #0,#0,#0,#0,#0,#0
+OpCode:
+.byte #0
+Chunk:
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+InterpretResult:
+.byte #0
+Stack:
+.byte #0,#0,#0,#0,#0,#0
+VM:
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+ObjType:
+.byte #0
+ObjString:
+.byte #0,#0,#0,#0,#0,#0,#0
 // Function: repl
 repl:
 	push %r11
@@ -75,23 +138,23 @@ __bbcc_00000006:
 main:
 	push %r11
 	mov %r13, %r11
-	sub #12, %r13
+	sub #1, %r13
 // AddrOf
-	lea WORD -12[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
 	call [initVM]
 	add #2, %r13
 // AddrOf
-	lea WORD -12[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
 	call [repl]
 	add #2, %r13
 // AddrOf
-	lea WORD -12[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0

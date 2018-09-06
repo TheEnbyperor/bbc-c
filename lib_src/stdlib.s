@@ -1,9 +1,18 @@
 .import isdigit
 .import _HIMEM
+.export size_t
+.export ptrdiff_t
+.export block_meta
 .export malloc
 .export free
 .export realloc
 .export atoi
+size_t:
+.byte #0,#0
+ptrdiff_t:
+.byte #0,#0
+block_meta:
+.byte #0,#0,#0,#0,#0,#0,#0
 global_base:
 .byte #0,#0
 mem_top:
@@ -16,7 +25,7 @@ get_block_ptr:
 // Set
 	mov WORD 4[%r11], %r0
 // Set
-	mov #7, %r1
+	mov #1, %r1
 // Sub
 	sub %r1, %r0
 // Return
@@ -33,7 +42,7 @@ get_data_ptr:
 // Set
 	mov WORD 4[%r11], %r0
 // Set
-	mov #7, %r1
+	mov #1, %r1
 // Add
 	add %r1, %r0
 // Return
@@ -140,7 +149,7 @@ __bbcc_00000004:
 // Add
 	add %r2, %r0
 // Set
-	mov #7, %r2
+	mov #1, %r2
 // Add
 	add %r2, %r0
 // LessThanJmp
@@ -159,7 +168,7 @@ __bbcc_00000005:
 // Add
 	add %r2, %r0
 // Set
-	mov #7, %r2
+	mov #1, %r2
 // Add
 	add %r2, %r0
 // Set
@@ -208,7 +217,7 @@ split_block:
 // Set
 	mov WORD 4[%r11], %r0
 // Set
-	mov #7, %r1
+	mov #1, %r1
 // Add
 	add %r1, %r0
 // Set
@@ -224,7 +233,7 @@ split_block:
 // Sub
 	sub WORD 6[%r11], %r0
 // Sub
-	sub #7, %r0
+	sub #1, %r0
 // SetAt
 	mov %r0, WORD [%r2]
 // ReadAt
@@ -304,7 +313,7 @@ __bbcc_00000009:
 // ReadAt
 	mov WORD [%r0], %r0
 // Add
-	mov #7, %r1
+	mov #1, %r1
 	add %r0, %r1
 // ReadAt
 	mov WORD 4[%r11], %r0
@@ -443,7 +452,7 @@ __bbcc_0000000f:
 // Set
 	mov #4, %r2
 // Add
-	mov #7, %r1
+	mov #1, %r1
 	add %r2, %r1
 // LessThanJmp
 	cmp %r0, %r1
@@ -469,7 +478,7 @@ __bbcc_0000000e:
 // Set
 	mov %r3, %r0
 // Set
-	mov #7, %r1
+	mov #1, %r1
 // Add
 	add %r1, %r0
 // Return
@@ -715,7 +724,7 @@ __bbcc_0000001e:
 // Set
 	mov #4, %r3
 // Add
-	mov #7, %r2
+	mov #1, %r2
 	add %r3, %r2
 // LessThanJmp
 	cmp %r0, %r2
@@ -751,7 +760,7 @@ __bbcc_0000001f:
 // ReadAt
 	mov WORD [%r1], %r0
 // Add
-	add #7, %r0
+	add #1, %r0
 // ReadAt
 	mov WORD 2[%r1], %r2
 // ReadAt
@@ -782,7 +791,7 @@ __bbcc_00000023:
 // Set
 	mov #4, %r3
 // Add
-	mov #7, %r2
+	mov #1, %r2
 	add %r3, %r2
 // LessThanJmp
 	cmp %r0, %r2

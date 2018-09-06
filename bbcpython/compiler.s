@@ -11,7 +11,35 @@
 .import initScanner
 .import scanToken
 .import atoi
+.export size_t
+.export ptrdiff_t
+.export int8_t
+.export uint8_t
+.export int16_t
+.export uint16_t
+.export ArrayMeta
+.export DynamicArray
+.export LineInfo
+.export LineInfoArray
+.export ValueType
+.export Obj
+.export Value
+.export ValueArray
+.export OpCode
+.export Chunk
+.export InterpretResult
+.export Stack
+.export VM
+.export ObjType
+.export ObjString
 .export compile
+.export Scanner
+.export TokenType
+.export Token
+.export Precedence
+.export Parser
+.export ParseFunc
+.export ParseRule
 .export parsePrecedence
 .export rules
 __bbcc_00000031:
@@ -42,8 +70,64 @@ __bbcc_0000003d:
 .byte #83,#84,#65,#82,#84,#32,#80,#65,#82,#83,#69,#10,#0
 __bbcc_0000003e:
 .byte #69,#120,#112,#101,#99,#116,#101,#100,#32,#101,#110,#100,#32,#111,#102,#32,#101,#120,#112,#114,#101,#115,#115,#105,#111,#110,#46,#0
+size_t:
+.byte #0,#0
+ptrdiff_t:
+.byte #0,#0
+int8_t:
+.byte #0
+uint8_t:
+.byte #0
+int16_t:
+.byte #0,#0
+uint16_t:
+.byte #0,#0
+ArrayMeta:
+.byte #0,#0,#0,#0
+DynamicArray:
+.byte #0,#0,#0,#0,#0,#0
+LineInfo:
+.byte #0,#0,#0,#0
+LineInfoArray:
+.byte #0,#0,#0,#0,#0,#0
+ValueType:
+.byte #0
+Obj:
+.byte #0,#0,#0
+Value:
+.byte #0,#0,#0
+ValueArray:
+.byte #0,#0,#0,#0,#0,#0
+OpCode:
+.byte #0
+Chunk:
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+InterpretResult:
+.byte #0
+Stack:
+.byte #0,#0,#0,#0,#0,#0
+VM:
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+ObjType:
+.byte #0
+ObjString:
+.byte #0,#0,#0,#0,#0,#0,#0
+Scanner:
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+TokenType:
+.byte #0,#0
+Token:
+.byte #0,#0,#0,#0,#0,#0,#0,#0
+Precedence:
+.byte #0
+Parser:
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+ParseFunc:
+.byte #0,#0
+ParseRule:
+.byte #0,#0,#0,#0,#0
 rules:
-.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
 // Function: currentChunk
 currentChunk:
 	push %r11
@@ -663,7 +747,7 @@ __bbcc_0000004a:
 number:
 	push %r11
 	mov %r13, %r11
-	sub #3, %r13
+	sub #1, %r13
 	push %r1
 // Add
 	mov WORD 4[%r11], %r0
@@ -678,7 +762,7 @@ number:
 // Set
 	mov %r0, %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -688,7 +772,7 @@ number:
 // Set
 	mov WORD 4[%r11], %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -706,7 +790,7 @@ __bbcc_0000004b:
 string:
 	push %r11
 	mov %r13, %r11
-	sub #3, %r13
+	sub #1, %r13
 	push %r1
 	push %r2
 // Add
@@ -740,7 +824,7 @@ string:
 // Set
 	mov %r0, %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -750,7 +834,7 @@ string:
 // Set
 	mov WORD 4[%r11], %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -1101,7 +1185,7 @@ __bbcc_00000050:
 literal:
 	push %r11
 	mov %r13, %r11
-	sub #3, %r13
+	sub #1, %r13
 	push %r1
 	push %r2
 // Add
@@ -1115,7 +1199,7 @@ literal:
 	cmp #19, %r2
 	jnz [__bbcc_00000028]
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -1124,7 +1208,7 @@ literal:
 // Set
 	mov WORD 4[%r11], %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -1141,7 +1225,7 @@ __bbcc_00000028:
 // Set
 	mov #1, %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -1151,7 +1235,7 @@ __bbcc_00000028:
 // Set
 	mov WORD 4[%r11], %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -1168,7 +1252,7 @@ __bbcc_0000002a:
 // Set
 	mov #0, %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -1178,7 +1262,7 @@ __bbcc_0000002a:
 // Set
 	mov WORD 4[%r11], %r1
 // AddrOf
-	lea WORD -3[%r11], %r0
+	lea WORD -1[%r11], %r0
 // Set
 // CallFunction
 	push %r0
@@ -1203,17 +1287,12 @@ __bbcc_00000051:
 getRule:
 	push %r11
 	mov %r13, %r11
-	push %r1
 // AddrOf
 	lea WORD [rules], %r0
-// Mult
-	mov #5, %r1
-	mul WORD 4[%r11], %r1
 // Add
-	add %r1, %r0
+	add WORD 4[%r11], %r0
 // Return
 __bbcc_00000052:
-	pop %r1
 	mov %r11, %r13
 	pop %r11
 	ret
@@ -1222,16 +1301,14 @@ initRule:
 	push %r11
 	mov %r13, %r11
 	push %r1
-// Set
-	mov WORD 6[%r11], %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD [%r1]
-// Set
-	mov WORD 8[%r11], %r0
+	mov 4[%r11], %r0
+	mov 6[%r11], %r1
+	mov %r1, WORD [%r0]
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 2[%r1]
+	mov 4[%r11], %r0
+	mov 8[%r11], %r1
+	mov %r1, WORD 2[%r0]
 // SetAt
 	mov 4[%r11], %r0
 	mov 10[%r11], %r1
@@ -1287,7 +1364,6 @@ parsePrecedence:
 	add #2, %r13
 // ReadAt
 	mov WORD [%r0], %r0
-// Set
 // Set
 	mov %r0, %r2
 // NotEqualJmp
@@ -1347,7 +1423,6 @@ __bbcc_0000002e:
 // ReadAt
 	mov WORD 2[%r0], %r0
 // Set
-// Set
 	mov %r0, %r1
 // Set
 	mov WORD 4[%r11], %r0
@@ -1398,7 +1473,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #5, %r0
+	add #1, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1419,7 +1494,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #95, %r0
+	add #19, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1440,7 +1515,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #120, %r0
+	add #24, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1461,7 +1536,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #70, %r0
+	add #14, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1482,7 +1557,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #15, %r0
+	add #3, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1505,7 +1580,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #20, %r0
+	add #4, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1528,7 +1603,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #30, %r0
+	add #6, %r0
 // Set
 	mov %r0, %r3
 // Set
@@ -1549,7 +1624,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #25, %r0
+	add #5, %r0
 // Set
 	mov %r0, %r3
 // Set
@@ -1570,7 +1645,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #210, %r0
+	add #42, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1581,132 +1656,6 @@ compile:
 	mov #0, %r1
 // Set
 	mov #0, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #8, %r13
-// AddrOf
-	lea WORD [rules], %r0
-// Add
-	add #250, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea WORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #8, %r13
-// AddrOf
-	lea WORD [rules], %r0
-// Add
-	add #255, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea WORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #8, %r13
-// AddrOf
-	lea WORD [rules], %r0
-// Add
-	add #260, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea WORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #8, %r13
-// AddrOf
-	lea WORD [rules], %r0
-// Add
-	add #265, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea WORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #8, %r13
-// AddrOf
-	lea WORD [rules], %r0
-// Add
-	add #270, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea WORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #8, %r13
-// AddrOf
-	lea WORD [rules], %r0
-// Add
-	add #275, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea WORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
 // CallFunction
 	push %r0
 	push %r1
@@ -1718,6 +1667,132 @@ compile:
 	lea WORD [rules], %r0
 // Add
 	add #50, %r0
+// Set
+	mov %r0, %r3
+// Set
+	mov #0, %r2
+// AddrOf
+	lea WORD [binary], %r0
+// Set
+	mov %r0, %r1
+// Set
+	mov #8, %r0
+// CallFunction
+	push %r0
+	push %r1
+	push %r2
+	push %r3
+	call [initRule]
+	add #8, %r13
+// AddrOf
+	lea WORD [rules], %r0
+// Add
+	add #51, %r0
+// Set
+	mov %r0, %r3
+// Set
+	mov #0, %r2
+// AddrOf
+	lea WORD [binary], %r0
+// Set
+	mov %r0, %r1
+// Set
+	mov #8, %r0
+// CallFunction
+	push %r0
+	push %r1
+	push %r2
+	push %r3
+	call [initRule]
+	add #8, %r13
+// AddrOf
+	lea WORD [rules], %r0
+// Add
+	add #52, %r0
+// Set
+	mov %r0, %r3
+// Set
+	mov #0, %r2
+// AddrOf
+	lea WORD [binary], %r0
+// Set
+	mov %r0, %r1
+// Set
+	mov #8, %r0
+// CallFunction
+	push %r0
+	push %r1
+	push %r2
+	push %r3
+	call [initRule]
+	add #8, %r13
+// AddrOf
+	lea WORD [rules], %r0
+// Add
+	add #53, %r0
+// Set
+	mov %r0, %r3
+// Set
+	mov #0, %r2
+// AddrOf
+	lea WORD [binary], %r0
+// Set
+	mov %r0, %r1
+// Set
+	mov #8, %r0
+// CallFunction
+	push %r0
+	push %r1
+	push %r2
+	push %r3
+	call [initRule]
+	add #8, %r13
+// AddrOf
+	lea WORD [rules], %r0
+// Add
+	add #54, %r0
+// Set
+	mov %r0, %r3
+// Set
+	mov #0, %r2
+// AddrOf
+	lea WORD [binary], %r0
+// Set
+	mov %r0, %r1
+// Set
+	mov #8, %r0
+// CallFunction
+	push %r0
+	push %r1
+	push %r2
+	push %r3
+	call [initRule]
+	add #8, %r13
+// AddrOf
+	lea WORD [rules], %r0
+// Add
+	add #55, %r0
+// Set
+	mov %r0, %r3
+// Set
+	mov #0, %r2
+// AddrOf
+	lea WORD [binary], %r0
+// Set
+	mov %r0, %r1
+// Set
+	mov #8, %r0
+// CallFunction
+	push %r0
+	push %r1
+	push %r2
+	push %r3
+	call [initRule]
+	add #8, %r13
+// AddrOf
+	lea WORD [rules], %r0
+// Add
+	add #10, %r0
 // Set
 	mov %r0, %r3
 // AddrOf
@@ -1738,7 +1813,7 @@ compile:
 // AddrOf
 	lea WORD [rules], %r0
 // Add
-	add #290, %r0
+	add #58, %r0
 // Set
 	mov %r0, %r3
 // Set

@@ -2,6 +2,15 @@
 .import memcmp
 .import isalpha
 .import isdigit
+.export size_t
+.export ptrdiff_t
+.export int8_t
+.export uint8_t
+.export int16_t
+.export uint16_t
+.export Scanner
+.export TokenType
+.export Token
 .export initScanner
 .export scanToken
 __bbcc_000000b4:
@@ -62,6 +71,24 @@ __bbcc_000000cf:
 .byte #108,#111,#99,#97,#108,#0
 __bbcc_000000d0:
 .byte #85,#110,#101,#120,#112,#101,#99,#116,#101,#100,#32,#99,#104,#97,#114,#97,#99,#116,#101,#114,#0
+size_t:
+.byte #0,#0
+ptrdiff_t:
+.byte #0,#0
+int8_t:
+.byte #0
+uint8_t:
+.byte #0
+int16_t:
+.byte #0,#0
+uint16_t:
+.byte #0,#0
+Scanner:
+.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+TokenType:
+.byte #0,#0
+Token:
+.byte #0,#0,#0,#0,#0,#0,#0,#0
 // Function: initScanner
 initScanner:
 	push %r11

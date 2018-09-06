@@ -1,28 +1,27 @@
 #ifndef bbc_python_debug_h
 #define bbc_python_debug_h
 
-struct LineInfo {
+#include "memory.h"
+
+typedef struct {
   unsigned int startByte;
   unsigned int lineNum;
-};
+} LineInfo;
 
-struct LineInfoArray {
-  unsigned int count;
-  unsigned int capacity;
-  struct LineInfo* lineInfo;
-};
+typedef struct {
+  ArrayMeta meta;
+  LineInfo* lineInfo;
+} LineInfoArray;
 
 #include "chunk.h"
 
-void initLineInfoArray(struct LineInfoArray* array);
-void writeLineInfoArray(struct LineInfoArray* array, struct LineInfo* value);
-void freeLineInfoArray(struct LineInfoArray* array);
+void writeLineInfoArray(LineInfoArray* array, LineInfo* value);
 
-unsigned int getLastLine(struct LineInfoArray* array);
-unsigned int getLine(struct LineInfoArray* array, unsigned int offset);
-void writeLine(struct LineInfoArray* array, unsigned int offset, unsigned int lineNum);
+unsigned int getLastLine(LineInfoArray* array);
+unsigned int getLine(LineInfoArray* array, unsigned int offset);
+void writeLine(LineInfoArray* array, unsigned int offset, unsigned int lineNum);
 
-void disassembleChunk(struct Chunk* chunk, const char* name);
-unsigned int disassembleInstruction(struct Chunk* chunk, unsigned int i);
+void disassembleChunk(struct sChunk* chunk, const char* name);
+unsigned int disassembleInstruction(struct sChunk* chunk, unsigned int i);
 
 #endif

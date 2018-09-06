@@ -167,7 +167,7 @@ class Catalogue(Utilities):
     def _find_space(self, file):
         for i in range(len(self.free_space)):
             sector, length = self.free_space[i]
-            file_length = file.length / self.sector_size
+            file_length = file.length // self.sector_size
 
             if file.length % self.sector_size != 0:
                 file_length += 1

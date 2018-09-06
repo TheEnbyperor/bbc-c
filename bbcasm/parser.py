@@ -68,14 +68,15 @@ class Parser:
                         loc_offset = self.tokens[index].value
                         if self.tokens[index-1].type == MINUS:
                             loc_offset = -loc_offset
-                    index = self.eat(index+1, RPAREM)
+                        index += 1
+                    index = self.eat(index, RPAREM)
                     return insts.LabelAddrVal(name, offset=offset, loc_offset=loc_offset), index
                 else:
                     self.error(index)
             else:
-                if self.tokens[index].value > 255:
+                if offset > 255:
                     self.error(index)
-                return insts.LiteralVal(self.tokens[index].value), index + 1
+                return insts.LiteralVal(offset), index + 1
         self.error(index)
 
     def parse_AccumulatorVal(self, index):
@@ -218,9 +219,14 @@ class Parser:
     def parse_cmd_byte(self, index):
         nums = []
         while True:
-            num, index = self.parse_LiteralVal(index)
-            inst = insts.Byte(num)
-            nums.append(inst)
+            if self.tokens[index].type == STRING:
+                for c in self.tokens[index].value:
+                    nums.append(insts.Byte(insts.LiteralVal(ord(c))))
+                index += 1
+            else:
+                num, index = self.parse_LiteralVal(index)
+                inst = insts.Byte(num)
+                nums.append(inst)
             if self.token_is(index, COMMA):
                 index += 1
             else:

@@ -2,32 +2,35 @@
 #define bbc_python_object_h
 
 #include "common.h"
+#include "value.h"
 #include "vm.h"
 
-#define ObjType unsigned char
+typedef uint8_t ObjType;
 #define OBJ_STRING 0
 
-struct Obj {
+struct sObj {
     ObjType type;
-    struct Obj* next;
+    Obj* next;
 };
 
-struct ObjString {
-    struct Obj object;
+typedef struct {
+    struct sObj object;
     int length;
     char *chars;
-};
+} ObjString;
 
-ObjType objType(struct Value *value);
+ObjType objType(Value *value);
 
-bool isString(struct Value *value);
+bool isString(Value *value);
 
-struct ObjString *asString(struct Value *value);
+ObjString *asString(Value *value);
 
-char *asCString(struct Value *value);
+char *asCString(Value *value);
 
-struct ObjString *takeString(char *chars, int length, struct VM *vm);
+ObjString *takeString(char *chars, int length, VM *vm);
 
-struct ObjString *copyString(const char *chars, int length, struct VM *vm);
+ObjString *copyString(const char *chars, int length, VM *vm);
+
+void freeObjects(VM *vm);
 
 #endif

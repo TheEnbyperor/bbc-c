@@ -2,33 +2,33 @@
 #define bbc_python_vm_h
 
 #include "chunk.h"
-#include "object.h"
+#include "memory.h"
+#include "value.h"
 
-#define InterpretResult unsigned int
+typedef uint8_t InterpretResult;
 #define INTERPRET_OK 0
 #define INTERPRET_COMPILE_ERROR 1
 #define INTERPRET_RUNTIME_ERROR 2
 
-struct Stack {
-  struct Value* data;
-  unsigned int count;
-  unsigned int capacity;
-};
+typedef struct {
+  ArrayMeta meta;
+  Value* data;
+} Stack;
 
-struct VM {
-  struct Chunk* chunk;
+typedef struct {
+  struct sChunk* chunk;
   uint8_t* ip;
-  struct Stack stack;
-  struct Obj* objects;
-};
+  Stack stack;
+  Obj* objects;
+} VM;
 
-void initStack(struct Stack* stack);
-void freeStack(struct Stack* stack);
-void pushStack(struct Stack* stack, struct Value *value);
-void popStack(struct Stack* stack, struct Value *value);
+#include "object.h"
 
-void initVM(struct VM* vm);
-InterpretResult interpret(struct VM *vm, const char* source);
-void freeVM(struct VM* vm);
+void pushStack(Stack* stack, Value *value);
+void popStack(Stack* stack, Value *value);
+
+void initVM(VM* vm);
+InterpretResult interpret(VM *vm, const char* source);
+void freeVM(VM* vm);
 
 #endif

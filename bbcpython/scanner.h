@@ -1,16 +1,16 @@
 #ifndef bbc_python_scanner_h
 #define bbc_python_scanner_h
 
-struct Scanner {
+typedef struct {
   const char* start;
   const char* current;
   int line;
   bool isStartOfLine;
   int indent[20];
   int *curIndent;
-};
+} Scanner;
 
-#define TokenType unsigned int
+typedef unsigned int TokenType;
 #define TOKEN_EOF 56
 #define TOKEN_ERROR 57
 #define TOKEN_NEWLINE 58
@@ -79,14 +79,14 @@ struct Scanner {
 #define TOKEN_LESS 54
 #define TOKEN_LESS_EQUAL 55
 
-struct Token {
+typedef struct {
   TokenType type;
   const char* start;
   int length;
   int line;
-};
+} Token;
 
-void initScanner(struct Scanner* scanner, const char* source);
-void scanToken(struct Scanner *scanner, struct Token *token);
+void initScanner(Scanner* scanner, const char* source);
+void scanToken(Scanner *scanner, Token *token);
 
 #endif

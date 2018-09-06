@@ -47,7 +47,9 @@ def link_o_static(arg, objs, name: str):
 
     if getattr(arg, "6502", False):
         make_tape(name, name, 0x1900, exa, out)
-        make_disk([["$.{}".format(name.upper()), out, 0x1900, exa]], name)
+        make_disk([("$.{}".format(name.upper()), out, 0x1900, exa)], name)
+    else:
+        make_disk_with_vm([("$.{}".format(name.upper()), out)], name)
 
 
 def link_o_static_shared(arg, objs, name: str):
@@ -78,6 +80,20 @@ def make_disk(files, out):
     disk = bbcdisk.files_to_disk(files)
     disk_file = open("{}.ssd".format(out), "wb")
     disk_file.write(disk)
+
+
+def make_disk_with_vm(files, out):
+    files = list(map(lambda f: (f[0], f[1], 0, 0), files))
+    vm_dir = os.path.join(os.path.dirname(__file__), "bbcvm")
+    loader_file = os.path.join(vm_dir, "loader")
+    vm_file = os.path.join(vm_dir, "vm")
+    with open(loader_file, 'rb') as l:
+        loader = bytes(l.read())
+    with open(vm_file, 'rb') as v:
+        vm = bytes(v.read())
+    files += (("$.LOADER", loader, 0x1900, 0x1900),)
+    files += (("$.VM", vm, 0x1900, 0x1900),)
+    make_disk(files, out)
 
 
 if __name__ == "__main__":

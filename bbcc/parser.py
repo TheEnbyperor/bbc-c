@@ -137,7 +137,7 @@ class Parser:
         statements/declarations, enclosed in braces.
         """
         index = self.eat(index, LBRACE)
-        p.symbols.new_scope()
+        self.symbols.new_scope()
 
         # Read block items (statements/declarations) until there are no more.
         items = []
@@ -157,7 +157,7 @@ class Parser:
                 # When both of our parsing attempts fail, break out of the loop
                 break
 
-        p.symbols.end_scope()
+        self.symbols.end_scope()
         index = self.eat(index, RBRACE)
 
         return ast.Compound(items), index

@@ -42,18 +42,18 @@ class Assembler:
         for l in self.exports:
             lv = self.labels[l]
             header.append(0x0)
-            header.extend(struct.pack("<H", lv))
+            header.extend(struct.pack("<I", lv))
             header.extend(l.encode())
             header.append(0x0)
 
         for l in self.imports:
             lil, lal, lal2, lml, ln = l
             header.append(0x1)
-            header.extend(struct.pack("<HHBH", lil, lal, lal2, lml))
+            header.extend(struct.pack("<IIBI", lil, lal, lal2, lml))
             header.extend(ln.encode())
             header.append(0x0)
 
-        out.extend(struct.pack("<H", len(header)))
+        out.extend(struct.pack("<I", len(header)))
         out.extend(header)
 
         out.extend(self.insts)
@@ -119,7 +119,7 @@ class Assembler:
                 const_val = value.const_loc.val if value.const_loc is not None else 0
                 am = 0x3
                 mv = (((value.reg_indirect.reg_num << 4) & 0xF0) | (const_val & 0x0F)) |\
-                     ((const_val & 0xFF0) << 4)
+                     ((const_val & 0xFFFFFF0) << 4)
             else:
                 raise SyntaxError(f"Indirect register can't be {value.reg_indirect}")
         elif value.const_loc is not None:
@@ -128,8 +128,8 @@ class Assembler:
             self.insts.append((am << 4) & 0xF0)
         elif al2 == 1:
             self.insts.append(am & 0x0F)
-        self.insts.extend(struct.pack("<H", mv))
-        self.loc += 3
+        self.insts.extend(struct.pack("<I", mv))
+        self.loc += 5
 
     def get_reg_val(self, left: typing.Union[ast.RegisterValue, None], right: typing.Union[ast.RegisterValue, None]):
         left_num = left.reg_num if left is not None else 0
@@ -140,6 +140,13 @@ class Assembler:
     def get_mem_reg_val(self, mem: ast.MemoryValue, reg: ast.RegisterValue, al, ml):
         self.get_mem_val(mem, al, 0, ml)
         self.insts[-3] |= (reg.reg_num & 0x0F)
+
+    def get_const_val(self, val: ast.LiteralValue):
+        if val.val < 0:
+            self.insts.extend(struct.pack("<i", val.val))
+        else:
+            self.insts.extend(struct.pack("<I", val.val))
+        self.loc += 4
 
     @setup_labels
     def visit_Bytes(self, node: ast.Bytes):
@@ -165,7 +172,7 @@ class Assembler:
     @setup_labels
     def visit_Push(self, node: ast.Push):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x06)
+            self.insts.append(0x08)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -174,7 +181,7 @@ class Assembler:
     @setup_labels
     def visit_Pop(self, node: ast.Pop):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x07)
+            self.insts.append(0x0a)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -183,7 +190,7 @@ class Assembler:
     @setup_labels
     def visit_Inc(self, node: ast.Inc):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x19)
+            self.insts.append(0x35)
             self.get_reg_val(node.value, None)
             self.loc += 1
         elif isinstance(node.value, ast.MemoryValue):
@@ -191,6 +198,8 @@ class Assembler:
                 self.insts.append(0x36)
             elif node.value.length == 2:
                 self.insts.append(0x37)
+            elif node.value.length == 4:
+                self.insts.append(0x38)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -199,14 +208,16 @@ class Assembler:
     @setup_labels
     def visit_Dec(self, node: ast.Dec):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x1A)
+            self.insts.append(0x39)
             self.get_reg_val(node.value, None)
             self.loc += 1
         elif isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
-                self.insts.append(0x38)
+                self.insts.append(0x3a)
             elif node.value.length == 2:
-                self.insts.append(0x39)
+                self.insts.append(0x3b)
+            elif node.value.length == 4:
+                self.insts.append(0x3c)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -215,14 +226,16 @@ class Assembler:
     @setup_labels
     def visit_Neg(self, node: ast.Neg):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x28)
+            self.insts.append(0x41)
             self.get_reg_val(node.value, None)
             self.loc += 1
         elif isinstance(node.value, ast.MemoryValue):
             if node.value.length == 1:
-                self.insts.append(0x34)
+                self.insts.append(0x42)
             elif node.value.length == 2:
-                self.insts.append(0x35)
+                self.insts.append(0x43)
+            elif node.value.length == 4:
+                self.insts.append(0x44)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -231,26 +244,30 @@ class Assembler:
     @setup_labels
     def visit_Mov(self, node: ast.Mov):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x05)
+            self.insts.append(0x07)
             self.get_reg_val(node.left, node.right)
             self.loc += 1
         elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x00)
             self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
+            self.get_const_val(node.left)
+            self.loc += 1
         elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
             if node.left.length == 1:
                 self.insts.append(0x01)
             elif node.left.length == 2:
                 self.insts.append(0x02)
+            elif node.left.length == 4:
+                self.insts.append(0x03)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         elif isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.MemoryValue):
             if node.right.length == 1:
-                self.insts.append(0x03)
-            elif node.right.length == 2:
                 self.insts.append(0x04)
+            elif node.right.length == 2:
+                self.insts.append(0x05)
+            elif node.right.length == 4:
+                self.insts.append(0x06)
             self.get_mem_reg_val(node.right, node.left, 1, 2)
             self.loc += 1
         else:
@@ -259,7 +276,7 @@ class Assembler:
     @setup_labels
     def visit_Lea(self, node: ast.Lea):
         if isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x08)
+            self.insts.append(0x0c)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         else:
@@ -268,177 +285,182 @@ class Assembler:
     @setup_labels
     def visit_Add(self, node: ast.Add):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x0B)
+            self.insts.append(0x0f)
             self.get_reg_val(node.left, node.right)
             self.loc += 1
         elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x09)
+            self.insts.append(0x0d)
             self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
+            self.get_const_val(node.left)
+            self.loc += 1
         elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
             if node.left.length == 1:
-                self.insts.append(0x0D)
+                self.insts.append(0x11)
             elif node.left.length == 2:
-                self.insts.append(0x0F)
+                self.insts.append(0x13)
+            elif node.left.length == 4:
+                self.insts.append(0x15)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         else:
             raise SyntaxError(f"Can't add {node.left} to {node.right}")
-
-    @setup_labels
-    def visit_Sub(self, node: ast.Sub):
-        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x13)
-            self.get_reg_val(node.left, node.right)
-            self.loc += 1
-        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x11)
-            self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
-        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            if node.left.length == 1:
-                self.insts.append(0x15)
-            elif node.left.length == 2:
-                self.insts.append(0x17)
-            self.get_mem_reg_val(node.left, node.right, 1, 2)
-            self.loc += 1
-        else:
-            raise SyntaxError(f"Can't subtract {node.left} from {node.right}")
-
-    @setup_labels
-    def visit_Mul(self, node: ast.Mul):
-        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x43)
-            self.get_reg_val(node.left, node.right)
-            self.loc += 1
-        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x42)
-            self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
-        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            if node.left.length == 1:
-                self.insts.append(0x44)
-            elif node.left.length == 2:
-                self.insts.append(0x45)
-            self.get_mem_reg_val(node.left, node.right, 1, 2)
-            self.loc += 1
-        else:
-            raise SyntaxError(f"Can't multiply {node.left} and {node.right}")
-
-    @setup_labels
-    def visit_Div(self, node: ast.Div):
-        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x47)
-            self.get_reg_val(node.left, node.right)
-            self.loc += 1
-        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x46)
-            self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
-        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            if node.left.length == 1:
-                self.insts.append(0x48)
-            elif node.left.length == 2:
-                self.insts.append(0x49)
-            self.get_mem_reg_val(node.left, node.right, 1, 2)
-            self.loc += 1
-        else:
-            raise SyntaxError(f"Can't divide {node.left} and {node.right}")
-
-    @setup_labels
-    def visit_Mod(self, node: ast.Mod):
-        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x4b)
-            self.get_reg_val(node.left, node.right)
-            self.loc += 1
-        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x4a)
-            self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
-        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            if node.left.length == 1:
-                self.insts.append(0x4c)
-            elif node.left.length == 2:
-                self.insts.append(0x4d)
-            self.get_mem_reg_val(node.left, node.right, 1, 2)
-            self.loc += 1
-        else:
-            raise SyntaxError(f"Can't modulo {node.left} and {node.right}")
+    #
+    # @setup_labels
+    # def visit_Sub(self, node: ast.Sub):
+    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x13)
+    #         self.get_reg_val(node.left, node.right)
+    #         self.loc += 1
+    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x11)
+    #         self.get_reg_val(node.right, None)
+    #         self.insts.extend(struct.pack("<h", node.left.val))
+    #         self.loc += 3
+    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+    #         if node.left.length == 1:
+    #             self.insts.append(0x15)
+    #         elif node.left.length == 2:
+    #             self.insts.append(0x17)
+    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
+    #         self.loc += 1
+    #     else:
+    #         raise SyntaxError(f"Can't subtract {node.left} from {node.right}")
+    #
+    # @setup_labels
+    # def visit_Mul(self, node: ast.Mul):
+    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x43)
+    #         self.get_reg_val(node.left, node.right)
+    #         self.loc += 1
+    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x42)
+    #         self.get_reg_val(node.right, None)
+    #         self.insts.extend(struct.pack("<h", node.left.val))
+    #         self.loc += 3
+    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+    #         if node.left.length == 1:
+    #             self.insts.append(0x44)
+    #         elif node.left.length == 2:
+    #             self.insts.append(0x45)
+    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
+    #         self.loc += 1
+    #     else:
+    #         raise SyntaxError(f"Can't multiply {node.left} and {node.right}")
+    #
+    # @setup_labels
+    # def visit_Div(self, node: ast.Div):
+    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x47)
+    #         self.get_reg_val(node.left, node.right)
+    #         self.loc += 1
+    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x46)
+    #         self.get_reg_val(node.right, None)
+    #         self.insts.extend(struct.pack("<h", node.left.val))
+    #         self.loc += 3
+    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+    #         if node.left.length == 1:
+    #             self.insts.append(0x48)
+    #         elif node.left.length == 2:
+    #             self.insts.append(0x49)
+    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
+    #         self.loc += 1
+    #     else:
+    #         raise SyntaxError(f"Can't divide {node.left} and {node.right}")
+    #
+    # @setup_labels
+    # def visit_Mod(self, node: ast.Mod):
+    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x4b)
+    #         self.get_reg_val(node.left, node.right)
+    #         self.loc += 1
+    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x4a)
+    #         self.get_reg_val(node.right, None)
+    #         self.insts.extend(struct.pack("<h", node.left.val))
+    #         self.loc += 3
+    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+    #         if node.left.length == 1:
+    #             self.insts.append(0x4c)
+    #         elif node.left.length == 2:
+    #             self.insts.append(0x4d)
+    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
+    #         self.loc += 1
+    #     else:
+    #         raise SyntaxError(f"Can't modulo {node.left} and {node.right}")
+    #
 
     @setup_labels
     def visit_Cmp(self, node: ast.Cmp):
         if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x2A)
+            self.insts.append(0x22)
             self.get_reg_val(node.left, node.right)
             self.loc += 1
         elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x29)
+            self.insts.append(0x21)
             self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
+            self.get_const_val(node.left)
+            self.loc += 1
         elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
             if node.left.length == 1:
-                self.insts.append(0x2B)
+                self.insts.append(0x23)
             elif node.left.length == 2:
-                self.insts.append(0x2C)
+                self.insts.append(0x24)
+            elif node.left.length == 4:
+                self.insts.append(0x25)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         else:
             raise SyntaxError(f"Can't compare {node.left} and {node.right}")
-
-    @setup_labels
-    def visit_And(self, node: ast.And):
-        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x1C)
-            self.get_reg_val(node.left, node.right)
-            self.loc += 1
-        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x1B)
-            self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
-        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            if node.left.length == 1:
-                self.insts.append(0x1D)
-            elif node.left.length == 2:
-                self.insts.append(0x1E)
-            self.get_mem_reg_val(node.left, node.right, 1, 2)
-            self.loc += 1
-        else:
-            raise SyntaxError(f"Can't and {node.left} and {node.right}")
-
-    @setup_labels
-    def visit_Or(self, node: ast.Or):
-        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x20)
-            self.get_reg_val(node.left, node.right)
-            self.loc += 1
-        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-            self.insts.append(0x1F)
-            self.get_reg_val(node.right, None)
-            self.insts.extend(struct.pack("<h", node.left.val))
-            self.loc += 3
-        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            if node.left.length == 1:
-                self.insts.append(0x21)
-            elif node.left.length == 2:
-                self.insts.append(0x22)
-            self.get_mem_reg_val(node.left, node.right, 1, 2)
-            self.loc += 1
-        else:
-            raise SyntaxError(f"Can't or {node.left} and {node.right}")
-
+    #
+    # @setup_labels
+    # def visit_And(self, node: ast.And):
+    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x1C)
+    #         self.get_reg_val(node.left, node.right)
+    #         self.loc += 1
+    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x1B)
+    #         self.get_reg_val(node.right, None)
+    #         self.insts.extend(struct.pack("<h", node.left.val))
+    #         self.loc += 3
+    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+    #         if node.left.length == 1:
+    #             self.insts.append(0x1D)
+    #         elif node.left.length == 2:
+    #             self.insts.append(0x1E)
+    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
+    #         self.loc += 1
+    #     else:
+    #         raise SyntaxError(f"Can't and {node.left} and {node.right}")
+    #
+    # @setup_labels
+    # def visit_Or(self, node: ast.Or):
+    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x20)
+    #         self.get_reg_val(node.left, node.right)
+    #         self.loc += 1
+    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+    #         self.insts.append(0x1F)
+    #         self.get_reg_val(node.right, None)
+    #         self.insts.extend(struct.pack("<h", node.left.val))
+    #         self.loc += 3
+    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+    #         if node.left.length == 1:
+    #             self.insts.append(0x21)
+    #         elif node.left.length == 2:
+    #             self.insts.append(0x22)
+    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
+    #         self.loc += 1
+    #     else:
+    #         raise SyntaxError(f"Can't or {node.left} and {node.right}")
+    #
     @setup_labels
     def visit_Jmp(self, node: ast.Jmp):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump to a byte pointer")
-            self.insts.append(0x2F)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump to a non dword pointer")
+            self.insts.append(0x47)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -447,9 +469,9 @@ class Assembler:
     @setup_labels
     def visit_Jze(self, node: ast.Jze):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on zero to a byte pointer")
-            self.insts.append(0x30)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on zero to a non dword pointer")
+            self.insts.append(0x48)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -458,9 +480,9 @@ class Assembler:
     @setup_labels
     def visit_Jnz(self, node: ast.Jnz):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on not zero to a byte pointer")
-            self.insts.append(0x31)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on not zero to a non dword pointer")
+            self.insts.append(0x49)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -469,9 +491,9 @@ class Assembler:
     @setup_labels
     def visit_Jl(self, node: ast.Jl):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on lesser to a byte pointer")
-            self.insts.append(0x3E)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on lesser to a non dword pointer")
+            self.insts.append(0x4e)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -480,9 +502,9 @@ class Assembler:
     @setup_labels
     def visit_Jle(self, node: ast.Jle):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on lesser or equal to a byte pointer")
-            self.insts.append(0x3F)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on lesser or equal to a non dword pointer")
+            self.insts.append(0x4f)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -491,9 +513,9 @@ class Assembler:
     @setup_labels
     def visit_Jg(self, node: ast.Jg):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on on greater to a byte pointer")
-            self.insts.append(0x40)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on on greater to a non dword pointer")
+            self.insts.append(0x50)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -502,9 +524,9 @@ class Assembler:
     @setup_labels
     def visit_Jge(self, node: ast.Jge):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on greater or equal to a byte pointer")
-            self.insts.append(0x41)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on greater or equal to a non dword pointer")
+            self.insts.append(0x51)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -513,9 +535,9 @@ class Assembler:
     @setup_labels
     def visit_Ja(self, node: ast.Ja):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on on above to a byte pointer")
-            self.insts.append(0x3A)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on on above to a non dword pointer")
+            self.insts.append(0x4a)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -524,9 +546,9 @@ class Assembler:
     @setup_labels
     def visit_Jae(self, node: ast.Jae):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on above or equal to a byte pointer")
-            self.insts.append(0x3B)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on above or equal to a non dword pointer")
+            self.insts.append(0x4b)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -535,9 +557,9 @@ class Assembler:
     @setup_labels
     def visit_Jb(self, node: ast.Jb):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on on below to a byte pointer")
-            self.insts.append(0x3C)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on on below to a non dword pointer")
+            self.insts.append(0x4c)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -546,18 +568,18 @@ class Assembler:
     @setup_labels
     def visit_Jbe(self, node: ast.Jbe):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't jump on below or equal to a byte pointer")
-            self.insts.append(0x3D)
+            if node.value.length != 4:
+                raise SyntaxError("Can't jump on below or equal to a non dword pointer")
+            self.insts.append(0x4d)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
             raise SyntaxError(f"Can't jump on below or equal to {node.value}")
 
     @setup_labels
-    def visit_Sze(self, node: ast.Jze):
+    def visit_Sze(self, node: ast.Sze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x4e)
+            self.insts.append(0x52)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -566,7 +588,7 @@ class Assembler:
     @setup_labels
     def visit_Snz(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x4f)
+            self.insts.append(0x53)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -575,7 +597,7 @@ class Assembler:
     @setup_labels
     def visit_Sa(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x50)
+            self.insts.append(0x54)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -584,7 +606,7 @@ class Assembler:
     @setup_labels
     def visit_Sae(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x51)
+            self.insts.append(0x55)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -593,7 +615,7 @@ class Assembler:
     @setup_labels
     def visit_Sb(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x52)
+            self.insts.append(0x56)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -602,7 +624,7 @@ class Assembler:
     @setup_labels
     def visit_Sbe(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x53)
+            self.insts.append(0x57)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -611,7 +633,7 @@ class Assembler:
     @setup_labels
     def visit_Sl(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x54)
+            self.insts.append(0x58)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -620,7 +642,7 @@ class Assembler:
     @setup_labels
     def visit_Sle(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x55)
+            self.insts.append(0x59)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -629,7 +651,7 @@ class Assembler:
     @setup_labels
     def visit_Sg(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x56)
+            self.insts.append(0x5a)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -638,7 +660,7 @@ class Assembler:
     @setup_labels
     def visit_Sge(self, node: ast.Jze):
         if isinstance(node.value, ast.RegisterValue):
-            self.insts.append(0x57)
+            self.insts.append(0x5b)
             self.get_reg_val(node.value, None)
             self.loc += 1
         else:
@@ -647,9 +669,9 @@ class Assembler:
     @setup_labels
     def visit_Call(self, node: ast.Call):
         if isinstance(node.value, ast.MemoryValue):
-            if node.value.length == 1:
-                raise SyntaxError("Can't call byte pointer")
-            self.insts.append(0x2D)
+            if node.value.length != 4:
+                raise SyntaxError("Can't call non dword pointer")
+            self.insts.append(0x45)
             self.get_mem_val(node.value, 1, 0, 2)
             self.loc += 1
         else:
@@ -658,9 +680,9 @@ class Assembler:
     @setup_labels
     def visit_Calln(self, node: ast.Calln):
         if isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-            if node.left.length == 1:
-                raise SyntaxError("Can't call byte pointer")
-            self.insts.append(0x2E)
+            if node.left.length != 4:
+                raise SyntaxError("Can't call native non dword pointer")
+            self.insts.append(0x46)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         else:

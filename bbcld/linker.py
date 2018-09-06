@@ -12,7 +12,7 @@ class Linker:
         self.sta = sta
 
     def _find_lib(self, symbol_name):
-        lib_dir = os.path.join(os.path.dirname(__file__), "..", "lib")
+        lib_dir = os.path.join(os.path.dirname(__file__), "..", "lib_6502")
         libs = glob.glob(os.path.join(lib_dir, "*.o"))
         for l in libs:
             lib = open(l, "rb")
@@ -86,7 +86,6 @@ class Linker:
         if start_symbol is None:
             raise LookupError("No _start symbol, don't know where to start execution")
 
-        print(start_symbol)
         return out, start_symbol[1]
 
     def link_shared(self, strip):

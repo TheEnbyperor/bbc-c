@@ -1,39 +1,20 @@
 #include "debug.h"
 #include "common.h"
-#include "memory.h"
 
-void initLineInfoArray(struct LineInfoArray* array) {
-  array->lineInfo = NULL;
-  array->capacity = 0;
-  array->count = 0;
+void writeLineInfoArray(LineInfoArray* array, LineInfo* value) {
+  writeArray(array, sizeof(LineInfo), value);
 }
 
-void writeLineInfoArray(struct LineInfoArray* array, struct LineInfo* value) {
-  if (array->capacity < array->count + 1) {
-    int oldCapacity = array->capacity;
-    array->capacity = growCapacity(oldCapacity);
-    array->lineInfo = (struct LineInfo*)reallocate(array->lineInfo, array->capacity * sizeof(struct LineInfo));
-  }
-
-  array->lineInfo[array->count] = *value;
-  array->count++;
-}
-
-void freeLineInfoArray(struct LineInfoArray* array) {
-  reallocate(array->lineInfo, 0);
-  initLineInfoArray(array);
-}
-
-unsigned int getLastLine(struct LineInfoArray* array) {
-    if (array->count == 0)
+unsigned int getLastLine(LineInfoArray* array) {
+    if (array->meta.count == 0)
       return 0;
-    return array->lineInfo[array->count - 1].lineNum;
+    return array->lineInfo[array->meta.count - 1].lineNum;
 }
 
-unsigned int getLine(struct LineInfoArray* array, unsigned int offset) {
+unsigned int getLine(LineInfoArray* array, unsigned int offset) {
   unsigned int lastLine = 0;
-  for (unsigned int i = 0; i < array->count; i++) {
-    struct LineInfo info;
+  for (unsigned int i = 0; i < array->meta.count; i++) {
+    LineInfo info;
     info = array->lineInfo[i];
     if (info.startByte <= offset) {
       lastLine = info.lineNum;
@@ -44,8 +25,8 @@ unsigned int getLine(struct LineInfoArray* array, unsigned int offset) {
   return lastLine;
 }
 
-void writeLine(struct LineInfoArray* array, unsigned int offset, unsigned int lineNum) {
-  struct LineInfo info;
+void writeLine(LineInfoArray* array, unsigned int offset, unsigned int lineNum) {
+  LineInfo info;
   info.startByte = offset;
   info.lineNum = lineNum;
 
@@ -56,15 +37,15 @@ static int simpleInstruction(const char* name, int offset);
 static int constantInstruction(const char* name, struct Chunk* chunk, int offset);
 static int longConstantInstruction(const char* name, struct Chunk* chunk, int offset);
 
-void disassembleChunk(struct Chunk* chunk, const char* name) {
+void disassembleChunk(Chunk* chunk, const char* name) {
   printf("== %s ==\n", name);
 
-  for (unsigned int i = 0; i < chunk->count;) {
+  for (unsigned int i = 0; i < chunk->meta.count;) {
     i = disassembleInstruction(chunk, i);
   }
 }
 
-unsigned int disassembleInstruction(struct Chunk* chunk, unsigned int offset) {
+unsigned int disassembleInstruction(Chunk* chunk, unsigned int offset) {
   printf("%04u ", offset);
 
   unsigned int line = getLine(&chunk->lineInfo, offset);
@@ -112,7 +93,7 @@ static unsigned int simpleInstruction(const char* name, unsigned int offset) {
   return offset + 1;
 }
 
-static unsigned int constantInstruction(const char* name, struct Chunk* chunk, unsigned int offset) {
+static unsigned int constantInstruction(const char* name, Chunk* chunk, unsigned int offset) {
   uint8_t constant = chunk->code[offset + 1];
   printf("%s %04u '", name, constant);
   printValue(&chunk->constants.values[constant]);
@@ -120,7 +101,7 @@ static unsigned int constantInstruction(const char* name, struct Chunk* chunk, u
   return offset + 2;
 }
 
-static unsigned int longConstantInstruction(const char* name, struct Chunk* chunk, unsigned int offset) {
+static unsigned int longConstantInstruction(const char* name, Chunk* chunk, unsigned int offset) {
   uint16_t constant = *(uint16_t *)(&chunk->code[offset + 1]);
   printf("%s %04u '", name, constant);
   printValue(&chunk->constants.values[constant]);

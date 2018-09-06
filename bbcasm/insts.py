@@ -183,9 +183,9 @@ class Inst:
         else:
             if type(self.value) in [AccumulatorVal]:
                 return 1
-            elif type(self.value) in [LiteralVal, ZpVal, ZpXVal, ZpYVal, IndirectXVal, IndirectYVal]:
+            elif type(self.value) in [LiteralVal, ZpVal, ZpXVal, ZpYVal, IndirectXVal, IndirectYVal,  LabelAddrVal]:
                 return 2
-            elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal, LabelVal, LabelAddrVal]:
+            elif type(self.value) in [MemVal, MemXVal, MemYVal, IndirectVal, LabelVal]:
                 return 3
 
     def is_relative(self):
@@ -236,7 +236,7 @@ class ASL(Inst):
 
 
 class BIT(Inst):
-    modes = [(LiteralVal, 0x24), (MemVal, 0x2C)]
+    modes = [(ZpVal, 0x24), (MemVal, 0x2C)]
 
     def __init__(self, value):
         self.value = value

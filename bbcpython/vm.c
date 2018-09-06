@@ -5,67 +5,43 @@
 #include "string.h"
 #include "vm.h"
 
-void initStack(struct Stack *stack) {
-    stack->data = NULL;
-    stack->capacity = 0;
-    stack->count = 0;
+void pushStack(Stack *stack, Value *value) {
+    writeArray(stack, sizeof(Value), value);
 }
 
-void pushStack(struct Stack *stack, struct Value *value) {
-    if (stack->capacity < stack->count + 1) {
-        int oldCapacity = stack->capacity;
-        stack->capacity = growCapacity(oldCapacity);
-        stack->data = (struct Value *) reallocate(stack->data, stack->capacity * sizeof(struct Value));
-    }
-
-    stack->data[stack->count] = *value;
-    stack->count++;
+void popStack(Stack *stack, Value *value) {
+    popArray(stack, sizeof(Value), value);
 }
 
-void popStack(struct Stack *stack, struct Value *value) {
-    stack->count--;
-    *value = stack->data[stack->count];
-    int oldCapacity = stack->capacity;
-    stack->capacity = shrinkCapacity(oldCapacity, stack->count);
-    if (stack->capacity != oldCapacity) {
-        stack->data = (struct Value *) reallocate(stack->data, stack->capacity * sizeof(struct Value));
-    }
-}
-
-void freeStack(struct Stack *stack) {
-    reallocate(stack->data, 0);
-    initStack(stack);
-}
-
-void initVM(struct VM *vm) {
-    initStack(&vm->stack);
+void initVM(VM *vm) {
+    initArray(&vm->stack);
     vm->objects = NULL;
 }
 
-void freeVM(struct VM *vm) {
-    freeStack(&vm->stack);
+void freeVM(VM *vm) {
+    freeArray(&vm->stack);
     freeObjects(vm);
 }
 
-static uint8_t readByte(struct VM *vm) {
+static uint8_t readByte(VM *vm) {
     return *vm->ip++;
 }
 
-static struct Value *readConstant(struct VM *vm) {
+static Value *readConstant(VM *vm) {
     return &vm->chunk->constants.values[readByte(vm)];
 }
 
-static struct Value *peek(struct VM *vm, int distance) {
-    return &vm->stack.data[vm->stack.count - 1 - distance];
+static Value *peek(VM *vm, int distance) {
+    return &vm->stack.data[vm->stack.meta.count - 1 - distance];
 }
 
-static void runtimeError(struct VM *vm, const char *format) {
+static void runtimeError(VM *vm, const char *format) {
     unsigned int instruction = vm->ip - vm->chunk->code - 1;
     printf("[line %d] in script: %s\n", getLine(&vm->chunk->lineInfo, instruction), format);
-    freeStack(&vm->stack);
+    freeArray(&vm->stack);
 }
 
-static bool checkArithType(struct VM *vm, int *a, int *b, struct Value **value) {
+static bool checkArithType(VM *vm, int *a, int *b, Value **value) {
     *value = peek(vm, 1);
     if (!isInt(peek(vm, 0)) || !isInt(*value)) {
         runtimeError(vm, "Operands must be a number.");
@@ -78,15 +54,15 @@ static bool checkArithType(struct VM *vm, int *a, int *b, struct Value **value) 
     return true;
 }
 
-static bool isFalsey(struct VM *vm, struct Value **value) {
+static bool isFalsey(VM *vm, Value **value) {
     *value = peek(vm, 0);
     if (isNone(*value)) return true;
     else if (isBool(*value)) return !asBool(*value);
     else if (isInt(*value)) return asInt(*value) == 0;
 }
 
-static bool valuesEqual(struct VM *vm, struct Value **a) {
-    struct Value b;
+static bool valuesEqual(VM *vm, Value **a) {
+    Value b;
     popStack(&vm->stack, &b);
     *a = peek(vm, 0);
 
@@ -98,10 +74,10 @@ static bool valuesEqual(struct VM *vm, struct Value **a) {
     if (type == VAL_INT) return asInt(*a) == asInt(&b);
 }
 
-void concatenate(struct VM *vm) {
-    struct Value bVal;
-    struct Value *aVal;
-    struct ObjString *bStr, *aStr;
+void concatenate(VM *vm) {
+    Value bVal;
+    Value *aVal;
+    ObjString *bStr, *aStr;
     popStack(&vm->stack, &bVal);
     aVal = peek(vm, 0);
     bStr = asString(&bVal);
@@ -117,15 +93,15 @@ void concatenate(struct VM *vm) {
     objVal(aStr, aVal);
 }
 
-static InterpretResult run(struct VM *vm) {
-    struct Value value;
-    struct Value *valuePtr;
+static InterpretResult run(VM *vm) {
+    Value value;
+    Value *valuePtr;
     int a, b;
 
     for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
         printf("[");
-        for (int slot = 0; slot < vm->stack.count; slot++) {
+        for (int slot = 0; slot < vm->stack.meta.count; slot++) {
             if (slot != 0) {
                 printf(", ");
             }
@@ -194,8 +170,8 @@ static InterpretResult run(struct VM *vm) {
 
 }
 
-InterpretResult interpret(struct VM *vm, const char *source) {
-    struct Chunk chunk;
+InterpretResult interpret(VM *vm, const char *source) {
+    Chunk chunk;
     initChunk(&chunk);
 
     if (!compile(source, &chunk, vm)) {

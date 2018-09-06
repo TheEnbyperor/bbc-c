@@ -33,7 +33,6 @@ class Parser:
         while True:
             try:
                 item, index = self.parse_line(index)
-                # print(item)
                 items.append(item)
             except SyntaxError:
                 break
@@ -160,11 +159,14 @@ class Parser:
         return ast.RegisterValue(reg_num), index + 1
 
     def parse_mem_value(self, index):
-        length = 2
+        length = 4
         if self.token_is(index, BYTE):
             length = 1
             index += 1
         elif self.token_is(index, WORD):
+            length = 2
+            index += 1
+        elif self.token_is(index, DWORD):
             index += 1
 
         def get_const_loc(index):

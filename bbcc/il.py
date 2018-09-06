@@ -9,6 +9,7 @@ return_register = spots.R0
 zero = spots.LiteralSpot(0)
 one = spots.LiteralSpot(1)
 
+word_size = 4
 
 class ILValue:
     def __init__(self, value_type, storage=None, name=None):
@@ -88,16 +89,16 @@ class Set(ILInst):
 
         if value != output:
             if isinstance(output, spots.MemorySpot):
-                for i in range(0, self.output.type.size, 2):
+                for i in range(0, self.output.type.size, word_size):
                     out_spot = copy.deepcopy(output)
                     val_spot = value
                     if isinstance(val_spot, spots.MemorySpot):
                         val_spot.offset += i
                         reg = get_reg([], [])
-                        assembly.add_inst(asm.Mov(val_spot, reg, min(self.output.type.size-i, 2)))
+                        assembly.add_inst(asm.Mov(val_spot, reg, min(self.output.type.size-i, word_size)))
                         val_spot = reg
                     out_spot.offset += i
-                    assembly.add_inst(asm.Mov(val_spot, out_spot, min(self.output.type.size-i, 2)))
+                    assembly.add_inst(asm.Mov(val_spot, out_spot, min(self.output.type.size-i, word_size)))
             else:
                 assembly.add_inst(asm.Mov(value, output, self.output.type.size))
 
@@ -124,31 +125,31 @@ class ReadAt(ILInst):
 
             if not isinstance(value, spots.RegisterSpot):
                 scratch = get_reg([], [offset])
-                assembly.add_inst(asm.Mov(value, scratch, 2))
+                assembly.add_inst(asm.Mov(value, scratch, word_size))
 
             if not isinstance(offset, spots.LiteralSpot):
                 scratch = get_reg([], [offset])
                 if value != scratch:
-                    assembly.add_inst(asm.Mov(value, scratch, 2))
-                assembly.add_inst(asm.Add(offset, scratch, 2))
+                    assembly.add_inst(asm.Mov(value, scratch, word_size))
+                assembly.add_inst(asm.Add(offset, scratch, word_size))
                 spot = spots.MemorySpot(scratch)
             else:
                 if offset.value > 0xfff:
-                    assembly.add_inst(asm.Add(offset, scratch, 2))
+                    assembly.add_inst(asm.Add(offset, scratch, word_size))
                     spot = spots.MemorySpot(scratch)
                 else:
                     spot = spots.MemorySpot(scratch, offset.value)
 
-            for i in range(0, self.output.type.size, 2):
+            for i in range(0, self.output.type.size, word_size):
                 mem_spot = copy.deepcopy(spot)
                 mem_spot.offset += i
                 out_spot = copy.deepcopy(output)
                 if isinstance(out_spot, spots.MemorySpot):
                     out_spot.offset += i
                     reg = get_reg([], [offset, scratch])
-                    assembly.add_inst(asm.Mov(mem_spot, reg, min(self.output.type.size-i, 2)))
+                    assembly.add_inst(asm.Mov(mem_spot, reg, min(self.output.type.size-i, word_size)))
                     mem_spot = reg
-                assembly.add_inst(asm.Mov(mem_spot, out_spot, min(self.output.type.size-i, 2)))
+                assembly.add_inst(asm.Mov(mem_spot, out_spot, min(self.output.type.size-i, word_size)))
 
 
 class SetAt(ILInst):
@@ -176,19 +177,19 @@ class SetAt(ILInst):
 
             if not isinstance(offset, spots.LiteralSpot):
                 loc = get_reg([], [location, value, offset])
-                assembly.add_inst(asm.Mov(location, loc, 2))
-                assembly.add_inst(asm.Add(offset, loc, 2))
+                assembly.add_inst(asm.Mov(location, loc, word_size))
+                assembly.add_inst(asm.Add(offset, loc, word_size))
                 spot = spots.MemorySpot(loc)
             else:
                 if offset.value > 0xfff:
                     loc = get_reg([], [location, value, offset])
-                    assembly.add_inst(asm.Mov(location, loc, 2))
-                    assembly.add_inst(asm.Add(offset, loc, 2))
+                    assembly.add_inst(asm.Mov(location, loc, word_size))
+                    assembly.add_inst(asm.Add(offset, loc, word_size))
                     spot = spots.MemorySpot(loc)
                 else:
                     spot = spots.MemorySpot(location, offset.value)
 
-            for i in range(0, self.value.type.size, 2):
+            for i in range(0, self.value.type.size, word_size):
                 val = copy.deepcopy(value)
                 if isinstance(value, spots.LiteralSpot) or isinstance(value, spots.MemorySpot):
                     if isinstance(value, spots.MemorySpot):
@@ -199,7 +200,7 @@ class SetAt(ILInst):
                 out = copy.deepcopy(spot)
                 if isinstance(out, spots.MemorySpot):
                     out.offset += i
-                assembly.add_inst(asm.Mov(val, out, min(self.value.type.size - i, 2)))
+                assembly.add_inst(asm.Mov(val, out, min(self.value.type.size - i, word_size)))
 
 
 class AddrOf(ILInst):
@@ -347,9 +348,9 @@ class CallFunction(ILInst):
                 old_spot = spot
                 spot = get_reg([], used_regs)
                 used_regs.append(spot)
-                assembly.add_inst(asm.Mov(old_spot, spot))
+                assembly.add_inst(asm.Mov(old_spot, spot, word_size))
             assembly.add_inst(asm.Push(spot, None))
-            offset += 2
+            offset += word_size
 
         if isinstance(loc, spots.RegisterSpot):
             loc = spots.MemorySpot(loc)
@@ -357,7 +358,7 @@ class CallFunction(ILInst):
         assembly.add_inst(asm.Call(loc, None))
 
         if offset > 0:
-            assembly.add_inst(asm.Add(spots.LiteralSpot(offset), spots.RSP, 2))
+            assembly.add_inst(asm.Add(spots.LiteralSpot(offset), spots.RSP, word_size))
 
         if not self.output.type.is_void():
             if return_register != output:
@@ -1094,7 +1095,7 @@ class IL:
         to_remove = []
         for v in free_values:
             if v.stack_offset is not None:
-                global_spotmap[v] = spots.MemorySpot(spots.RBP, v.stack_offset+4)
+                global_spotmap[v] = spots.MemorySpot(spots.RBP, v.stack_offset+(word_size*2))
                 to_remove.append(v)
 
         for v in to_remove:
@@ -1102,7 +1103,7 @@ class IL:
             pass
 
         for v in free_values:
-            if v.type.size not in {1, 2}:
+            if v.type.size not in {1, 2, 4}:
                 move_to_mem.append(v)
 
         offset = 0
@@ -1205,23 +1206,23 @@ class IL:
             self.is_last = (i + 1) == len(commands)
             c.gen_asm(temp_asm, spotmap, self, get_reg)
 
-        self.assembly.add_inst(asm.Push(spots.RBP, None, 2))
-        self.assembly.add_inst(asm.Mov(spots.RSP, spots.RBP, 2))
+        self.assembly.add_inst(asm.Push(spots.RBP, None, word_size))
+        self.assembly.add_inst(asm.Mov(spots.RSP, spots.RBP, word_size))
         if stack_size != 0:
             offset_spot = spots.LiteralSpot(stack_size)
             self.assembly.add_inst(asm.Sub(offset_spot, spots.RSP))
         for r in used_regs:
-            self.assembly.add_inst(asm.Push(r, None, 2))
+            self.assembly.add_inst(asm.Push(r, None, word_size))
 
         end_label = self.get_label()
         self.assembly.merge_temp_asm(temp_asm, end_label)
 
         self.assembly.add_inst(asm.Label(end_label))
         for r in used_regs[::-1]:
-            self.assembly.add_inst(asm.Pop(r, None, 2))
+            self.assembly.add_inst(asm.Pop(r, None, word_size))
 
-        self.assembly.add_inst(asm.Mov(spots.RBP, spots.RSP, 2))
-        self.assembly.add_inst(asm.Pop(spots.RBP, None, 2))
+        self.assembly.add_inst(asm.Mov(spots.RBP, spots.RSP, word_size))
+        self.assembly.add_inst(asm.Pop(spots.RBP, None, word_size))
 
         self.assembly.add_inst(asm.Ret())
 

@@ -3,9 +3,9 @@
 #include "common.h"
 #include "scanner.h"
 
-static void pushIndent(struct Scanner *scanner, int indent);
+static void pushIndent(Scanner *scanner, int indent);
 
-void initScanner(struct Scanner* scanner, const char* source) {
+void initScanner(Scanner* scanner, const char* source) {
   scanner->start = source;
   scanner->current = source;
   scanner->line = 1;
@@ -15,47 +15,47 @@ void initScanner(struct Scanner* scanner, const char* source) {
   pushIndent(scanner, 0);
 }
 
-static bool isAtEnd(struct Scanner* scanner) {
+static bool isAtEnd(Scanner* scanner) {
   return *scanner->current == '\0';
 }
 
-static void pushIndent(struct Scanner *scanner, int indent) {
+static void pushIndent(Scanner *scanner, int indent) {
   *scanner->curIndent = indent;
   ++scanner->curIndent;
 }
-static int popIndent(struct Scanner *scanner) {
+static int popIndent(Scanner *scanner) {
   --scanner->curIndent;
   return *scanner->curIndent;
 }
-static int peekIndent(struct Scanner *scanner) {
+static int peekIndent(Scanner *scanner) {
   return scanner->curIndent[-1];
 }
 
-static void makeToken(struct Scanner *scanner, struct Token *token, TokenType type) {
+static void makeToken( Scanner *scanner, Token *token, TokenType type) {
   token->type = type;
   token->start = scanner->start;
   token->length = (int)(scanner->current - scanner->start);
   token->line = scanner->line;
 }
 
-static void errorToken(struct Scanner *scanner, struct Token *token, const char* message) {
+static void errorToken(Scanner *scanner, Token *token, const char* message) {
   token->type = TOKEN_ERROR;
   token->start = message;
   token->length = (int)strlen(message);
   token->line = scanner->line;
 }
 
-static char advance(struct Scanner *scanner) {
+static char advance(Scanner *scanner) {
   char a = *scanner->current;
   scanner->current++;
   return a;
 }
 
-static char peek(struct Scanner *scanner) {
+static char peek(Scanner *scanner) {
   return *scanner->current;
 }
 
-static bool match(struct Scanner *scanner, char expected) {
+static bool match(Scanner *scanner, char expected) {
   if (isAtEnd(scanner)) return false;
   if (*scanner->current != expected) return false;
 
@@ -63,7 +63,7 @@ static bool match(struct Scanner *scanner, char expected) {
   return true;
 }
 
-static void skipWhitespace(struct Scanner *scanner) {
+static void skipWhitespace(Scanner *scanner) {
   for (;;) {
     char c = peek(scanner);
     if (c == ' ' || c == '\r' || c == '\t') {
@@ -76,7 +76,7 @@ static void skipWhitespace(struct Scanner *scanner) {
   }
 }
 
-static bool indent(struct Scanner *scanner, struct Token *token) {
+static bool indent(Scanner *scanner, Token *token) {
   int indent;
   indent = 0;
   for (;;) {
@@ -117,7 +117,7 @@ static bool isAlpha(char c) {
   return isalpha(c) || c == '_';
 }
 
-static void string(struct Scanner *scanner, struct Token *token, char start) {
+static void string(Scanner *scanner, Token *token, char start) {
   while (peek(scanner) != start && peek(scanner) != '\n' && !isAtEnd(scanner)) {
     advance(scanner);
   }
@@ -132,7 +132,7 @@ static void string(struct Scanner *scanner, struct Token *token, char start) {
   return;
 }
 
-static void number(struct Scanner *scanner, struct Token *token) {
+static void number(Scanner *scanner, Token *token) {
   while (isdigit(peek(scanner))) {
     advance(scanner);
   }
@@ -141,7 +141,7 @@ static void number(struct Scanner *scanner, struct Token *token) {
   return;
 }
 
-static TokenType checkKeyword(struct Scanner *scanner, int start, int length, const char *rest, TokenType type) {
+static TokenType checkKeyword(Scanner *scanner, int start, int length, const char *rest, TokenType type) {
   if (scanner->current - scanner->start == start + length &&
       memcmp(scanner->start + start, rest, length) == 0) {
     return type;
@@ -150,7 +150,7 @@ static TokenType checkKeyword(struct Scanner *scanner, int start, int length, co
   return TOKEN_IDENTIFIER;
 }
 
-static TokenType identifierType(struct Scanner *scanner) {
+static TokenType identifierType(Scanner *scanner) {
   char c = scanner->start[0];
   unsigned int len = scanner->current - scanner->start;
   if (c == 'b') return checkKeyword(scanner, 1, 4, "reak", TOKEN_BREAK);
@@ -225,14 +225,14 @@ static TokenType identifierType(struct Scanner *scanner) {
   return TOKEN_IDENTIFIER;
 }
 
-static void identifier(struct Scanner *scanner, struct Token *token) {
+static void identifier(Scanner *scanner, Token *token) {
   while (isAlpha(peek(scanner)) || isdigit(peek(scanner))) advance(scanner);
 
   makeToken(scanner, token, identifierType(scanner));
   return;
 }
 
-void scanToken(struct Scanner *scanner, struct Token *token) {
+void scanToken(Scanner *scanner, Token *token) {
   if (scanner->isStartOfLine) {
     scanner->isStartOfLine = false;
     scanner->start = scanner->current;

@@ -1,4 +1,5 @@
 from .tokens import *
+import string
 
 
 class Lexer:
@@ -52,7 +53,14 @@ class Lexer:
 
     def string(self):
         result = ''
-        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == "_"):
+        while self.current_char is not None and self.current_char != '"' and self.current_char != '\n':
+            result += self.current_char
+            self.advance()
+        return result
+
+    def id(self):
+        result = ''
+        while self.current_char is not None and self.current_char in string.ascii_letters+string.digits+"_":
             result += self.current_char
             self.advance()
         return result
@@ -106,8 +114,13 @@ class Lexer:
                 self.advance()
                 tokens.append(Token(COMMA, ","))
 
+            elif self.current_char == '"':
+                self.advance()
+                tokens.append(Token(STRING, self.string()))
+                self.advance()
+
             elif not self.current_char.isspace():
-                string = self.string()
+                string = self.id()
                 if self.current_char == ":":
                     self.advance()
                     tokens.append(Token(LABEL, string))

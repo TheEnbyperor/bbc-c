@@ -60,8 +60,6 @@ Register indirect allows using the value stored in a register plus a 28-bit sign
 | Bits 0-3        | Bits 4-7         | Bits 8-15     | Bits 16-23   | Bits 24-31       |
 | --------------- | ---------------- | ------------- | ------------ | ---------------- |
 | Register number | Offset value LSB | Offset value  | Offset Value | Offset value MSB |
-0ABBCCDD
-
 
 ## List of instructions
 

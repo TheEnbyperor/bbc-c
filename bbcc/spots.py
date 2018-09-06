@@ -44,7 +44,8 @@ class RegisterSpot(Spot):
 
 class MemorySpot(Spot):
     size_map = {1: "BYTE ",
-                2: "WORD "}
+                2: "WORD ",
+                4: "DWORD "}
 
     def __init__(self, base, offset=0):
         super().__init__((base, offset))
@@ -85,8 +86,9 @@ R7 = RegisterSpot("r7")
 R8 = RegisterSpot("r8")
 R9 = RegisterSpot("r9")
 R10 = RegisterSpot("r10")
+R11 = RegisterSpot("r11")
 
-registers = [R0, R1, R2, R3, R4, R5, R6, R7, R8, R9]
+registers = [R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]
 
-RBP = RegisterSpot("r11")
-RSP = RegisterSpot("r13")
+RBP = RegisterSpot("r12")
+RSP = RegisterSpot("r14")

@@ -23,95 +23,101 @@ class EmulatorFrame(wx.Frame):
         self.m_staticText2 = wx.StaticText(self, wx.ID_ANY, u"R0 (Return)", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText2, 0, wx.ALL, 5)
 
-        self.r0_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r0_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r0_val, 0, wx.ALL, 5)
 
         self.m_staticText21 = wx.StaticText(self, wx.ID_ANY, u"R1", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText21, 0, wx.ALL, 5)
 
-        self.r1_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r1_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r1_val, 0, wx.ALL, 5)
 
         self.m_staticText22 = wx.StaticText(self, wx.ID_ANY, u"R2", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText22, 0, wx.ALL, 5)
 
-        self.r2_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r2_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r2_val, 0, wx.ALL, 5)
 
         self.m_staticText23 = wx.StaticText(self, wx.ID_ANY, u"R3", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText23, 0, wx.ALL, 5)
 
-        self.r3_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r3_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r3_val, 0, wx.ALL, 5)
 
         self.m_staticText24 = wx.StaticText(self, wx.ID_ANY, u"R4", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText24, 0, wx.ALL, 5)
 
-        self.r4_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r4_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r4_val, 0, wx.ALL, 5)
 
         self.m_staticText25 = wx.StaticText(self, wx.ID_ANY, u"R5", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText25, 0, wx.ALL, 5)
 
-        self.r5_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r5_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r5_val, 0, wx.ALL, 5)
 
         self.m_staticText251 = wx.StaticText(self, wx.ID_ANY, u"R6", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText251, 0, wx.ALL, 5)
 
-        self.r6_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r6_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r6_val, 0, wx.ALL, 5)
 
         self.m_staticText252 = wx.StaticText(self, wx.ID_ANY, u"R7", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText252, 0, wx.ALL, 5)
 
-        self.r7_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r7_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r7_val, 0, wx.ALL, 5)
 
         self.m_staticText253 = wx.StaticText(self, wx.ID_ANY, u"R8", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText253, 0, wx.ALL, 5)
 
-        self.r8_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r8_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r8_val, 0, wx.ALL, 5)
 
         self.m_staticText254 = wx.StaticText(self, wx.ID_ANY, u"R9", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText254, 0, wx.ALL, 5)
 
-        self.r9_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r9_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r9_val, 0, wx.ALL, 5)
 
         self.m_staticText255 = wx.StaticText(self, wx.ID_ANY, u"R10", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText255, 0, wx.ALL, 5)
 
-        self.r10_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r10_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r10_val, 0, wx.ALL, 5)
 
-        self.m_staticText256 = wx.StaticText(self, wx.ID_ANY, u"R11 (Base pointer)",
+        self.m_staticText2555 = wx.StaticText(self, wx.ID_ANY, u"R11", wx.DefaultPosition, wx.DefaultSize, 0)
+        g_sizer1.Add(self.m_staticText2555, 0, wx.ALL, 5)
+
+        self.r11_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
+        g_sizer1.Add(self.r11_val, 0, wx.ALL, 5)
+
+        self.m_staticText256 = wx.StaticText(self, wx.ID_ANY, u"R12 (Base pointer)",
                                              wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText256, 0, wx.ALL, 5)
 
-        self.r11_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
-        g_sizer1.Add(self.r11_val, 0, wx.ALL, 5)
-
-        self.m_staticText257 = wx.StaticText(self, wx.ID_ANY, u"R12 (Status)", wx.DefaultPosition, wx.DefaultSize, 0)
-        g_sizer1.Add(self.m_staticText257, 0, wx.ALL, 5)
-
-        self.r12_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.r12_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.r12_val, 0, wx.ALL, 5)
 
-        self.m_staticText258 = wx.StaticText(self, wx.ID_ANY, u"R13 (Stack pointer)",
+        self.m_staticText257 = wx.StaticText(self, wx.ID_ANY, u"R13 (Status)", wx.DefaultPosition, wx.DefaultSize, 0)
+        g_sizer1.Add(self.m_staticText257, 0, wx.ALL, 5)
+
+        self.r13_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
+        g_sizer1.Add(self.r13_val, 0, wx.ALL, 5)
+
+        self.m_staticText258 = wx.StaticText(self, wx.ID_ANY, u"R14 (Stack pointer)",
                                              wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText258, 0, wx.ALL, 5)
 
-        self.r13_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
-        g_sizer1.Add(self.r13_val, 0, wx.ALL, 5)
+        self.r14_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
+        g_sizer1.Add(self.r14_val, 0, wx.ALL, 5)
 
-        self.m_staticText259 = wx.StaticText(self, wx.ID_ANY, u"R14 (Program counter)",
+        self.m_staticText259 = wx.StaticText(self, wx.ID_ANY, u"R15 (Program counter)",
                                              wx.DefaultPosition, wx.DefaultSize, 0)
         g_sizer1.Add(self.m_staticText259, 0, wx.ALL, 5)
 
-        self.r14_val = wx.StaticText(self, wx.ID_ANY, u"0x0000", wx.DefaultPosition, wx.DefaultSize, 0)
-        g_sizer1.Add(self.r14_val, 0, wx.ALL, 5)
+        self.r15_val = wx.StaticText(self, wx.ID_ANY, u"0x00000000", wx.DefaultPosition, wx.DefaultSize, 0)
+        g_sizer1.Add(self.r15_val, 0, wx.ALL, 5)
 
         b_sizer2.Add(g_sizer1, 1, wx.EXPAND, 5)
         b_sizer1.Add(b_sizer2, 1, 0, 5)
