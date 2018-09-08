@@ -1,9 +1,9 @@
 #include "debug.h"
 #include "common.h"
 
-void writeLineInfoArray(LineInfoArray* array, LineInfo* value) {
-  writeArray(array, sizeof(LineInfo), value);
-}
+//void writeLineInfoArray(LineInfoArray* array, LineInfo* value) {
+//  writeArray(array, sizeof(LineInfo), value);
+//}
 
 unsigned int getLastLine(LineInfoArray* array) {
     if (array->meta.count == 0)

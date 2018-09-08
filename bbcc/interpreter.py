@@ -185,7 +185,7 @@ class Interpreter(ast.NodeVisitor):
 
         right = self._set_type(right, left.type)
         left.set_to(right, self.il)
-        return left
+        return right
 
     def visit_PlusEquals(self, node):
         left = self.visit(node.left)
@@ -859,6 +859,8 @@ class Interpreter(ast.NodeVisitor):
 
     def visit_SizeofType(self, node):
         decl_info = self.scope.lookup_decl(id(node))
+        if not decl_info.ctype.is_complete():
+            raise SyntaxError("Attempt to get size of incomplete type")
         val = il.ILValue(ctypes.unsig_int)
         self.il.register_literal_value(val, decl_info.ctype.size)
         return val
@@ -868,6 +870,8 @@ class Interpreter(ast.NodeVisitor):
         node_val = self.visit(node.expr)
         self.visit_raw = False
         val = il.ILValue(ctypes.unsig_int)
+        if not node_val.type.is_complete():
+            raise SyntaxError("Attempt to get size of incomplete type")
         self.il.register_literal_value(val, node_val.type.size)
         return val
 

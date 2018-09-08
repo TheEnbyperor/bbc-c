@@ -139,7 +139,7 @@ class Assembler:
 
     def get_mem_reg_val(self, mem: ast.MemoryValue, reg: ast.RegisterValue, al, ml):
         self.get_mem_val(mem, al, 0, ml)
-        self.insts[-3] |= (reg.reg_num & 0x0F)
+        self.insts[-5] |= (reg.reg_num & 0x0F)
 
     def get_const_val(self, val: ast.LiteralValue):
         if val.val < 0:
@@ -304,27 +304,29 @@ class Assembler:
             self.loc += 1
         else:
             raise SyntaxError(f"Can't add {node.left} to {node.right}")
-    #
-    # @setup_labels
-    # def visit_Sub(self, node: ast.Sub):
-    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x13)
-    #         self.get_reg_val(node.left, node.right)
-    #         self.loc += 1
-    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x11)
-    #         self.get_reg_val(node.right, None)
-    #         self.insts.extend(struct.pack("<h", node.left.val))
-    #         self.loc += 3
-    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-    #         if node.left.length == 1:
-    #             self.insts.append(0x15)
-    #         elif node.left.length == 2:
-    #             self.insts.append(0x17)
-    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
-    #         self.loc += 1
-    #     else:
-    #         raise SyntaxError(f"Can't subtract {node.left} from {node.right}")
+
+    @setup_labels
+    def visit_Sub(self, node: ast.Sub):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x19)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x17)
+            self.get_reg_val(node.right, None)
+            self.get_const_val(node.left)
+            self.loc += 1
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x1b)
+            elif node.left.length == 2:
+                self.insts.append(0x1d)
+            elif node.left.length == 4:
+                self.insts.append(0x1f)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't subtract {node.left} from {node.right}")
     #
     # @setup_labels
     # def visit_Mul(self, node: ast.Mul):
@@ -412,49 +414,51 @@ class Assembler:
             self.loc += 1
         else:
             raise SyntaxError(f"Can't compare {node.left} and {node.right}")
-    #
-    # @setup_labels
-    # def visit_And(self, node: ast.And):
-    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x1C)
-    #         self.get_reg_val(node.left, node.right)
-    #         self.loc += 1
-    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x1B)
-    #         self.get_reg_val(node.right, None)
-    #         self.insts.extend(struct.pack("<h", node.left.val))
-    #         self.loc += 3
-    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-    #         if node.left.length == 1:
-    #             self.insts.append(0x1D)
-    #         elif node.left.length == 2:
-    #             self.insts.append(0x1E)
-    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
-    #         self.loc += 1
-    #     else:
-    #         raise SyntaxError(f"Can't and {node.left} and {node.right}")
-    #
-    # @setup_labels
-    # def visit_Or(self, node: ast.Or):
-    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x20)
-    #         self.get_reg_val(node.left, node.right)
-    #         self.loc += 1
-    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x1F)
-    #         self.get_reg_val(node.right, None)
-    #         self.insts.extend(struct.pack("<h", node.left.val))
-    #         self.loc += 3
-    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-    #         if node.left.length == 1:
-    #             self.insts.append(0x21)
-    #         elif node.left.length == 2:
-    #             self.insts.append(0x22)
-    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
-    #         self.loc += 1
-    #     else:
-    #         raise SyntaxError(f"Can't or {node.left} and {node.right}")
-    #
+
+    @setup_labels
+    def visit_And(self, node: ast.And):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x5D)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x5C)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x5E)
+            elif node.left.length == 2:
+                self.insts.append(0x5F)
+            elif node.left.length == 4:
+                self.insts.append(0x60)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't and {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Or(self, node: ast.Or):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x62)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x61)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x63)
+            elif node.left.length == 2:
+                self.insts.append(0x64)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't or {node.left} and {node.right}")
+
     @setup_labels
     def visit_Jmp(self, node: ast.Jmp):
         if isinstance(node.value, ast.MemoryValue):

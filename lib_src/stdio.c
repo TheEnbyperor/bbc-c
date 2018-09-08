@@ -31,12 +31,12 @@ char *gets(char *s, int n) {
       return NULL;
     }
     putchar(c);
-    if (c == '\b') {
-      *--cs = '\0';
+    if (c == 127) {
+      --cs;
       continue;
     }
     if ((*cs++ = c) == '\n') {
-      --c;
+      --cs;
       break;
     }
   }
@@ -45,84 +45,84 @@ char *gets(char *s, int n) {
 }
 
 
-void itoa(int n, char *s, bool unsig, unsigned int zero_pad) {
-  int i;
-  bool negative = false;
-
-  if (!unsig && n < 0) {
-    negative = true;
-    n = -n;
-  }
-
-  i = 0;
-  do {       /* generate digits in reverse order */
-    s[i++] = n % 10 + '0';   /* get next digit */
-  } while ((n /= 10) > 0);     /* delete it */
-
-  for (;i < zero_pad;) s[i++] = '0';
-
-  if (negative) s[i++] = '-';
-
-  s[i] = '\0';
-  strrev(s);
-}
-
-
-int printf(const char *format, ...) {
-    void *ap;
-    char c;
-    char bf[24];
-    int i;
-
-    ap = &format+1;
-
-    for (; c = *format; ++format) {
-        if (c == '%') {
-            char zero_pad = 0;
-
-            c = *(++format);
-
-            if (c == '0') {
-				c = *(++format);
-				if (c == '\0')
-					break;
-				if (isdigit(c))
-					zero_pad = c - '0';
-				c = *(++format);
-            }
-
-            if (c == '\0') {
-                break;
-            } else if (c == 'c') {
-                char c = *((char *)ap);
-                ap = (char*)ap + sizeof(int);
-				putchar(c);
-				++i;
-                continue;
-            } else if (c == 's') {
-                char* s = *((char **)ap);
-                ap = (char*)ap + sizeof(char *);
-				fputs(s);
-				i += strlen(s);
-                continue;
-            } else if (c == 'u') {
-                int i = *((int *)ap);
-                ap = (char*)ap + sizeof(int);
-                itoa(i, bf, true, zero_pad);
-                fputs(bf);
-				i += strlen(bf);
-                continue;
-            } else if (c == 'd') {
-                int i = *((int *)ap);
-                ap = (char*)ap + sizeof(int);
-                itoa(i, bf, false, zero_pad);
-                fputs(bf);
-				i += strlen(bf);
-                continue;
-            }
-            putchar(c);
-        }
-        putchar(c);
-        ++i;
-    }
-}
+//void itoa(int n, char *s, bool unsig, unsigned int zero_pad) {
+//  int i;
+//  bool negative = false;
+//
+//  if (!unsig && n < 0) {
+//    negative = true;
+//    n = -n;
+//  }
+//
+//  i = 0;
+//  do {       /* generate digits in reverse order */
+//    s[i++] = n % 10 + '0';   /* get next digit */
+//  } while ((n /= 10) > 0);     /* delete it */
+//
+//  for (;i < zero_pad;) s[i++] = '0';
+//
+//  if (negative) s[i++] = '-';
+//
+//  s[i] = '\0';
+//  strrev(s);
+//}
+//
+//
+//int printf(const char *format, ...) {
+//    void *ap;
+//    char c;
+//    char bf[24];
+//    int i;
+//
+//    ap = &format+1;
+//
+//    for (; c = *format; ++format) {
+//        if (c == '%') {
+//            char zero_pad = 0;
+//
+//            c = *(++format);
+//
+//            if (c == '0') {
+//				c = *(++format);
+//				if (c == '\0')
+//					break;
+//				if (isdigit(c))
+//					zero_pad = c - '0';
+//				c = *(++format);
+//            }
+//
+//            if (c == '\0') {
+//                break;
+//            } else if (c == 'c') {
+//                char c = *((char *)ap);
+//                ap = (char*)ap + sizeof(int);
+//				putchar(c);
+//				++i;
+//                continue;
+//            } else if (c == 's') {
+//                char* s = *((char **)ap);
+//                ap = (char*)ap + sizeof(char *);
+//				fputs(s);
+//				i += strlen(s);
+//                continue;
+//            } else if (c == 'u') {
+//                int i = *((int *)ap);
+//                ap = (char*)ap + sizeof(int);
+//                itoa(i, bf, true, zero_pad);
+//                fputs(bf);
+//				i += strlen(bf);
+//                continue;
+//            } else if (c == 'd') {
+//                int i = *((int *)ap);
+//                ap = (char*)ap + sizeof(int);
+//                itoa(i, bf, false, zero_pad);
+//                fputs(bf);
+//				i += strlen(bf);
+//                continue;
+//            }
+//            putchar(c);
+//        }
+//        putchar(c);
+//        ++i;
+//    }
+//}

@@ -193,9 +193,9 @@ class SymbolTableBuilder(ast.NodeVisitor):
                     raise SyntaxError("Typedef can't have initaliser")
 
                 self.scope.add_typedef(identifier.value, ctype)
-
-            out.append(ast.DeclInfo(
-                identifier, ctype, storage, init, param_identifiers))
+            else:
+                out.append(ast.DeclInfo(
+                    identifier, ctype, storage, init, param_identifiers))
 
         return out
 

@@ -58,7 +58,19 @@ inst_jump_table_l:
       #0(jump_greater_equal-1),
 
       // Set on x
-      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,
+      
+      // And
+      #0(and_const_reg-1),#0(and_reg_reg-1),#0(and_mem_reg_short-1),#0(and_mem_reg_long-1),
+      #0(and_mem_reg_double-1),
+      
+      // Or
+      #0(or_const_reg-1),#0(or_reg_reg-1),#0(or_mem_reg_short-1),#0(or_mem_reg_long-1),
+      #0(or_mem_reg_double-1),
+      
+      // Xor
+      #0(xor_const_reg-1),#0(xor_reg_reg-1),#0(xor_mem_reg_short-1),#0(xor_mem_reg_long-1),
+      #0(xor_mem_reg_double-1)
 
 inst_jump_table_h:
 .byte #1(mov_const_reg-1),#1(mov_mem_reg_short-1),#1(mov_mem_reg_long-1),#1(mov_mem_reg_double-1),
@@ -110,7 +122,19 @@ inst_jump_table_h:
       #1(jump_greater_equal-1),
 
       // Set on x
-      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0
+      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,
+      
+      // And
+      #1(and_const_reg-1),#1(and_reg_reg-1),#1(and_mem_reg_short-1),#1(and_mem_reg_long-1),
+      #1(and_mem_reg_double-1),
+      
+      // Or
+      #1(or_const_reg-1),#1(or_reg_reg-1),#1(or_mem_reg_short-1),#1(or_mem_reg_long-1),
+      #1(or_mem_reg_double-1),
+      
+      // Xor
+      #1(xor_const_reg-1),#1(xor_reg_reg-1),#1(xor_mem_reg_short-1),#1(xor_mem_reg_long-1),
+      #1(xor_mem_reg_double-1)
 
 other_inst_jump_table_l:
 .byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1), #0(halt_and_catch_fire-1)
@@ -526,6 +550,7 @@ rts
 mov_mem_reg_double:
 jsr mov_mem_reg_long
 iny
+iny
 jsr _load_byte_temp
 sta 2(_r_0),x
 iny
@@ -857,7 +882,7 @@ jmp set_sign_zero_from_reg
 // Add 32 bit memory to register
 add_mem_reg_double:
 clc
-bcc _add_mem_reg_long
+bcc _add_mem_reg_double
 // Add with carry
 add_carry_mem_reg_double:
 jsr load_carry_status
@@ -1361,7 +1386,7 @@ and 1(_r_0),x
 sta 1(_r_0),x
 rts
 
-// 8 bit logical and memory anh register
+// 8 bit logical and memory and register
 and_mem_reg_short:
 jsr and_mem_reg_start
 lda #0
@@ -1450,7 +1475,7 @@ ora 1(_r_0),x
 sta 1(_r_0),x
 rts
 
-// 8 bit logical or memory anh register
+// 8 bit logical or memory and register
 or_mem_reg_short:
 jsr or_mem_reg_start
 lda #0
@@ -1540,7 +1565,7 @@ eor 1(_r_0),x
 sta 1(_r_0),x
 rts
 
-// 8 bit logical xor memory anh register
+// 8 bit logical xor memory and register
 xor_mem_reg_short:
 jsr xor_mem_reg_start
 lda #0

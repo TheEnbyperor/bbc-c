@@ -1,15 +1,12 @@
 #include "stdio.h"
-
-int fputs(const char *s) {
-    char c;
-
-    for (; c = *s; ++s) {
-        putchar(c);
-    }
-    return 0;
-}
-
+#include "stdlib.h"
 
 int main() {
-    fputs("Hello, world!\n");
+#define BUF_SIZE 4
+
+    return malloc(BUF_SIZE);
+
+//    gets(buf, BUF_SIZE);
+//    puts(buf);
+#undef BUF_SIZE
 }
