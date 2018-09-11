@@ -652,11 +652,8 @@ __bbcc_0000001d:
 	mov %r0, BYTE [%r1]
 // Label
 __bbcc_0000001b:
-// Add
-	mov #1, %r0
-	add %r2, %r0
-// Set
-	mov %r0, %r2
+// Inc
+	inc %r2
 // Jmp
 	jmp [__bbcc_0000001a]
 // Label

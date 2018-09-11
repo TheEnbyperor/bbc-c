@@ -1157,35 +1157,48 @@ ldx #$40
 jmp set_sign_zero_from_reg
 
 // Multiply
-_multiply_op1_l: .byte #0
-_multiply_op1_h: .byte #0
-_multiply_op2_l: .byte #0
-_multiply_op2_h: .byte #0
-_multiply_result_l: .byte #0
-_multiply_result_h: .byte #0
+_multiply_op1: .byte #0, #0, #0, #0
+_multiply_op2_l: .byte #0, #0, #0, #0
+_multiply_result: .byte #0, #0, #0, #0, #0, #0, #0, #0
 
-_multiply:
-lda #0
-sta _multiply_result_h
-sta _multiply_result_l
-ldx #16
-_multiply_1:
-lsr _multiply_op2_l
-ror _multiply_op2_h
-bcc _multiply_2
+multiply:
+lda #$00
+sta 4(_multiply_result)
+sta 5(_multiply_result)
+sta 6(_multiply_result)
+sta 7(_multiply_result)
+ldx #$20
+multiply_shift_r:
+lsr 3(_multiply_op1)
+ror 2(_multiply_op1)
+ror 1(_multiply_op1)
+ror 0(_multiply_op1)
+bcc multiply_rotate_r
+lda 4(_multiply_result)
 clc
-lda _multiply_op1_l
-adc _multiply_result_l
-sta _multiply_result_l
-lda _multiply_op1_h
-adc _multiply_result_h
-sta _multiply_result_h
-_multiply_2:
-clc
-asl _multiply_op1_l
-rol _multiply_op1_h
+adc 0(_multiply_op1)
+sta 4(_multiply_result)
+lda 5(_multiply_result)
+adc 1(_multiply_op1)
+sta 5(_multiply_result)
+lda 6(_multiply_result)
+adc 2(_multiply_op1)
+sta 6(_multiply_result)
+lda 7(_multiply_result)
+adc 3(_multiply_op2)
+multiply_rotate_r:
+ror a
+sta 7(_multiply_result)
+ror 6(_multiply_result)
+ror 5(_multiply_result)
+ror 4(_multiply_result)
+ror 3(_multiply_result)
+ror 2(_multiply_result)
+ror 1(_multiply_result)
+ror 0(_multiply_result)
 dex
-bne _multiply_1
+bne multiply_shift_r
+rts
 
 // Increment register
 inc_reg:

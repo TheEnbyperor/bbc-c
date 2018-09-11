@@ -21,11 +21,8 @@ __bbcc_00000000:
 // JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000001]
-// Add
-	mov #1, %r0
-	add %r1, %r0
-// Set
-	mov %r0, %r1
+// Inc
+	inc %r1
 // Jmp
 	jmp [__bbcc_00000000]
 // Label
@@ -57,43 +54,40 @@ strrev:
 // Sub
 	sub #1, %r0
 // Set
+	mov %r0, %r2
 // Label
 __bbcc_00000002:
 // MoreEqualJmp
-	cmp %r3, %r0
+	cmp %r3, %r2
 	jge [__bbcc_00000004]
 // ReadAt
-	mov DWORD 8[%r12], %r1
-	mov DWORD 8[%r12], %r1
-	add %r3, %r1
-	mov BYTE [%r1], %r1
+	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r0
+	add %r3, %r0
+	mov BYTE [%r0], %r0
 // Set
-	mov %r1, %r2
+	mov %r0, %r1
 // ReadAt
-	mov DWORD 8[%r12], %r1
-	mov DWORD 8[%r12], %r1
-	add %r0, %r1
-	mov BYTE [%r1], %r1
+	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r0
+	add %r2, %r0
+	mov BYTE [%r0], %r0
 // SetAt
 	mov 8[%r12], %r4
 	mov %r4, %r5
 	add %r3, %r5
-	mov %r1, BYTE [%r5]
+	mov %r0, BYTE [%r5]
 // SetAt
-	mov 8[%r12], %r1
-	mov %r1, %r4
-	add %r0, %r4
-	mov %r2, BYTE [%r4]
+	mov 8[%r12], %r0
+	mov %r0, %r4
+	add %r2, %r4
+	mov %r1, BYTE [%r4]
 // Label
 __bbcc_00000003:
-// Add
-	mov #1, %r1
-	add %r3, %r1
-// Set
-	mov %r1, %r3
-// Sub
-	sub #1, %r0
-// Set
+// Inc
+	inc %r3
+// Dec
+	dec %r2
 // Jmp
 	jmp [__bbcc_00000002]
 // Label
@@ -147,11 +141,8 @@ __bbcc_00000005:
 __bbcc_00000008:
 // Label
 __bbcc_00000006:
-// Add
-	mov #1, %r0
-	add %r2, %r0
-// Set
-	mov %r0, %r2
+// Inc
+	inc %r2
 // Jmp
 	jmp [__bbcc_00000005]
 // Label
@@ -223,11 +214,8 @@ __bbcc_00000009:
 __bbcc_0000000c:
 // Label
 __bbcc_0000000a:
-// Add
-	mov #1, %r0
-	add %r1, %r0
-// Set
-	mov %r0, %r1
+// Inc
+	inc %r1
 // Jmp
 	jmp [__bbcc_00000009]
 // Label
@@ -260,26 +248,22 @@ memset:
 // Set
 	mov #0, %r0
 // Set
-	mov %r0, %r1
 // Label
 __bbcc_0000000d:
 // MoreEqualJmp
-	mov 14[%r12], %r0
-	cmp %r1, %r0
+	mov 14[%r12], %r1
+	cmp %r0, %r1
 	jae [__bbcc_0000000f]
 // SetAt
-	mov 8[%r12], %r0
-	mov %r0, %r2
-	add %r1, %r2
-	mov 12[%r12], %r0
-	mov %r0, BYTE [%r2]
+	mov 8[%r12], %r1
+	mov %r1, %r2
+	add %r0, %r2
+	mov 12[%r12], %r1
+	mov %r1, BYTE [%r2]
 // Label
 __bbcc_0000000e:
-// Add
-	mov #1, %r0
-	add %r1, %r0
-// Set
-	mov %r0, %r1
+// Inc
+	inc %r0
 // Jmp
 	jmp [__bbcc_0000000d]
 // Label
@@ -300,11 +284,8 @@ memcpy:
 	push %r2
 // Label
 __bbcc_00000010:
-// Sub
-	mov DWORD 16[%r12], %r0
-	sub #1, %r0
-// Set
-	mov %r0, DWORD 16[%r12]
+// Dec
+	dec 16[%r12]
 // Set
 	mov DWORD 12[%r12], %r0
 // ReadAt

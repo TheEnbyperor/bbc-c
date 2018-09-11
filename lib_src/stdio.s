@@ -25,11 +25,8 @@ __bbcc_00000000:
 	add #4, %r14
 // Label
 __bbcc_00000001:
-// Add
-	mov #1, %r0
-	add DWORD 8[%r12], %r0
-// Set
-	mov %r0, DWORD 8[%r12]
+// Inc
+	inc 8[%r12]
 // Jmp
 	jmp [__bbcc_00000000]
 // Label
@@ -69,18 +66,14 @@ gets:
 	mov %r14, %r12
 	push %r1
 	push %r2
-	push %r3
 // Set
 	mov DWORD 8[%r12], %r0
 // Set
-	mov %r0, %r1
+	mov %r0, %r2
 // Label
 __bbcc_00000003:
-// Sub
-	mov DWORD 12[%r12], %r0
-	sub #1, %r0
-// Set
-	mov %r0, DWORD 12[%r12]
+// Dec
+	dec 12[%r12]
 // LessEqualJmp
 	mov #0, %r0
 	cmp 12[%r12], %r0
@@ -89,9 +82,9 @@ __bbcc_00000003:
 	call [getchar]
 // Set
 // Set
-	mov %r0, %r3
+	mov %r0, %r1
 // NotEqualJmp
-	cmp #3, %r3
+	cmp #3, %r1
 	jnz [__bbcc_00000005]
 // Return
 	mov #0, %r0
@@ -99,36 +92,31 @@ __bbcc_00000003:
 // Label
 __bbcc_00000005:
 // Set
-	mov %r3, %r0
+	mov %r1, %r0
 // CallFunction
 	push %r0
 	call [putchar]
 	add #4, %r14
 // NotEqualJmp
-	cmp #127, %r3
+	cmp #127, %r1
 	jnz [__bbcc_00000006]
-// Sub
-	sub #1, %r1
-// Set
+// Dec
+	dec %r2
 // Jmp
 	jmp [__bbcc_00000003]
 // Label
 __bbcc_00000006:
 // Set
-	mov %r1, %r2
-// Add
-	mov #1, %r0
-	add %r1, %r0
-// Set
-	mov %r0, %r1
+	mov %r2, %r0
+// Inc
+	inc %r2
 // SetAt
-	mov %r3, BYTE [%r2]
+	mov %r1, BYTE [%r0]
 // NotEqualJmp
-	cmp #10, %r3
+	cmp #10, %r1
 	jnz [__bbcc_00000007]
-// Sub
-	sub #1, %r1
-// Set
+// Dec
+	dec %r2
 // Jmp
 	jmp [__bbcc_00000004]
 // Label
@@ -140,11 +128,10 @@ __bbcc_00000004:
 // Set
 	mov #0, %r0
 // SetAt
-	mov %r0, BYTE [%r1]
+	mov %r0, BYTE [%r2]
 // Return
 	mov DWORD 8[%r12], %r0
 __bbcc_0000000a:
-	pop %r3
 	pop %r2
 	pop %r1
 	mov %r12, %r14

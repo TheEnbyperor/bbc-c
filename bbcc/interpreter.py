@@ -567,10 +567,7 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Add(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            one = il.ILValue(expr.type)
-            self.il.register_literal_value(one, 1)
-            self.il.add(il.Add(one, value, new_val))
-            expr.set_to(new_val, self.il)
+            self.il.add(il.Inc(value))
         return value
 
     def visit_PostIncr(self, node):
@@ -586,10 +583,7 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Add(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            one = il.ILValue(expr.type)
-            self.il.register_literal_value(one, 1)
-            self.il.add(il.Add(one, value, new_val))
-            expr.set_to(new_val, self.il)
+            self.il.add(il.Inc(value))
         return output
 
     def visit_PreDecr(self, node):
@@ -603,10 +597,7 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Sub(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            one = il.ILValue(expr.type)
-            self.il.register_literal_value(one, 1)
-            self.il.add(il.Sub(value, one, new_val))
-            expr.set_to(new_val, self.il)
+            self.il.add(il.Dec(value))
         return value
 
     def visit_PostDecr(self, node):
@@ -622,10 +613,7 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Sub(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            one = il.ILValue(expr.type)
-            self.il.register_literal_value(one, 1)
-            self.il.add(il.Sub(value, one, new_val))
-            expr.set_to(new_val, self.il)
+            self.il.add(il.Dec(value))
         return output
 
     def visit_AddrOf(self, node):
