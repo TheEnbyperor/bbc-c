@@ -32,7 +32,7 @@ inst_jump_table_l:
       #0(cmp_mem_reg_double-1),
 
       // Multiply
-      #0,#0,#0,#0,#0,
+      #0(mul_const_reg-1),#0(mul_reg_reg-1),#0(mul_mem_reg_short-1),#0(mul_mem_reg_long-1),#0(mul_mem_reg_double-1),
 
       // Divide
       #0,#0,#0,#0,#0,
@@ -96,7 +96,7 @@ inst_jump_table_h:
       #1(cmp_mem_reg_double-1),
 
       // Multiply
-      #0,#0,#0,#0,#0,
+      #1(mul_const_reg-1),#1(mul_reg_reg-1),#1(mul_mem_reg_short-1),#1(mul_mem_reg_long-1),#1(mul_mem_reg_double-1),
 
       // Divide
       #0,#0,#0,#0,#0,
@@ -822,6 +822,8 @@ lda 3(_r_0),y
 adc 3(_r_0),x
 sta 3(_r_0),y
 jsr set_carry_status
+tya
+tax
 jmp set_sign_zero_from_reg
 
 // Helper for memory to register add
@@ -1237,6 +1239,353 @@ lda 3(_multiply_result)
 sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jmp inc_pc_4
+
+_mul_load_reg2:
+lda 0(_r_0),x
+sta 0(_multiply_op2)
+lda 1(_r_0),x
+sta 1(_multiply_op2)
+lda 2(_r_0),x
+sta 2(_multiply_op2)
+lda 3(_r_0),x
+sta 3(_multiply_op2)
+rts
+
+// Multiply register and register
+mul_reg_reg:
+lda 0(_r_0),y
+sta 0(_multiply_op1)
+lda 1(_r_0),y
+sta 1(_multiply_op1)
+lda 2(_r_0),y
+sta 2(_multiply_op1)
+lda 3(_r_0),y
+sta 3(_multiply_op1)
+jsr _mul_load_reg2
+jsr multiply
+lda 0(_multiply_result)
+sta 0(_r_0),y
+lda 1(_multiply_result)
+sta 1(_r_0),y
+lda 2(_multiply_result)
+sta 2(_r_0),y
+lda 3(_multiply_result)
+sta 3(_r_0),y
+tya
+tax
+jmp set_sign_zero_from_reg
+
+_mul_mem_reg_start:
+jsr get_mem_address
+jsr _load_byte_temp
+sta 0(_multiply_op1)
+rts
+
+_mul_mem_reg_start2:
+jsr _mul_mem_reg_start
+iny
+jsr _load_byte_temp
+sta 1(_multiply_op1)
+rts
+
+_mul_mem_reg_end:
+jsr multiply
+lda 0(_multiply_result)
+sta 0(_r_0),x
+lda 1(_multiply_result)
+sta 1(_r_0),x
+lda 2(_multiply_result)
+sta 2(_r_0),x
+lda 3(_multiply_result)
+sta 3(_r_0),x
+jmp set_sign_zero_from_reg
+
+// Multiply 8 bit memory and register
+mul_mem_reg_short:
+jsr _mul_mem_reg_start
+lda #0
+sta 1(_multiply_op1)
+sta 2(_multiply_op1)
+sta 3(_multiply_op1)
+jsr _mul_load_reg2
+jmp _mul_mem_reg_end
+
+// Multiply 16 bit memory and register
+mul_mem_reg_long:
+jsr _mul_mem_reg_start2
+lda #0
+sta 2(_multiply_op1)
+sta 3(_multiply_op1)
+jsr _mul_load_reg2
+jmp _mul_mem_reg_end
+
+// Multiply 32 bit memory and register
+mul_mem_reg_double:
+jsr _mul_mem_reg_start2
+iny
+jsr _load_byte_temp
+sta 2(_multiply_op1)
+iny
+jsr _load_byte_temp
+sta 3(_multiply_op1)
+jsr _mul_load_reg2
+jmp _mul_mem_reg_end
+
+// Divide
+_divide_op1: .byte #0, #0, #0, #0
+_divide_op2: .byte #0, #0, #0, #0
+_divide_remainder: .byte #0, #0, #0, #0
+_divide_temp_1: .byte #0
+_divide_temp_2: .byte #0
+_divide_temp_3: .byte #0
+divide:
+lda #0
+sta 0(_divide_remainder)
+sta 1(_divide_remainder)
+sta 2(_divide_remainder)
+sta 3(_divide_remainder)
+ldx #24
+divide_loop:
+asl 0(_divide_op1)
+rol 1(_divide_op1)
+rol 2(_divide_op1)
+rol 3(_divide_op1)
+rol 0(_divide_remainder)
+rol 1(_divide_remainder)
+rol 2(_divide_remainder)
+rol 3(_divide_remainder)
+sec
+lda 0(_divide_remainder)
+sbc 0(_divide_op2)
+sta _divide_temp_1
+lda 1(_divide_remainder)
+sbc 1(_divide_op2)
+sta _divide_temp_2
+lda 2(_divide_remainder)
+sbc 2(_divide_op2)
+sta _divide_temp_3
+lda 3(_divide_remainder)
+sbc 3(_divide_op2)
+bcc divide_skip
+sta 3(_divide_remainder)
+lda _divide_temp_3
+sta 2(_divide_remainder)
+lda _divide_temp_2
+sta 1(_divide_remainder)
+lda _divide_temp_1
+sta 0(_divide_remainder)
+inc 0(_divide_op2)
+divide_skip:
+dex
+bne divide_loop:
+rts
+
+_div_mod_const_reg_start:
+lda 0(_r_0),x
+sta 0(_divide_op1)
+lda 1(_r_0),x
+sta 1(_divide_op1)
+lda 2(_r_0),x
+sta 2(_divide_op1)
+lda 3(_r_0),x
+sta 3(_divide_op1)
+ldy #1
+jsr _load_byte_pc
+sta 0(_divide_op2)
+iny
+jsr _load_byte_pc
+sta 1(_divide_op2)
+iny
+jsr _load_byte_pc
+sta 2(_divide_op2)
+iny
+jsr _load_byte_pc
+sta 3(_divide_op2)
+txa
+pha
+jsr divide
+pla
+tax
+
+// Divide constant and register
+div_const_reg:
+jsr _div_mod_const_reg_start
+lda 0(_divide_op1)
+sta 0(_r_0),x
+lda 1(_divide_op1)
+sta 1(_r_0),x
+lda 2(_divide_op1)
+sta 2(_r_0),x
+lda 3(_divide_op1)
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp inc_pc_4
+
+// Modulus constant and register
+mod_const_reg:
+jsr _div_mod_const_reg_start
+lda 0(_divide_remainder)
+sta 0(_r_0),x
+lda 1(_divide_remainder)
+sta 1(_r_0),x
+lda 2(_divide_remainder)
+sta 2(_r_0),x
+lda 3(_divide_remainder)
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp inc_pc_4
+
+_div_load_reg2:
+lda 0(_r_0),x
+sta 0(_divide_op2)
+lda 1(_r_0),x
+sta 1(_divide_op2)
+lda 2(_r_0),x
+sta 2(_divide_op2)
+lda 3(_r_0),x
+sta 3(_divide_op2)
+rts
+
+_div_mod_reg_reg_start:
+lda 0(_r_0),y
+sta 0(_divide_op1)
+lda 1(_r_0),y
+sta 1(_divide_op1)
+lda 2(_r_0),y
+sta 2(_divide_op1)
+lda 3(_r_0),y
+sta 3(_divide_op1)
+jsr _div_load_reg2
+jmp divide
+
+// Divide register and register
+div_reg_reg:
+jsr _div_mod_reg_reg_start
+lda 0(_divide_op1)
+sta 0(_r_0),y
+lda 1(_divide_op1)
+sta 1(_r_0),y
+lda 2(_divide_op1)
+sta 2(_r_0),y
+lda 3(_divide_op1)
+sta 3(_r_0),y
+tya
+tax
+jmp set_sign_zero_from_reg
+
+// Modulus register and register
+mod_reg_reg:
+jsr _div_mod_reg_reg_start
+lda 0(_divide_remainder)
+sta 0(_r_0),y
+lda 1(_divide_remainder)
+sta 1(_r_0),y
+lda 2(_divide_remainder)
+sta 2(_r_0),y
+lda 3(_divide_remainder)
+sta 3(_r_0),y
+tya
+tax
+jmp set_sign_zero_from_reg
+
+_div_mem_reg_start:
+jsr get_mem_address
+jsr _load_byte_temp
+sta 0(_divide_op1)
+rts
+
+_div_mem_reg_start2:
+jsr _div_mem_reg_start
+iny
+jsr _load_byte_temp
+sta 1(_divide_op1)
+rts
+
+_div_mem_reg_end:
+jsr divide
+lda 0(_divide_op1)
+sta 0(_r_0),x
+lda 1(_divide_op1)
+sta 1(_r_0),x
+lda 2(_divide_op1)
+sta 2(_r_0),x
+lda 3(_divide_op1)
+sta 3(_r_0),x
+jmp set_sign_zero_from_reg
+
+_mod_mem_reg_end:
+jsr divide
+lda 0(_divide_remainder)
+sta 0(_r_0),x
+lda 1(_divide_remainder)
+sta 1(_r_0),x
+lda 2(_divide_remainder)
+sta 2(_r_0),x
+lda 3(_divide_remainder)
+sta 3(_r_0),x
+jmp set_sign_zero_from_reg
+
+// Divide 8 bit memory and register
+div_mem_reg_short:
+jsr _div_mem_reg_start
+lda #0
+sta 1(_divide_op1)
+sta 2(_divide_op1)
+sta 3(_divide_op1)
+jsr _div_load_reg2
+jmp _div_mem_reg_end
+
+// Modulus 8 bit memory and register
+mod_mem_reg_short:
+jsr _div_mem_reg_start
+lda #0
+sta 1(_divide_op1)
+sta 2(_divide_op1)
+sta 3(_divide_op1)
+jsr _div_load_reg2
+jmp _mod_mem_reg_end
+
+// Divide 16 bit memory and register
+div_mem_reg_long:
+jsr _div_mem_reg_start2
+lda #0
+sta 2(_divide_op1)
+sta 3(_divide_op1)
+jsr _div_load_reg2
+jmp _div_mem_reg_end
+
+// Modulus 16 bit memory and register
+mod_mem_reg_long:
+jsr _div_mem_reg_start2
+lda #0
+sta 2(_divide_op1)
+sta 3(_divide_op1)
+jsr _div_load_reg2
+jmp _mod_mem_reg_end
+
+// Divide 32 bit memory and register
+div_mem_reg_double:
+jsr _div_mem_reg_start2
+iny
+jsr _load_byte_temp
+sta 2(_divide_op1)
+iny
+jsr _load_byte_temp
+sta 3(_divide_op1)
+jsr _div_load_reg2
+jmp _div_mem_reg_end
+
+// Modulus 32 bit memory and register
+mod_mem_reg_double:
+jsr _div_mem_reg_start2
+iny
+jsr _load_byte_temp
+sta 2(_divide_op1)
+iny
+jsr _load_byte_temp
+sta 3(_divide_op1)
+jsr _div_load_reg2
+jmp _mod_mem_reg_end
 
 // Increment register
 inc_reg:
