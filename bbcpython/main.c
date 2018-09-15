@@ -8,7 +8,7 @@ static void repl(struct VM *vm) {
     printf(">>> ");
 
     if (!gets(line, sizeof(line))) {
-      printf("\n");
+      printf("\nBye!\n");
       break;
     }
 
@@ -17,7 +17,7 @@ static void repl(struct VM *vm) {
 }
 
 int main() {
-  struct VM vm;
+  VM vm;
   initVM(&vm);
 
   repl(&vm);

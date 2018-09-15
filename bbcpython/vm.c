@@ -47,7 +47,7 @@ static bool checkArithType(VM *vm, int *a, int *b, Value **value) {
         runtimeError(vm, "Operands must be a number.");
         return false;
     }
-    struct Value aVal, bVal;
+    Value aVal, bVal;
     popStack(&vm->stack, &bVal);
     *a = asInt(*value);
     *b = asInt(&bVal);

@@ -168,23 +168,23 @@ void *realloc(void *p, unsigned int size) {
     return p;
 }
 
-//int atoi(const char *s) {
-//    char *str = s;
-//    int res = 0;
-//    bool negative = false;
-//
-//    if (*str == '-') {
-//        negative = true;
-//        ++str;
-//    }
-//
-//    while (isdigit(*str)) {
-//        res *= 10;
-//        res += (int) (*str - '0');
-//        ++str;
-//    }
-//
-//    if (negative) res = -res;
-//
-//    return res;
-//}
+int atoi(const char *s) {
+    char *str = s;
+    int res = 0;
+    bool negative = false;
+
+    if (*str == '-') {
+        negative = true;
+        ++str;
+    }
+
+    while (isdigit(*str)) {
+        res *= 10;
+        res += (int) (*str - '0');
+        ++str;
+    }
+
+    if (negative) res = -res;
+
+    return res;
+}

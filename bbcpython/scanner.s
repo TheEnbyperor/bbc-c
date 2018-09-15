@@ -2,422 +2,393 @@
 .import memcmp
 .import isalpha
 .import isdigit
-.export size_t
-.export ptrdiff_t
-.export int8_t
-.export uint8_t
-.export int16_t
-.export uint16_t
-.export Scanner
-.export TokenType
-.export Token
 .export initScanner
 .export scanToken
-__bbcc_000000b4:
-.byte #73,#110,#118,#97,#108,#105,#100,#32,#105,#110,#100,#101,#110,#116,#46,#0
-__bbcc_000000b5:
-.byte #85,#110,#116,#101,#114,#109,#105,#110,#97,#116,#101,#100,#32,#115,#116,#114,#105,#110,#103,#46,#0
 __bbcc_000000b6:
-.byte #114,#101,#97,#107,#0
+.byte #73,#110,#118,#97,#108,#105,#100,#32,#105,#110,#100,#101,#110,#116,#46,#0
 __bbcc_000000b7:
-.byte #108,#111,#98,#97,#108,#0
+.byte #85,#110,#116,#101,#114,#109,#105,#110,#97,#116,#101,#100,#32,#115,#116,#114,#105,#110,#103,#46,#0
 __bbcc_000000b8:
-.byte #97,#109,#98,#100,#97,#0
+.byte #114,#101,#97,#107,#0
 __bbcc_000000b9:
-.byte #114,#0
+.byte #108,#111,#98,#97,#108,#0
 __bbcc_000000ba:
-.byte #97,#115,#115,#0
+.byte #97,#109,#98,#100,#97,#0
 __bbcc_000000bb:
-.byte #105,#101,#108,#100,#0
+.byte #114,#0
 __bbcc_000000bc:
-.byte #97,#108,#115,#101,#0
+.byte #97,#115,#115,#0
 __bbcc_000000bd:
-.byte #114,#117,#101,#0
+.byte #105,#101,#108,#100,#0
 __bbcc_000000be:
-.byte #114,#121,#0
+.byte #97,#108,#115,#101,#0
 __bbcc_000000bf:
-.byte #111,#110,#101,#0
+.byte #114,#117,#101,#0
 __bbcc_000000c0:
-.byte #110,#116,#105,#110,#117,#101,#0
+.byte #114,#121,#0
 __bbcc_000000c1:
-.byte #110,#97,#108,#108,#121,#0
+.byte #111,#110,#101,#0
 __bbcc_000000c2:
-.byte #111,#109,#0
+.byte #110,#116,#105,#110,#117,#101,#0
 __bbcc_000000c3:
-.byte #105,#115,#101,#0
+.byte #110,#97,#108,#108,#121,#0
 __bbcc_000000c4:
-.byte #116,#117,#114,#110,#0
+.byte #111,#109,#0
 __bbcc_000000c5:
-.byte #105,#108,#101,#0
+.byte #105,#115,#101,#0
 __bbcc_000000c6:
-.byte #116,#104,#0
+.byte #116,#117,#114,#110,#0
 __bbcc_000000c7:
-.byte #112,#111,#114,#116,#0
+.byte #105,#108,#101,#0
 __bbcc_000000c8:
-.byte #97,#105,#116,#0
+.byte #116,#104,#0
 __bbcc_000000c9:
-.byte #100,#0
+.byte #112,#111,#114,#116,#0
 __bbcc_000000ca:
-.byte #110,#99,#0
+.byte #97,#105,#116,#0
 __bbcc_000000cb:
-.byte #101,#114,#116,#0
+.byte #100,#0
 __bbcc_000000cc:
-.byte #99,#101,#112,#116,#0
+.byte #110,#99,#0
 __bbcc_000000cd:
-.byte #102,#0
+.byte #101,#114,#116,#0
 __bbcc_000000ce:
-.byte #101,#0
+.byte #99,#101,#112,#116,#0
 __bbcc_000000cf:
-.byte #108,#111,#99,#97,#108,#0
+.byte #102,#0
 __bbcc_000000d0:
+.byte #101,#0
+__bbcc_000000d1:
+.byte #108,#111,#99,#97,#108,#0
+__bbcc_000000d2:
 .byte #85,#110,#101,#120,#112,#101,#99,#116,#101,#100,#32,#99,#104,#97,#114,#97,#99,#116,#101,#114,#0
-size_t:
-.byte #0,#0
-ptrdiff_t:
-.byte #0,#0
-int8_t:
-.byte #0
-uint8_t:
-.byte #0
-int16_t:
-.byte #0,#0
-uint16_t:
-.byte #0,#0
-Scanner:
-.byte #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0
-TokenType:
-.byte #0,#0
-Token:
-.byte #0,#0,#0,#0,#0,#0,#0,#0
 // Function: initScanner
 initScanner:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // Set
-	mov WORD 6[%r11], %r0
+	mov DWORD 12[%r12], %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD [%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD [%r1]
 // Set
-	mov WORD 6[%r11], %r0
+	mov DWORD 12[%r12], %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 2[%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD 4[%r1]
 // SetAt
-	mov 4[%r11], %r0
+	mov 8[%r12], %r0
 	mov #1, %r1
-	mov %r1, WORD 4[%r0]
+	mov %r1, DWORD 8[%r0]
 // Set
 	mov #1, %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, BYTE 6[%r1]
+	mov 8[%r12], %r1
+	mov %r0, BYTE 12[%r1]
 // Add
-	mov WORD 4[%r11], %r0
-	add #7, %r0
+	mov DWORD 8[%r12], %r0
+	add #13, %r0
 // Set
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 47[%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD 93[%r1]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	mov #0, %r1
 	push %r1
 	push %r0
 	call [pushIndent]
-	add #4, %r13
+	add #8, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000d1:
+__bbcc_000000d3:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: isAtEnd
 isAtEnd:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // ReadAt
 	mov BYTE [%r0], %r1
 // EqualCmp
 	cmp #0, %r1
 	sze %r0
 // Return
-__bbcc_000000d2:
+__bbcc_000000d4:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: pushIndent
 pushIndent:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 47[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 93[%r0], %r0
 // SetAt
-	mov 6[%r11], %r1
-	mov %r1, WORD [%r0]
+	mov 12[%r12], %r1
+	mov %r1, DWORD [%r0]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 47[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 93[%r0], %r0
 // Add
-	add #2, %r0
+	add #4, %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 47[%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD 93[%r1]
 // Return
 	mov #0, %r0
-__bbcc_000000d3:
+__bbcc_000000d5:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: popIndent
 popIndent:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 47[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 93[%r0], %r0
 // Sub
-	sub #2, %r0
+	sub #4, %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 47[%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD 93[%r1]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 47[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 93[%r0], %r0
 // ReadAt
-	mov WORD [%r0], %r0
+	mov DWORD [%r0], %r0
 // Return
-__bbcc_000000d4:
+__bbcc_000000d6:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: peekIndent
 peekIndent:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 47[%r0], %r2
+	mov DWORD 8[%r12], %r0
+	mov DWORD 93[%r0], %r2
 // Neg
 	mov #-1, %r1
 // Mult
-	mov #2, %r0
+	mov #4, %r0
 	mul %r1, %r0
 // ReadAt
 	mov %r2, %r1
 	add %r0, %r1
-	mov WORD [%r1], %r0
+	mov DWORD [%r1], %r0
 // Return
-__bbcc_000000d5:
+__bbcc_000000d7:
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: makeToken
 makeToken:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // SetAt
-	mov 6[%r11], %r0
-	mov 8[%r11], %r1
-	mov %r1, WORD [%r0]
+	mov 12[%r12], %r0
+	mov 16[%r12], %r1
+	mov %r1, DWORD [%r0]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // Set
 // SetAt
-	mov 6[%r11], %r1
-	mov %r0, WORD 2[%r1]
+	mov 12[%r12], %r1
+	mov %r0, DWORD 4[%r1]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // ReadAt
-	mov WORD 4[%r11], %r1
-	mov WORD [%r1], %r1
+	mov DWORD 8[%r12], %r1
+	mov DWORD [%r1], %r1
 // Set
 // Sub
 	sub %r1, %r0
 // Set
 // SetAt
-	mov 6[%r11], %r1
-	mov %r0, WORD 4[%r1]
+	mov 12[%r12], %r1
+	mov %r0, DWORD 8[%r1]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 4[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r0], %r0
 // SetAt
-	mov 6[%r11], %r1
-	mov %r0, WORD 6[%r1]
+	mov 12[%r12], %r1
+	mov %r0, DWORD 12[%r1]
 // Return
 	mov #0, %r0
-__bbcc_000000d6:
+__bbcc_000000d8:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: errorToken
 errorToken:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // Set
 	mov #57, %r0
 // SetAt
-	mov 6[%r11], %r1
-	mov %r0, WORD [%r1]
+	mov 12[%r12], %r1
+	mov %r0, DWORD [%r1]
 // Set
-	mov WORD 8[%r11], %r0
+	mov DWORD 16[%r12], %r0
 // SetAt
-	mov 6[%r11], %r1
-	mov %r0, WORD 2[%r1]
+	mov 12[%r12], %r1
+	mov %r0, DWORD 4[%r1]
 // Set
-	mov WORD 8[%r11], %r0
+	mov DWORD 16[%r12], %r0
 // CallFunction
 	push %r0
 	call [strlen]
-	add #2, %r13
+	add #4, %r14
 // Set
 // SetAt
-	mov 6[%r11], %r1
-	mov %r0, WORD 4[%r1]
+	mov 12[%r12], %r1
+	mov %r0, DWORD 8[%r1]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 4[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r0], %r0
 // SetAt
-	mov 6[%r11], %r1
-	mov %r0, WORD 6[%r1]
+	mov 12[%r12], %r1
+	mov %r0, DWORD 12[%r1]
 // Return
 	mov #0, %r0
-__bbcc_000000d7:
+__bbcc_000000d9:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: advance
 advance:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // ReadAt
 	mov BYTE [%r0], %r0
 // Set
 	mov %r0, %r2
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r1
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // Set
-	mov %r1, %r0
+	mov %r0, %r1
 // Add
-	mov #1, %r0
-	add %r1, %r0
+	add #1, %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 2[%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD 4[%r1]
 // Return
 	mov %r2, %r0
-__bbcc_000000d8:
+__bbcc_000000da:
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: peek
 peek:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // ReadAt
 	mov BYTE [%r0], %r0
 // Return
-__bbcc_000000d9:
-	mov %r11, %r13
-	pop %r11
+__bbcc_000000db:
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: match
 match:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [isAtEnd]
-	add #2, %r13
+	add #4, %r14
 // JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000000]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000da]
+	jmp [__bbcc_000000dc]
 // Label
 __bbcc_00000000:
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // ReadAt
 	mov BYTE [%r0], %r0
 // EqualJmp
-	cmp 6[%r11], %r0
+	cmp 12[%r12], %r0
 	jze [__bbcc_00000001]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000da]
+	jmp [__bbcc_000000dc]
 // Label
 __bbcc_00000001:
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r1
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // Set
-	mov %r1, %r0
+	mov %r0, %r1
 // Add
-	mov #1, %r0
-	add %r1, %r0
+	add #1, %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 2[%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD 4[%r1]
 // Return
 	mov #1, %r0
-__bbcc_000000da:
+__bbcc_000000dc:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: skipWhitespace
 skipWhitespace:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // Label
 __bbcc_00000002:
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
+	add #4, %r14
 // Set
 	mov %r0, %r1
 // Set
@@ -439,11 +410,11 @@ __bbcc_00000006:
 	cmp #0, %r0
 	jze [__bbcc_00000005]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [advance]
-	add #2, %r13
+	add #4, %r14
 // Jmp
 	jmp [__bbcc_00000007]
 // Label
@@ -456,20 +427,20 @@ __bbcc_00000009:
 // Set
 	mov #0, %r1
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
+	add #4, %r14
 // EqualJmp
 	cmp #10, %r0
 	jze [__bbcc_0000000b]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [isAtEnd]
-	add #2, %r13
+	add #4, %r14
 // JmpNotZero
 	cmp #0, %r0
 	jnz [__bbcc_0000000b]
@@ -481,11 +452,11 @@ __bbcc_0000000b:
 	cmp #0, %r1
 	jze [__bbcc_0000000a]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [advance]
-	add #2, %r13
+	add #4, %r14
 // Jmp
 	jmp [__bbcc_00000009]
 // Label
@@ -496,7 +467,7 @@ __bbcc_0000000a:
 __bbcc_00000008:
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000db]
+	jmp [__bbcc_000000dd]
 // Label
 __bbcc_0000000c:
 // Label
@@ -509,15 +480,15 @@ __bbcc_00000003:
 __bbcc_00000004:
 // Return
 	mov #0, %r0
-__bbcc_000000db:
+__bbcc_000000dd:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: indent
 indent:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 	push %r3
@@ -527,11 +498,11 @@ indent:
 // Label
 __bbcc_0000000d:
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
+	add #4, %r14
 // Set
 	mov %r0, %r2
 // Set
@@ -550,11 +521,11 @@ __bbcc_00000011:
 	cmp #0, %r0
 	jze [__bbcc_00000010]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [advance]
-	add #2, %r13
+	add #4, %r14
 // NotEqualJmp
 	cmp #9, %r2
 	jnz [__bbcc_00000012]
@@ -574,8 +545,20 @@ __bbcc_00000013:
 	jmp [__bbcc_00000014]
 // Label
 __bbcc_00000010:
+// NotEqualJmp
+	cmp #10, %r2
+	jnz [__bbcc_00000015]
+// Return
+	mov #0, %r0
+	jmp [__bbcc_000000de]
+// Jmp
+	jmp [__bbcc_00000016]
+// Label
+__bbcc_00000015:
 // Jmp
 	jmp [__bbcc_0000000f]
+// Label
+__bbcc_00000016:
 // Label
 __bbcc_00000014:
 // Label
@@ -585,37 +568,37 @@ __bbcc_0000000e:
 // Label
 __bbcc_0000000f:
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peekIndent]
-	add #2, %r13
+	add #4, %r14
 // Set
 	mov %r0, %r4
 // NotEqualJmp
 	cmp %r1, %r4
-	jnz [__bbcc_00000015]
+	jnz [__bbcc_00000017]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000dc]
+	jmp [__bbcc_000000de]
 // Jmp
-	jmp [__bbcc_00000016]
+	jmp [__bbcc_00000018]
 // Label
-__bbcc_00000015:
+__bbcc_00000017:
 // LessEqualJmp
 	cmp %r1, %r4
-	jle [__bbcc_00000017]
+	jle [__bbcc_00000019]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r1
 	push %r0
 	call [pushIndent]
-	add #4, %r13
+	add #8, %r14
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r2
+	mov DWORD 12[%r12], %r2
 // Set
 	mov #59, %r0
 // CallFunction
@@ -623,40 +606,40 @@ __bbcc_00000015:
 	push %r2
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #1, %r0
-	jmp [__bbcc_000000dc]
+	jmp [__bbcc_000000de]
 // Jmp
-	jmp [__bbcc_00000018]
+	jmp [__bbcc_0000001a]
 // Label
-__bbcc_00000017:
+__bbcc_00000019:
 // MoreEqualJmp
 	cmp %r1, %r4
-	jge [__bbcc_00000019]
+	jge [__bbcc_0000001b]
 // Label
-__bbcc_0000001a:
+__bbcc_0000001c:
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [popIndent]
-	add #2, %r13
+	add #4, %r14
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peekIndent]
-	add #2, %r13
+	add #4, %r14
 // Set
 	mov %r0, %r4
 // NotEqualJmp
-	cmp %r4, %r1
-	jnz [__bbcc_0000001c]
+	cmp %r0, %r1
+	jnz [__bbcc_0000001e]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r2
+	mov DWORD 12[%r12], %r2
 // Set
 	mov #60, %r0
 // CallFunction
@@ -664,191 +647,191 @@ __bbcc_0000001a:
 	push %r2
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #1, %r0
-	jmp [__bbcc_000000dc]
+	jmp [__bbcc_000000de]
 // Label
-__bbcc_0000001c:
+__bbcc_0000001e:
 // MoreEqualJmp
 	cmp %r1, %r4
-	jge [__bbcc_0000001b]
+	jge [__bbcc_0000001d]
 // Jmp
-	jmp [__bbcc_0000001a]
+	jmp [__bbcc_0000001c]
 // Label
-__bbcc_0000001b:
+__bbcc_0000001d:
 // Set
-	mov WORD 4[%r11], %r2
+	mov DWORD 8[%r12], %r2
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // AddrOf
-	lea WORD [__bbcc_000000b4], %r0
+	lea DWORD [__bbcc_000000b6], %r0
 // Set
 // CallFunction
 	push %r0
 	push %r1
 	push %r2
 	call [errorToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #1, %r0
-	jmp [__bbcc_000000dc]
+	jmp [__bbcc_000000de]
 // Label
-__bbcc_00000019:
+__bbcc_0000001b:
+// Label
+__bbcc_0000001a:
 // Label
 __bbcc_00000018:
-// Label
-__bbcc_00000016:
 // Return
 	mov #0, %r0
-__bbcc_000000dc:
+__bbcc_000000de:
 	pop %r4
 	pop %r3
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: isAlpha
 isAlpha:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 // Set
 	mov #1, %r1
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [isalpha]
-	add #2, %r13
+	add #4, %r14
 // JmpNotZero
 	cmp #0, %r0
-	jnz [__bbcc_0000001d]
+	jnz [__bbcc_0000001f]
 // EqualJmp
 	mov #95, %r0
-	cmp 4[%r11], %r0
-	jze [__bbcc_0000001d]
+	cmp 8[%r12], %r0
+	jze [__bbcc_0000001f]
 // Set
 	mov #0, %r1
 // Label
-__bbcc_0000001d:
+__bbcc_0000001f:
 // Return
 	mov %r1, %r0
-__bbcc_000000dd:
+__bbcc_000000df:
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: string
 string:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 // Label
-__bbcc_0000001e:
+__bbcc_00000020:
 // Set
 	mov #0, %r1
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
+	add #4, %r14
 // EqualJmp
-	cmp 8[%r11], %r0
-	jze [__bbcc_00000020]
+	cmp 16[%r12], %r0
+	jze [__bbcc_00000022]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
-// EqualJmp
-	cmp #10, %r0
-	jze [__bbcc_00000020]
-// Set
-	mov WORD 4[%r11], %r0
-// CallFunction
-	push %r0
-	call [isAtEnd]
-	add #2, %r13
-// JmpNotZero
-	cmp #0, %r0
-	jnz [__bbcc_00000020]
-// Set
-	mov #1, %r1
-// Label
-__bbcc_00000020:
-// JmpZero
-	cmp #0, %r1
-	jze [__bbcc_0000001f]
-// Set
-	mov WORD 4[%r11], %r0
-// CallFunction
-	push %r0
-	call [advance]
-	add #2, %r13
-// Jmp
-	jmp [__bbcc_0000001e]
-// Label
-__bbcc_0000001f:
-// Set
-	mov #1, %r1
-// Set
-	mov WORD 4[%r11], %r0
-// CallFunction
-	push %r0
-	call [isAtEnd]
-	add #2, %r13
-// JmpNotZero
-	cmp #0, %r0
-	jnz [__bbcc_00000022]
-// Set
-	mov WORD 4[%r11], %r0
-// CallFunction
-	push %r0
-	call [peek]
-	add #2, %r13
+	add #4, %r14
 // EqualJmp
 	cmp #10, %r0
 	jze [__bbcc_00000022]
 // Set
-	mov #0, %r1
+	mov DWORD 8[%r12], %r0
+// CallFunction
+	push %r0
+	call [isAtEnd]
+	add #4, %r14
+// JmpNotZero
+	cmp #0, %r0
+	jnz [__bbcc_00000022]
+// Set
+	mov #1, %r1
 // Label
 __bbcc_00000022:
 // JmpZero
 	cmp #0, %r1
 	jze [__bbcc_00000021]
 // Set
-	mov WORD 4[%r11], %r2
+	mov DWORD 8[%r12], %r0
+// CallFunction
+	push %r0
+	call [advance]
+	add #4, %r14
+// Jmp
+	jmp [__bbcc_00000020]
+// Label
+__bbcc_00000021:
 // Set
-	mov WORD 6[%r11], %r1
+	mov #1, %r1
+// Set
+	mov DWORD 8[%r12], %r0
+// CallFunction
+	push %r0
+	call [isAtEnd]
+	add #4, %r14
+// JmpNotZero
+	cmp #0, %r0
+	jnz [__bbcc_00000024]
+// Set
+	mov DWORD 8[%r12], %r0
+// CallFunction
+	push %r0
+	call [peek]
+	add #4, %r14
+// EqualJmp
+	cmp #10, %r0
+	jze [__bbcc_00000024]
+// Set
+	mov #0, %r1
+// Label
+__bbcc_00000024:
+// JmpZero
+	cmp #0, %r1
+	jze [__bbcc_00000023]
+// Set
+	mov DWORD 8[%r12], %r2
+// Set
+	mov DWORD 12[%r12], %r1
 // AddrOf
-	lea WORD [__bbcc_000000b5], %r0
+	lea DWORD [__bbcc_000000b7], %r0
 // Set
 // CallFunction
 	push %r0
 	push %r1
 	push %r2
 	call [errorToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000de]
+	jmp [__bbcc_000000e0]
 // Label
-__bbcc_00000021:
+__bbcc_00000023:
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [advance]
-	add #2, %r13
+	add #4, %r14
 // Set
-	mov WORD 4[%r11], %r2
+	mov DWORD 8[%r12], %r2
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #1, %r0
 // CallFunction
@@ -856,51 +839,51 @@ __bbcc_00000021:
 	push %r1
 	push %r2
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000de:
+__bbcc_000000e0:
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: number
 number:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 // Label
-__bbcc_00000023:
+__bbcc_00000025:
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
+	add #4, %r14
 // Set
 // CallFunction
 	push %r0
 	call [isdigit]
-	add #2, %r13
+	add #4, %r14
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000024]
+	jze [__bbcc_00000026]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [advance]
-	add #2, %r13
+	add #4, %r14
 // Jmp
-	jmp [__bbcc_00000023]
+	jmp [__bbcc_00000025]
 // Label
-__bbcc_00000024:
+__bbcc_00000026:
 // Set
-	mov WORD 4[%r11], %r2
+	mov DWORD 8[%r12], %r2
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #0, %r0
 // CallFunction
@@ -908,86 +891,86 @@ __bbcc_00000024:
 	push %r1
 	push %r2
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000df:
+__bbcc_000000e1:
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: checkKeyword
 checkKeyword:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 	push %r3
 // Set
 	mov #0, %r3
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // ReadAt
-	mov WORD 4[%r11], %r1
-	mov WORD [%r1], %r1
+	mov DWORD 8[%r12], %r1
+	mov DWORD [%r1], %r1
 // Set
 // Sub
 	sub %r1, %r0
 // Add
-	mov WORD 6[%r11], %r1
-	add WORD 8[%r11], %r1
+	mov DWORD 12[%r12], %r1
+	add DWORD 16[%r12], %r1
 // NotEqualJmp
 	cmp %r0, %r1
-	jnz [__bbcc_00000026]
+	jnz [__bbcc_00000028]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Add
 	add %r1, %r0
 // Set
 	mov %r0, %r2
 // Set
-	mov WORD 10[%r11], %r1
+	mov DWORD 20[%r12], %r1
 // Set
-	mov WORD 8[%r11], %r0
+	mov DWORD 16[%r12], %r0
 // CallFunction
 	push %r0
 	push %r1
 	push %r2
 	call [memcmp]
-	add #6, %r13
+	add #12, %r14
 // NotEqualJmp
 	cmp #0, %r0
-	jnz [__bbcc_00000026]
+	jnz [__bbcc_00000028]
 // Set
 	mov #1, %r3
 // Label
-__bbcc_00000026:
+__bbcc_00000028:
 // JmpZero
 	cmp #0, %r3
-	jze [__bbcc_00000025]
+	jze [__bbcc_00000027]
 // Return
-	mov WORD 12[%r11], %r0
-	jmp [__bbcc_000000e0]
+	mov DWORD 24[%r12], %r0
+	jmp [__bbcc_000000e2]
 // Label
-__bbcc_00000025:
+__bbcc_00000027:
 // Return
 	mov #2, %r0
-__bbcc_000000e0:
+__bbcc_000000e2:
 	pop %r3
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: identifierType
 identifierType:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 	push %r3
@@ -995,18 +978,18 @@ identifierType:
 	push %r5
 	push %r6
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE [%r0], %r0
 // Set
 	mov %r0, %r3
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // ReadAt
-	mov WORD 4[%r11], %r1
-	mov WORD [%r1], %r1
+	mov DWORD 8[%r12], %r1
+	mov DWORD [%r1], %r1
 // Set
 // Sub
 	sub %r1, %r0
@@ -1015,11 +998,11 @@ identifierType:
 	mov %r0, %r2
 // NotEqualJmp
 	cmp #98, %r3
-	jnz [__bbcc_00000027]
+	jnz [__bbcc_00000029]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000b6], %r0
+	lea DWORD [__bbcc_000000b8], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1033,20 +1016,20 @@ identifierType:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000028]
+	jmp [__bbcc_0000002a]
 // Label
-__bbcc_00000027:
+__bbcc_00000029:
 // NotEqualJmp
 	cmp #103, %r3
-	jnz [__bbcc_00000029]
+	jnz [__bbcc_0000002b]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000b7], %r0
+	lea DWORD [__bbcc_000000b9], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1060,20 +1043,20 @@ __bbcc_00000027:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_0000002a]
+	jmp [__bbcc_0000002c]
 // Label
-__bbcc_00000029:
+__bbcc_0000002b:
 // NotEqualJmp
 	cmp #108, %r3
-	jnz [__bbcc_0000002b]
+	jnz [__bbcc_0000002d]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000b8], %r0
+	lea DWORD [__bbcc_000000ba], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1087,20 +1070,20 @@ __bbcc_00000029:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_0000002c]
+	jmp [__bbcc_0000002e]
 // Label
-__bbcc_0000002b:
+__bbcc_0000002d:
 // NotEqualJmp
 	cmp #111, %r3
-	jnz [__bbcc_0000002d]
+	jnz [__bbcc_0000002f]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000b9], %r0
+	lea DWORD [__bbcc_000000bb], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1114,20 +1097,20 @@ __bbcc_0000002b:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_0000002e]
+	jmp [__bbcc_00000030]
 // Label
-__bbcc_0000002d:
+__bbcc_0000002f:
 // NotEqualJmp
 	cmp #112, %r3
-	jnz [__bbcc_0000002f]
+	jnz [__bbcc_00000031]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000ba], %r0
+	lea DWORD [__bbcc_000000bc], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1141,20 +1124,20 @@ __bbcc_0000002d:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000030]
+	jmp [__bbcc_00000032]
 // Label
-__bbcc_0000002f:
+__bbcc_00000031:
 // NotEqualJmp
 	cmp #121, %r3
-	jnz [__bbcc_00000031]
+	jnz [__bbcc_00000033]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000bb], %r0
+	lea DWORD [__bbcc_000000bd], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1168,20 +1151,20 @@ __bbcc_0000002f:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000032]
+	jmp [__bbcc_00000034]
 // Label
-__bbcc_00000031:
+__bbcc_00000033:
 // NotEqualJmp
 	cmp #70, %r3
-	jnz [__bbcc_00000033]
+	jnz [__bbcc_00000035]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000bc], %r0
+	lea DWORD [__bbcc_000000be], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1195,20 +1178,20 @@ __bbcc_00000031:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000034]
+	jmp [__bbcc_00000036]
 // Label
-__bbcc_00000033:
+__bbcc_00000035:
 // NotEqualJmp
 	cmp #84, %r3
-	jnz [__bbcc_00000035]
+	jnz [__bbcc_00000037]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000bd], %r0
+	lea DWORD [__bbcc_000000bf], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1222,20 +1205,20 @@ __bbcc_00000033:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000036]
+	jmp [__bbcc_00000038]
 // Label
-__bbcc_00000035:
+__bbcc_00000037:
 // NotEqualJmp
 	cmp #116, %r3
-	jnz [__bbcc_00000037]
+	jnz [__bbcc_00000039]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000be], %r0
+	lea DWORD [__bbcc_000000c0], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1249,20 +1232,20 @@ __bbcc_00000035:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000038]
+	jmp [__bbcc_0000003a]
 // Label
-__bbcc_00000037:
+__bbcc_00000039:
 // NotEqualJmp
 	cmp #78, %r3
-	jnz [__bbcc_00000039]
+	jnz [__bbcc_0000003b]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000bf], %r0
+	lea DWORD [__bbcc_000000c1], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1276,43 +1259,43 @@ __bbcc_00000037:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_0000003a]
+	jmp [__bbcc_0000003c]
 // Label
-__bbcc_00000039:
+__bbcc_0000003b:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #99, %r3
-	jnz [__bbcc_0000003c]
+	jnz [__bbcc_0000003e]
 // LessEqualJmp
 	mov #1, %r1
 	cmp %r2, %r1
-	jle [__bbcc_0000003c]
+	jle [__bbcc_0000003e]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_0000003c:
+__bbcc_0000003e:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_0000003b]
+	jze [__bbcc_0000003d]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #108, %r3
-	jnz [__bbcc_0000003d]
+	jnz [__bbcc_0000003f]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000ba], %r0
+	lea DWORD [__bbcc_000000bc], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1326,20 +1309,20 @@ __bbcc_0000003c:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_0000003e]
+	jmp [__bbcc_00000040]
 // Label
-__bbcc_0000003d:
+__bbcc_0000003f:
 // NotEqualJmp
 	cmp #111, %r3
-	jnz [__bbcc_0000003f]
+	jnz [__bbcc_00000041]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c0], %r0
+	lea DWORD [__bbcc_000000c2], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1353,47 +1336,47 @@ __bbcc_0000003d:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_0000003f:
+__bbcc_00000041:
 // Label
-__bbcc_0000003e:
+__bbcc_00000040:
 // Jmp
-	jmp [__bbcc_00000040]
+	jmp [__bbcc_00000042]
 // Label
-__bbcc_0000003b:
+__bbcc_0000003d:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #102, %r3
-	jnz [__bbcc_00000042]
+	jnz [__bbcc_00000044]
 // LessEqualJmp
 	mov #1, %r1
 	cmp %r2, %r1
-	jle [__bbcc_00000042]
+	jle [__bbcc_00000044]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_00000042:
+__bbcc_00000044:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000041]
+	jze [__bbcc_00000043]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #105, %r3
-	jnz [__bbcc_00000043]
+	jnz [__bbcc_00000045]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c1], %r0
+	lea DWORD [__bbcc_000000c3], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1407,20 +1390,20 @@ __bbcc_00000042:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000044]
+	jmp [__bbcc_00000046]
 // Label
-__bbcc_00000043:
+__bbcc_00000045:
 // NotEqualJmp
 	cmp #111, %r3
-	jnz [__bbcc_00000045]
+	jnz [__bbcc_00000047]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000b9], %r0
+	lea DWORD [__bbcc_000000bb], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1434,20 +1417,20 @@ __bbcc_00000043:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000046]
+	jmp [__bbcc_00000048]
 // Label
-__bbcc_00000045:
+__bbcc_00000047:
 // NotEqualJmp
 	cmp #114, %r3
-	jnz [__bbcc_00000047]
+	jnz [__bbcc_00000049]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c2], %r0
+	lea DWORD [__bbcc_000000c4], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1461,49 +1444,49 @@ __bbcc_00000045:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_00000047:
+__bbcc_00000049:
+// Label
+__bbcc_00000048:
 // Label
 __bbcc_00000046:
-// Label
-__bbcc_00000044:
 // Jmp
-	jmp [__bbcc_00000048]
+	jmp [__bbcc_0000004a]
 // Label
-__bbcc_00000041:
+__bbcc_00000043:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #114, %r3
-	jnz [__bbcc_0000004a]
+	jnz [__bbcc_0000004c]
 // LessEqualJmp
 	mov #1, %r1
 	cmp %r2, %r1
-	jle [__bbcc_0000004a]
+	jle [__bbcc_0000004c]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_0000004a:
+__bbcc_0000004c:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000049]
+	jze [__bbcc_0000004b]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #97, %r3
-	jnz [__bbcc_0000004b]
+	jnz [__bbcc_0000004d]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c3], %r0
+	lea DWORD [__bbcc_000000c5], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1517,20 +1500,20 @@ __bbcc_0000004a:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_0000004c]
+	jmp [__bbcc_0000004e]
 // Label
-__bbcc_0000004b:
+__bbcc_0000004d:
 // NotEqualJmp
 	cmp #101, %r3
-	jnz [__bbcc_0000004d]
+	jnz [__bbcc_0000004f]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c4], %r0
+	lea DWORD [__bbcc_000000c6], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1544,47 +1527,47 @@ __bbcc_0000004b:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_0000004d:
+__bbcc_0000004f:
 // Label
-__bbcc_0000004c:
+__bbcc_0000004e:
 // Jmp
-	jmp [__bbcc_0000004e]
+	jmp [__bbcc_00000050]
 // Label
-__bbcc_00000049:
+__bbcc_0000004b:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #119, %r3
-	jnz [__bbcc_00000050]
+	jnz [__bbcc_00000052]
 // LessEqualJmp
 	mov #1, %r1
 	cmp %r2, %r1
-	jle [__bbcc_00000050]
+	jle [__bbcc_00000052]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_00000050:
+__bbcc_00000052:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_0000004f]
+	jze [__bbcc_00000051]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #104, %r3
-	jnz [__bbcc_00000051]
+	jnz [__bbcc_00000053]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c5], %r0
+	lea DWORD [__bbcc_000000c7], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1598,20 +1581,20 @@ __bbcc_00000050:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000052]
+	jmp [__bbcc_00000054]
 // Label
-__bbcc_00000051:
+__bbcc_00000053:
 // NotEqualJmp
 	cmp #105, %r3
-	jnz [__bbcc_00000053]
+	jnz [__bbcc_00000055]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c6], %r0
+	lea DWORD [__bbcc_000000c8], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1625,47 +1608,47 @@ __bbcc_00000051:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_00000053:
+__bbcc_00000055:
 // Label
-__bbcc_00000052:
+__bbcc_00000054:
 // Jmp
-	jmp [__bbcc_00000054]
+	jmp [__bbcc_00000056]
 // Label
-__bbcc_0000004f:
+__bbcc_00000051:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #105, %r3
-	jnz [__bbcc_00000056]
+	jnz [__bbcc_00000058]
 // LessEqualJmp
 	mov #1, %r1
 	cmp %r2, %r1
-	jle [__bbcc_00000056]
+	jle [__bbcc_00000058]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_00000056:
+__bbcc_00000058:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000055]
+	jze [__bbcc_00000057]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #109, %r3
-	jnz [__bbcc_00000057]
+	jnz [__bbcc_00000059]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c7], %r0
+	lea DWORD [__bbcc_000000c9], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1679,81 +1662,81 @@ __bbcc_00000056:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
-// Jmp
-	jmp [__bbcc_00000058]
-// Label
-__bbcc_00000057:
-// NotEqualJmp
-	cmp #110, %r3
-	jnz [__bbcc_00000059]
-// Return
-	mov #22, %r0
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
 	jmp [__bbcc_0000005a]
 // Label
 __bbcc_00000059:
 // NotEqualJmp
-	cmp #115, %r3
+	cmp #110, %r3
 	jnz [__bbcc_0000005b]
 // Return
-	mov #27, %r0
-	jmp [__bbcc_000000e1]
+	mov #22, %r0
+	jmp [__bbcc_000000e3]
 // Jmp
 	jmp [__bbcc_0000005c]
 // Label
 __bbcc_0000005b:
 // NotEqualJmp
-	cmp #102, %r3
+	cmp #115, %r3
 	jnz [__bbcc_0000005d]
 // Return
-	mov #46, %r0
-	jmp [__bbcc_000000e1]
+	mov #27, %r0
+	jmp [__bbcc_000000e3]
+// Jmp
+	jmp [__bbcc_0000005e]
 // Label
 __bbcc_0000005d:
+// NotEqualJmp
+	cmp #102, %r3
+	jnz [__bbcc_0000005f]
+// Return
+	mov #46, %r0
+	jmp [__bbcc_000000e3]
+// Label
+__bbcc_0000005f:
+// Label
+__bbcc_0000005e:
 // Label
 __bbcc_0000005c:
 // Label
 __bbcc_0000005a:
-// Label
-__bbcc_00000058:
 // Jmp
-	jmp [__bbcc_0000005e]
+	jmp [__bbcc_00000060]
 // Label
-__bbcc_00000055:
+__bbcc_00000057:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #97, %r3
-	jnz [__bbcc_00000060]
+	jnz [__bbcc_00000062]
 // LessEqualJmp
 	mov #1, %r1
 	cmp %r2, %r1
-	jle [__bbcc_00000060]
+	jle [__bbcc_00000062]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_00000060:
+__bbcc_00000062:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_0000005f]
+	jze [__bbcc_00000061]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #119, %r3
-	jnz [__bbcc_00000061]
+	jnz [__bbcc_00000063]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c8], %r0
+	lea DWORD [__bbcc_000000ca], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1767,20 +1750,20 @@ __bbcc_00000060:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000062]
+	jmp [__bbcc_00000064]
 // Label
-__bbcc_00000061:
+__bbcc_00000063:
 // NotEqualJmp
 	cmp #110, %r3
-	jnz [__bbcc_00000063]
+	jnz [__bbcc_00000065]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000c9], %r0
+	lea DWORD [__bbcc_000000cb], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1794,65 +1777,65 @@ __bbcc_00000061:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000064]
+	jmp [__bbcc_00000066]
 // Label
-__bbcc_00000063:
+__bbcc_00000065:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #115, %r3
-	jnz [__bbcc_00000066]
+	jnz [__bbcc_00000068]
 // NotEqualJmp
 	cmp #2, %r2
-	jnz [__bbcc_00000066]
+	jnz [__bbcc_00000068]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_00000066:
+__bbcc_00000068:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000065]
+	jze [__bbcc_00000067]
 // Return
 	mov #34, %r0
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000067]
+	jmp [__bbcc_00000069]
 // Label
-__bbcc_00000065:
+__bbcc_00000067:
 // Set
 	mov #0, %r0
 // LessEqualJmp
 	mov #2, %r1
 	cmp %r2, %r1
-	jle [__bbcc_00000069]
+	jle [__bbcc_0000006b]
 // NotEqualJmp
 	cmp #115, %r3
-	jnz [__bbcc_00000069]
+	jnz [__bbcc_0000006b]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_00000069:
+__bbcc_0000006b:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000068]
+	jze [__bbcc_0000006a]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 2[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #121, %r3
-	jnz [__bbcc_0000006a]
+	jnz [__bbcc_0000006c]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000ca], %r0
+	lea DWORD [__bbcc_000000cc], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1866,18 +1849,18 @@ __bbcc_00000069:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_0000006a:
+__bbcc_0000006c:
 // NotEqualJmp
 	cmp #115, %r3
-	jnz [__bbcc_0000006b]
+	jnz [__bbcc_0000006d]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000cb], %r0
+	lea DWORD [__bbcc_000000cd], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1891,53 +1874,53 @@ __bbcc_0000006a:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_0000006b:
+__bbcc_0000006d:
 // Label
-__bbcc_00000068:
+__bbcc_0000006a:
 // Label
-__bbcc_00000067:
+__bbcc_00000069:
+// Label
+__bbcc_00000066:
 // Label
 __bbcc_00000064:
-// Label
-__bbcc_00000062:
 // Jmp
-	jmp [__bbcc_0000006c]
+	jmp [__bbcc_0000006e]
 // Label
-__bbcc_0000005f:
+__bbcc_00000061:
 // Set
 	mov #0, %r0
 // NotEqualJmp
 	cmp #101, %r3
-	jnz [__bbcc_0000006e]
+	jnz [__bbcc_00000070]
 // LessEqualJmp
 	mov #1, %r1
 	cmp %r2, %r1
-	jle [__bbcc_0000006e]
+	jle [__bbcc_00000070]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_0000006e:
+__bbcc_00000070:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_0000006d]
+	jze [__bbcc_0000006f]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #120, %r3
-	jnz [__bbcc_0000006f]
+	jnz [__bbcc_00000071]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000cc], %r0
+	lea DWORD [__bbcc_000000ce], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1951,43 +1934,43 @@ __bbcc_0000006e:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_00000070]
+	jmp [__bbcc_00000072]
 // Label
-__bbcc_0000006f:
+__bbcc_00000071:
 // Set
 	mov #0, %r0
 // LessEqualJmp
 	mov #2, %r1
 	cmp %r2, %r1
-	jle [__bbcc_00000072]
+	jle [__bbcc_00000074]
 // NotEqualJmp
 	cmp #108, %r3
-	jnz [__bbcc_00000072]
+	jnz [__bbcc_00000074]
 // Set
 	mov #1, %r0
 // Label
-__bbcc_00000072:
+__bbcc_00000074:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000071]
+	jze [__bbcc_00000073]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 2[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #105, %r3
-	jnz [__bbcc_00000073]
+	jnz [__bbcc_00000075]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000cd], %r0
+	lea DWORD [__bbcc_000000cf], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -2001,18 +1984,18 @@ __bbcc_00000072:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_00000073:
+__bbcc_00000075:
 // NotEqualJmp
 	cmp #115, %r3
-	jnz [__bbcc_00000074]
+	jnz [__bbcc_00000076]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea WORD [__bbcc_000000ce], %r0
+	lea DWORD [__bbcc_000000d0], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -2026,122 +2009,122 @@ __bbcc_00000073:
 	push %r6
 	push %r4
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_00000074:
+__bbcc_00000076:
 // Label
-__bbcc_00000071:
+__bbcc_00000073:
 // Label
-__bbcc_00000070:
+__bbcc_00000072:
 // Jmp
-	jmp [__bbcc_00000075]
+	jmp [__bbcc_00000077]
 // Label
-__bbcc_0000006d:
+__bbcc_0000006f:
 // Set
 	mov #0, %r1
 // NotEqualJmp
 	cmp #100, %r3
-	jnz [__bbcc_00000077]
+	jnz [__bbcc_00000079]
 // LessEqualJmp
 	mov #2, %r0
 	cmp %r2, %r0
-	jle [__bbcc_00000077]
+	jle [__bbcc_00000079]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // NotEqualJmp
 	cmp #101, %r0
-	jnz [__bbcc_00000077]
+	jnz [__bbcc_00000079]
 // Set
 	mov #1, %r1
 // Label
-__bbcc_00000077:
+__bbcc_00000079:
 // JmpZero
 	cmp #0, %r1
-	jze [__bbcc_00000076]
+	jze [__bbcc_00000078]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 2[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #102, %r3
-	jnz [__bbcc_00000078]
-// Return
-	mov #35, %r0
-	jmp [__bbcc_000000e1]
-// Jmp
-	jmp [__bbcc_00000079]
-// Label
-__bbcc_00000078:
-// NotEqualJmp
-	cmp #108, %r3
 	jnz [__bbcc_0000007a]
 // Return
-	mov #40, %r0
-	jmp [__bbcc_000000e1]
-// Label
-__bbcc_0000007a:
-// Label
-__bbcc_00000079:
+	mov #35, %r0
+	jmp [__bbcc_000000e3]
 // Jmp
 	jmp [__bbcc_0000007b]
 // Label
-__bbcc_00000076:
+__bbcc_0000007a:
+// NotEqualJmp
+	cmp #108, %r3
+	jnz [__bbcc_0000007c]
+// Return
+	mov #40, %r0
+	jmp [__bbcc_000000e3]
+// Label
+__bbcc_0000007c:
+// Label
+__bbcc_0000007b:
+// Jmp
+	jmp [__bbcc_0000007d]
+// Label
+__bbcc_00000078:
 // Set
 	mov #0, %r1
 // NotEqualJmp
 	cmp #110, %r3
-	jnz [__bbcc_0000007d]
+	jnz [__bbcc_0000007f]
 // LessEqualJmp
 	mov #2, %r0
 	cmp %r2, %r0
-	jle [__bbcc_0000007d]
+	jle [__bbcc_0000007f]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 1[%r0], %r0
 // NotEqualJmp
 	cmp #111, %r0
-	jnz [__bbcc_0000007d]
+	jnz [__bbcc_0000007f]
 // Set
 	mov #1, %r1
 // Label
-__bbcc_0000007d:
+__bbcc_0000007f:
 // JmpZero
 	cmp #0, %r1
-	jze [__bbcc_0000007c]
+	jze [__bbcc_0000007e]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD [%r0], %r0
+	mov DWORD 8[%r12], %r0
+	mov DWORD [%r0], %r0
 // ReadAt
 	mov BYTE 2[%r0], %r0
 // Set
 	mov %r0, %r3
 // NotEqualJmp
 	cmp #116, %r3
-	jnz [__bbcc_0000007e]
+	jnz [__bbcc_00000080]
 // Return
 	mov #42, %r0
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Jmp
-	jmp [__bbcc_0000007f]
+	jmp [__bbcc_00000081]
 // Label
-__bbcc_0000007e:
+__bbcc_00000080:
 // NotEqualJmp
 	cmp #110, %r3
-	jnz [__bbcc_00000080]
+	jnz [__bbcc_00000082]
 // Set
-	mov WORD 4[%r11], %r2
+	mov DWORD 8[%r12], %r2
 // AddrOf
-	lea WORD [__bbcc_000000cf], %r0
+	lea DWORD [__bbcc_000000d1], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -2155,31 +2138,33 @@ __bbcc_0000007e:
 	push %r4
 	push %r2
 	call [checkKeyword]
-	add #10, %r13
+	add #20, %r14
 // Return
-	jmp [__bbcc_000000e1]
+	jmp [__bbcc_000000e3]
 // Label
-__bbcc_00000080:
+__bbcc_00000082:
 // Label
-__bbcc_0000007f:
+__bbcc_00000081:
 // Label
-__bbcc_0000007c:
+__bbcc_0000007e:
 // Label
-__bbcc_0000007b:
+__bbcc_0000007d:
 // Label
-__bbcc_00000075:
+__bbcc_00000077:
 // Label
-__bbcc_0000006c:
+__bbcc_0000006e:
 // Label
-__bbcc_0000005e:
+__bbcc_00000060:
 // Label
-__bbcc_00000054:
+__bbcc_00000056:
 // Label
-__bbcc_0000004e:
+__bbcc_00000050:
 // Label
-__bbcc_00000048:
+__bbcc_0000004a:
 // Label
-__bbcc_00000040:
+__bbcc_00000042:
+// Label
+__bbcc_0000003c:
 // Label
 __bbcc_0000003a:
 // Label
@@ -2198,169 +2183,167 @@ __bbcc_0000002e:
 __bbcc_0000002c:
 // Label
 __bbcc_0000002a:
-// Label
-__bbcc_00000028:
 // Return
 	mov #2, %r0
-__bbcc_000000e1:
+__bbcc_000000e3:
 	pop %r6
 	pop %r5
 	pop %r4
 	pop %r3
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: identifier
 identifier:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 // Label
-__bbcc_00000081:
+__bbcc_00000083:
 // Set
 	mov #1, %r1
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
+	add #4, %r14
 // CallFunction
 	push %r0
 	call [isAlpha]
-	add #2, %r13
+	add #4, %r14
 // JmpNotZero
 	cmp #0, %r0
-	jnz [__bbcc_00000083]
+	jnz [__bbcc_00000085]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [peek]
-	add #2, %r13
+	add #4, %r14
 // Set
 // CallFunction
 	push %r0
 	call [isdigit]
-	add #2, %r13
+	add #4, %r14
 // JmpNotZero
 	cmp #0, %r0
-	jnz [__bbcc_00000083]
+	jnz [__bbcc_00000085]
 // Set
 	mov #0, %r1
 // Label
-__bbcc_00000083:
+__bbcc_00000085:
 // JmpZero
 	cmp #0, %r1
-	jze [__bbcc_00000082]
+	jze [__bbcc_00000084]
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [advance]
-	add #2, %r13
+	add #4, %r14
 // Jmp
-	jmp [__bbcc_00000081]
+	jmp [__bbcc_00000083]
 // Label
-__bbcc_00000082:
+__bbcc_00000084:
 // Set
-	mov WORD 4[%r11], %r2
+	mov DWORD 8[%r12], %r2
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [identifierType]
-	add #2, %r13
+	add #4, %r14
 // CallFunction
 	push %r0
 	push %r1
 	push %r2
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000e2:
+__bbcc_000000e4:
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret
 // Function: scanToken
 scanToken:
-	push %r11
-	mov %r13, %r11
+	push %r12
+	mov %r14, %r12
 	push %r1
 	push %r2
 	push %r3
 	push %r4
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov BYTE 6[%r0], %r0
-// JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000084]
-// Set
-	mov #0, %r0
-// SetAt
-	mov 4[%r11], %r1
-	mov %r0, BYTE 6[%r1]
-// ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
-// Set
-// SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD [%r1]
-// Set
-	mov WORD 4[%r11], %r1
-// Set
-	mov WORD 6[%r11], %r0
-// CallFunction
-	push %r0
-	push %r1
-	call [indent]
-	add #4, %r13
-// JmpZero
-	cmp #0, %r0
-	jze [__bbcc_00000085]
-// Return
-	mov #0, %r0
-	jmp [__bbcc_000000e3]
-// Label
-__bbcc_00000085:
-// Label
-__bbcc_00000084:
-// Set
-	mov WORD 4[%r11], %r0
-// CallFunction
-	push %r0
-	call [skipWhitespace]
-	add #2, %r13
-// ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 2[%r0], %r0
-// Set
-// SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD [%r1]
-// Set
-	mov WORD 4[%r11], %r0
-// CallFunction
-	push %r0
-	call [isAtEnd]
-	add #2, %r13
+	mov DWORD 8[%r12], %r0
+	mov BYTE 12[%r0], %r0
 // JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000086]
 // Set
-	mov WORD 4[%r11], %r2
+	mov #0, %r0
+// SetAt
+	mov 8[%r12], %r1
+	mov %r0, BYTE 12[%r1]
+// ReadAt
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
 // Set
-	mov WORD 6[%r11], %r1
+// SetAt
+	mov 8[%r12], %r1
+	mov %r0, DWORD [%r1]
+// Set
+	mov DWORD 8[%r12], %r1
+// Set
+	mov DWORD 12[%r12], %r0
+// CallFunction
+	push %r0
+	push %r1
+	call [indent]
+	add #8, %r14
+// JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000087]
+// Return
+	mov #0, %r0
+	jmp [__bbcc_000000e5]
+// Label
+__bbcc_00000087:
+// Label
+__bbcc_00000086:
+// Set
+	mov DWORD 8[%r12], %r0
+// CallFunction
+	push %r0
+	call [skipWhitespace]
+	add #4, %r14
+// ReadAt
+	mov DWORD 8[%r12], %r0
+	mov DWORD 4[%r0], %r0
+// Set
+// SetAt
+	mov 8[%r12], %r1
+	mov %r0, DWORD [%r1]
+// Set
+	mov DWORD 8[%r12], %r0
+// CallFunction
+	push %r0
+	call [isAtEnd]
+	add #4, %r14
+// JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000088]
+// Set
+	mov DWORD 8[%r12], %r2
+// Set
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #56, %r0
 // CallFunction
@@ -2368,27 +2351,27 @@ __bbcc_00000084:
 	push %r1
 	push %r2
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Label
-__bbcc_00000086:
+__bbcc_00000088:
 // Set
-	mov WORD 4[%r11], %r0
+	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
 	call [advance]
-	add #2, %r13
+	add #4, %r14
 // Set
 	mov %r0, %r2
 // NotEqualJmp
 	cmp #10, %r2
-	jnz [__bbcc_00000087]
+	jnz [__bbcc_00000089]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #58, %r0
 // CallFunction
@@ -2396,41 +2379,40 @@ __bbcc_00000086:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // SetAt
-	mov 6[%r11], %r0
+	mov 12[%r12], %r0
 	mov #0, %r1
-	mov %r1, WORD 4[%r0]
+	mov %r1, DWORD 8[%r0]
 // ReadAt
-	mov WORD 4[%r11], %r0
-	mov WORD 4[%r0], %r1
+	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r0], %r0
 // Set
-	mov %r1, %r0
+	mov %r0, %r1
 // Add
-	mov #1, %r0
-	add %r1, %r0
+	add #1, %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, WORD 4[%r1]
+	mov 8[%r12], %r1
+	mov %r0, DWORD 8[%r1]
 // Set
 	mov #1, %r0
 // SetAt
-	mov 4[%r11], %r1
-	mov %r0, BYTE 6[%r1]
+	mov 8[%r12], %r1
+	mov %r0, BYTE 12[%r1]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_00000088]
+	jmp [__bbcc_0000008a]
 // Label
-__bbcc_00000087:
+__bbcc_00000089:
 // NotEqualJmp
 	cmp #43, %r2
-	jnz [__bbcc_00000089]
+	jnz [__bbcc_0000008b]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #3, %r0
 // CallFunction
@@ -2438,21 +2420,21 @@ __bbcc_00000087:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_0000008a]
+	jmp [__bbcc_0000008c]
 // Label
-__bbcc_00000089:
+__bbcc_0000008b:
 // NotEqualJmp
 	cmp #45, %r2
-	jnz [__bbcc_0000008b]
+	jnz [__bbcc_0000008d]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #4, %r0
 // CallFunction
@@ -2460,21 +2442,21 @@ __bbcc_00000089:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_0000008c]
+	jmp [__bbcc_0000008e]
 // Label
-__bbcc_0000008b:
+__bbcc_0000008d:
 // NotEqualJmp
 	cmp #47, %r2
-	jnz [__bbcc_0000008d]
+	jnz [__bbcc_0000008f]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #5, %r0
 // CallFunction
@@ -2482,21 +2464,21 @@ __bbcc_0000008b:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_0000008e]
+	jmp [__bbcc_00000090]
 // Label
-__bbcc_0000008d:
+__bbcc_0000008f:
 // NotEqualJmp
 	cmp #42, %r2
-	jnz [__bbcc_0000008f]
+	jnz [__bbcc_00000091]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #6, %r0
 // CallFunction
@@ -2504,21 +2486,21 @@ __bbcc_0000008d:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_00000090]
+	jmp [__bbcc_00000092]
 // Label
-__bbcc_0000008f:
+__bbcc_00000091:
 // NotEqualJmp
 	cmp #40, %r2
-	jnz [__bbcc_00000091]
+	jnz [__bbcc_00000093]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #10, %r0
 // CallFunction
@@ -2526,21 +2508,21 @@ __bbcc_0000008f:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_00000092]
+	jmp [__bbcc_00000094]
 // Label
-__bbcc_00000091:
+__bbcc_00000093:
 // NotEqualJmp
 	cmp #41, %r2
-	jnz [__bbcc_00000093]
+	jnz [__bbcc_00000095]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #11, %r0
 // CallFunction
@@ -2548,21 +2530,21 @@ __bbcc_00000091:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_00000094]
+	jmp [__bbcc_00000096]
 // Label
-__bbcc_00000093:
+__bbcc_00000095:
 // NotEqualJmp
 	cmp #123, %r2
-	jnz [__bbcc_00000095]
+	jnz [__bbcc_00000097]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #12, %r0
 // CallFunction
@@ -2570,21 +2552,21 @@ __bbcc_00000093:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_00000096]
+	jmp [__bbcc_00000098]
 // Label
-__bbcc_00000095:
+__bbcc_00000097:
 // NotEqualJmp
 	cmp #125, %r2
-	jnz [__bbcc_00000097]
+	jnz [__bbcc_00000099]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #13, %r0
 // CallFunction
@@ -2592,21 +2574,21 @@ __bbcc_00000095:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_00000098]
+	jmp [__bbcc_0000009a]
 // Label
-__bbcc_00000097:
+__bbcc_00000099:
 // NotEqualJmp
 	cmp #44, %r2
-	jnz [__bbcc_00000099]
+	jnz [__bbcc_0000009b]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #7, %r0
 // CallFunction
@@ -2614,21 +2596,21 @@ __bbcc_00000097:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_0000009a]
+	jmp [__bbcc_0000009c]
 // Label
-__bbcc_00000099:
+__bbcc_0000009b:
 // NotEqualJmp
 	cmp #46, %r2
-	jnz [__bbcc_0000009b]
+	jnz [__bbcc_0000009d]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #8, %r0
 // CallFunction
@@ -2636,21 +2618,21 @@ __bbcc_00000099:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_0000009c]
+	jmp [__bbcc_0000009e]
 // Label
-__bbcc_0000009b:
+__bbcc_0000009d:
 // NotEqualJmp
 	cmp #58, %r2
-	jnz [__bbcc_0000009d]
+	jnz [__bbcc_0000009f]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #9, %r0
 // CallFunction
@@ -2658,42 +2640,42 @@ __bbcc_0000009b:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_0000009e]
+	jmp [__bbcc_000000a0]
 // Label
-__bbcc_0000009d:
+__bbcc_0000009f:
 // Set
 	mov #0, %r3
 // NotEqualJmp
 	cmp #33, %r2
-	jnz [__bbcc_000000a0]
+	jnz [__bbcc_000000a2]
 // Set
-	mov WORD 4[%r11], %r1
+	mov DWORD 8[%r12], %r1
 // Set
 	mov #61, %r0
 // CallFunction
 	push %r0
 	push %r1
 	call [match]
-	add #4, %r13
+	add #8, %r14
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_000000a0]
+	jze [__bbcc_000000a2]
 // Set
 	mov #1, %r3
 // Label
-__bbcc_000000a0:
+__bbcc_000000a2:
 // JmpZero
 	cmp #0, %r3
-	jze [__bbcc_0000009f]
+	jze [__bbcc_000000a1]
 // Set
-	mov WORD 4[%r11], %r3
+	mov DWORD 8[%r12], %r3
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // Set
 	mov #51, %r0
 // CallFunction
@@ -2701,233 +2683,235 @@ __bbcc_000000a0:
 	push %r1
 	push %r3
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_000000a1]
+	jmp [__bbcc_000000a3]
 // Label
-__bbcc_0000009f:
+__bbcc_000000a1:
 // NotEqualJmp
 	cmp #61, %r2
-	jnz [__bbcc_000000a2]
+	jnz [__bbcc_000000a4]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // Set
-	mov WORD 6[%r11], %r3
+	mov DWORD 12[%r12], %r3
 // Set
-	mov WORD 4[%r11], %r1
+	mov DWORD 8[%r12], %r1
 // Set
 	mov #61, %r0
 // CallFunction
 	push %r0
 	push %r1
 	call [match]
-	add #4, %r13
+	add #8, %r14
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_000000a3]
+	jze [__bbcc_000000a5]
 // Set
 	mov #50, %r0
 // Jmp
-	jmp [__bbcc_000000a4]
+	jmp [__bbcc_000000a6]
 // Label
-__bbcc_000000a3:
+__bbcc_000000a5:
 // Set
 	mov #49, %r0
 // Label
-__bbcc_000000a4:
+__bbcc_000000a6:
 // Set
 // CallFunction
 	push %r0
 	push %r3
 	push %r4
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_000000a5]
+	jmp [__bbcc_000000a7]
 // Label
-__bbcc_000000a2:
+__bbcc_000000a4:
 // NotEqualJmp
 	cmp #60, %r2
-	jnz [__bbcc_000000a6]
+	jnz [__bbcc_000000a8]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // Set
-	mov WORD 6[%r11], %r3
+	mov DWORD 12[%r12], %r3
 // Set
-	mov WORD 4[%r11], %r1
+	mov DWORD 8[%r12], %r1
 // Set
 	mov #61, %r0
 // CallFunction
 	push %r0
 	push %r1
 	call [match]
-	add #4, %r13
+	add #8, %r14
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_000000a7]
+	jze [__bbcc_000000a9]
 // Set
 	mov #55, %r0
 // Jmp
-	jmp [__bbcc_000000a8]
+	jmp [__bbcc_000000aa]
 // Label
-__bbcc_000000a7:
+__bbcc_000000a9:
 // Set
 	mov #54, %r0
 // Label
-__bbcc_000000a8:
+__bbcc_000000aa:
 // Set
 // CallFunction
 	push %r0
 	push %r3
 	push %r4
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_000000a9]
+	jmp [__bbcc_000000ab]
 // Label
-__bbcc_000000a6:
+__bbcc_000000a8:
 // NotEqualJmp
 	cmp #62, %r2
-	jnz [__bbcc_000000aa]
+	jnz [__bbcc_000000ac]
 // Set
-	mov WORD 4[%r11], %r4
+	mov DWORD 8[%r12], %r4
 // Set
-	mov WORD 6[%r11], %r3
+	mov DWORD 12[%r12], %r3
 // Set
-	mov WORD 4[%r11], %r1
+	mov DWORD 8[%r12], %r1
 // Set
 	mov #61, %r0
 // CallFunction
 	push %r0
 	push %r1
 	call [match]
-	add #4, %r13
+	add #8, %r14
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_000000ab]
+	jze [__bbcc_000000ad]
 // Set
 	mov #53, %r0
 // Jmp
-	jmp [__bbcc_000000ac]
+	jmp [__bbcc_000000ae]
 // Label
-__bbcc_000000ab:
+__bbcc_000000ad:
 // Set
 	mov #52, %r0
 // Label
-__bbcc_000000ac:
+__bbcc_000000ae:
 // Set
 // CallFunction
 	push %r0
 	push %r3
 	push %r4
 	call [makeToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_000000ad]
+	jmp [__bbcc_000000af]
 // Label
-__bbcc_000000aa:
+__bbcc_000000ac:
 // Set
 	mov #1, %r0
 // EqualJmp
 	cmp #34, %r2
-	jze [__bbcc_000000af]
+	jze [__bbcc_000000b1]
 // EqualJmp
 	cmp #39, %r2
-	jze [__bbcc_000000af]
+	jze [__bbcc_000000b1]
 // Set
 	mov #0, %r0
 // Label
-__bbcc_000000af:
+__bbcc_000000b1:
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_000000ae]
+	jze [__bbcc_000000b0]
 // Set
-	mov WORD 4[%r11], %r1
+	mov DWORD 8[%r12], %r1
 // Set
-	mov WORD 6[%r11], %r0
+	mov DWORD 12[%r12], %r0
 // CallFunction
 	push %r2
 	push %r0
 	push %r1
 	call [string]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Jmp
-	jmp [__bbcc_000000b0]
+	jmp [__bbcc_000000b2]
 // Label
-__bbcc_000000ae:
+__bbcc_000000b0:
 // Set
 	mov %r2, %r0
 // CallFunction
 	push %r0
 	call [isdigit]
-	add #2, %r13
-// JmpZero
-	cmp #0, %r0
-	jze [__bbcc_000000b1]
-// Set
-	mov WORD 4[%r11], %r1
-// Set
-	mov WORD 6[%r11], %r0
-// CallFunction
-	push %r0
-	push %r1
-	call [number]
-	add #4, %r13
-// Return
-	mov #0, %r0
-	jmp [__bbcc_000000e3]
-// Jmp
-	jmp [__bbcc_000000b2]
-// Label
-__bbcc_000000b1:
-// CallFunction
-	push %r2
-	call [isAlpha]
-	add #2, %r13
+	add #4, %r14
 // JmpZero
 	cmp #0, %r0
 	jze [__bbcc_000000b3]
 // Set
-	mov WORD 4[%r11], %r1
+	mov DWORD 8[%r12], %r1
 // Set
-	mov WORD 6[%r11], %r0
+	mov DWORD 12[%r12], %r0
+// CallFunction
+	push %r0
+	push %r1
+	call [number]
+	add #8, %r14
+// Return
+	mov #0, %r0
+	jmp [__bbcc_000000e5]
+// Jmp
+	jmp [__bbcc_000000b4]
+// Label
+__bbcc_000000b3:
+// CallFunction
+	push %r2
+	call [isAlpha]
+	add #4, %r14
+// JmpZero
+	cmp #0, %r0
+	jze [__bbcc_000000b5]
+// Set
+	mov DWORD 8[%r12], %r1
+// Set
+	mov DWORD 12[%r12], %r0
 // CallFunction
 	push %r0
 	push %r1
 	call [identifier]
-	add #4, %r13
+	add #8, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000e5]
 // Label
-__bbcc_000000b3:
+__bbcc_000000b5:
+// Label
+__bbcc_000000b4:
 // Label
 __bbcc_000000b2:
 // Label
-__bbcc_000000b0:
+__bbcc_000000af:
 // Label
-__bbcc_000000ad:
+__bbcc_000000ab:
 // Label
-__bbcc_000000a9:
+__bbcc_000000a7:
 // Label
-__bbcc_000000a5:
+__bbcc_000000a3:
 // Label
-__bbcc_000000a1:
+__bbcc_000000a0:
 // Label
 __bbcc_0000009e:
 // Label
@@ -2950,28 +2934,26 @@ __bbcc_0000008e:
 __bbcc_0000008c:
 // Label
 __bbcc_0000008a:
-// Label
-__bbcc_00000088:
 // Set
-	mov WORD 4[%r11], %r2
+	mov DWORD 8[%r12], %r2
 // Set
-	mov WORD 6[%r11], %r1
+	mov DWORD 12[%r12], %r1
 // AddrOf
-	lea WORD [__bbcc_000000d0], %r0
+	lea DWORD [__bbcc_000000d2], %r0
 // Set
 // CallFunction
 	push %r0
 	push %r1
 	push %r2
 	call [errorToken]
-	add #6, %r13
+	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000e3:
+__bbcc_000000e5:
 	pop %r4
 	pop %r3
 	pop %r2
 	pop %r1
-	mov %r11, %r13
-	pop %r11
+	mov %r12, %r14
+	pop %r12
 	ret

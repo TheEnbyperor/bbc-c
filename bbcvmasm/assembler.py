@@ -327,70 +327,76 @@ class Assembler:
             self.loc += 1
         else:
             raise SyntaxError(f"Can't subtract {node.left} from {node.right}")
-    #
-    # @setup_labels
-    # def visit_Mul(self, node: ast.Mul):
-    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x43)
-    #         self.get_reg_val(node.left, node.right)
-    #         self.loc += 1
-    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x42)
-    #         self.get_reg_val(node.right, None)
-    #         self.insts.extend(struct.pack("<h", node.left.val))
-    #         self.loc += 3
-    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-    #         if node.left.length == 1:
-    #             self.insts.append(0x44)
-    #         elif node.left.length == 2:
-    #             self.insts.append(0x45)
-    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
-    #         self.loc += 1
-    #     else:
-    #         raise SyntaxError(f"Can't multiply {node.left} and {node.right}")
-    #
-    # @setup_labels
-    # def visit_Div(self, node: ast.Div):
-    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x47)
-    #         self.get_reg_val(node.left, node.right)
-    #         self.loc += 1
-    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x46)
-    #         self.get_reg_val(node.right, None)
-    #         self.insts.extend(struct.pack("<h", node.left.val))
-    #         self.loc += 3
-    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-    #         if node.left.length == 1:
-    #             self.insts.append(0x48)
-    #         elif node.left.length == 2:
-    #             self.insts.append(0x49)
-    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
-    #         self.loc += 1
-    #     else:
-    #         raise SyntaxError(f"Can't divide {node.left} and {node.right}")
-    #
-    # @setup_labels
-    # def visit_Mod(self, node: ast.Mod):
-    #     if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x4b)
-    #         self.get_reg_val(node.left, node.right)
-    #         self.loc += 1
-    #     elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
-    #         self.insts.append(0x4a)
-    #         self.get_reg_val(node.right, None)
-    #         self.insts.extend(struct.pack("<h", node.left.val))
-    #         self.loc += 3
-    #     elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
-    #         if node.left.length == 1:
-    #             self.insts.append(0x4c)
-    #         elif node.left.length == 2:
-    #             self.insts.append(0x4d)
-    #         self.get_mem_reg_val(node.left, node.right, 1, 2)
-    #         self.loc += 1
-    #     else:
-    #         raise SyntaxError(f"Can't modulo {node.left} and {node.right}")
-    #
+
+    @setup_labels
+    def visit_Mul(self, node: ast.Mul):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x27)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x26)
+            self.get_reg_val(node.right, None)
+            self.get_const_val(node.left)
+            self.loc += 1
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x28)
+            elif node.left.length == 2:
+                self.insts.append(0x49)
+            elif node.left.length == 4:
+                self.insts.append(0x2a)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't multiply {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Div(self, node: ast.Div):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x2c)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x2b)
+            self.get_reg_val(node.right, None)
+            self.get_const_val(node.left)
+            self.loc += 1
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x2d)
+            elif node.left.length == 2:
+                self.insts.append(0x2e)
+            elif node.left.length == 4:
+                self.insts.append(0x2f)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't divide {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Mod(self, node: ast.Mod):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x31)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x30)
+            self.get_reg_val(node.right, None)
+            self.get_const_val(node.left)
+            self.loc += 1
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x32)
+            elif node.left.length == 2:
+                self.insts.append(0x33)
+            elif node.left.length == 4:
+                self.insts.append(0x34)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't modulo {node.left} and {node.right}")
+
 
     @setup_labels
     def visit_Cmp(self, node: ast.Cmp):

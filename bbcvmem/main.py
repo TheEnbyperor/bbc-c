@@ -43,9 +43,9 @@ class Emulator(gui.EmulatorFrame):
             0x06: (self.parse_mov_reg_mem_double, self.run_mov_reg_mem_double),
             0x07: (self.parse_mov_reg_reg, self.run_mov_reg_reg),
             0x08: (self.parse_push_reg, self.run_push_reg),
-            # 0x09: (self.parse_push_mem, self.run_push_mem),
+            0x09: (self.parse_push_mem, self.run_push_mem),
             0x0a: (self.parse_pop_reg, self.run_pop_reg),
-            # 0x0b: (self.parse_pop_mem, self.run_pop_mem),
+            0x0b: (self.parse_pop_mem, self.run_pop_mem),
             0x0c: (self.parse_lea, self.run_lea),
             0x0d: (self.parse_add_const_reg, self.run_add_const_reg),
             0x0e: (self.parse_adc_const_reg, self.run_adc_const_reg),
@@ -61,43 +61,48 @@ class Emulator(gui.EmulatorFrame):
             0x18: (self.parse_sbc_const_reg, self.run_sbc_const_reg),
             0x19: (self.parse_sub_reg_reg, self.run_sub_reg_reg),
             0x1a: (self.parse_sbc_reg_reg, self.run_sbc_reg_reg),
-            # 0x1b: (self.parse_sub_mem_reg_short, self.run_sub_mem_reg_short),
-            # 0x1c: (self.parse_sbc_mem_reg_short, self.run_sbc_mem_reg_short),
-            # 0x1d: (self.parse_sub_mem_reg_long, self.run_sub_mem_reg_long),
-            # 0x1e: (self.parse_sbc_mem_reg_long, self.run_sbc_mem_reg_long),
+            0x1b: (self.parse_sub_mem_reg_short, self.run_sub_mem_reg_short),
+            0x1c: (self.parse_sbc_mem_reg_short, self.run_sbc_mem_reg_short),
+            0x1d: (self.parse_sub_mem_reg_long, self.run_sub_mem_reg_long),
+            0x1e: (self.parse_sbc_mem_reg_long, self.run_sbc_mem_reg_long),
+            0x1f: (self.parse_sub_mem_reg_double, self.run_sub_mem_reg_double),
+            0x20: (self.parse_sbc_mem_reg_double, self.run_sbc_mem_reg_double),
             0x21: (self.parse_cmp_const_reg, self.run_cmp_const_reg),
             0x22: (self.parse_cmp_reg_reg, self.run_cmp_reg_reg),
             0x23: (self.parse_cmp_mem_reg_short, self.run_cmp_mem_reg_short),
             0x24: (self.parse_cmp_mem_reg_long, self.run_cmp_mem_reg_long),
             0x25: (self.parse_cmp_mem_reg_double, self.run_cmp_mem_reg_double),
-            # 0x26: (self.parse_mul_const_reg, self.run_mul_const_reg),
-            # 0x27: (self.parse_mul_reg_reg, self.run_mul_reg_reg),
-            # 0x28: (self.parse_mul_mem_reg_short, self.run_mul_mem_reg_short),
-            # 0x29: (self.parse_mul_mem_reg_long, self.run_mul_mem_reg_long),
-            # 0x2b: (self.parse_div_const_reg, self.run_div_const_reg),
-            # 0x2c: (self.parse_div_reg_reg, self.run_div_reg_reg),
-            # 0x2d: (self.parse_div_mem_reg_short, self.run_div_mem_reg_short),
-            # 0x2e: (self.parse_div_mem_reg_long, self.run_div_mem_reg_long),
-            # 0x30: (self.parse_mod_const_reg, self.run_mod_const_reg),
-            # 0x31: (self.parse_mod_reg_reg, self.run_mod_reg_reg),
-            # 0x32: (self.parse_mod_mem_reg_short, self.run_mod_mem_reg_short),
-            # 0x33: (self.parse_mod_mem_reg_long, self.run_mod_mem_reg_long),
+            0x26: (self.parse_mul_const_reg, self.run_mul_const_reg),
+            0x27: (self.parse_mul_reg_reg, self.run_mul_reg_reg),
+            0x28: (self.parse_mul_mem_reg_short, self.run_mul_mem_reg_short),
+            0x29: (self.parse_mul_mem_reg_long, self.run_mul_mem_reg_long),
+            0x2a: (self.parse_mul_mem_reg_double, self.run_mul_mem_reg_double),
+            0x2b: (self.parse_div_const_reg, self.run_div_const_reg),
+            0x2c: (self.parse_div_reg_reg, self.run_div_reg_reg),
+            0x2d: (self.parse_div_mem_reg_short, self.run_div_mem_reg_short),
+            0x2e: (self.parse_div_mem_reg_long, self.run_div_mem_reg_long),
+            0x2f: (self.parse_div_mem_reg_double, self.run_div_mem_reg_double),
+            0x30: (self.parse_mod_const_reg, self.run_mod_const_reg),
+            0x31: (self.parse_mod_reg_reg, self.run_mod_reg_reg),
+            0x32: (self.parse_mod_mem_reg_short, self.run_mod_mem_reg_short),
+            0x33: (self.parse_mod_mem_reg_long, self.run_mod_mem_reg_long),
+            0x34: (self.parse_mod_mem_reg_double, self.run_mod_mem_reg_double),
             0x35: (self.parse_inc_reg, self.run_inc_reg),
-            # 0x36: (self.parse_inc_mem_short, self.run_inc_mem_short),
-            # 0x37: (self.parse_inc_mem_long, self.run_inc_mem_long),
-            # 0x38: (self.parse_inc_mem_double, self.run_inc_mem_double),
+            0x36: (self.parse_inc_mem_short, self.run_inc_mem_short),
+            0x37: (self.parse_inc_mem_long, self.run_inc_mem_long),
+            0x38: (self.parse_inc_mem_double, self.run_inc_mem_double),
             0x39: (self.parse_dec_reg, self.run_dec_reg),
-            # 0x3a: (self.parse_dec_mem_short, self.run_dec_mem_short),
-            # 0x3b: (self.parse_dec_mem_long, self.run_dec_mem_long),
-            # 0x3c: (self.parse_dec_mem_double, self.run_dec_mem_double),
+            0x3a: (self.parse_dec_mem_short, self.run_dec_mem_short),
+            0x3b: (self.parse_dec_mem_long, self.run_dec_mem_long),
+            0x3c: (self.parse_dec_mem_double, self.run_dec_mem_double),
             # 0x3d: (self.parse_not_reg, self.run_not_reg),
             # 0x3e: (self.parse_not_mem_short, self.run_not_mem_short),
             # 0x3f: (self.parse_not_mem_long, self.run_not_mem_long),
             # 0x40: (self.parse_not_mem_double, self.run_not_mem_double),
             0x41: (self.parse_neg_reg, self.run_neg_reg),
-            # 0x42: (self.parse_neg_mem_short, self.run_neg_mem_short),
-            # 0x43: (self.parse_neg_mem_long, self.run_neg_mem_long),
-            # 0x44: (self.parse_neg_mem_double, self.run_neg_mem_double),
+            0x42: (self.parse_neg_mem_short, self.run_neg_mem_short),
+            0x43: (self.parse_neg_mem_long, self.run_neg_mem_long),
+            0x44: (self.parse_neg_mem_double, self.run_neg_mem_double),
             0x45: (self.parse_call, self.run_call),
             0x46: (self.parse_call_native, self.run_call_native),
             0x47: (self.parse_jump, self.run_jump),
@@ -314,6 +319,16 @@ class Emulator(gui.EmulatorFrame):
         self.set_reg(num, val)
         self.inc_reg(14, 4)
 
+    def push_mem(self, addr):
+        self.dec_reg(14, 4)
+        val = self.get_mem_dword(addr)
+        self.set_mem_reg_indirect(14, 0, val)
+
+    def pop_mem(self, addr):
+        val = self.get_mem_reg_indirect(14, 0)
+        self.set_mem_dword(addr, val)
+        self.inc_reg(14, 4)
+
     # Indirect memory
     def set_mem_reg_indirect(self, reg, offset, val):
         reg_val = self.get_reg(reg)
@@ -523,7 +538,7 @@ class Emulator(gui.EmulatorFrame):
     def parse_mov_reg_mem_double(self):
         addr = self.get_mem_address_str()
         reg, _ = self.get_reg_params(self.peek_byte(1))
-        return f"mov %r{reg}, WORD {addr}"
+        return f"mov %r{reg}, DWORD {addr}"
 
     def run_mov_reg_mem_double(self):
         addr = self.get_mem_address()
@@ -551,6 +566,14 @@ class Emulator(gui.EmulatorFrame):
         self.push_reg(reg)
         self.inc_pc()
 
+    def parse_push_mem(self):
+        addr = self.get_mem_address_str()
+        return f"push DOUBLE %r{addr}"
+
+    def run_push_mem(self):
+        addr = self.get_mem_address()
+        self.push_mem(addr)
+
     def parse_pop_reg(self):
         reg, _ = self.get_reg_params(self.peek_byte(1))
         return f"pop %r{reg}"
@@ -559,6 +582,14 @@ class Emulator(gui.EmulatorFrame):
         reg, _ = self.get_reg_params(self.peek_byte(1))
         self.pop_reg(reg)
         self.inc_pc()
+
+    def parse_pop_mem(self):
+        addr = self.get_mem_address_str()
+        return f"pop DOUBLE %r{addr}"
+
+    def run_pop_mem(self):
+        addr = self.get_mem_address()
+        self.pop_mem(addr)
 
     def parse_lea(self):
         addr = self.get_mem_address_str()
@@ -800,7 +831,7 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_sub(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_sbc_mem_reg_short(self):
         addr = self.get_mem_address_str()
@@ -816,7 +847,7 @@ class Emulator(gui.EmulatorFrame):
         carry = self.get_flag(self.CARRY)
         res = self.run_sub(op1, op2, carry)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_sub_mem_reg_long(self):
         addr = self.get_mem_address_str()
@@ -831,7 +862,7 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_sub(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_sbc_mem_reg_long(self):
         addr = self.get_mem_address_str()
@@ -847,7 +878,39 @@ class Emulator(gui.EmulatorFrame):
         carry = self.get_flag(self.CARRY)
         res = self.run_sub(op1, op2, carry)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
+
+
+    def parse_sub_mem_reg_double(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sub DWORD {addr}, %r{reg}"
+
+    def run_sub_mem_reg_double(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_dword(addr)
+        op2 = self.get_reg(reg)
+        res = self.run_sub(op1, op2)
+        self.set_reg(reg, res)
+        self.inc_pc(5)
+
+    def parse_sbc_mem_reg_double(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"sbc DWORD {addr}, %r{reg}"
+
+    def run_sbc_mem_reg_double(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_dword(addr)
+        op2 = self.get_reg(reg)
+        carry = self.get_flag(self.CARRY)
+        res = self.run_sub(op1, op2, carry)
+        self.set_reg(reg, res)
+        self.inc_pc(5)
 
     def parse_cmp_const_reg(self):
         const = self.peek_dword(2)
@@ -932,18 +995,18 @@ class Emulator(gui.EmulatorFrame):
         return res
 
     def parse_mul_const_reg(self):
-        const = self.peek_word(2)
+        const = self.peek_dword(2)
         reg, _ = self.get_reg_params(self.peek_byte(1))
-        return f"mul #${const:04x}, %r{reg}"
+        return f"mul #${const:08x}, %r{reg}"
 
     def run_mul_const_reg(self):
-        const = self.peek_word(2)
+        const = self.peek_dword(2)
         reg, _ = self.get_reg_params(self.peek_byte(1))
 
         op2 = self.get_reg(reg)
         res = self.run_mul(const, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_mul_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
@@ -971,7 +1034,7 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_mul(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_mul_mem_reg_long(self):
         addr = self.get_mem_address_str()
@@ -986,21 +1049,36 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_mul(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
+
+    def parse_mul_mem_reg_double(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"mul WORD {addr}, %r{reg}"
+
+    def run_mul_mem_reg_double(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_dword(addr)
+        op2 = self.get_reg(reg)
+        res = self.run_mul(op1, op2)
+        self.set_reg(reg, res)
+        self.inc_pc(5)
 
     def parse_div_const_reg(self):
-        const = self.peek_word(2)
+        const = self.peek_dword(2)
         reg, _ = self.get_reg_params(self.peek_byte(1))
-        return f"div #${const:04x}, %r{reg}"
+        return f"div #${const:08x}, %r{reg}"
 
     def run_div_const_reg(self):
-        const = self.peek_word(2)
+        const = self.peek_dword(2)
         reg, _ = self.get_reg_params(self.peek_byte(1))
 
         op2 = self.get_reg(reg)
         res = self.run_div(const, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_div_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
@@ -1028,7 +1106,7 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_div(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_div_mem_reg_long(self):
         addr = self.get_mem_address_str()
@@ -1043,21 +1121,36 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_div(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
+
+    def parse_div_mem_reg_double(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"div DWORD {addr}, %r{reg}"
+
+    def run_div_mem_reg_double(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_dword(addr)
+        op2 = self.get_reg(reg)
+        res = self.run_div(op1, op2)
+        self.set_reg(reg, res)
+        self.inc_pc(5)
 
     def parse_mod_const_reg(self):
-        const = self.peek_word(2)
+        const = self.peek_dword(2)
         reg, _ = self.get_reg_params(self.peek_byte(1))
-        return f"mod #${const:04x}, %r{reg}"
+        return f"mod #${const:08x}, %r{reg}"
 
     def run_mod_const_reg(self):
-        const = self.peek_word(2)
+        const = self.peek_dword(2)
         reg, _ = self.get_reg_params(self.peek_byte(1))
 
         op2 = self.get_reg(reg)
         res = self.run_mod(const, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_mod_reg_reg(self):
         reg1, reg2 = self.get_reg_params(self.peek_byte(1))
@@ -1085,7 +1178,7 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_mod(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_mod_mem_reg_long(self):
         addr = self.get_mem_address_str()
@@ -1100,7 +1193,22 @@ class Emulator(gui.EmulatorFrame):
         op2 = self.get_reg(reg)
         res = self.run_mod(op1, op2)
         self.set_reg(reg, res)
-        self.inc_pc(3)
+        self.inc_pc(5)
+
+    def parse_mod_mem_reg_double(self):
+        addr = self.get_mem_address_str()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+        return f"mod WORD {addr}, %r{reg}"
+
+    def run_mod_mem_reg_double(self):
+        addr = self.get_mem_address()
+        reg, _ = self.get_reg_params(self.peek_byte(1))
+
+        op1 = self.get_mem_dword(addr)
+        op2 = self.get_reg(reg)
+        res = self.run_mod(op1, op2)
+        self.set_reg(reg, res)
+        self.inc_pc(5)
 
     def parse_inc_reg(self):
         reg, _ = self.get_reg_params(self.peek_byte(1))
@@ -1118,7 +1226,7 @@ class Emulator(gui.EmulatorFrame):
     def run_inc_mem_short(self):
         addr = self.get_mem_address()
         self.set_mem_byte(addr, self.get_mem_byte(addr)+1)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_inc_mem_long(self):
         addr = self.get_mem_address_str()
@@ -1127,7 +1235,16 @@ class Emulator(gui.EmulatorFrame):
     def run_inc_mem_long(self):
         addr = self.get_mem_address()
         self.set_mem_word(addr, self.get_mem_word(addr)+1)
-        self.inc_pc(3)
+        self.inc_pc(5)
+
+    def parse_inc_mem_double(self):
+        addr = self.get_mem_address_str()
+        return f"inc DWORD {addr}"
+
+    def run_inc_mem_double(self):
+        addr = self.get_mem_address()
+        self.set_mem_dword(addr, self.get_mem_dword(addr)+1)
+        self.inc_pc(5)
 
     def parse_dec_reg(self):
         reg, _ = self.get_reg_params(self.peek_byte(1))
@@ -1136,7 +1253,7 @@ class Emulator(gui.EmulatorFrame):
     def run_dec_reg(self):
         reg, _ = self.get_reg_params(self.peek_byte(1))
         self.set_reg(reg, self.get_reg(reg)-1)
-        self.inc_pc()
+        self.inc_pc(1)
 
     def parse_dec_mem_short(self):
         addr = self.get_mem_address_str()
@@ -1145,7 +1262,7 @@ class Emulator(gui.EmulatorFrame):
     def run_dec_mem_short(self):
         addr = self.get_mem_address()
         self.set_mem_byte(addr, self.get_mem_byte(addr)-1)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_dec_mem_long(self):
         addr = self.get_mem_address_str()
@@ -1154,7 +1271,16 @@ class Emulator(gui.EmulatorFrame):
     def run_dec_mem_long(self):
         addr = self.get_mem_address()
         self.set_mem_word(addr, self.get_mem_word(addr)-1)
-        self.inc_pc(3)
+        self.inc_pc(5)
+
+    def parse_dec_mem_double(self):
+        addr = self.get_mem_address_str()
+        return f"dec DWORD {addr}"
+
+    def run_dec_mem_double(self):
+        addr = self.get_mem_address()
+        self.set_mem_dword(addr, self.get_mem_dword(addr)-1)
+        self.inc_pc(5)
 
     def parse_neg_reg(self):
         reg, _ = self.get_reg_params(self.peek_byte(1))
@@ -1172,7 +1298,7 @@ class Emulator(gui.EmulatorFrame):
     def run_neg_mem_short(self):
         addr = self.get_mem_address()
         self.set_mem_byte(addr, (~self.get_mem_byte(addr))+1)
-        self.inc_pc(3)
+        self.inc_pc(5)
 
     def parse_neg_mem_long(self):
         addr = self.get_mem_address_str()
@@ -1181,7 +1307,16 @@ class Emulator(gui.EmulatorFrame):
     def run_neg_mem_long(self):
         addr = self.get_mem_address()
         self.set_mem_word(addr, (~self.get_mem_word(addr))+1)
-        self.inc_pc(3)
+        self.inc_pc(5)
+
+    def parse_neg_mem_double(self):
+        addr = self.get_mem_address_str()
+        return f"neg DWORD {addr}"
+
+    def run_neg_mem_double(self):
+        addr = self.get_mem_address()
+        self.set_mem_dword(addr, (~self.get_mem_dword(addr))+1)
+        self.inc_pc(5)
 
     def parse_call(self):
         addr = self.get_mem_address_str()

@@ -56,7 +56,7 @@ writeChunk:
 	call [getLastLine]
 	add #4, %r14
 // EqualJmp
-	cmp 14[%r12], %r0
+	cmp 16[%r12], %r0
 	jze [__bbcc_00000000]
 // Add
 	mov DWORD 8[%r12], %r0
@@ -68,7 +68,7 @@ writeChunk:
 // ReadAt
 	mov DWORD [%r0], %r0
 // CallFunction
-	mov DWORD 14[%r12], %r2
+	mov DWORD 16[%r12], %r2
 	push %r2
 	push %r0
 	push %r1

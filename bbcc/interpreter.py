@@ -567,7 +567,14 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Add(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Inc(value))
+            if isinstance(expr, ast.DirectLValue):
+                self.il.add(il.Inc(value))
+            else:
+                one = il.ILValue(value.type)
+                self.il.register_literal_value(one, 1)
+                new_val = il.ILValue(value.type)
+                self.il.add(il.Add(value, one, new_val))
+                expr.set_to(new_val, self.il)
         return value
 
     def visit_PostIncr(self, node):
@@ -583,7 +590,14 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Add(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Inc(value))
+            if isinstance(expr, ast.DirectLValue):
+                self.il.add(il.Inc(value))
+            else:
+                one = il.ILValue(value.type)
+                self.il.register_literal_value(one, 1)
+                new_val = il.ILValue(value.type)
+                self.il.add(il.Add(value, one, new_val))
+                expr.set_to(new_val, self.il)
         return output
 
     def visit_PreDecr(self, node):
@@ -597,7 +611,14 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Sub(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Dec(value))
+            if isinstance(expr, ast.DirectLValue):
+                self.il.add(il.Dec(value))
+            else:
+                one = il.ILValue(value.type)
+                self.il.register_literal_value(one, 1)
+                new_val = il.ILValue(value.type)
+                self.il.add(il.Sub(value, one, new_val))
+                expr.set_to(new_val, self.il)
         return value
 
     def visit_PostDecr(self, node):
@@ -613,7 +634,14 @@ class Interpreter(ast.NodeVisitor):
             self.il.add(il.Sub(value, type_len, new_val))
             expr.set_to(new_val, self.il)
         else:
-            self.il.add(il.Dec(value))
+            if isinstance(expr, ast.DirectLValue):
+                self.il.add(il.Dec(value))
+            else:
+                one = il.ILValue(value.type)
+                self.il.register_literal_value(one, 1)
+                new_val = il.ILValue(value.type)
+                self.il.add(il.Sub(value, one, new_val))
+                expr.set_to(new_val, self.il)
         return output
 
     def visit_AddrOf(self, node):
@@ -687,6 +715,8 @@ class Interpreter(ast.NodeVisitor):
                 offset = arg
         else:
             offset = il.ILValue(ctypes.unsig_int)
+            if not htype.is_complete():
+                raise SyntaxError("Pointer arithmetic on incomplete type")
             self.il.register_literal_value(offset, const_arg*htype.size)
 
         return ast.IndirectLValue(head_val, htype, offset)

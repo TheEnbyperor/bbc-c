@@ -1,4 +1,5 @@
 import collections
+import math
 
 from . import ast
 from . import il
@@ -447,6 +448,8 @@ class SymbolTableBuilder(ast.NodeVisitor):
         decl_infos = self.get_decl_infos(node.node)
         self.scope.add_decl(id(node), decl_infos)
         for d in decl_infos:
+            if not d.ctype.is_complete() and not d.ctype.is_function():
+                raise SyntaxError("Incomplete type")
             var_name = d.identifier.value
             if self.scope.lookup(var_name, current_scope_only=True):
                 raise SyntaxError("Duplicate identifier '%s' found" % var_name)
@@ -475,7 +478,7 @@ class SymbolTableBuilder(ast.NodeVisitor):
                 raise SyntaxError("Duplicate identifier '%s' found" % name)
             symbol = VarSymbol(name, param, None)
             symbol.il_value.stack_offset = offset
-            offset += symbol.type.size + (symbol.type.size % 2)
+            offset += int(il.word_size * math.ceil(float(symbol.type.size)/il.word_size))
             self.scope.define(symbol)
         for n in node.nodes.items:
             self.visit(n)

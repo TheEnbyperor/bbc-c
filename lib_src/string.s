@@ -251,7 +251,7 @@ memset:
 // Label
 __bbcc_0000000d:
 // MoreEqualJmp
-	mov 14[%r12], %r1
+	mov 16[%r12], %r1
 	cmp %r0, %r1
 	jae [__bbcc_0000000f]
 // SetAt

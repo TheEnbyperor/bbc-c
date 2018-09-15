@@ -11,6 +11,7 @@ one = spots.LiteralSpot(1)
 
 word_size = 4
 
+
 class ILValue:
     def __init__(self, value_type, storage=None, name=None):
         self.type = value_type

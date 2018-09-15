@@ -135,11 +135,8 @@ __bbcc_00000001:
 	mov %r3, BYTE [%r5]
 // Label
 __bbcc_00000002:
-// Add
-	mov #1, %r0
-	add %r4, %r0
-// Set
-	mov %r0, %r4
+// Inc
+	inc %r4
 // Jmp
 	jmp [__bbcc_00000001]
 // Label
@@ -147,12 +144,11 @@ __bbcc_00000003:
 // Add
 	mov DWORD 8[%r12], %r2
 // ReadAt
-	mov DWORD [%r2], %r1
+	mov DWORD [%r2], %r0
 // Set
-	mov %r1, %r0
+	mov %r0, %r1
 // Add
-	mov #1, %r0
-	add %r1, %r0
+	add #1, %r0
 // SetAt
 	mov %r0, DWORD [%r2]
 // Return
@@ -221,11 +217,8 @@ __bbcc_00000004:
 	mov %r3, BYTE [%r0]
 // Label
 __bbcc_00000005:
-// Add
-	mov #1, %r0
-	add %r4, %r0
-// Set
-	mov %r0, %r4
+// Inc
+	inc %r4
 // Jmp
 	jmp [__bbcc_00000004]
 // Label

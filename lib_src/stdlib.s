@@ -1,7 +1,9 @@
+.import isdigit
 .import _HIMEM
 .export malloc
 .export free
 .export realloc
+.export atoi
 global_base:
 .byte #0,#0,#0,#0
 mem_top:
@@ -18,7 +20,7 @@ get_block_ptr:
 // Sub
 	sub %r1, %r0
 // Return
-__bbcc_00000027:
+__bbcc_0000002b:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -35,7 +37,7 @@ get_data_ptr:
 // Add
 	add %r1, %r0
 // Return
-__bbcc_00000028:
+__bbcc_0000002c:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -102,7 +104,7 @@ __bbcc_00000002:
 __bbcc_00000001:
 // Return
 	mov %r3, %r0
-__bbcc_00000029:
+__bbcc_0000002d:
 	pop %r4
 	pop %r3
 	pop %r2
@@ -147,7 +149,7 @@ __bbcc_00000004:
 	jl [__bbcc_00000005]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_0000002a]
+	jmp [__bbcc_0000002e]
 // Label
 __bbcc_00000005:
 // Set
@@ -191,7 +193,7 @@ __bbcc_00000006:
 	mov %r0, BYTE 12[%r1]
 // Return
 	mov %r1, %r0
-__bbcc_0000002a:
+__bbcc_0000002e:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -262,7 +264,7 @@ split_block:
 __bbcc_00000007:
 // Return
 	mov #0, %r0
-__bbcc_0000002b:
+__bbcc_0000002f:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -339,7 +341,7 @@ __bbcc_0000000a:
 __bbcc_00000008:
 // Return
 	mov DWORD 8[%r12], %r0
-__bbcc_0000002c:
+__bbcc_00000030:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -358,7 +360,7 @@ malloc:
 	jg [__bbcc_0000000b]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_0000002d]
+	jmp [__bbcc_00000031]
 // Label
 __bbcc_0000000b:
 // JmpNotZero
@@ -381,7 +383,7 @@ __bbcc_0000000b:
 	jnz [__bbcc_0000000d]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_0000002d]
+	jmp [__bbcc_00000031]
 // Label
 __bbcc_0000000d:
 // Set
@@ -427,7 +429,7 @@ __bbcc_0000000c:
 	jnz [__bbcc_00000010]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_0000002d]
+	jmp [__bbcc_00000031]
 // Label
 __bbcc_00000010:
 // Jmp
@@ -471,7 +473,7 @@ __bbcc_0000000e:
 // Add
 	add %r1, %r0
 // Return
-__bbcc_0000002d:
+__bbcc_00000031:
 	pop %r3
 	pop %r2
 	pop %r1
@@ -490,7 +492,7 @@ free:
 	jnz [__bbcc_00000013]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_0000002e]
+	jmp [__bbcc_00000032]
 // Label
 __bbcc_00000013:
 // Set
@@ -583,7 +585,7 @@ __bbcc_00000019:
 __bbcc_00000017:
 // Return
 	mov #0, %r0
-__bbcc_0000002e:
+__bbcc_00000032:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -660,7 +662,7 @@ __bbcc_0000001b:
 __bbcc_0000001c:
 // Return
 	mov #0, %r0
-__bbcc_0000002f:
+__bbcc_00000033:
 	pop %r4
 	pop %r3
 	pop %r2
@@ -685,7 +687,7 @@ realloc:
 	call [malloc]
 	add #4, %r14
 // Return
-	jmp [__bbcc_00000030]
+	jmp [__bbcc_00000034]
 // Label
 __bbcc_0000001e:
 // Set
@@ -809,7 +811,7 @@ __bbcc_00000022:
 	jnz [__bbcc_00000026]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_00000030]
+	jmp [__bbcc_00000034]
 // Label
 __bbcc_00000026:
 // Set
@@ -835,14 +837,91 @@ __bbcc_00000026:
 	add #4, %r14
 // Return
 	mov %r2, %r0
-	jmp [__bbcc_00000030]
+	jmp [__bbcc_00000034]
 // Label
 __bbcc_00000025:
 // Label
 __bbcc_00000021:
 // Return
 	mov DWORD 8[%r12], %r0
-__bbcc_00000030:
+__bbcc_00000034:
+	pop %r3
+	pop %r2
+	pop %r1
+	mov %r12, %r14
+	pop %r12
+	ret
+// Function: atoi
+atoi:
+	push %r12
+	mov %r14, %r12
+	push %r1
+	push %r2
+	push %r3
+// Set
+	mov DWORD 8[%r12], %r0
+// Set
+	mov %r0, %r3
+// Set
+	mov #0, %r1
+// Set
+	mov #0, %r0
+// Set
+	mov %r0, %r2
+// ReadAt
+	mov BYTE [%r3], %r0
+// NotEqualJmp
+	cmp #45, %r0
+	jnz [__bbcc_00000027]
+// Set
+	mov #1, %r0
+// Set
+	mov %r0, %r2
+// Inc
+	inc %r3
+// Label
+__bbcc_00000027:
+// Label
+__bbcc_00000028:
+// ReadAt
+	mov BYTE [%r3], %r0
+// Set
+// CallFunction
+	push %r0
+	call [isdigit]
+	add #4, %r14
+// JmpZero
+	cmp #0, %r0
+	jze [__bbcc_00000029]
+// Mult
+	mul #10, %r1
+// Set
+// ReadAt
+	mov BYTE [%r3], %r0
+// Set
+// Sub
+	sub #48, %r0
+// Set
+// Add
+	add %r0, %r1
+// Set
+// Inc
+	inc %r3
+// Jmp
+	jmp [__bbcc_00000028]
+// Label
+__bbcc_00000029:
+// JmpZero
+	cmp #0, %r2
+	jze [__bbcc_0000002a]
+// Neg
+	neg %r1
+// Set
+// Label
+__bbcc_0000002a:
+// Return
+	mov %r1, %r0
+__bbcc_00000035:
 	pop %r3
 	pop %r2
 	pop %r1
