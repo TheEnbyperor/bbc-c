@@ -1158,7 +1158,7 @@ jmp set_sign_zero_from_reg
 
 // Multiply
 _multiply_op1: .byte #0, #0, #0, #0
-_multiply_op2_l: .byte #0, #0, #0, #0
+_multiply_op2: .byte #0, #0, #0, #0
 _multiply_result: .byte #0, #0, #0, #0, #0, #0, #0, #0
 
 multiply:
@@ -1176,13 +1176,13 @@ ror 0(_multiply_op1)
 bcc multiply_rotate_r
 lda 4(_multiply_result)
 clc
-adc 0(_multiply_op1)
+adc 0(_multiply_op2)
 sta 4(_multiply_result)
 lda 5(_multiply_result)
-adc 1(_multiply_op1)
+adc 1(_multiply_op2)
 sta 5(_multiply_result)
 lda 6(_multiply_result)
-adc 2(_multiply_op1)
+adc 2(_multiply_op2)
 sta 6(_multiply_result)
 lda 7(_multiply_result)
 adc 3(_multiply_op2)
@@ -1199,6 +1199,44 @@ ror 0(_multiply_result)
 dex
 bne multiply_shift_r
 rts
+
+// Multiply constant and register
+mul_const_reg:
+lda 0(_r_0),x
+sta 0(_multiply_op1)
+lda 1(_r_0),x
+sta 1(_multiply_op1)
+lda 2(_r_0),x
+sta 2(_multiply_op1)
+lda 3(_r_0),x
+sta 3(_multiply_op1)
+ldy #1
+jsr _load_byte_pc
+sta 0(_multiply_op2)
+iny
+jsr _load_byte_pc
+sta 1(_multiply_op2)
+iny
+jsr _load_byte_pc
+sta 2(_multiply_op2)
+iny
+jsr _load_byte_pc
+sta 3(_multiply_op2)
+txa
+pha
+jsr multiply
+pla
+tax
+lda 0(_multiply_result)
+sta 0(_r_0),x
+lda 1(_multiply_result)
+sta 1(_r_0),x
+lda 2(_multiply_result)
+sta 2(_r_0),x
+lda 3(_multiply_result)
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp inc_pc_4
 
 // Increment register
 inc_reg:
