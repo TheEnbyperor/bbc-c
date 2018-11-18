@@ -1013,10 +1013,12 @@ jmp set_sign_zero_from_reg
 
 // Helper for memory from register subtract
 sub_mem_reg_start:
+php
 jsr get_mem_address
 jsr _load_byte_temp
 sta 0(_r_temp)
 lda 0(_r_0),x
+plp
 sbc 0(_r_temp)
 rts
 
@@ -1055,6 +1057,7 @@ jmp set_sign_zero_from_reg
 
 // Compare 8 bit memory and register
 cmp_mem_reg_short:
+sec
 jsr sub_mem_reg_start
 sta 0(_r_temp)
 lda 1(_r_0),x
@@ -1090,6 +1093,7 @@ jmp set_sign_zero_from_reg
 
 // Compare 16 bit memory and register
 cmp_mem_reg_long:
+sec
 jsr sub_mem_reg_start
 sta 0(_r_temp)
 iny
@@ -1134,6 +1138,7 @@ jmp set_sign_zero_from_reg
 
 // Compare 32 bit memory and register
 cmp_mem_reg_double:
+sec
 jsr sub_mem_reg_start
 sta 0(_r_temp)
 iny

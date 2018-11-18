@@ -18,9 +18,8 @@ void writeArray(DynamicArray* array, size_t elmSize, void *value) {
     }
 
     size_t offset = array->meta.count * elmSize;
-    for (unsigned int i = 0; i < elmSize; ++i) {
+    for (unsigned int i = 0; i < elmSize; ++i)
         array->data[offset+i] = *(((uint8_t *)value)+i);
-    }
     array->meta.count++;
 }
 
