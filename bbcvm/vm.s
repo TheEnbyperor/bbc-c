@@ -35,10 +35,10 @@ inst_jump_table_l:
       #0(mul_const_reg-1),#0(mul_reg_reg-1),#0(mul_mem_reg_short-1),#0(mul_mem_reg_long-1),#0(mul_mem_reg_double-1),
 
       // Divide
-      #0,#0,#0,#0,#0,
+      #0(div_const_reg-1),#0(div_reg_reg-1),#0(div_mem_reg_short-1),#0(div_mem_reg_long-1),#0(div_mem_reg_double-1),
 
       // Modulo
-      #0,#0,#0,#0,#0,
+      #0(mod_const_reg-1),#0(mod_reg_reg-1),#0(mod_mem_reg_short-1),#0(mod_mem_reg_long-1),#0(mod_mem_reg_double-1),
 
       // Increment decrement
       #0(inc_reg-1),#0(inc_mem_short-1),#0(inc_mem_long-1),#0(inc_mem_double-1),
@@ -58,7 +58,7 @@ inst_jump_table_l:
       #0(jump_greater_equal-1),
 
       // Set on x
-      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,
+      #0(set_zero-1),#0(set_not_zero-1),#0,#0,#0,#0,#0,#0,#0,#0,
       
       // And
       #0(and_const_reg-1),#0(and_reg_reg-1),#0(and_mem_reg_short-1),#0(and_mem_reg_long-1),
@@ -99,10 +99,10 @@ inst_jump_table_h:
       #1(mul_const_reg-1),#1(mul_reg_reg-1),#1(mul_mem_reg_short-1),#1(mul_mem_reg_long-1),#1(mul_mem_reg_double-1),
 
       // Divide
-      #0,#0,#0,#0,#0,
+      #1(div_const_reg-1),#1(div_reg_reg-1),#1(div_mem_reg_short-1),#1(div_mem_reg_long-1),#1(div_mem_reg_double-1),
 
       // Modulo
-      #0,#0,#0,#0,#0,
+      #1(mod_const_reg-1),#1(mod_reg_reg-1),#1(mod_mem_reg_short-1),#1(mod_mem_reg_long-1),#1(mod_mem_reg_double-1),
 
       // Increment decrement
       #1(inc_reg-1),#1(inc_mem_short-1),#1(inc_mem_long-1),#1(inc_mem_double-1),
@@ -122,7 +122,7 @@ inst_jump_table_h:
       #1(jump_greater_equal-1),
 
       // Set on x
-      #0,#0,#0,#0,#0,#0,#0,#0,#0,#0,
+      #1(set_zero-1),#1(set_not_zero-1),#0,#0,#0,#0,#0,#0,#0,#0,
       
       // And
       #1(and_const_reg-1),#1(and_reg_reg-1),#1(and_mem_reg_short-1),#1(and_mem_reg_long-1),
@@ -1344,7 +1344,7 @@ sta 0(_divide_remainder)
 sta 1(_divide_remainder)
 sta 2(_divide_remainder)
 sta 3(_divide_remainder)
-ldx #24
+ldx #32
 divide_loop:
 asl 0(_divide_op1)
 rol 1(_divide_op1)
@@ -1374,10 +1374,10 @@ lda _divide_temp_2
 sta 1(_divide_remainder)
 lda _divide_temp_1
 sta 0(_divide_remainder)
-inc 0(_divide_op2)
+inc 0(_divide_op1)
 divide_skip:
 dex
-bne divide_loop:
+bne divide_loop
 rts
 
 _div_mod_const_reg_start:
@@ -1406,6 +1406,7 @@ pha
 jsr divide
 pla
 tax
+rts
 
 // Divide constant and register
 div_const_reg:
@@ -2206,6 +2207,7 @@ rts
 _jump_zero_start:
 jsr get_mem_address
 jsr dec_mem_address
+_set_zero_start:
 lda 0(_r_status)
 and #$02
 rts
@@ -2314,6 +2316,32 @@ jump_greater:
 jsr _jump_lesser_start
 bcc _jump_test_fail
 bcs _jump_test_end
+
+// Set register when result of comparison is zero
+set_zero:
+jsr _set_zero_start
+beq _set_test_fail
+jmp _set_test_pass
+
+// Set register when result of comparison is not zero
+set_not_zero:
+jsr _set_zero_start
+bne _set_test_fail
+jmp _set_test_pass
+
+_set_test_pass:
+lda #1
+sta 0(_r_0),x
+bne _set_test_end
+_set_test_fail:
+lda #0
+sta 0(_r_0),x
+_set_test_end:
+lda #0
+sta 1(_r_0),x
+sta 2(_r_0),x
+sta 3(_r_0),x
+rts
 
 // JSR to native 6502 code with accumulator set from a register and then the accumulator after RTS loaded into the register
 call_6502:

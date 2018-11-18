@@ -2,65 +2,86 @@
 .import memcmp
 .import isalpha
 .import isdigit
+.import printf
 .export initScanner
 .export scanToken
 __bbcc_000000b6:
-.byte #73,#110,#118,#97,#108,#105,#100,#32,#105,#110,#100,#101,#110,#116,#46,#0
+.byte #77,#65,#75,#69,#32,#84,#79,#75,#69,#78,#10,#0
 __bbcc_000000b7:
-.byte #85,#110,#116,#101,#114,#109,#105,#110,#97,#116,#101,#100,#32,#115,#116,#114,#105,#110,#103,#46,#0
+.byte #80,#69,#69,#75,#10,#0
 __bbcc_000000b8:
-.byte #114,#101,#97,#107,#0
+.byte #73,#110,#118,#97,#108,#105,#100,#32,#105,#110,#100,#101,#110,#116,#46,#0
 __bbcc_000000b9:
-.byte #108,#111,#98,#97,#108,#0
+.byte #85,#110,#116,#101,#114,#109,#105,#110,#97,#116,#101,#100,#32,#115,#116,#114,#105,#110,#103,#46,#0
 __bbcc_000000ba:
-.byte #97,#109,#98,#100,#97,#0
+.byte #78,#85,#77,#66,#69,#82,#10,#0
 __bbcc_000000bb:
-.byte #114,#0
+.byte #73,#83,#32,#68,#73,#71,#73,#84,#10,#0
 __bbcc_000000bc:
-.byte #97,#115,#115,#0
+.byte #114,#101,#97,#107,#0
 __bbcc_000000bd:
-.byte #105,#101,#108,#100,#0
+.byte #108,#111,#98,#97,#108,#0
 __bbcc_000000be:
-.byte #97,#108,#115,#101,#0
+.byte #97,#109,#98,#100,#97,#0
 __bbcc_000000bf:
-.byte #114,#117,#101,#0
+.byte #114,#0
 __bbcc_000000c0:
-.byte #114,#121,#0
+.byte #97,#115,#115,#0
 __bbcc_000000c1:
-.byte #111,#110,#101,#0
+.byte #105,#101,#108,#100,#0
 __bbcc_000000c2:
-.byte #110,#116,#105,#110,#117,#101,#0
+.byte #97,#108,#115,#101,#0
 __bbcc_000000c3:
-.byte #110,#97,#108,#108,#121,#0
+.byte #114,#117,#101,#0
 __bbcc_000000c4:
-.byte #111,#109,#0
+.byte #114,#121,#0
 __bbcc_000000c5:
-.byte #105,#115,#101,#0
+.byte #111,#110,#101,#0
 __bbcc_000000c6:
-.byte #116,#117,#114,#110,#0
+.byte #110,#116,#105,#110,#117,#101,#0
 __bbcc_000000c7:
-.byte #105,#108,#101,#0
+.byte #110,#97,#108,#108,#121,#0
 __bbcc_000000c8:
-.byte #116,#104,#0
+.byte #111,#109,#0
 __bbcc_000000c9:
-.byte #112,#111,#114,#116,#0
+.byte #105,#115,#101,#0
 __bbcc_000000ca:
-.byte #97,#105,#116,#0
+.byte #116,#117,#114,#110,#0
 __bbcc_000000cb:
-.byte #100,#0
+.byte #105,#108,#101,#0
 __bbcc_000000cc:
-.byte #110,#99,#0
+.byte #116,#104,#0
 __bbcc_000000cd:
-.byte #101,#114,#116,#0
+.byte #112,#111,#114,#116,#0
 __bbcc_000000ce:
-.byte #99,#101,#112,#116,#0
+.byte #97,#105,#116,#0
 __bbcc_000000cf:
-.byte #102,#0
+.byte #100,#0
 __bbcc_000000d0:
-.byte #101,#0
+.byte #110,#99,#0
 __bbcc_000000d1:
-.byte #108,#111,#99,#97,#108,#0
+.byte #101,#114,#116,#0
 __bbcc_000000d2:
+.byte #99,#101,#112,#116,#0
+__bbcc_000000d3:
+.byte #102,#0
+__bbcc_000000d4:
+.byte #101,#0
+__bbcc_000000d5:
+.byte #108,#111,#99,#97,#108,#0
+__bbcc_000000d6:
+.byte #83,#84,#65,#82,#84,#32,#79,#70,#32,#76,#73,#78,#69,#10,#0
+__bbcc_000000d7:
+.byte #87,#72,#73,#84,#69,#83,#80,#65,#67,#69,#10,#0
+__bbcc_000000d8:
+.byte #73,#83,#32,#65,#84,#32,#69,#78,#68,#10,#0
+__bbcc_000000d9:
+.byte #65,#68,#86,#65,#78,#67,#69,#10,#0
+__bbcc_000000da:
+.byte #37,#99,#10,#0
+__bbcc_000000db:
+.byte #82,#69,#84,#85,#82,#78,#10,#0
+__bbcc_000000dc:
 .byte #85,#110,#101,#120,#112,#101,#99,#116,#101,#100,#32,#99,#104,#97,#114,#97,#99,#116,#101,#114,#0
 // Function: initScanner
 initScanner:
@@ -103,7 +124,7 @@ initScanner:
 	add #8, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000d3:
+__bbcc_000000dd:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -122,7 +143,7 @@ isAtEnd:
 	cmp #0, %r1
 	sze %r0
 // Return
-__bbcc_000000d4:
+__bbcc_000000de:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -148,7 +169,7 @@ pushIndent:
 	mov %r0, DWORD 93[%r1]
 // Return
 	mov #0, %r0
-__bbcc_000000d5:
+__bbcc_000000df:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -172,7 +193,7 @@ popIndent:
 // ReadAt
 	mov DWORD [%r0], %r0
 // Return
-__bbcc_000000d6:
+__bbcc_000000e0:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -196,7 +217,7 @@ peekIndent:
 	add %r0, %r1
 	mov DWORD [%r1], %r0
 // Return
-__bbcc_000000d7:
+__bbcc_000000e1:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -237,9 +258,16 @@ makeToken:
 // SetAt
 	mov 12[%r12], %r1
 	mov %r0, DWORD 12[%r1]
+// AddrOf
+	lea DWORD [__bbcc_000000b6], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000d8:
+__bbcc_000000e2:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -277,7 +305,7 @@ errorToken:
 	mov %r0, DWORD 12[%r1]
 // Return
 	mov #0, %r0
-__bbcc_000000d9:
+__bbcc_000000e3:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -307,7 +335,7 @@ advance:
 	mov %r0, DWORD 4[%r1]
 // Return
 	mov %r2, %r0
-__bbcc_000000da:
+__bbcc_000000e4:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -317,13 +345,20 @@ __bbcc_000000da:
 peek:
 	push %r12
 	mov %r14, %r12
+// AddrOf
+	lea DWORD [__bbcc_000000b7], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // ReadAt
 	mov DWORD 8[%r12], %r0
 	mov DWORD 4[%r0], %r0
 // ReadAt
 	mov BYTE [%r0], %r0
 // Return
-__bbcc_000000db:
+__bbcc_000000e5:
 	mov %r12, %r14
 	pop %r12
 	ret
@@ -343,7 +378,7 @@ match:
 	jze [__bbcc_00000000]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000dc]
+	jmp [__bbcc_000000e6]
 // Label
 __bbcc_00000000:
 // ReadAt
@@ -356,7 +391,7 @@ __bbcc_00000000:
 	jze [__bbcc_00000001]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000dc]
+	jmp [__bbcc_000000e6]
 // Label
 __bbcc_00000001:
 // ReadAt
@@ -371,7 +406,7 @@ __bbcc_00000001:
 	mov %r0, DWORD 4[%r1]
 // Return
 	mov #1, %r0
-__bbcc_000000dc:
+__bbcc_000000e6:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -467,7 +502,7 @@ __bbcc_0000000a:
 __bbcc_00000008:
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000dd]
+	jmp [__bbcc_000000e7]
 // Label
 __bbcc_0000000c:
 // Label
@@ -480,7 +515,7 @@ __bbcc_00000003:
 __bbcc_00000004:
 // Return
 	mov #0, %r0
-__bbcc_000000dd:
+__bbcc_000000e7:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -550,7 +585,7 @@ __bbcc_00000010:
 	jnz [__bbcc_00000015]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000de]
+	jmp [__bbcc_000000e8]
 // Jmp
 	jmp [__bbcc_00000016]
 // Label
@@ -580,7 +615,7 @@ __bbcc_0000000f:
 	jnz [__bbcc_00000017]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000de]
+	jmp [__bbcc_000000e8]
 // Jmp
 	jmp [__bbcc_00000018]
 // Label
@@ -609,7 +644,7 @@ __bbcc_00000017:
 	add #12, %r14
 // Return
 	mov #1, %r0
-	jmp [__bbcc_000000de]
+	jmp [__bbcc_000000e8]
 // Jmp
 	jmp [__bbcc_0000001a]
 // Label
@@ -650,7 +685,7 @@ __bbcc_0000001c:
 	add #12, %r14
 // Return
 	mov #1, %r0
-	jmp [__bbcc_000000de]
+	jmp [__bbcc_000000e8]
 // Label
 __bbcc_0000001e:
 // MoreEqualJmp
@@ -665,7 +700,7 @@ __bbcc_0000001d:
 // Set
 	mov DWORD 12[%r12], %r1
 // AddrOf
-	lea DWORD [__bbcc_000000b6], %r0
+	lea DWORD [__bbcc_000000b8], %r0
 // Set
 // CallFunction
 	push %r0
@@ -675,7 +710,7 @@ __bbcc_0000001d:
 	add #12, %r14
 // Return
 	mov #1, %r0
-	jmp [__bbcc_000000de]
+	jmp [__bbcc_000000e8]
 // Label
 __bbcc_0000001b:
 // Label
@@ -684,7 +719,7 @@ __bbcc_0000001a:
 __bbcc_00000018:
 // Return
 	mov #0, %r0
-__bbcc_000000de:
+__bbcc_000000e8:
 	pop %r4
 	pop %r3
 	pop %r2
@@ -718,7 +753,7 @@ isAlpha:
 __bbcc_0000001f:
 // Return
 	mov %r1, %r0
-__bbcc_000000df:
+__bbcc_000000e9:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -809,7 +844,7 @@ __bbcc_00000024:
 // Set
 	mov DWORD 12[%r12], %r1
 // AddrOf
-	lea DWORD [__bbcc_000000b7], %r0
+	lea DWORD [__bbcc_000000b9], %r0
 // Set
 // CallFunction
 	push %r0
@@ -819,7 +854,7 @@ __bbcc_00000024:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e0]
+	jmp [__bbcc_000000ea]
 // Label
 __bbcc_00000023:
 // Set
@@ -842,7 +877,7 @@ __bbcc_00000023:
 	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000e0:
+__bbcc_000000ea:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -854,6 +889,13 @@ number:
 	mov %r14, %r12
 	push %r1
 	push %r2
+// AddrOf
+	lea DWORD [__bbcc_000000ba], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Label
 __bbcc_00000025:
 // Set
@@ -870,6 +912,13 @@ __bbcc_00000025:
 // JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000026]
+// AddrOf
+	lea DWORD [__bbcc_000000bb], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Set
 	mov DWORD 8[%r12], %r0
 // CallFunction
@@ -880,6 +929,13 @@ __bbcc_00000025:
 	jmp [__bbcc_00000025]
 // Label
 __bbcc_00000026:
+// AddrOf
+	lea DWORD [__bbcc_000000b6], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Set
 	mov DWORD 8[%r12], %r2
 // Set
@@ -894,7 +950,7 @@ __bbcc_00000026:
 	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000e1:
+__bbcc_000000eb:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -955,12 +1011,12 @@ __bbcc_00000028:
 	jze [__bbcc_00000027]
 // Return
 	mov DWORD 24[%r12], %r0
-	jmp [__bbcc_000000e2]
+	jmp [__bbcc_000000ec]
 // Label
 __bbcc_00000027:
 // Return
 	mov #2, %r0
-__bbcc_000000e2:
+__bbcc_000000ec:
 	pop %r3
 	pop %r2
 	pop %r1
@@ -1002,7 +1058,7 @@ identifierType:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000b8], %r0
+	lea DWORD [__bbcc_000000bc], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1018,7 +1074,7 @@ identifierType:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000002a]
 // Label
@@ -1029,7 +1085,7 @@ __bbcc_00000029:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000b9], %r0
+	lea DWORD [__bbcc_000000bd], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1045,7 +1101,7 @@ __bbcc_00000029:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000002c]
 // Label
@@ -1056,7 +1112,7 @@ __bbcc_0000002b:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000ba], %r0
+	lea DWORD [__bbcc_000000be], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1072,7 +1128,7 @@ __bbcc_0000002b:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000002e]
 // Label
@@ -1083,7 +1139,7 @@ __bbcc_0000002d:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000bb], %r0
+	lea DWORD [__bbcc_000000bf], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1099,7 +1155,7 @@ __bbcc_0000002d:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000030]
 // Label
@@ -1110,7 +1166,7 @@ __bbcc_0000002f:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000bc], %r0
+	lea DWORD [__bbcc_000000c0], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1126,7 +1182,7 @@ __bbcc_0000002f:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000032]
 // Label
@@ -1137,7 +1193,7 @@ __bbcc_00000031:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000bd], %r0
+	lea DWORD [__bbcc_000000c1], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1153,7 +1209,7 @@ __bbcc_00000031:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000034]
 // Label
@@ -1164,7 +1220,7 @@ __bbcc_00000033:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000be], %r0
+	lea DWORD [__bbcc_000000c2], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1180,7 +1236,7 @@ __bbcc_00000033:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000036]
 // Label
@@ -1191,7 +1247,7 @@ __bbcc_00000035:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000bf], %r0
+	lea DWORD [__bbcc_000000c3], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1207,7 +1263,7 @@ __bbcc_00000035:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000038]
 // Label
@@ -1218,7 +1274,7 @@ __bbcc_00000037:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c0], %r0
+	lea DWORD [__bbcc_000000c4], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1234,7 +1290,7 @@ __bbcc_00000037:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000003a]
 // Label
@@ -1245,7 +1301,7 @@ __bbcc_00000039:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c1], %r0
+	lea DWORD [__bbcc_000000c5], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1261,7 +1317,7 @@ __bbcc_00000039:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000003c]
 // Label
@@ -1295,7 +1351,7 @@ __bbcc_0000003e:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000bc], %r0
+	lea DWORD [__bbcc_000000c0], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1311,7 +1367,7 @@ __bbcc_0000003e:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000040]
 // Label
@@ -1322,7 +1378,7 @@ __bbcc_0000003f:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c2], %r0
+	lea DWORD [__bbcc_000000c6], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1338,7 +1394,7 @@ __bbcc_0000003f:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_00000041:
 // Label
@@ -1376,7 +1432,7 @@ __bbcc_00000044:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c3], %r0
+	lea DWORD [__bbcc_000000c7], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1392,7 +1448,7 @@ __bbcc_00000044:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000046]
 // Label
@@ -1403,7 +1459,7 @@ __bbcc_00000045:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000bb], %r0
+	lea DWORD [__bbcc_000000bf], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1419,7 +1475,7 @@ __bbcc_00000045:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000048]
 // Label
@@ -1430,7 +1486,7 @@ __bbcc_00000047:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c4], %r0
+	lea DWORD [__bbcc_000000c8], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1446,7 +1502,7 @@ __bbcc_00000047:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_00000049:
 // Label
@@ -1486,7 +1542,7 @@ __bbcc_0000004c:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c5], %r0
+	lea DWORD [__bbcc_000000c9], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1502,7 +1558,7 @@ __bbcc_0000004c:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000004e]
 // Label
@@ -1513,7 +1569,7 @@ __bbcc_0000004d:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c6], %r0
+	lea DWORD [__bbcc_000000ca], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1529,7 +1585,7 @@ __bbcc_0000004d:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_0000004f:
 // Label
@@ -1567,7 +1623,7 @@ __bbcc_00000052:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c7], %r0
+	lea DWORD [__bbcc_000000cb], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1583,7 +1639,7 @@ __bbcc_00000052:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000054]
 // Label
@@ -1594,7 +1650,7 @@ __bbcc_00000053:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c8], %r0
+	lea DWORD [__bbcc_000000cc], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1610,7 +1666,7 @@ __bbcc_00000053:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_00000055:
 // Label
@@ -1648,7 +1704,7 @@ __bbcc_00000058:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000c9], %r0
+	lea DWORD [__bbcc_000000cd], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1664,7 +1720,7 @@ __bbcc_00000058:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000005a]
 // Label
@@ -1674,7 +1730,7 @@ __bbcc_00000059:
 	jnz [__bbcc_0000005b]
 // Return
 	mov #22, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000005c]
 // Label
@@ -1684,7 +1740,7 @@ __bbcc_0000005b:
 	jnz [__bbcc_0000005d]
 // Return
 	mov #27, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000005e]
 // Label
@@ -1694,7 +1750,7 @@ __bbcc_0000005d:
 	jnz [__bbcc_0000005f]
 // Return
 	mov #46, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_0000005f:
 // Label
@@ -1736,7 +1792,7 @@ __bbcc_00000062:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000ca], %r0
+	lea DWORD [__bbcc_000000ce], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1752,7 +1808,7 @@ __bbcc_00000062:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000064]
 // Label
@@ -1763,7 +1819,7 @@ __bbcc_00000063:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000cb], %r0
+	lea DWORD [__bbcc_000000cf], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1779,7 +1835,7 @@ __bbcc_00000063:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000066]
 // Label
@@ -1801,7 +1857,7 @@ __bbcc_00000068:
 	jze [__bbcc_00000067]
 // Return
 	mov #34, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000069]
 // Label
@@ -1835,7 +1891,7 @@ __bbcc_0000006b:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000cc], %r0
+	lea DWORD [__bbcc_000000d0], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1851,7 +1907,7 @@ __bbcc_0000006b:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_0000006c:
 // NotEqualJmp
@@ -1860,7 +1916,7 @@ __bbcc_0000006c:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000cd], %r0
+	lea DWORD [__bbcc_000000d1], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1876,7 +1932,7 @@ __bbcc_0000006c:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_0000006d:
 // Label
@@ -1920,7 +1976,7 @@ __bbcc_00000070:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000ce], %r0
+	lea DWORD [__bbcc_000000d2], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1936,7 +1992,7 @@ __bbcc_00000070:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000072]
 // Label
@@ -1970,7 +2026,7 @@ __bbcc_00000074:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000cf], %r0
+	lea DWORD [__bbcc_000000d3], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -1986,7 +2042,7 @@ __bbcc_00000074:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_00000075:
 // NotEqualJmp
@@ -1995,7 +2051,7 @@ __bbcc_00000075:
 // Set
 	mov DWORD 8[%r12], %r4
 // AddrOf
-	lea DWORD [__bbcc_000000d0], %r0
+	lea DWORD [__bbcc_000000d4], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -2011,7 +2067,7 @@ __bbcc_00000075:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_00000076:
 // Label
@@ -2058,7 +2114,7 @@ __bbcc_00000079:
 	jnz [__bbcc_0000007a]
 // Return
 	mov #35, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_0000007b]
 // Label
@@ -2068,7 +2124,7 @@ __bbcc_0000007a:
 	jnz [__bbcc_0000007c]
 // Return
 	mov #40, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_0000007c:
 // Label
@@ -2113,7 +2169,7 @@ __bbcc_0000007f:
 	jnz [__bbcc_00000080]
 // Return
 	mov #42, %r0
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Jmp
 	jmp [__bbcc_00000081]
 // Label
@@ -2124,7 +2180,7 @@ __bbcc_00000080:
 // Set
 	mov DWORD 8[%r12], %r2
 // AddrOf
-	lea DWORD [__bbcc_000000d1], %r0
+	lea DWORD [__bbcc_000000d5], %r0
 // Set
 	mov %r0, %r1
 // Set
@@ -2140,7 +2196,7 @@ __bbcc_00000080:
 	call [checkKeyword]
 	add #20, %r14
 // Return
-	jmp [__bbcc_000000e3]
+	jmp [__bbcc_000000ed]
 // Label
 __bbcc_00000082:
 // Label
@@ -2185,7 +2241,7 @@ __bbcc_0000002c:
 __bbcc_0000002a:
 // Return
 	mov #2, %r0
-__bbcc_000000e3:
+__bbcc_000000ed:
 	pop %r6
 	pop %r5
 	pop %r4
@@ -2267,7 +2323,7 @@ __bbcc_00000084:
 	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000e4:
+__bbcc_000000ee:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -2281,6 +2337,13 @@ scanToken:
 	push %r2
 	push %r3
 	push %r4
+// AddrOf
+	lea DWORD [__bbcc_000000d6], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // ReadAt
 	mov DWORD 8[%r12], %r0
 	mov BYTE 12[%r0], %r0
@@ -2313,11 +2376,18 @@ scanToken:
 	jze [__bbcc_00000087]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Label
 __bbcc_00000087:
 // Label
 __bbcc_00000086:
+// AddrOf
+	lea DWORD [__bbcc_000000d7], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Set
 	mov DWORD 8[%r12], %r0
 // CallFunction
@@ -2331,6 +2401,13 @@ __bbcc_00000086:
 // SetAt
 	mov 8[%r12], %r1
 	mov %r0, DWORD [%r1]
+// AddrOf
+	lea DWORD [__bbcc_000000d8], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Set
 	mov DWORD 8[%r12], %r0
 // CallFunction
@@ -2340,6 +2417,13 @@ __bbcc_00000086:
 // JmpZero
 	cmp #0, %r0
 	jze [__bbcc_00000088]
+// AddrOf
+	lea DWORD [__bbcc_000000d8], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Set
 	mov DWORD 8[%r12], %r2
 // Set
@@ -2354,9 +2438,16 @@ __bbcc_00000086:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Label
 __bbcc_00000088:
+// AddrOf
+	lea DWORD [__bbcc_000000d9], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Set
 	mov DWORD 8[%r12], %r0
 // CallFunction
@@ -2365,6 +2456,21 @@ __bbcc_00000088:
 	add #4, %r14
 // Set
 	mov %r0, %r2
+// AddrOf
+	lea DWORD [__bbcc_000000d9], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
+// AddrOf
+	lea DWORD [__bbcc_000000da], %r0
+// Set
+// CallFunction
+	push %r2
+	push %r0
+	call [printf]
+	add #8, %r14
 // NotEqualJmp
 	cmp #10, %r2
 	jnz [__bbcc_00000089]
@@ -2401,7 +2507,7 @@ __bbcc_00000088:
 	mov %r0, BYTE 12[%r1]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_0000008a]
 // Label
@@ -2423,7 +2529,7 @@ __bbcc_00000089:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_0000008c]
 // Label
@@ -2445,7 +2551,7 @@ __bbcc_0000008b:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_0000008e]
 // Label
@@ -2467,7 +2573,7 @@ __bbcc_0000008d:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_00000090]
 // Label
@@ -2489,7 +2595,7 @@ __bbcc_0000008f:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_00000092]
 // Label
@@ -2511,7 +2617,7 @@ __bbcc_00000091:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_00000094]
 // Label
@@ -2533,7 +2639,7 @@ __bbcc_00000093:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_00000096]
 // Label
@@ -2555,7 +2661,7 @@ __bbcc_00000095:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_00000098]
 // Label
@@ -2577,7 +2683,7 @@ __bbcc_00000097:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_0000009a]
 // Label
@@ -2599,7 +2705,7 @@ __bbcc_00000099:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_0000009c]
 // Label
@@ -2621,7 +2727,7 @@ __bbcc_0000009b:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_0000009e]
 // Label
@@ -2643,7 +2749,7 @@ __bbcc_0000009d:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_000000a0]
 // Label
@@ -2686,7 +2792,7 @@ __bbcc_000000a2:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_000000a3]
 // Label
@@ -2729,7 +2835,7 @@ __bbcc_000000a6:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_000000a7]
 // Label
@@ -2772,7 +2878,7 @@ __bbcc_000000aa:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_000000ab]
 // Label
@@ -2815,7 +2921,7 @@ __bbcc_000000ae:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_000000af]
 // Label
@@ -2847,7 +2953,7 @@ __bbcc_000000b1:
 	add #12, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_000000b2]
 // Label
@@ -2861,6 +2967,13 @@ __bbcc_000000b0:
 // JmpZero
 	cmp #0, %r0
 	jze [__bbcc_000000b3]
+// AddrOf
+	lea DWORD [__bbcc_000000bb], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Set
 	mov DWORD 8[%r12], %r1
 // Set
@@ -2870,9 +2983,16 @@ __bbcc_000000b0:
 	push %r1
 	call [number]
 	add #8, %r14
+// AddrOf
+	lea DWORD [__bbcc_000000db], %r0
+// Set
+// CallFunction
+	push %r0
+	call [printf]
+	add #4, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Jmp
 	jmp [__bbcc_000000b4]
 // Label
@@ -2895,7 +3015,7 @@ __bbcc_000000b3:
 	add #8, %r14
 // Return
 	mov #0, %r0
-	jmp [__bbcc_000000e5]
+	jmp [__bbcc_000000ef]
 // Label
 __bbcc_000000b5:
 // Label
@@ -2939,7 +3059,7 @@ __bbcc_0000008a:
 // Set
 	mov DWORD 12[%r12], %r1
 // AddrOf
-	lea DWORD [__bbcc_000000d2], %r0
+	lea DWORD [__bbcc_000000dc], %r0
 // Set
 // CallFunction
 	push %r0
@@ -2949,7 +3069,7 @@ __bbcc_0000008a:
 	add #12, %r14
 // Return
 	mov #0, %r0
-__bbcc_000000e5:
+__bbcc_000000ef:
 	pop %r4
 	pop %r3
 	pop %r2

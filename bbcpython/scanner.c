@@ -38,6 +38,7 @@ static void makeToken(Scanner *scanner, Token *token, TokenType type) {
     token->start = scanner->start;
     token->length = (int) (scanner->current - scanner->start);
     token->line = scanner->line;
+    printf("MAKE TOKEN\n");
 }
 
 static void errorToken(Scanner *scanner, Token *token, const char *message) {
@@ -54,6 +55,7 @@ static char advance(Scanner *scanner) {
 }
 
 static char peek(Scanner *scanner) {
+    printf("PEEK\n");
     return *scanner->current;
 }
 
@@ -137,10 +139,13 @@ static void string(Scanner *scanner, Token *token, char start) {
 }
 
 static void number(Scanner *scanner, Token *token) {
+    printf("NUMBER\n");
     while (isdigit(peek(scanner))) {
+        printf("IS DIGIT\n");
         advance(scanner);
     }
 
+    printf("MAKE TOKEN\n");
     makeToken(scanner, token, TOKEN_NUMBER);
     return;
 }
@@ -229,22 +234,29 @@ static void identifier(Scanner *scanner, Token *token) {
 }
 
 void scanToken(Scanner *scanner, Token *token) {
+    printf("START OF LINE\n");
     if (scanner->isStartOfLine) {
         scanner->isStartOfLine = false;
         scanner->start = scanner->current;
         if (indent(scanner, token)) return;
     }
 
+    printf("WHITESPACE\n");
     skipWhitespace(scanner);
 
     scanner->start = scanner->current;
 
+    printf("IS AT END\n");
     if (isAtEnd(scanner)) {
+        printf("IS AT END\n");
         makeToken(scanner, token, TOKEN_EOF);
         return;
     }
 
+    printf("ADVANCE\n");
     char c = advance(scanner);
+    printf("ADVANCE\n");
+    printf("%c\n", c);
 
     if (c == '\n') {
         makeToken(scanner, token, TOKEN_NEWLINE);
@@ -301,7 +313,9 @@ void scanToken(Scanner *scanner, Token *token) {
         string(scanner, token, c);
         return;
     } else if (isdigit(c)) {
+        printf("IS DIGIT\n");
         number(scanner, token);
+        printf("RETURN\n");
         return;
     } else if (isAlpha(c)) {
         identifier(scanner, token);
