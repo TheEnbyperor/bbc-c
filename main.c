@@ -1,52 +1,35 @@
-#include "stdbool.h"
+#include "stdio.h"
+#include "stdint.h"
+#include "stddef.h"
 
-int strlen(char s[]) {
-    int len = 0;
-    while (s[len]) ++len;
-    return len;
+typedef unsigned int TokenType;
+typedef uint8_t Precedence;
+typedef void (*ParseFunc)();
+
+typedef struct {
+    ParseFunc prefix;
+    ParseFunc suffix;
+    Precedence precedence;
+} ParseRule;
+
+ParseRule rules[1];
+
+static ParseRule *getRule(TokenType type) {
+    return &rules[type];
 }
 
-void strrev(char *s) {
-    int i, j;
-    char c;
-
-    for (i = 0, j = strlen(s) - 1; i < j; ++i, --j) {
-        c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
+void initRule(ParseRule *rule, ParseFunc prefix, ParseFunc suffix, Precedence precedence) {
+    rule->prefix = prefix;
+    rule->suffix = suffix;
+    rule->precedence = precedence;
 }
 
-void itoa(int n, char *s, bool unsig, unsigned int zero_pad) {
-    int i;
-    bool negative = false;
-
-//    putchar('i');
-
-//    if (!unsig && n < 0) {
-//        negative = true;
-//        n = -n;
-//    }
-
-//    putchar('i');
-//    putchar(n + '0');
-
-    i = 0;
-    do {       /* generate digits in reverse order */
-        s[i++] = n % 10 + '0';   /* get next digit */
-    } while ((n /= 10) > 0);     /* delete it */
-
-//    putchar('a');
-
-//    for (;i < zero_pad;) s[i++] = '0';
-
-//    if (negative) s[i++] = '-';
-
-    s[i] = '\0';
-    strrev(s);
+void number() {
 }
 
 int main() {
-    char c[20];
-    itoa(1, c, true, 0);
+    initRule(&rules[0], number, NULL, 0);
+
+    ParseFunc prefixRule = (getRule(0))->prefix;
+    prefixRule();
 }

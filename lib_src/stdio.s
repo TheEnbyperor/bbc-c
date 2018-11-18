@@ -156,12 +156,6 @@ itoa:
 // Set
 	mov %r0, %r3
 // Set
-	mov #105, %r0
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
-// Set
 	mov #0, %r0
 // JmpNotZero
 	mov BYTE 16[%r12], %r1
@@ -189,20 +183,6 @@ __bbcc_00000009:
 	mov %r0, DWORD 8[%r12]
 // Label
 __bbcc_00000008:
-// Set
-	mov #105, %r0
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
-// Add
-	mov DWORD 8[%r12], %r0
-	add #48, %r0
-// Set
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
 // Set
 	mov #0, %r2
 // Label
@@ -235,12 +215,6 @@ __bbcc_0000000a:
 	jmp [__bbcc_0000000a]
 // Label
 __bbcc_0000000b:
-// Set
-	mov #97, %r0
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
 // Label
 __bbcc_0000000c:
 // MoreEqualJmp
@@ -345,12 +319,6 @@ __bbcc_00000010:
 	mov #0, %r0
 // Set
 	mov %r0, %r3
-// Set
-	mov #48, %r0
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -361,12 +329,6 @@ __bbcc_00000010:
 // NotEqualJmp
 	cmp #48, %r4
 	jnz [__bbcc_00000014]
-// Set
-	mov #49, %r0
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -407,12 +369,6 @@ __bbcc_00000016:
 	mov %r0, %r4
 // Label
 __bbcc_00000014:
-// Set
-	mov #50, %r0
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
 // NotEqualJmp
 	cmp #0, %r4
 	jnz [__bbcc_00000017]
@@ -512,12 +468,6 @@ __bbcc_0000001b:
 // Set
 // Set
 	mov %r0, %r5
-// Set
-	mov #51, %r0
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
 // AddrOf
 	lea DWORD -24[%r12], %r0
 // Set

@@ -89,11 +89,7 @@ static void advance(Parser *parser) {
     for (;;) {
         Token token;
 
-        printf("SCAN TOKEN\n");
-
         scanToken(parser->scanner, &token);
-
-        printf("SCAN TOKEN\n");
 
 #ifdef DEBUG_PRINT_TOKENS
         printf("%04u %02u ", token.line, token.type);

@@ -49,24 +49,18 @@ void itoa(int n, char *s, bool unsig, unsigned int zero_pad) {
   int i;
   bool negative = false;
 
-  putchar('i');
-
   if (!unsig && n < 0) {
     negative = true;
     n = -n;
   }
-
-  putchar('i');
-  putchar(n + '0');
 
   i = 0;
   do {       /* generate digits in reverse order */
     s[i++] = n % 10 + '0';   /* get next digit */
   } while ((n /= 10) > 0);     /* delete it */
 
-  putchar('a');
 
-  for (;i < zero_pad;) s[i++] = '0';
+  while (i < zero_pad) s[i++] = '0';
 
   if (negative) s[i++] = '-';
 
@@ -86,12 +80,9 @@ int printf(const char *format, ...) {
     for (; c = *format; ++format) {
         if (c == '%') {
             char zero_pad = 0;
-            putchar('0');
-
             c = *(++format);
 
             if (c == '0') {
-                putchar('1');
 				c = *(++format);
 				if (c == '\0')
 					break;
@@ -99,7 +90,6 @@ int printf(const char *format, ...) {
 					zero_pad = c - '0';
 				c = *(++format);
             }
-            putchar('2');
 
             if (c == '\0') {
                 break;
@@ -118,7 +108,6 @@ int printf(const char *format, ...) {
             } else if (c == 'u') {
                 int i = *((int *)ap);
                 ap = (char*)ap + sizeof(int);
-                putchar('3');
                 itoa(i, bf, true, zero_pad);
                 fputs(bf);
 				i += strlen(bf);

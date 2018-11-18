@@ -1294,7 +1294,11 @@ sta 1(_multiply_op1)
 rts
 
 _mul_mem_reg_end:
+txa
+pha
 jsr multiply
+pla
+tax
 lda 0(_multiply_result)
 sta 0(_r_0),x
 lda 1(_multiply_result)
