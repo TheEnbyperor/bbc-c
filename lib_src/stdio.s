@@ -38,7 +38,7 @@ __bbcc_00000001:
 __bbcc_00000002:
 // Return
 	mov #0, %r0
-__bbcc_00000020:
+__bbcc_0000001f:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -61,7 +61,7 @@ puts:
 	add #4, %r14
 // Return
 	mov #0, %r0
-__bbcc_00000021:
+__bbcc_00000020:
 	mov %r12, %r14
 	pop %r12
 	ret
@@ -93,7 +93,7 @@ __bbcc_00000003:
 	jnz [__bbcc_00000005]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_00000022]
+	jmp [__bbcc_00000021]
 // Label
 __bbcc_00000005:
 // Set
@@ -136,7 +136,7 @@ __bbcc_00000004:
 	mov %r0, BYTE [%r2]
 // Return
 	mov DWORD 8[%r12], %r0
-__bbcc_00000022:
+__bbcc_00000021:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -220,7 +220,7 @@ __bbcc_0000000c:
 // MoreEqualJmp
 	mov 20[%r12], %r0
 	cmp %r2, %r0
-	jge [__bbcc_0000000e]
+	jge [__bbcc_0000000d]
 // Set
 	mov %r2, %r1
 // Inc
@@ -232,15 +232,13 @@ __bbcc_0000000c:
 	mov %r4, %r5
 	add %r1, %r5
 	mov %r0, BYTE [%r5]
-// Label
-__bbcc_0000000d:
 // Jmp
 	jmp [__bbcc_0000000c]
 // Label
-__bbcc_0000000e:
+__bbcc_0000000d:
 // JmpZero
 	cmp #0, %r3
-	jze [__bbcc_0000000f]
+	jze [__bbcc_0000000e]
 // Set
 	mov %r2, %r1
 // Inc
@@ -253,7 +251,7 @@ __bbcc_0000000e:
 	add %r1, %r4
 	mov %r0, BYTE [%r4]
 // Label
-__bbcc_0000000f:
+__bbcc_0000000e:
 // Set
 	mov #0, %r0
 // SetAt
@@ -269,7 +267,7 @@ __bbcc_0000000f:
 	add #4, %r14
 // Return
 	mov #0, %r0
-__bbcc_00000023:
+__bbcc_00000022:
 	pop %r5
 	pop %r4
 	pop %r3
@@ -303,7 +301,7 @@ printf:
 // Set
 	mov %r0, %r5
 // Label
-__bbcc_00000010:
+__bbcc_0000000f:
 // ReadAt
 	mov DWORD 8[%r12], %r0
 	mov BYTE [%r0], %r0
@@ -311,10 +309,10 @@ __bbcc_00000010:
 	mov %r0, %r4
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000012]
+	jze [__bbcc_00000011]
 // NotEqualJmp
 	cmp #37, %r4
-	jnz [__bbcc_00000013]
+	jnz [__bbcc_00000012]
 // Set
 	mov #0, %r0
 // Set
@@ -328,7 +326,7 @@ __bbcc_00000010:
 	mov %r0, %r4
 // NotEqualJmp
 	cmp #48, %r4
-	jnz [__bbcc_00000014]
+	jnz [__bbcc_00000013]
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -338,11 +336,11 @@ __bbcc_00000010:
 	mov %r0, %r4
 // NotEqualJmp
 	cmp #0, %r4
-	jnz [__bbcc_00000015]
+	jnz [__bbcc_00000014]
 // Jmp
-	jmp [__bbcc_00000012]
+	jmp [__bbcc_00000011]
 // Label
-__bbcc_00000015:
+__bbcc_00000014:
 // Set
 	mov %r4, %r0
 // CallFunction
@@ -351,7 +349,7 @@ __bbcc_00000015:
 	add #4, %r14
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000016]
+	jze [__bbcc_00000015]
 // Set
 	mov %r4, %r0
 // Sub
@@ -359,7 +357,16 @@ __bbcc_00000015:
 // Set
 	mov %r0, %r3
 // Label
-__bbcc_00000016:
+__bbcc_00000015:
+// Set
+	mov %r3, %r0
+// Add
+	add #48, %r0
+// Set
+// CallFunction
+	push %r0
+	call [putchar]
+	add #4, %r14
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -368,19 +375,19 @@ __bbcc_00000016:
 // Set
 	mov %r0, %r4
 // Label
-__bbcc_00000014:
+__bbcc_00000013:
 // NotEqualJmp
 	cmp #0, %r4
-	jnz [__bbcc_00000017]
+	jnz [__bbcc_00000016]
 // Jmp
-	jmp [__bbcc_00000012]
+	jmp [__bbcc_00000011]
 // Jmp
-	jmp [__bbcc_00000018]
+	jmp [__bbcc_00000017]
 // Label
-__bbcc_00000017:
+__bbcc_00000016:
 // NotEqualJmp
 	cmp #99, %r4
-	jnz [__bbcc_00000019]
+	jnz [__bbcc_00000018]
 // Set
 	mov %r5, %r0
 // ReadAt
@@ -405,14 +412,14 @@ __bbcc_00000017:
 // Inc
 	inc %r1
 // Jmp
-	jmp [__bbcc_00000011]
+	jmp [__bbcc_00000010]
 // Jmp
-	jmp [__bbcc_0000001a]
+	jmp [__bbcc_00000019]
 // Label
-__bbcc_00000019:
+__bbcc_00000018:
 // NotEqualJmp
 	cmp #115, %r4
-	jnz [__bbcc_0000001b]
+	jnz [__bbcc_0000001a]
 // Set
 	mov %r5, %r0
 // ReadAt
@@ -445,14 +452,14 @@ __bbcc_00000019:
 	add %r0, %r1
 // Set
 // Jmp
-	jmp [__bbcc_00000011]
+	jmp [__bbcc_00000010]
 // Jmp
-	jmp [__bbcc_0000001c]
+	jmp [__bbcc_0000001b]
 // Label
-__bbcc_0000001b:
+__bbcc_0000001a:
 // NotEqualJmp
 	cmp #117, %r4
-	jnz [__bbcc_0000001d]
+	jnz [__bbcc_0000001c]
 // Set
 	mov %r5, %r0
 // ReadAt
@@ -501,14 +508,14 @@ __bbcc_0000001b:
 	add %r0, %r2
 // Set
 // Jmp
-	jmp [__bbcc_00000011]
+	jmp [__bbcc_00000010]
 // Jmp
-	jmp [__bbcc_0000001e]
+	jmp [__bbcc_0000001d]
 // Label
-__bbcc_0000001d:
+__bbcc_0000001c:
 // NotEqualJmp
 	cmp #100, %r4
-	jnz [__bbcc_0000001f]
+	jnz [__bbcc_0000001e]
 // Set
 	mov %r5, %r0
 // ReadAt
@@ -557,17 +564,17 @@ __bbcc_0000001d:
 	add %r0, %r2
 // Set
 // Jmp
-	jmp [__bbcc_00000011]
-// Label
-__bbcc_0000001f:
+	jmp [__bbcc_00000010]
 // Label
 __bbcc_0000001e:
 // Label
-__bbcc_0000001c:
+__bbcc_0000001d:
 // Label
-__bbcc_0000001a:
+__bbcc_0000001b:
 // Label
-__bbcc_00000018:
+__bbcc_00000019:
+// Label
+__bbcc_00000017:
 // Set
 	mov %r4, %r0
 // CallFunction
@@ -575,7 +582,7 @@ __bbcc_00000018:
 	call [putchar]
 	add #4, %r14
 // Label
-__bbcc_00000013:
+__bbcc_00000012:
 // Set
 	mov %r4, %r0
 // CallFunction
@@ -585,16 +592,16 @@ __bbcc_00000013:
 // Inc
 	inc %r1
 // Label
-__bbcc_00000011:
+__bbcc_00000010:
 // Inc
 	inc 8[%r12]
 // Jmp
-	jmp [__bbcc_00000010]
+	jmp [__bbcc_0000000f]
 // Label
-__bbcc_00000012:
+__bbcc_00000011:
 // Return
 	mov #0, %r0
-__bbcc_00000024:
+__bbcc_00000023:
 	pop %r7
 	pop %r6
 	pop %r5

@@ -2300,8 +2300,8 @@ rts
 
 // Jump when a < b signed
 jump_lesser:
-jsr _jump_above_start_2
-bcs _jump_test_fail
+jsr _set_zero_start
+bne _jump_test_fail
 jsr _jump_lesser_start
 bcs _jump_test_fail
 bcc _jump_test_end
@@ -2316,9 +2316,9 @@ bcc _jump_test_end
 jump_greater_equal:
 jsr _jump_lesser_start
 bcs _jump_test_end
-jsr _jump_above_start_2
-bcs _jump_test_end
-bcc _jump_test_fail
+jsr _set_zero_start
+bne _jump_test_end
+jmp _jump_test_fail
 
 // Jump when a > b signed
 jump_greater:

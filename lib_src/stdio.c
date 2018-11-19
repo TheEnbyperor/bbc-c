@@ -86,8 +86,13 @@ int printf(const char *format, ...) {
 				c = *(++format);
 				if (c == '\0')
 					break;
-				if (isdigit(c))
-					zero_pad = c - '0';
+				while (isdigit(c)) {
+                    zero_pad *= 10;
+                    zero_pad += (int) (c - '0');
+				    c = *(++format);
+                }
+				if (c == '\0')
+					break;
 				c = *(++format);
             }
 
