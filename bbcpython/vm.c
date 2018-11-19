@@ -131,7 +131,6 @@ static InterpretResult run(VM *vm) {
                 popStack(&vm->stack, &value);
                 a = asInt(valuePtr);
                 b = asInt(&value);
-                printf("%u %u %u\n", a, b, a+b);
                 intVal(a + b, valuePtr);
             } else {
                 runtimeError(vm, "Operands must be two numbers or two strings.");

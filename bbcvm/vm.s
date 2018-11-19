@@ -2274,6 +2274,7 @@ jmp _jump_test_fail
 _jump_lesser_start:
 jsr get_mem_address
 jsr dec_mem_address
+_set_lesser_start:
 lda 0(_r_status)
 and #$04
 lsr a
@@ -2302,9 +2303,9 @@ rts
 
 // Jump when a < b signed
 jump_lesser:
-jsr _set_zero_start
+jsr _jump_zero_start
 bne _jump_test_fail
-jsr _jump_lesser_start
+jsr _set_lesser_start
 bcs _jump_test_fail
 bcc _jump_test_end
 
