@@ -828,8 +828,10 @@ jmp set_sign_zero_from_reg
 
 // Helper for memory to register add
 add_mem_reg_start:
+php
 jsr get_mem_address
 jsr _load_byte_temp
+plp
 adc 0(_r_0),x
 sta 0(_r_0),x
 rts

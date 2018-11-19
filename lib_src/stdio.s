@@ -38,7 +38,7 @@ __bbcc_00000001:
 __bbcc_00000002:
 // Return
 	mov #0, %r0
-__bbcc_0000001f:
+__bbcc_00000020:
 	pop %r1
 	mov %r12, %r14
 	pop %r12
@@ -61,7 +61,7 @@ puts:
 	add #4, %r14
 // Return
 	mov #0, %r0
-__bbcc_00000020:
+__bbcc_00000021:
 	mov %r12, %r14
 	pop %r12
 	ret
@@ -93,7 +93,7 @@ __bbcc_00000003:
 	jnz [__bbcc_00000005]
 // Return
 	mov #0, %r0
-	jmp [__bbcc_00000021]
+	jmp [__bbcc_00000022]
 // Label
 __bbcc_00000005:
 // Set
@@ -136,7 +136,7 @@ __bbcc_00000004:
 	mov %r0, BYTE [%r2]
 // Return
 	mov DWORD 8[%r12], %r0
-__bbcc_00000021:
+__bbcc_00000022:
 	pop %r2
 	pop %r1
 	mov %r12, %r14
@@ -267,7 +267,7 @@ __bbcc_0000000e:
 	add #4, %r14
 // Return
 	mov #0, %r0
-__bbcc_00000022:
+__bbcc_00000023:
 	pop %r5
 	pop %r4
 	pop %r3
@@ -314,9 +314,7 @@ __bbcc_0000000f:
 	cmp #37, %r4
 	jnz [__bbcc_00000012]
 // Set
-	mov #0, %r0
-// Set
-	mov %r0, %r3
+	mov #0, %r2
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -341,6 +339,8 @@ __bbcc_0000000f:
 	jmp [__bbcc_00000011]
 // Label
 __bbcc_00000014:
+// Label
+__bbcc_00000015:
 // Set
 	mov %r4, %r0
 // CallFunction
@@ -349,24 +349,18 @@ __bbcc_00000014:
 	add #4, %r14
 // JmpZero
 	cmp #0, %r0
-	jze [__bbcc_00000015]
+	jze [__bbcc_00000016]
+// Mult
+	mul #10, %r2
+// Set
 // Set
 	mov %r4, %r0
 // Sub
 	sub #48, %r0
 // Set
-	mov %r0, %r3
-// Label
-__bbcc_00000015:
-// Set
-	mov %r3, %r0
 // Add
-	add #48, %r0
+	add %r0, %r2
 // Set
-// CallFunction
-	push %r0
-	call [putchar]
-	add #4, %r14
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -374,20 +368,24 @@ __bbcc_00000015:
 	mov BYTE [%r0], %r0
 // Set
 	mov %r0, %r4
+// Jmp
+	jmp [__bbcc_00000015]
+// Label
+__bbcc_00000016:
 // Label
 __bbcc_00000013:
 // NotEqualJmp
 	cmp #0, %r4
-	jnz [__bbcc_00000016]
+	jnz [__bbcc_00000017]
 // Jmp
 	jmp [__bbcc_00000011]
 // Jmp
-	jmp [__bbcc_00000017]
+	jmp [__bbcc_00000018]
 // Label
-__bbcc_00000016:
+__bbcc_00000017:
 // NotEqualJmp
 	cmp #99, %r4
-	jnz [__bbcc_00000018]
+	jnz [__bbcc_00000019]
 // Set
 	mov %r5, %r0
 // ReadAt
@@ -397,9 +395,9 @@ __bbcc_00000016:
 // Set
 	mov %r5, %r0
 // Set
-	mov #4, %r2
+	mov #4, %r3
 // Add
-	add %r2, %r0
+	add %r3, %r0
 // Set
 // Set
 	mov %r0, %r5
@@ -414,12 +412,12 @@ __bbcc_00000016:
 // Jmp
 	jmp [__bbcc_00000010]
 // Jmp
-	jmp [__bbcc_00000019]
+	jmp [__bbcc_0000001a]
 // Label
-__bbcc_00000018:
+__bbcc_00000019:
 // NotEqualJmp
 	cmp #115, %r4
-	jnz [__bbcc_0000001a]
+	jnz [__bbcc_0000001b]
 // Set
 	mov %r5, %r0
 // ReadAt
@@ -430,9 +428,9 @@ __bbcc_00000018:
 // Set
 	mov %r5, %r0
 // Set
-	mov #4, %r2
+	mov #4, %r3
 // Add
-	add %r2, %r0
+	add %r3, %r0
 // Set
 // Set
 	mov %r0, %r5
@@ -454,18 +452,18 @@ __bbcc_00000018:
 // Jmp
 	jmp [__bbcc_00000010]
 // Jmp
-	jmp [__bbcc_0000001b]
+	jmp [__bbcc_0000001c]
 // Label
-__bbcc_0000001a:
+__bbcc_0000001b:
 // NotEqualJmp
 	cmp #117, %r4
-	jnz [__bbcc_0000001c]
+	jnz [__bbcc_0000001d]
 // Set
 	mov %r5, %r0
 // ReadAt
 	mov DWORD [%r0], %r0
 // Set
-	mov %r0, %r2
+	mov %r0, %r3
 // Set
 	mov %r5, %r0
 // Set
@@ -482,12 +480,12 @@ __bbcc_0000001a:
 // Set
 	mov #1, %r6
 // Set
-	mov %r3, %r0
+	mov %r2, %r0
 // CallFunction
 	push %r0
 	push %r6
 	push %r7
-	push %r2
+	push %r3
 	call [itoa]
 	add #16, %r14
 // AddrOf
@@ -505,23 +503,23 @@ __bbcc_0000001a:
 	call [strlen]
 	add #4, %r14
 // Add
-	add %r0, %r2
+	add %r0, %r3
 // Set
 // Jmp
 	jmp [__bbcc_00000010]
 // Jmp
-	jmp [__bbcc_0000001d]
+	jmp [__bbcc_0000001e]
 // Label
-__bbcc_0000001c:
+__bbcc_0000001d:
 // NotEqualJmp
 	cmp #100, %r4
-	jnz [__bbcc_0000001e]
+	jnz [__bbcc_0000001f]
 // Set
 	mov %r5, %r0
 // ReadAt
 	mov DWORD [%r0], %r0
 // Set
-	mov %r0, %r2
+	mov %r0, %r3
 // Set
 	mov %r5, %r0
 // Set
@@ -538,12 +536,12 @@ __bbcc_0000001c:
 // Set
 	mov #0, %r6
 // Set
-	mov %r3, %r0
+	mov %r2, %r0
 // CallFunction
 	push %r0
 	push %r6
 	push %r7
-	push %r2
+	push %r3
 	call [itoa]
 	add #16, %r14
 // AddrOf
@@ -561,20 +559,20 @@ __bbcc_0000001c:
 	call [strlen]
 	add #4, %r14
 // Add
-	add %r0, %r2
+	add %r0, %r3
 // Set
 // Jmp
 	jmp [__bbcc_00000010]
 // Label
+__bbcc_0000001f:
+// Label
 __bbcc_0000001e:
 // Label
-__bbcc_0000001d:
+__bbcc_0000001c:
 // Label
-__bbcc_0000001b:
+__bbcc_0000001a:
 // Label
-__bbcc_00000019:
-// Label
-__bbcc_00000017:
+__bbcc_00000018:
 // Set
 	mov %r4, %r0
 // CallFunction
@@ -601,7 +599,7 @@ __bbcc_00000010:
 __bbcc_00000011:
 // Return
 	mov #0, %r0
-__bbcc_00000023:
+__bbcc_00000024:
 	pop %r7
 	pop %r6
 	pop %r5

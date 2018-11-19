@@ -79,7 +79,7 @@ int printf(const char *format, ...) {
 
     for (; c = *format; ++format) {
         if (c == '%') {
-            char zero_pad = 0;
+            int zero_pad = 0;
             c = *(++format);
 
             if (c == '0') {
@@ -91,9 +91,6 @@ int printf(const char *format, ...) {
                     zero_pad += (int) (c - '0');
 				    c = *(++format);
                 }
-				if (c == '\0')
-					break;
-				c = *(++format);
             }
 
             if (c == '\0') {
