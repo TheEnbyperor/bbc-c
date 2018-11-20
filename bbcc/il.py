@@ -84,6 +84,9 @@ class Set(ILInst):
     def outputs(self):
         return [self.output]
 
+    def rel_spot_pref(self):
+        return {self.value: [self.output]}
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         value = spotmap[self.value]
         output = spotmap[self.output]
@@ -311,6 +314,11 @@ class Return(ILInst):
             return [self.value]
         return []
 
+    def abs_spot_pref(self):
+        if self.value is not None:
+            return {self.value: [return_register]}
+        return {}
+
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         if self.value is not None:
             value = spotmap[self.value]
@@ -332,13 +340,15 @@ class CallFunction(ILInst):
         return self.args + [self.loc]
 
     def outputs(self):
-        return [self.output]
+        return [self.output] if not self.output.type.is_void() else []
+
+    def abs_spot_pref(self):
+        return {self.output: [return_register]} if not self.output.type.is_void() else {}
 
     def clobber(self):
         return [return_register] if not self.output.type.is_void() else []
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
-        output = spotmap[self.output]
         loc = spotmap[self.loc]
 
         offset = 0
@@ -362,6 +372,7 @@ class CallFunction(ILInst):
             assembly.add_inst(asm.Add(spots.LiteralSpot(offset), spots.RSP, word_size))
 
         if not self.output.type.is_void():
+            output = spotmap[self.output]
             if return_register != output:
                 assembly.add_inst(asm.Mov(return_register, output, self.output.type.size))
 
@@ -557,17 +568,20 @@ class And(ILInst):
     def outputs(self):
         return [self.output]
 
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
     def rel_spot_conf(self):
-        return {self.output: [self.left, self.right]}
+        return {self.output: [self.right]}
 
     def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
         left = spotmap[self.left]
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        if right != output:
-            assembly.add_inst(asm.Mov(right, output))
-        assembly.add_inst(asm.And(left, output))
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output))
+        assembly.add_inst(asm.And(right, output))
 
 
 class IncOr(ILInst):
@@ -593,9 +607,9 @@ class IncOr(ILInst):
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        if right != output:
-            assembly.add_inst(asm.Mov(right, output))
-        assembly.add_inst(asm.Or(left, output))
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output))
+        assembly.add_inst(asm.Or(right, output))
 
 
 class ExcOr(ILInst):
@@ -621,9 +635,9 @@ class ExcOr(ILInst):
         right = spotmap[self.right]
         output = spotmap[self.output]
 
-        if right != output:
-            assembly.add_inst(asm.Mov(right, output))
-        assembly.add_inst(asm.Xor(left, output))
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output))
+        assembly.add_inst(asm.Xor(right, output))
 
 
 class Not(ILInst):
@@ -1155,6 +1169,9 @@ class IL:
                 # simplified immediately.
                 n = max(g.nodes(), key=lambda n: len(g.confs(n)))
                 spilled_nodes.append(n)
+
+        while g.all_nodes():
+            removed_nodes.append(g.pop(g.all_nodes()[0]))
 
         spotmap = self._generate_spotmap(removed_nodes, merged_nodes, g_bak)
 

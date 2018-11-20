@@ -62,16 +62,15 @@ writeChunk:
 	mov DWORD 8[%r12], %r0
 	add #24, %r0
 // Set
-	mov %r0, %r1
 // Add
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r1
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r1], %r1
 // CallFunction
 	mov DWORD 16[%r12], %r2
 	push %r2
-	push %r0
 	push %r1
+	push %r0
 	call [writeLine]
 	add #12, %r14
 // Label
@@ -105,12 +104,11 @@ addConstant:
 	mov DWORD 8[%r12], %r0
 	add #12, %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov DWORD 12[%r12], %r0
+	mov DWORD 12[%r12], %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [writeValueArray]
 	add #8, %r14
 // Add
@@ -138,12 +136,11 @@ freeChunk:
 	mov DWORD 8[%r12], %r0
 	mov DWORD 8[%r0], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #0, %r0
+	mov #0, %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [reallocate]
 	add #8, %r14
 // Add

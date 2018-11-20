@@ -26,12 +26,11 @@ __bbcc_00000000:
 // AddrOf
 	lea DWORD -255[%r12], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #255, %r0
+	mov #255, %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [gets]
 	add #8, %r14
 // JmpNotZero

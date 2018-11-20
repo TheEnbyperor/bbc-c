@@ -66,9 +66,8 @@ printObject:
 	cmp #0, %r0
 	jnz [__bbcc_00000000]
 // AddrOf
-	lea DWORD [__bbcc_0000000a], %r0
+	lea DWORD [__bbcc_0000000a], %r1
 // Set
-	mov %r0, %r1
 // Set
 	mov DWORD 8[%r12], %r0
 // CallFunction
@@ -97,16 +96,14 @@ printValue:
 	push %r2
 // ReadAt
 	mov DWORD 8[%r12], %r0
-	mov BYTE [%r0], %r0
+	mov BYTE [%r0], %r2
 // Set
-	mov %r0, %r1
 // NotEqualJmp
-	cmp #1, %r1
+	cmp #1, %r2
 	jnz [__bbcc_00000001]
 // AddrOf
-	lea DWORD [__bbcc_0000000b], %r0
+	lea DWORD [__bbcc_0000000b], %r1
 // Set
-	mov %r0, %r2
 // Set
 	mov DWORD 8[%r12], %r0
 // CallFunction
@@ -115,7 +112,7 @@ printValue:
 	add #4, %r14
 // CallFunction
 	push %r0
-	push %r2
+	push %r1
 	call [printf]
 	add #8, %r14
 // Jmp
@@ -123,7 +120,7 @@ printValue:
 // Label
 __bbcc_00000001:
 // NotEqualJmp
-	cmp #0, %r1
+	cmp #0, %r2
 	jnz [__bbcc_00000003]
 // AddrOf
 	lea DWORD [__bbcc_0000000c], %r0
@@ -137,7 +134,7 @@ __bbcc_00000001:
 // Label
 __bbcc_00000003:
 // NotEqualJmp
-	cmp #2, %r1
+	cmp #2, %r2
 	jnz [__bbcc_00000005]
 // Set
 	mov DWORD 8[%r12], %r0
@@ -170,7 +167,7 @@ __bbcc_00000007:
 // Label
 __bbcc_00000005:
 // NotEqualJmp
-	cmp #3, %r1
+	cmp #3, %r2
 	jnz [__bbcc_00000009]
 // Set
 	mov DWORD 8[%r12], %r0

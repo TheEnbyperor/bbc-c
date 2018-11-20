@@ -319,8 +319,8 @@ toupper:
 // Neg
 	mov #-32, %r1
 // And
-	mov %r1, %r0
-	and 8[%r12], %r0
+	mov 8[%r12], %r0
+	and %r1, %r0
 // Set
 // Jmp
 	jmp [__bbcc_0000000b]
@@ -349,8 +349,8 @@ tolower:
 	cmp #0, %r0
 	jze [__bbcc_0000000c]
 // IncOr
-	mov #32, %r0
-	or 8[%r12], %r0
+	mov 8[%r12], %r0
+	or #32, %r0
 // Set
 // Jmp
 	jmp [__bbcc_0000000d]

@@ -77,9 +77,8 @@ writeArray:
 	mov %r0, DWORD 4[%r1]
 // ReadAt
 	mov DWORD 8[%r12], %r0
-	mov DWORD 8[%r0], %r0
+	mov DWORD 8[%r0], %r1
 // Set
-	mov %r0, %r1
 // Add
 	mov DWORD 8[%r12], %r0
 // ReadAt
@@ -100,43 +99,41 @@ __bbcc_00000000:
 // Add
 	mov DWORD 8[%r12], %r0
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r1
 // Mult
-	mul DWORD 12[%r12], %r0
+	mul DWORD 12[%r12], %r1
 // Set
-	mov %r0, %r1
 // Set
-	mov #0, %r0
+	mov #0, %r2
 // Set
-	mov %r0, %r4
 // Label
 __bbcc_00000001:
 // MoreEqualJmp
 	mov 12[%r12], %r0
-	cmp %r4, %r0
+	cmp %r2, %r0
 	jae [__bbcc_00000003]
 // Set
-	mov DWORD 16[%r12], %r0
+	mov DWORD 16[%r12], %r3
 // Set
-	mov %r4, %r2
+	mov %r2, %r0
 // Add
-	add %r2, %r0
+	add %r0, %r3
 // ReadAt
-	mov BYTE [%r0], %r3
+	mov BYTE [%r3], %r4
 // ReadAt
 	mov DWORD 8[%r12], %r0
-	mov DWORD 8[%r0], %r2
+	mov DWORD 8[%r0], %r3
 // Add
 	mov %r1, %r0
-	add %r4, %r0
+	add %r2, %r0
 // SetAt
-	mov %r2, %r5
+	mov %r3, %r5
 	add %r0, %r5
-	mov %r3, BYTE [%r5]
+	mov %r4, BYTE [%r5]
 // Label
 __bbcc_00000002:
 // Inc
-	inc %r4
+	inc %r2
 // Jmp
 	jmp [__bbcc_00000001]
 // Label
@@ -144,13 +141,13 @@ __bbcc_00000003:
 // Add
 	mov DWORD 8[%r12], %r2
 // ReadAt
-	mov DWORD [%r2], %r0
+	mov DWORD [%r2], %r1
 // Set
-	mov %r0, %r1
+	mov %r1, %r0
 // Add
-	add #1, %r0
+	add #1, %r1
 // SetAt
-	mov %r0, DWORD [%r2]
+	mov %r1, DWORD [%r2]
 // Return
 	mov #0, %r0
 __bbcc_0000000e:
@@ -173,52 +170,50 @@ popArray:
 // Add
 	mov DWORD 8[%r12], %r2
 // ReadAt
-	mov DWORD [%r2], %r0
+	mov DWORD [%r2], %r1
 // Set
-	mov %r0, %r1
+	mov %r1, %r0
 // Sub
-	sub #1, %r0
+	sub #1, %r1
 // SetAt
-	mov %r0, DWORD [%r2]
+	mov %r1, DWORD [%r2]
 // Add
 	mov DWORD 8[%r12], %r0
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r2
 // Mult
-	mul DWORD 12[%r12], %r0
+	mul DWORD 12[%r12], %r2
 // Set
-	mov %r0, %r1
 // Set
-	mov #0, %r0
+	mov #0, %r1
 // Set
-	mov %r0, %r4
 // Label
 __bbcc_00000004:
 // MoreEqualJmp
 	mov 12[%r12], %r0
-	cmp %r4, %r0
+	cmp %r1, %r0
 	jae [__bbcc_00000006]
 // ReadAt
 	mov DWORD 8[%r12], %r0
-	mov DWORD 8[%r0], %r2
+	mov DWORD 8[%r0], %r3
 // Add
-	mov %r1, %r0
-	add %r4, %r0
+	mov %r2, %r0
+	add %r1, %r0
 // ReadAt
-	add %r0, %r2
-	mov BYTE [%r2], %r3
+	add %r0, %r3
+	mov BYTE [%r3], %r4
 // Set
-	mov DWORD 16[%r12], %r0
+	mov DWORD 16[%r12], %r3
 // Set
-	mov %r4, %r2
+	mov %r1, %r0
 // Add
-	add %r2, %r0
+	add %r0, %r3
 // SetAt
-	mov %r3, BYTE [%r0]
+	mov %r4, BYTE [%r3]
 // Label
 __bbcc_00000005:
 // Inc
-	inc %r4
+	inc %r1
 // Jmp
 	jmp [__bbcc_00000004]
 // Label
@@ -226,10 +221,9 @@ __bbcc_00000006:
 // Add
 	mov DWORD 8[%r12], %r0
 // ReadAt
-	mov DWORD 4[%r0], %r0
+	mov DWORD 4[%r0], %r1
 // Set
 // Set
-	mov %r0, %r2
 // Add
 	mov DWORD 8[%r12], %r0
 // ReadAt
@@ -237,26 +231,25 @@ __bbcc_00000006:
 // Set
 // CallFunction
 	push %r0
-	push %r2
+	push %r1
 	call [shrinkCapacity]
 	add #8, %r14
 // Add
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 // SetAt
-	mov %r0, DWORD 4[%r1]
+	mov %r0, DWORD 4[%r2]
 // Add
 	mov DWORD 8[%r12], %r0
 // ReadAt
 	mov DWORD 4[%r0], %r0
 // EqualJmp
-	cmp %r0, %r2
+	cmp %r0, %r1
 	jze [__bbcc_00000007]
 // ReadAt
 	mov DWORD 8[%r12], %r0
-	mov DWORD 8[%r0], %r0
+	mov DWORD 8[%r0], %r1
 // Set
-	mov %r0, %r1
 // Add
 	mov DWORD 8[%r12], %r0
 // ReadAt
@@ -293,12 +286,11 @@ freeArray:
 	mov DWORD 8[%r12], %r0
 	mov DWORD 8[%r0], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #0, %r0
+	mov #0, %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [reallocate]
 	add #8, %r14
 // Set

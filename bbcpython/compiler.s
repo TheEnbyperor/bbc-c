@@ -84,13 +84,12 @@ __bbcc_00000000:
 // AddrOf
 	lea DWORD [__bbcc_00000031], %r0
 // Set
-	mov %r0, %r1
 // ReadAt
-	mov DWORD 12[%r12], %r0
-	mov DWORD 12[%r0], %r0
+	mov DWORD 12[%r12], %r1
+	mov DWORD 12[%r1], %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [printf]
 	add #8, %r14
 // ReadAt
@@ -128,9 +127,8 @@ __bbcc_00000003:
 	call [printf]
 	add #4, %r14
 // Set
-	mov #0, %r0
+	mov #0, %r1
 // Set
-	mov %r0, %r1
 // Label
 __bbcc_00000005:
 // ReadAt
@@ -201,12 +199,11 @@ errorAtCurrent:
 // Add
 	mov DWORD 8[%r12], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov DWORD 12[%r12], %r0
+	mov DWORD 12[%r12], %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	push %r2
 	call [errorAt]
 	add #12, %r14
@@ -230,12 +227,11 @@ error:
 	mov DWORD 8[%r12], %r0
 	add #16, %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov DWORD 12[%r12], %r0
+	mov DWORD 12[%r12], %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	push %r2
 	call [errorAt]
 	add #12, %r14
@@ -278,9 +274,8 @@ advance:
 __bbcc_00000008:
 // ReadAt
 	mov DWORD 8[%r12], %r0
-	mov DWORD 38[%r0], %r0
+	mov DWORD 38[%r0], %r1
 // Set
-	mov %r0, %r1
 // AddrOf
 	lea DWORD -16[%r12], %r0
 // Set
@@ -292,25 +287,23 @@ __bbcc_00000008:
 // AddrOf
 	lea DWORD [__bbcc_00000036], %r0
 // Set
-	mov %r0, %r2
 // AddrOf
-	lea DWORD -16[%r12], %r0
+	lea DWORD -16[%r12], %r1
 // ReadAt
-	mov DWORD 12[%r0], %r1
+	mov DWORD 12[%r1], %r2
 // AddrOf
-	lea DWORD -16[%r12], %r0
+	lea DWORD -16[%r12], %r1
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r1], %r1
 // CallFunction
-	push %r0
 	push %r1
 	push %r2
+	push %r0
 	call [printf]
 	add #12, %r14
 // Set
-	mov #0, %r0
+	mov #0, %r1
 // Set
-	mov %r0, %r2
 // Label
 __bbcc_0000000b:
 // AddrOf
@@ -318,28 +311,27 @@ __bbcc_0000000b:
 // ReadAt
 	mov DWORD 8[%r0], %r0
 // MoreEqualJmp
-	cmp %r2, %r0
+	cmp %r1, %r0
 	jge [__bbcc_0000000d]
 // AddrOf
 	lea DWORD [__bbcc_00000037], %r0
 // Set
-	mov %r0, %r1
 // AddrOf
-	lea DWORD -16[%r12], %r0
+	lea DWORD -16[%r12], %r2
 // ReadAt
-	mov DWORD 4[%r0], %r0
+	mov DWORD 4[%r2], %r2
 // ReadAt
-	add %r2, %r0
-	mov BYTE [%r0], %r0
+	add %r1, %r2
+	mov BYTE [%r2], %r2
 // CallFunction
+	push %r2
 	push %r0
-	push %r1
 	call [printf]
 	add #8, %r14
 // Label
 __bbcc_0000000c:
 // Inc
-	inc %r2
+	inc %r1
 // Jmp
 	jmp [__bbcc_0000000b]
 // Label
@@ -450,18 +442,17 @@ emitByte:
 	call [currentChunk]
 	add #4, %r14
 // Set
-	mov %r0, %r1
 // Add
-	mov DWORD 8[%r12], %r0
-	add #16, %r0
+	mov DWORD 8[%r12], %r1
+	add #16, %r1
 // ReadAt
-	mov DWORD 12[%r0], %r0
+	mov DWORD 12[%r1], %r1
 // Set
 // CallFunction
-	push %r0
+	push %r1
 	mov DWORD 12[%r12], %r2
 	push %r2
-	push %r1
+	push %r0
 	call [writeChunk]
 	add #12, %r14
 // Return
@@ -534,29 +525,27 @@ makeConstant:
 	call [currentChunk]
 	add #4, %r14
 // Set
-	mov %r0, %r1
 // Set
-	mov DWORD 12[%r12], %r0
+	mov DWORD 12[%r12], %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [addConstant]
 	add #8, %r14
 // Set
 // Set
-	mov %r0, %r2
 // LessEqualJmp
-	mov #256, %r0
-	cmp %r2, %r0
+	mov #256, %r1
+	cmp %r0, %r1
 	jle [__bbcc_00000010]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // AddrOf
-	lea DWORD [__bbcc_00000039], %r0
+	lea DWORD [__bbcc_00000039], %r1
 // Set
 // CallFunction
-	push %r0
 	push %r1
+	push %r2
 	call [error]
 	add #8, %r14
 // Return
@@ -565,7 +554,6 @@ makeConstant:
 // Label
 __bbcc_00000010:
 // Set
-	mov %r2, %r0
 // Return
 __bbcc_00000049:
 	pop %r2
@@ -639,13 +627,12 @@ endCompiler:
 	call [currentChunk]
 	add #4, %r14
 // Set
-	mov %r0, %r1
 // AddrOf
-	lea DWORD [__bbcc_0000003a], %r0
+	lea DWORD [__bbcc_0000003a], %r1
 // Set
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [disassembleChunk]
 	add #8, %r14
 // Label
@@ -674,13 +661,12 @@ number:
 	call [atoi]
 	add #4, %r14
 // Set
-	mov %r0, %r1
 // AddrOf
-	lea DWORD -5[%r12], %r0
+	lea DWORD -5[%r12], %r1
 // Set
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [intVal]
 	add #8, %r14
 // Set
@@ -711,38 +697,36 @@ string:
 	mov DWORD 8[%r12], %r0
 	add #16, %r0
 // ReadAt
-	mov DWORD 4[%r0], %r0
+	mov DWORD 4[%r0], %r2
 // Set
-	mov #1, %r1
+	mov #1, %r0
 // Add
-	add %r1, %r0
+	add %r0, %r2
 // Set
-	mov %r0, %r2
 // Add
 	mov DWORD 8[%r12], %r0
 	add #16, %r0
 // ReadAt
-	mov DWORD 8[%r0], %r0
+	mov DWORD 8[%r0], %r1
 // Sub
-	sub #2, %r0
+	sub #2, %r1
 // ReadAt
-	mov DWORD 8[%r12], %r1
-	mov DWORD 42[%r1], %r1
+	mov DWORD 8[%r12], %r0
+	mov DWORD 42[%r0], %r0
 // Set
 // CallFunction
-	push %r1
 	push %r0
+	push %r1
 	push %r2
 	call [copyString]
 	add #12, %r14
 // Set
-	mov %r0, %r1
 // AddrOf
-	lea DWORD -5[%r12], %r0
+	lea DWORD -5[%r12], %r1
 // Set
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [objVal]
 	add #8, %r14
 // Set
@@ -817,17 +801,16 @@ binary:
 	mov DWORD 8[%r12], %r0
 	add #16, %r0
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r1
 // Set
-	mov %r0, %r3
 // CallFunction
-	push %r3
+	push %r1
 	call [getRule]
 	add #4, %r14
 // Set
 // Set
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // ReadAt
 	mov BYTE 8[%r0], %r0
 // Set
@@ -836,19 +819,19 @@ binary:
 // Set
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [parsePrecedence]
 	add #8, %r14
 // NotEqualJmp
-	cmp #3, %r3
+	cmp #3, %r1
 	jnz [__bbcc_00000012]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 	mov #3, %r0
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -856,15 +839,15 @@ binary:
 // Label
 __bbcc_00000012:
 // NotEqualJmp
-	cmp #4, %r3
+	cmp #4, %r1
 	jnz [__bbcc_00000014]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 	mov #4, %r0
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -872,15 +855,15 @@ __bbcc_00000012:
 // Label
 __bbcc_00000014:
 // NotEqualJmp
-	cmp #6, %r3
+	cmp #6, %r1
 	jnz [__bbcc_00000016]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 	mov #5, %r0
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -888,15 +871,15 @@ __bbcc_00000014:
 // Label
 __bbcc_00000016:
 // NotEqualJmp
-	cmp #5, %r3
+	cmp #5, %r1
 	jnz [__bbcc_00000018]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 	mov #6, %r0
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -904,15 +887,15 @@ __bbcc_00000016:
 // Label
 __bbcc_00000018:
 // NotEqualJmp
-	cmp #50, %r3
+	cmp #50, %r1
 	jnz [__bbcc_0000001a]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 	mov #10, %r0
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -920,18 +903,18 @@ __bbcc_00000018:
 // Label
 __bbcc_0000001a:
 // NotEqualJmp
-	cmp #51, %r3
+	cmp #51, %r1
 	jnz [__bbcc_0000001c]
 // Set
-	mov DWORD 8[%r12], %r2
+	mov DWORD 8[%r12], %r3
 // Set
-	mov #10, %r1
+	mov #10, %r2
 // Set
 	mov #9, %r0
 // CallFunction
 	push %r0
-	push %r1
 	push %r2
+	push %r3
 	call [emitBytes]
 	add #12, %r14
 // Jmp
@@ -939,15 +922,15 @@ __bbcc_0000001a:
 // Label
 __bbcc_0000001c:
 // NotEqualJmp
-	cmp #52, %r3
+	cmp #52, %r1
 	jnz [__bbcc_0000001e]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 	mov #11, %r0
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -955,18 +938,18 @@ __bbcc_0000001c:
 // Label
 __bbcc_0000001e:
 // NotEqualJmp
-	cmp #53, %r3
+	cmp #53, %r1
 	jnz [__bbcc_00000020]
 // Set
-	mov DWORD 8[%r12], %r2
+	mov DWORD 8[%r12], %r3
 // Set
-	mov #12, %r1
+	mov #12, %r2
 // Set
 	mov #9, %r0
 // CallFunction
 	push %r0
-	push %r1
 	push %r2
+	push %r3
 	call [emitBytes]
 	add #12, %r14
 // Jmp
@@ -974,15 +957,15 @@ __bbcc_0000001e:
 // Label
 __bbcc_00000020:
 // NotEqualJmp
-	cmp #54, %r3
+	cmp #54, %r1
 	jnz [__bbcc_00000022]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
 	mov #12, %r0
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -990,7 +973,7 @@ __bbcc_00000020:
 // Label
 __bbcc_00000022:
 // NotEqualJmp
-	cmp #55, %r3
+	cmp #55, %r1
 	jnz [__bbcc_00000024]
 // Set
 	mov DWORD 8[%r12], %r2
@@ -1045,26 +1028,25 @@ unary:
 // ReadAt
 	mov DWORD [%r0], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
-	mov #15, %r0
+	mov #15, %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r2
 	call [parsePrecedence]
 	add #8, %r14
 // NotEqualJmp
-	cmp #4, %r2
+	cmp #4, %r0
 	jnz [__bbcc_00000025]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // Set
-	mov #2, %r0
+	mov #2, %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r2
 	call [emitByte]
 	add #8, %r14
 // Jmp
@@ -1072,7 +1054,7 @@ unary:
 // Label
 __bbcc_00000025:
 // NotEqualJmp
-	cmp #42, %r2
+	cmp #42, %r0
 	jnz [__bbcc_00000027]
 // Set
 	mov DWORD 8[%r12], %r1
@@ -1106,11 +1088,10 @@ literal:
 	mov DWORD 8[%r12], %r0
 	add #16, %r0
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r1
 // Set
-	mov %r0, %r2
 // NotEqualJmp
-	cmp #19, %r2
+	cmp #19, %r1
 	jnz [__bbcc_00000028]
 // AddrOf
 	lea DWORD -5[%r12], %r0
@@ -1120,13 +1101,13 @@ literal:
 	call [noneVal]
 	add #4, %r14
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // AddrOf
 	lea DWORD -5[%r12], %r0
 // Set
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitConstant]
 	add #8, %r14
 // Jmp
@@ -1134,26 +1115,26 @@ literal:
 // Label
 __bbcc_00000028:
 // NotEqualJmp
-	cmp #24, %r2
+	cmp #24, %r1
 	jnz [__bbcc_0000002a]
 // Set
-	mov #1, %r1
+	mov #1, %r2
 // AddrOf
 	lea DWORD -5[%r12], %r0
 // Set
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [boolVal]
 	add #8, %r14
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // AddrOf
 	lea DWORD -5[%r12], %r0
 // Set
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [emitConstant]
 	add #8, %r14
 // Jmp
@@ -1161,7 +1142,7 @@ __bbcc_00000028:
 // Label
 __bbcc_0000002a:
 // NotEqualJmp
-	cmp #14, %r2
+	cmp #14, %r1
 	jnz [__bbcc_0000002c]
 // Set
 	mov #0, %r1
@@ -1282,20 +1263,19 @@ parsePrecedence:
 	call [getRule]
 	add #4, %r14
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r1
 // Set
-	mov %r0, %r2
 // NotEqualJmp
-	cmp #0, %r2
+	cmp #0, %r1
 	jnz [__bbcc_0000002d]
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r2
 // AddrOf
 	lea DWORD [__bbcc_0000003c], %r0
 // Set
 // CallFunction
 	push %r0
-	push %r1
+	push %r2
 	call [error]
 	add #8, %r14
 // Return
@@ -1307,7 +1287,7 @@ __bbcc_0000002d:
 	mov DWORD 8[%r12], %r0
 // CallFunction
 	push %r0
-	call [%r2]
+	call [%r1]
 	add #4, %r14
 // Label
 __bbcc_0000002e:
@@ -1342,12 +1322,11 @@ __bbcc_0000002e:
 // ReadAt
 	mov DWORD 4[%r0], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r1
 // CallFunction
-	push %r0
-	call [%r1]
+	push %r1
+	call [%r0]
 	add #4, %r14
 // Jmp
 	jmp [__bbcc_0000002e]
@@ -1370,395 +1349,356 @@ compile:
 	push %r2
 	push %r3
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
 // Set
-	mov %r0, %r3
 // AddrOf
 	lea DWORD [number], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov #0, %r1
+	mov #0, %r3
 // Set
-	mov #0, %r0
+	mov #0, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
 	push %r3
+	push %r0
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #9, %r0
+	add #9, %r1
 // Set
-	mov %r0, %r3
 // AddrOf
 	lea DWORD [string], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov #0, %r1
+	mov #0, %r3
 // Set
-	mov #0, %r0
+	mov #0, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
 	push %r3
+	push %r0
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #171, %r0
+	add #171, %r1
 // Set
-	mov %r0, %r3
 // AddrOf
 	lea DWORD [literal], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov #0, %r1
+	mov #0, %r3
 // Set
-	mov #0, %r0
+	mov #0, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
 	push %r3
+	push %r0
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #216, %r0
+	add #216, %r1
 // Set
-	mov %r0, %r3
 // AddrOf
 	lea DWORD [literal], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov #0, %r1
+	mov #0, %r3
 // Set
-	mov #0, %r0
+	mov #0, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
 	push %r3
+	push %r0
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #126, %r0
+	add #126, %r1
 // Set
-	mov %r0, %r3
 // AddrOf
 	lea DWORD [literal], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov #0, %r1
+	mov #0, %r3
 // Set
-	mov #0, %r0
+	mov #0, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
 	push %r3
+	push %r0
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r2
 // Add
-	add #27, %r0
+	add #27, %r2
 // Set
-	mov %r0, %r3
+// AddrOf
+	lea DWORD [unary], %r1
+// Set
+// AddrOf
+	lea DWORD [binary], %r0
+// Set
+// Set
+	mov #13, %r3
+// CallFunction
+	push %r3
+	push %r0
+	push %r1
+	push %r2
+	call [initRule]
+	add #16, %r14
+// AddrOf
+	lea DWORD [rules], %r2
+// Add
+	add #36, %r2
+// Set
+// AddrOf
+	lea DWORD [unary], %r1
+// Set
+// AddrOf
+	lea DWORD [binary], %r0
+// Set
+// Set
+	mov #13, %r3
+// CallFunction
+	push %r3
+	push %r0
+	push %r1
+	push %r2
+	call [initRule]
+	add #16, %r14
+// AddrOf
+	lea DWORD [rules], %r1
+// Add
+	add #54, %r1
+// Set
+// Set
+	mov #0, %r3
+// AddrOf
+	lea DWORD [binary], %r0
+// Set
+// Set
+	mov #14, %r2
+// CallFunction
+	push %r2
+	push %r0
+	push %r3
+	push %r1
+	call [initRule]
+	add #16, %r14
+// AddrOf
+	lea DWORD [rules], %r1
+// Add
+	add #45, %r1
+// Set
+// Set
+	mov #0, %r3
+// AddrOf
+	lea DWORD [binary], %r0
+// Set
+// Set
+	mov #14, %r2
+// CallFunction
+	push %r2
+	push %r0
+	push %r3
+	push %r1
+	call [initRule]
+	add #16, %r14
+// AddrOf
+	lea DWORD [rules], %r1
+// Add
+	add #378, %r1
+// Set
 // AddrOf
 	lea DWORD [unary], %r0
 // Set
-	mov %r0, %r2
-// AddrOf
-	lea DWORD [binary], %r0
 // Set
-	mov %r0, %r1
-// Set
-	mov #13, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #16, %r14
-// AddrOf
-	lea DWORD [rules], %r0
-// Add
-	add #36, %r0
-// Set
-	mov %r0, %r3
-// AddrOf
-	lea DWORD [unary], %r0
-// Set
-	mov %r0, %r2
-// AddrOf
-	lea DWORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #13, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #16, %r14
-// AddrOf
-	lea DWORD [rules], %r0
-// Add
-	add #54, %r0
-// Set
-	mov %r0, %r3
+	mov #0, %r3
 // Set
 	mov #0, %r2
+// CallFunction
+	push %r2
+	push %r3
+	push %r0
+	push %r1
+	call [initRule]
+	add #16, %r14
+// AddrOf
+	lea DWORD [rules], %r1
+// Add
+	add #450, %r1
+// Set
+// Set
+	mov #0, %r3
 // AddrOf
 	lea DWORD [binary], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #14, %r0
+	mov #8, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r0
 	push %r3
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #45, %r0
+	add #459, %r1
 // Set
-	mov %r0, %r3
 // Set
-	mov #0, %r2
+	mov #0, %r3
 // AddrOf
 	lea DWORD [binary], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #14, %r0
+	mov #8, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r0
 	push %r3
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #378, %r0
+	add #468, %r1
 // Set
-	mov %r0, %r3
-// AddrOf
-	lea DWORD [unary], %r0
 // Set
-	mov %r0, %r2
-// Set
-	mov #0, %r1
-// Set
-	mov #0, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #16, %r14
-// AddrOf
-	lea DWORD [rules], %r0
-// Add
-	add #450, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
+	mov #0, %r3
 // AddrOf
 	lea DWORD [binary], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #8, %r0
+	mov #8, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r0
 	push %r3
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #459, %r0
+	add #477, %r1
 // Set
-	mov %r0, %r3
 // Set
-	mov #0, %r2
+	mov #0, %r3
 // AddrOf
 	lea DWORD [binary], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #8, %r0
+	mov #8, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r0
 	push %r3
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #468, %r0
+	add #486, %r1
 // Set
-	mov %r0, %r3
 // Set
-	mov #0, %r2
+	mov #0, %r3
 // AddrOf
 	lea DWORD [binary], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #8, %r0
+	mov #8, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r0
 	push %r3
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #477, %r0
+	add #495, %r1
 // Set
-	mov %r0, %r3
 // Set
-	mov #0, %r2
+	mov #0, %r3
 // AddrOf
 	lea DWORD [binary], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #8, %r0
+	mov #8, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r0
 	push %r3
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #486, %r0
+	add #90, %r1
 // Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea DWORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #16, %r14
-// AddrOf
-	lea DWORD [rules], %r0
-// Add
-	add #495, %r0
-// Set
-	mov %r0, %r3
-// Set
-	mov #0, %r2
-// AddrOf
-	lea DWORD [binary], %r0
-// Set
-	mov %r0, %r1
-// Set
-	mov #8, %r0
-// CallFunction
-	push %r0
-	push %r1
-	push %r2
-	push %r3
-	call [initRule]
-	add #16, %r14
-// AddrOf
-	lea DWORD [rules], %r0
-// Add
-	add #90, %r0
-// Set
-	mov %r0, %r3
 // AddrOf
 	lea DWORD [grouping], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov #0, %r1
+	mov #0, %r3
 // Set
-	mov #18, %r0
+	mov #18, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
 	push %r3
+	push %r0
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
-	lea DWORD [rules], %r0
+	lea DWORD [rules], %r1
 // Add
-	add #522, %r0
+	add #522, %r1
 // Set
-	mov %r0, %r3
 // Set
-	mov #0, %r2
+	mov #0, %r3
 // AddrOf
 	lea DWORD [newline], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #1, %r0
+	mov #1, %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r0
 	push %r3
+	push %r1
 	call [initRule]
 	add #16, %r14
 // AddrOf
 	lea DWORD -97[%r12], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [initScanner]
 	add #8, %r14
 // AddrOf
@@ -1814,18 +1754,17 @@ compile:
 	call [expression]
 	add #4, %r14
 // AddrOf
-	lea DWORD -143[%r12], %r0
+	lea DWORD -143[%r12], %r1
 // Set
-	mov %r0, %r2
 // Set
-	mov #56, %r1
+	mov #56, %r2
 // AddrOf
 	lea DWORD [__bbcc_0000003e], %r0
 // Set
 // CallFunction
 	push %r0
-	push %r1
 	push %r2
+	push %r1
 	call [consume]
 	add #12, %r14
 // AddrOf
@@ -1843,20 +1782,19 @@ compile:
 	call [printf]
 	add #4, %r14
 // Set
-	mov #1, %r1
+	mov #1, %r0
 // AddrOf
-	lea DWORD -143[%r12], %r0
+	lea DWORD -143[%r12], %r1
 // ReadAt
-	mov BYTE 32[%r0], %r0
+	mov BYTE 32[%r1], %r1
 // JmpZero
-	cmp #0, %r0
+	cmp #0, %r1
 	jze [__bbcc_00000030]
 // Set
-	mov #0, %r1
+	mov #0, %r0
 // Label
 __bbcc_00000030:
 // Return
-	mov %r1, %r0
 __bbcc_00000057:
 	pop %r3
 	pop %r2

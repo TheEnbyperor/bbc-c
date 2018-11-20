@@ -127,51 +127,48 @@ getLine:
 // Set
 	mov #0, %r0
 // Set
-	mov %r0, %r3
 // Set
-	mov #0, %r0
+	mov #0, %r2
 // Set
-	mov %r0, %r2
 // Label
 __bbcc_00000001:
 // Add
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r1
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r1], %r1
 // MoreEqualJmp
-	cmp %r2, %r0
+	cmp %r2, %r1
 	jae [__bbcc_00000003]
 // ReadAt
-	mov DWORD 8[%r12], %r0
-	mov DWORD 8[%r0], %r1
+	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r1], %r3
 // Mult
-	mov #8, %r0
-	mul %r2, %r0
+	mov #8, %r1
+	mul %r2, %r1
 // ReadAt
-	add %r0, %r1
-	mov DWORD [%r1], %r4
+	add %r1, %r3
+	mov DWORD [%r3], %r4
 	mov %r4, DWORD -16[%r12]
-	mov DWORD 4[%r1], %r4
+	mov DWORD 4[%r3], %r4
 	mov %r4, DWORD -12[%r12]
 // Set
-	mov DWORD -16[%r12], %r0
-	mov %r0, DWORD -8[%r12]
-	mov DWORD -12[%r12], %r0
-	mov %r0, DWORD -4[%r12]
+	mov DWORD -16[%r12], %r1
+	mov %r1, DWORD -8[%r12]
+	mov DWORD -12[%r12], %r1
+	mov %r1, DWORD -4[%r12]
 // AddrOf
-	lea DWORD -8[%r12], %r0
+	lea DWORD -8[%r12], %r1
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r1], %r1
 // MoreThanJmp
-	mov 12[%r12], %r1
-	cmp %r0, %r1
+	mov 12[%r12], %r3
+	cmp %r1, %r3
 	ja [__bbcc_00000004]
 // AddrOf
 	lea DWORD -8[%r12], %r0
 // ReadAt
 	mov DWORD 4[%r0], %r0
 // Set
-	mov %r0, %r3
 // Jmp
 	jmp [__bbcc_00000005]
 // Label
@@ -183,7 +180,7 @@ __bbcc_00000005:
 // Label
 __bbcc_00000002:
 // Set
-	mov %r2, %r0
+	mov %r2, %r1
 // Inc
 	inc %r2
 // Jmp
@@ -191,7 +188,6 @@ __bbcc_00000002:
 // Label
 __bbcc_00000003:
 // Return
-	mov %r3, %r0
 __bbcc_0000003c:
 	pop %r4
 	pop %r3
@@ -250,25 +246,23 @@ disassembleChunk:
 // Set
 	mov #0, %r0
 // Set
-	mov %r0, %r1
 // Label
 __bbcc_00000006:
 // Add
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r1
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r1], %r1
 // MoreEqualJmp
-	cmp %r1, %r0
+	cmp %r0, %r1
 	jae [__bbcc_00000008]
 // Set
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r1
 // CallFunction
-	push %r1
 	push %r0
+	push %r1
 	call [disassembleInstruction]
 	add #8, %r14
 // Set
-	mov %r0, %r1
 // Label
 __bbcc_00000007:
 // Jmp
@@ -310,7 +304,7 @@ disassembleInstruction:
 	call [getLine]
 	add #8, %r14
 // Set
-	mov %r0, %r3
+	mov %r0, %r1
 // Set
 	mov #0, %r4
 // LessEqualJmp
@@ -321,19 +315,18 @@ disassembleInstruction:
 	mov DWORD 8[%r12], %r0
 	add #24, %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov #1, %r1
+	mov #1, %r3
 // Sub
-	mov DWORD 12[%r12], %r0
-	sub %r1, %r0
+	mov DWORD 12[%r12], %r2
+	sub %r3, %r2
 // CallFunction
-	push %r0
 	push %r2
+	push %r0
 	call [getLine]
 	add #8, %r14
 // NotEqualJmp
-	cmp %r0, %r3
+	cmp %r0, %r1
 	jnz [__bbcc_0000000a]
 // Set
 	mov #1, %r4
@@ -357,7 +350,7 @@ __bbcc_00000009:
 	lea DWORD [__bbcc_00000027], %r0
 // Set
 // CallFunction
-	push %r3
+	push %r1
 	push %r0
 	call [printf]
 	add #8, %r14
@@ -368,23 +361,21 @@ __bbcc_0000000b:
 	mov DWORD 8[%r0], %r0
 // ReadAt
 	add DWORD 12[%r12], %r0
-	mov BYTE [%r0], %r0
+	mov BYTE [%r0], %r1
 // Set
-	mov %r0, %r1
 // NotEqualJmp
 	cmp #0, %r1
 	jnz [__bbcc_0000000c]
 // AddrOf
 	lea DWORD [__bbcc_00000029], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r2
 // CallFunction
 	mov DWORD 12[%r12], %r3
 	push %r3
-	push %r0
 	push %r2
+	push %r0
 	call [constantInstruction]
 	add #12, %r14
 // Return
@@ -399,14 +390,13 @@ __bbcc_0000000c:
 // AddrOf
 	lea DWORD [__bbcc_0000002a], %r0
 // Set
-	mov %r0, %r2
 // Set
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r2
 // CallFunction
 	mov DWORD 12[%r12], %r3
 	push %r3
-	push %r0
 	push %r2
+	push %r0
 	call [longConstantInstruction]
 	add #12, %r14
 // Return
@@ -706,16 +696,15 @@ constantInstruction:
 // ReadAt
 	mov %r2, %r1
 	add %r0, %r1
-	mov BYTE [%r1], %r0
+	mov BYTE [%r1], %r1
 // Set
-	mov %r0, %r2
 // AddrOf
 	lea DWORD [__bbcc_00000038], %r0
 // Set
 // CallFunction
-	push %r2
-	mov DWORD 8[%r12], %r1
 	push %r1
+	mov DWORD 8[%r12], %r2
+	push %r2
 	push %r0
 	call [printf]
 	add #12, %r14
@@ -725,10 +714,10 @@ constantInstruction:
 // ReadAt
 	mov DWORD 8[%r0], %r0
 // Mult
-	mov #5, %r1
-	mul %r2, %r1
+	mov #5, %r2
+	mul %r1, %r2
 // Add
-	add %r1, %r0
+	add %r2, %r0
 // Set
 // CallFunction
 	push %r0
@@ -771,16 +760,15 @@ longConstantInstruction:
 	add %r1, %r0
 // Set
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r1
 // Set
-	mov %r0, %r2
 // AddrOf
 	lea DWORD [__bbcc_00000038], %r0
 // Set
 // CallFunction
-	push %r2
-	mov DWORD 8[%r12], %r1
 	push %r1
+	mov DWORD 8[%r12], %r2
+	push %r2
 	push %r0
 	call [printf]
 	add #12, %r14
@@ -790,10 +778,10 @@ longConstantInstruction:
 // ReadAt
 	mov DWORD 8[%r0], %r0
 // Mult
-	mov #5, %r1
-	mul %r2, %r1
+	mov #5, %r2
+	mul %r1, %r2
 // Add
-	add %r1, %r0
+	add %r2, %r0
 // Set
 // CallFunction
 	push %r0

@@ -26,23 +26,21 @@ allocateObject:
 // Set
 // Set
 // Set
+// SetAt
+	mov 12[%r12], %r1
+	mov %r1, BYTE [%r0]
+// ReadAt
+	mov DWORD 16[%r12], %r1
+	mov DWORD 20[%r1], %r1
+// Set
+// SetAt
+	mov %r1, DWORD 1[%r0]
+// Set
 	mov %r0, %r1
 // SetAt
-	mov 12[%r12], %r0
-	mov %r0, BYTE [%r1]
-// ReadAt
-	mov DWORD 16[%r12], %r0
-	mov DWORD 20[%r0], %r0
-// Set
-// SetAt
-	mov %r0, DWORD 1[%r1]
-// Set
-	mov %r1, %r0
-// SetAt
 	mov 16[%r12], %r2
-	mov %r0, DWORD 20[%r2]
+	mov %r1, DWORD 20[%r2]
 // Return
-	mov %r1, %r0
 __bbcc_00000004:
 	pop %r2
 	pop %r1
@@ -178,16 +176,14 @@ allocateString:
 // Set
 // Set
 // Set
-	mov %r0, %r1
 // SetAt
-	mov 12[%r12], %r0
-	mov %r0, DWORD 5[%r1]
+	mov 12[%r12], %r1
+	mov %r1, DWORD 5[%r0]
 // Set
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r1
 // SetAt
-	mov %r0, DWORD 9[%r1]
+	mov %r1, DWORD 9[%r0]
 // Return
-	mov %r1, %r0
 __bbcc_0000000a:
 	pop %r2
 	pop %r1
@@ -237,28 +233,27 @@ copyString:
 	call [reallocate]
 	add #8, %r14
 // Set
+	mov %r0, %r1
 // Set
-	mov %r0, %r3
 // Set
-	mov %r3, %r2
+	mov %r1, %r0
 // Set
-	mov DWORD 8[%r12], %r1
+	mov DWORD 8[%r12], %r3
 // Set
-	mov DWORD 12[%r12], %r0
+	mov DWORD 12[%r12], %r2
 // CallFunction
-	push %r0
-	push %r1
 	push %r2
+	push %r3
+	push %r0
 	call [memcpy]
 	add #12, %r14
 // Set
 	mov #0, %r0
 // SetAt
-	mov %r3, %r1
-	add DWORD 12[%r12], %r1
-	mov %r0, BYTE [%r1]
+	mov %r1, %r2
+	add DWORD 12[%r12], %r2
+	mov %r0, BYTE [%r2]
 // Set
-	mov %r3, %r1
 // Set
 	mov DWORD 16[%r12], %r0
 // CallFunction
@@ -295,12 +290,11 @@ freeObject:
 // ReadAt
 	mov DWORD 9[%r0], %r0
 // Set
-	mov %r0, %r1
 // Set
-	mov #0, %r0
+	mov #0, %r1
 // CallFunction
-	push %r0
 	push %r1
+	push %r0
 	call [reallocate]
 	add #8, %r14
 // Set
@@ -326,33 +320,28 @@ freeObjects:
 	push %r12
 	mov %r14, %r12
 	push %r1
-	push %r2
 // ReadAt
 	mov DWORD 8[%r12], %r0
-	mov DWORD 20[%r0], %r0
+	mov DWORD 20[%r0], %r1
 // Set
 // Set
-	mov %r0, %r2
 // Label
 __bbcc_00000002:
 // EqualJmp
-	cmp #0, %r2
+	cmp #0, %r1
 	jze [__bbcc_00000003]
 // ReadAt
-	mov DWORD 1[%r2], %r0
+	mov DWORD 1[%r1], %r0
 // Set
 // Set
-	mov %r0, %r1
 // Set
-	mov %r2, %r0
 // CallFunction
-	push %r0
+	push %r1
 	call [freeObject]
 	add #4, %r14
 // Set
-	mov %r1, %r0
+	mov %r0, %r1
 // Set
-	mov %r0, %r2
 // Jmp
 	jmp [__bbcc_00000002]
 // Label
@@ -360,7 +349,6 @@ __bbcc_00000003:
 // Return
 	mov #0, %r0
 __bbcc_0000000e:
-	pop %r2
 	pop %r1
 	mov %r12, %r14
 	pop %r12

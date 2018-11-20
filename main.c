@@ -1,6 +1,7 @@
-#include "ctype.h"
+#include "string.h"
 
 
 int main() {
-    isdigit('0');
+    char a[20];
+    memcpy(a, "hello", 5);
 }

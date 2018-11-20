@@ -72,9 +72,8 @@ gets:
 	push %r1
 	push %r2
 // Set
-	mov DWORD 8[%r12], %r0
+	mov DWORD 8[%r12], %r2
 // Set
-	mov %r0, %r2
 // Label
 __bbcc_00000003:
 // Dec
@@ -86,8 +85,8 @@ __bbcc_00000003:
 // CallFunction
 	call [getchar]
 // Set
-// Set
 	mov %r0, %r1
+// Set
 // NotEqualJmp
 	cmp #3, %r1
 	jnz [__bbcc_00000005]
@@ -152,9 +151,8 @@ itoa:
 	push %r4
 	push %r5
 // Set
-	mov #0, %r0
+	mov #0, %r3
 // Set
-	mov %r0, %r3
 // Set
 	mov #0, %r0
 // JmpNotZero
@@ -173,9 +171,8 @@ __bbcc_00000009:
 	cmp #0, %r0
 	jze [__bbcc_00000008]
 // Set
-	mov #1, %r0
+	mov #1, %r3
 // Set
-	mov %r0, %r3
 // Neg
 	mov 8[%r12], %r0
 	neg %r0
@@ -184,24 +181,24 @@ __bbcc_00000009:
 // Label
 __bbcc_00000008:
 // Set
-	mov #0, %r2
+	mov #0, %r1
 // Label
 __bbcc_0000000a:
 // Mod
-	mov DWORD 8[%r12], %r0
-	mod #10, %r0
+	mov DWORD 8[%r12], %r2
+	mod #10, %r2
 // Add
-	add #48, %r0
+	add #48, %r2
 // Set
-	mov %r2, %r1
+	mov %r1, %r0
 // Inc
-	inc %r2
+	inc %r1
 // Set
 // SetAt
 	mov 12[%r12], %r4
 	mov %r4, %r5
-	add %r1, %r5
-	mov %r0, BYTE [%r5]
+	add %r0, %r5
+	mov %r2, BYTE [%r5]
 // Div
 	mov DWORD 8[%r12], %r0
 	div #10, %r0
@@ -219,19 +216,19 @@ __bbcc_0000000b:
 __bbcc_0000000c:
 // MoreEqualJmp
 	mov 20[%r12], %r0
-	cmp %r2, %r0
+	cmp %r1, %r0
 	jge [__bbcc_0000000d]
 // Set
-	mov %r2, %r1
+	mov %r1, %r0
 // Inc
-	inc %r2
+	inc %r1
 // Set
-	mov #48, %r0
+	mov #48, %r2
 // SetAt
 	mov 12[%r12], %r4
 	mov %r4, %r5
-	add %r1, %r5
-	mov %r0, BYTE [%r5]
+	add %r0, %r5
+	mov %r2, BYTE [%r5]
 // Jmp
 	jmp [__bbcc_0000000c]
 // Label
@@ -240,24 +237,24 @@ __bbcc_0000000d:
 	cmp #0, %r3
 	jze [__bbcc_0000000e]
 // Set
-	mov %r2, %r1
+	mov %r1, %r0
 // Inc
-	inc %r2
+	inc %r1
 // Set
-	mov #45, %r0
+	mov #45, %r2
 // SetAt
 	mov 12[%r12], %r3
 	mov %r3, %r4
-	add %r1, %r4
-	mov %r0, BYTE [%r4]
+	add %r0, %r4
+	mov %r2, BYTE [%r4]
 // Label
 __bbcc_0000000e:
 // Set
 	mov #0, %r0
 // SetAt
-	mov 12[%r12], %r1
-	mov %r1, %r3
-	add %r2, %r3
+	mov 12[%r12], %r2
+	mov %r2, %r3
+	add %r1, %r3
 	mov %r0, BYTE [%r3]
 // Set
 	mov DWORD 12[%r12], %r0
@@ -289,17 +286,16 @@ printf:
 	push %r6
 	push %r7
 // AddrOf
-	lea DWORD 8[%r12], %r2
+	lea DWORD 8[%r12], %r0
 // Set
-	mov #1, %r0
+	mov #1, %r1
 // Mult
-	mul #4, %r0
+	mul #4, %r1
 // Add
-	add %r0, %r2
+	add %r1, %r0
 // Set
-	mov %r2, %r0
 // Set
-	mov %r0, %r5
+	mov %r0, %r2
 // Label
 __bbcc_0000000f:
 // ReadAt
@@ -314,7 +310,7 @@ __bbcc_0000000f:
 	cmp #37, %r4
 	jnz [__bbcc_00000012]
 // Set
-	mov #0, %r2
+	mov #0, %r3
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -351,16 +347,20 @@ __bbcc_00000015:
 	cmp #0, %r0
 	jze [__bbcc_00000016]
 // Mult
-	mul #10, %r2
+	mov %r3, %r0
+	mul #10, %r0
 // Set
+	mov %r0, %r3
 // Set
 	mov %r4, %r0
 // Sub
 	sub #48, %r0
 // Set
 // Add
-	add %r0, %r2
+	mov %r3, %r1
+	add %r0, %r1
 // Set
+	mov %r1, %r3
 // Inc
 	inc 8[%r12]
 // ReadAt
@@ -387,28 +387,26 @@ __bbcc_00000017:
 	cmp #99, %r4
 	jnz [__bbcc_00000019]
 // Set
-	mov %r5, %r0
+	mov %r2, %r0
 // ReadAt
-	mov BYTE [%r0], %r0
+	mov BYTE [%r0], %r1
 // Set
-	mov %r0, %r6
 // Set
-	mov %r5, %r0
+	mov %r2, %r0
 // Set
-	mov #4, %r3
+	mov #4, %r2
 // Add
-	add %r3, %r0
+	add %r2, %r0
 // Set
 // Set
-	mov %r0, %r5
+	mov %r0, %r2
 // Set
-	mov %r6, %r0
 // CallFunction
-	push %r0
+	push %r1
 	call [putchar]
 	add #4, %r14
 // Inc
-	inc %r1
+	inc %r5
 // Jmp
 	jmp [__bbcc_00000010]
 // Jmp
@@ -419,35 +417,33 @@ __bbcc_00000019:
 	cmp #115, %r4
 	jnz [__bbcc_0000001b]
 // Set
-	mov %r5, %r0
+	mov %r2, %r0
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r1
 // Set
 // Set
-	mov %r0, %r6
 // Set
-	mov %r5, %r0
+	mov %r2, %r0
 // Set
-	mov #4, %r3
+	mov #4, %r2
 // Add
-	add %r3, %r0
+	add %r2, %r0
 // Set
 // Set
-	mov %r0, %r5
+	mov %r0, %r2
 // Set
-	mov %r6, %r0
+	mov %r1, %r0
 // CallFunction
 	push %r0
 	call [fputs]
 	add #4, %r14
 // Set
-	mov %r6, %r0
 // CallFunction
-	push %r0
+	push %r1
 	call [strlen]
 	add #4, %r14
 // Add
-	add %r0, %r1
+	add %r0, %r5
 // Set
 // Jmp
 	jmp [__bbcc_00000010]
@@ -459,33 +455,31 @@ __bbcc_0000001b:
 	cmp #117, %r4
 	jnz [__bbcc_0000001d]
 // Set
-	mov %r5, %r0
+	mov %r2, %r0
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r6
 // Set
-	mov %r0, %r3
-// Set
-	mov %r5, %r0
-// Set
-	mov #4, %r5
-// Add
-	add %r5, %r0
-// Set
-// Set
-	mov %r0, %r5
-// AddrOf
-	lea DWORD -24[%r12], %r0
-// Set
-	mov %r0, %r7
-// Set
-	mov #1, %r6
 // Set
 	mov %r2, %r0
+// Set
+	mov #4, %r1
+// Add
+	add %r1, %r0
+// Set
+// Set
+	mov %r0, %r2
+// AddrOf
+	lea DWORD -24[%r12], %r1
+// Set
+// Set
+	mov #1, %r7
+// Set
+	mov %r3, %r0
 // CallFunction
 	push %r0
-	push %r6
 	push %r7
-	push %r3
+	push %r1
+	push %r6
 	call [itoa]
 	add #16, %r14
 // AddrOf
@@ -503,7 +497,7 @@ __bbcc_0000001b:
 	call [strlen]
 	add #4, %r14
 // Add
-	add %r0, %r3
+	add %r0, %r6
 // Set
 // Jmp
 	jmp [__bbcc_00000010]
@@ -515,33 +509,31 @@ __bbcc_0000001d:
 	cmp #100, %r4
 	jnz [__bbcc_0000001f]
 // Set
-	mov %r5, %r0
+	mov %r2, %r0
 // ReadAt
-	mov DWORD [%r0], %r0
+	mov DWORD [%r0], %r6
 // Set
-	mov %r0, %r3
-// Set
-	mov %r5, %r0
-// Set
-	mov #4, %r5
-// Add
-	add %r5, %r0
-// Set
-// Set
-	mov %r0, %r5
-// AddrOf
-	lea DWORD -24[%r12], %r0
-// Set
-	mov %r0, %r7
-// Set
-	mov #0, %r6
 // Set
 	mov %r2, %r0
+// Set
+	mov #4, %r1
+// Add
+	add %r1, %r0
+// Set
+// Set
+	mov %r0, %r2
+// AddrOf
+	lea DWORD -24[%r12], %r1
+// Set
+// Set
+	mov #0, %r7
+// Set
+	mov %r3, %r0
 // CallFunction
 	push %r0
-	push %r6
 	push %r7
-	push %r3
+	push %r1
+	push %r6
 	call [itoa]
 	add #16, %r14
 // AddrOf
@@ -559,7 +551,7 @@ __bbcc_0000001d:
 	call [strlen]
 	add #4, %r14
 // Add
-	add %r0, %r3
+	add %r0, %r6
 // Set
 // Jmp
 	jmp [__bbcc_00000010]
@@ -588,7 +580,7 @@ __bbcc_00000012:
 	call [putchar]
 	add #4, %r14
 // Inc
-	inc %r1
+	inc %r5
 // Label
 __bbcc_00000010:
 // Inc
