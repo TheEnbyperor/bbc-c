@@ -1692,7 +1692,7 @@ dec_mem_1:
 jsr get_mem_address
 sec
 jsr _load_byte_temp
-sbc #0
+sbc #1
 jsr _save_byte_temp
 sta 0(_r_temp)
 rts
