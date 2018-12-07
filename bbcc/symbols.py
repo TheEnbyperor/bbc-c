@@ -618,6 +618,18 @@ class SymbolTableBuilder(ast.NodeVisitor):
         self.visit(node.left)
         self.visit(node.right)
 
+    def visit_ExcOr(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_ShiftLeft(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_ShiftRight(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
     def visit_Negate(self, node):
         self.visit(node.expr)
 

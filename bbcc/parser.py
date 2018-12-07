@@ -370,7 +370,6 @@ class Parser:
 
     def parse_equality(self, index):
         """Parse equality expression."""
-        # TODO: Implement shift expressions here.
         return self.parse_series(
             index, self.parse_relational,
             {BOOLEQUALS: ast.Equality,
@@ -378,11 +377,17 @@ class Parser:
 
     def parse_relational(self, index):
         return self.parse_series(
-            index, self.parse_additive,
+            index, self.parse_shift,
             {LESSTHAN: ast.LessThan,
              MORETHAN: ast.MoreThan,
              LESSEQUAL: ast.LessEqual,
              MOREEQUAL: ast.MoreEqual})
+
+    def parse_shift(self, index):
+        return self.parse_series(
+            index, self.parse_additive,
+            {SHIFTLEFT: ast.ShiftLeft,
+             SHIFTRIGHT: ast.ShiftRight})
 
     def parse_additive(self, index):
         """Parse additive expression."""

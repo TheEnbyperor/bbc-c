@@ -87,6 +87,7 @@ class Function(AST):
         return "Function<{}>\n{}".format(self.decl,
                                                    "  " + "  ".join(str(self.nodes).splitlines(True)))
 
+
 class ExprStatement(AST):
     def __init__(self, expr):
         self.expr = expr
@@ -404,6 +405,20 @@ class IncOr(_ArithBinOp):
 
 
 class ExcOr(_ArithBinOp):
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
+class ShiftLeft(_ArithBinOp):
+
+    def __init__(self, left, right, op):
+        """Initialize node."""
+        super().__init__(left, right, op)
+
+
+class ShiftRight(_ArithBinOp):
 
     def __init__(self, left, right, op):
         """Initialize node."""

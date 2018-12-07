@@ -49,6 +49,15 @@ class Lexer:
             self.advance()
         return int(result)
 
+    def integer_hex(self):
+        """Return a integer consumed from the input."""
+        result = ''
+        while self.current_char is not None and (self.current_char.isdigit() or
+                                                 self.current_char.lower() in ["a", "b", "c", "d", "e", "f"]):
+            result += self.current_char
+            self.advance()
+        return int(result, 16)
+
     def char(self):
         if self.current_char == '\\':
             self.advance()
@@ -129,6 +138,10 @@ class Lexer:
             elif self.current_char == "/" and self.peek() == "*":
                 self.skip_comment()
 
+            elif self.current_char == "0" and (self.peek() == "x" or self.peek() == "X"):
+                self.advance()
+                self.advance()
+                tokens.append(Token(INTEGER, self.integer_hex()))
             elif self.current_char.isdigit():
                 tokens.append(Token(INTEGER, self.integer()))
 
@@ -179,6 +192,14 @@ class Lexer:
                 self.advance()
                 self.advance()
                 tokens.append(Token(MOREEQUAL, ">="))
+            elif self.current_char == "<" and self.peek() == "<":
+                self.advance()
+                self.advance()
+                tokens.append(Token(SHIFTRIGHT, "<<"))
+            elif self.current_char == ">" and self.peek() == ">":
+                self.advance()
+                self.advance()
+                tokens.append(Token(SHIFTLEFT, ">>"))
             elif self.current_char == "<":
                 self.advance()
                 tokens.append(Token(LESSTHAN, "<"))
