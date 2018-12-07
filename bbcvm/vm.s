@@ -70,7 +70,11 @@ inst_jump_table_l:
       
       // Xor
       #0(xor_const_reg-1),#0(xor_reg_reg-1),#0(xor_mem_reg_short-1),#0(xor_mem_reg_long-1),
-      #0(xor_mem_reg_double-1)
+      #0(xor_mem_reg_double-1),
+
+      // 6502 Memory
+      #0(mov_6502_reg_short-1),#0(mov_6502_reg_long-1),#0(mov_6502_reg_double-1),
+      #0(mov_reg_6502_short-1),#0(mov_reg_6502_long-1),#0(mov_reg_6502_double-1)
 
 inst_jump_table_h:
 .byte #1(mov_const_reg-1),#1(mov_mem_reg_short-1),#1(mov_mem_reg_long-1),#1(mov_mem_reg_double-1),
@@ -134,7 +138,11 @@ inst_jump_table_h:
       
       // Xor
       #1(xor_const_reg-1),#1(xor_reg_reg-1),#1(xor_mem_reg_short-1),#1(xor_mem_reg_long-1),
-      #1(xor_mem_reg_double-1)
+      #1(xor_mem_reg_double-1),
+
+      // 6502 Memory
+      #1(mov_6502_reg_short-1),#1(mov_6502_reg_long-1),#1(mov_6502_reg_double-1),
+      #1(mov_reg_6502_short-1),#1(mov_reg_6502_long-1),#1(mov_reg_6502_double-1)
 
 other_inst_jump_table_l:
 .byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1), #0(halt_and_catch_fire-1)
@@ -582,6 +590,67 @@ jsr _save_byte_temp
 lda 3(_r_0),x
 iny
 jsr _save_byte_temp
+rts
+
+// Load a 8 bit value from 6502 memory into a register
+mov_6502_reg_short:
+jsr get_mem_address
+lda ($8a),y
+sta 0(_r_0),x
+tya
+sta 1(_r_0),x
+sta 2(_r_0),x
+sta 3(_r_0),x
+rts
+
+// Load a 16 bit value from 6502 memory into a register
+mov_6502_reg_long:
+jsr mov_6502_reg_short
+iny
+lda ($8a),y
+sta 1(_r_0),x
+dey
+tya
+sta 2(_r_0),x
+sta 3(_r_0),x
+rts
+
+// Load a 32 bit value from 6502 memory into a register
+mov_6502_reg_double:
+jsr mov_6503_reg_long
+iny
+iny
+lda ($8a),y
+sta 2(_r_0),x
+iny
+lda ($8a),y
+sta 3(_r_0),x
+rts
+
+// Load a 8 bit value from a register into 6502 memory
+mov_reg_6502_short:
+jsr get_mem_address
+lda 0(_r_0),x
+sta ($8a),y
+rts
+
+// Load a 16 bit value from a register into 6502 memory
+mov_reg_mem_long:
+jsr mov_reg_6502_short
+lda 1(_r_0),x
+iny
+sta ($8a),y
+rts
+
+// Load a 32 bit value from a register into 6502 memory
+mov_reg_6502_double:
+jsr mov_reg_6502_long
+lda 2(_r_0),x
+iny
+sta ($8a),y
+lda 3(_r_0),x
+iny
+sta ($8a),y
 rts
 
 push_start_1:
@@ -1970,7 +2039,7 @@ sta 0(_r_0),x
 rts
 
 xor_mem_reg_start_2:
-jsr or_mem_reg_start
+jsr xor_mem_reg_start
 iny
 jsr _load_byte_temp
 eor 1(_r_0),x
@@ -1990,6 +2059,119 @@ jmp clear_carry
 // 16 bit logical xor memory and register
 xor_mem_reg_long:
 jsr xor_mem_reg_start_2
+lda #0
+sta 2(_r_0),x
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+// 32 bit logical xor memory and register
+xor_mem_reg_double:
+jsr or_mem_reg_start_2
+iny
+jsr _load_byte_temp
+eor 2(_r_0),x
+sta 2(_r_0),x
+iny
+jsr _load_byte_temp
+eor 3(_r_0),x
+sta 3(_r_0),x
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+shift_temp: .bytes #0, #0, #0, #0
+
+_shift_left:
+lda 0(shift_temp)
+jne _shift_left_1
+lda 1(shift_temp)
+jne _shift_left_1
+lda 2(shift_temp)
+jne _shift_left_1
+lda 3(shift_temp)
+jne _shift_left_1
+// Exit point
+jsr set_carry_from_reg
+jsr set_sign_zero_from_reg
+rts
+_shift_left_1:
+asl 0(_r_0),x
+rol 1(_r_0),x
+rol 2(_r_0),x
+rol 3(_r_0),x
+lda 0(shift_temp)
+bne _shift_left_2
+lda 1(shift_temp)
+bne _shift_left_3
+lda 2(shift_temp)
+bne _shift_left_4
+dec 3(shift_temp)
+_shift_left_2:
+dec 2(shift_temp)
+_shift_left_3:
+dec 1(shift_temp)
+_shift_left_4:
+dec 0(shift_temp)
+jmp _shift_left
+
+// Shift left register by constant
+shl_const_reg:
+ldy #1
+jsr _load_byte_pc
+sta 0(shift_temp)
+iny
+jsr _load_byte_pc
+sta 1(shift_temp)
+iny
+jsr _load_byte_pc
+sta 2(shift_temp)
+iny
+jsr _load_byte_pc
+sta 3(shift_temp)
+jsr _shift_left
+jmp inc_pc_4
+
+// Shift left register by register
+shl_reg_reg:
+lda 0(_r_0),x
+sta 0(shift_temp)
+lda 1(_r_0),x
+sta 1(shift_temp)
+lda 2(_r_0),x
+sta 2(shift_temp)
+lda 3(_r_0),x
+sta 3(shift_temp)
+tya
+tax
+jmp _shift_left
+
+// Helper for memory and register logical shl
+shl_mem_reg_start:
+jsr get_mem_address
+jsr _load_byte_temp
+sta 0(shift_temp)
+rts
+
+shl_mem_reg_start_2:
+jsr shl_mem_reg_start
+iny
+jsr _load_byte_temp
+sta 1(shift_temp)
+rts
+
+// 8 bit shift left memory and register
+shl_mem_reg_short:
+jsr xor_mem_reg_start
+lda #0
+sta 1(shift_temp)
+sta 1(shift_temp)
+sta 1(shift_temp)
+jsr set_sign_zero_from_reg
+jmp clear_carry
+
+// 16 bit shift left memory and register
+shl_mem_reg_long:
+jsr shl_mem_reg_start_2
 lda #0
 sta 2(_r_0),x
 sta 3(_r_0),x
