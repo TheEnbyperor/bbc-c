@@ -187,6 +187,10 @@ class Mov(_TwoValueNode):
     pass
 
 
+class Mov6502(_TwoValueNode):
+    pass
+
+
 class Lea(_TwoValueNode):
     pass
 

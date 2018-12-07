@@ -100,7 +100,8 @@ class Parser:
                  ("ja", ast.Ja), ("jae", ast.Jae), ("jb", ast.Jb), ("jbe", ast.Jbe), ("sze", ast.Sze), ("se", ast.Sze),
                  ("snz", ast.Snz), ("sne", ast.Snz), ("sl", ast.Sl), ("sle", ast.Sle), ("sg", ast.Sg), ("sge", ast.Sge),
                  ("sa", ast.Sa), ("sae", ast.Sae), ("sb", ast.Sb), ("sbe", ast.Sbe), ("jmp", ast.Jmp), ("lea", ast.Lea),
-                 ("inc", ast.Inc), ("dec", ast.Dec), ("and", ast.And), ("or", ast.Or), ("neg", ast.Neg)]
+                 ("inc", ast.Inc), ("dec", ast.Dec), ("and", ast.And), ("or", ast.Or), ("neg", ast.Neg),
+                 ("mov6502", ast.Mov6502)]
 
         def parse(inst, index):
             index = self.eat_id(index, inst[0])

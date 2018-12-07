@@ -274,6 +274,29 @@ class Assembler:
             raise SyntaxError(f"Can't mov {node.left} into {node.right}")
 
     @setup_labels
+    def visit_Mov6502(self, node: ast.Mov):
+        if isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x6b)
+            elif node.left.length == 2:
+                self.insts.append(0x6c)
+            elif node.left.length == 4:
+                self.insts.append(0x6d)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        elif isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.MemoryValue):
+            if node.right.length == 1:
+                self.insts.append(0x6e)
+            elif node.right.length == 2:
+                self.insts.append(0x6f)
+            elif node.right.length == 4:
+                self.insts.append(0x70)
+            self.get_mem_reg_val(node.right, node.left, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't mov6502 {node.left} into {node.right}")
+
+    @setup_labels
     def visit_Lea(self, node: ast.Lea):
         if isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
             self.insts.append(0x0c)
@@ -460,10 +483,35 @@ class Assembler:
                 self.insts.append(0x63)
             elif node.left.length == 2:
                 self.insts.append(0x64)
+            elif node.left.length == 4:
+                self.insts.append(0x65)
             self.get_mem_reg_val(node.left, node.right, 1, 2)
             self.loc += 1
         else:
             raise SyntaxError(f"Can't or {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Xor(self, node: ast.Or):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x67)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x66)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x68)
+            elif node.left.length == 2:
+                self.insts.append(0x69)
+            elif node.left.length == 4:
+                self.insts.append(0x6a)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't xor {node.left} and {node.right}")
 
     @setup_labels
     def visit_Jmp(self, node: ast.Jmp):
