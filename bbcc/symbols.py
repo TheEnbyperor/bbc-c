@@ -686,6 +686,12 @@ class SymbolTableBuilder(ast.NodeVisitor):
     def visit_Break(self, node):
         pass
 
+    def visit_InlineAsm(self, node):
+        for v in node.outputs:
+            self.visit(v[0])
+        for v in node.inputs:
+            self.visit(v[0])
+
     def visit_Continue(self, node):
         pass
 

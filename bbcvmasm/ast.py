@@ -227,6 +227,18 @@ class Or(_TwoValueNode):
     pass
 
 
+class Xor(_TwoValueNode):
+    pass
+
+
+class Shl(_TwoValueNode):
+    pass
+
+
+class Shr(_TwoValueNode):
+    pass
+
+
 class Ret(_ZeroValueNode):
     pass
 

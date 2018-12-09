@@ -91,6 +91,13 @@ class JmpRet:
         pass
 
 
+class Inline:
+    def __init__(self, asm):
+        self.asm = asm
+
+    def __str__(self):
+        return f"\t{self.asm}"
+
 class Mov(_Inst):
     name = "mov"
 
@@ -220,6 +227,14 @@ class Not(_Inst):
 
 class Xor(_Inst):
     name = "xor"
+
+
+class Shl(_Inst):
+    name = "shl"
+
+
+class Shr(_Inst):
+    name = "shr"
 
 
 class Neg(_Inst):

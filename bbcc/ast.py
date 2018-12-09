@@ -11,6 +11,31 @@ class Root(AST):
         self.nodes = nodes
 
 
+class InlineAsmConstraint:
+    READ_WRITE = 0
+    WRITE_ONLY = 1
+    MEMORY = 0
+    REGISTER = 1
+    SPECIFIC_REGISTER = 2
+    IMMEDIATE = 3
+    ANY = 4
+
+    def __init__(self, modifiers=None, constraint=ANY, extra=None):
+        if modifiers is None:
+            modifiers = [self.READ_WRITE]
+        self.modifiers = modifiers
+        self.constraint = constraint
+        self.extra = extra
+
+
+class InlineAsm(AST):
+    def __init__(self, asm, outputs, inputs, clobbers):
+        self.asm = asm
+        self.outputs = outputs
+        self.inputs = inputs
+        self.clobbers = clobbers
+
+
 class Compound(AST):
     def __init__(self, items):
         self.items = items

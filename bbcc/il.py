@@ -73,6 +73,22 @@ class ILInst:
         return self.__str__()
 
 
+class Asm(ILInst):
+    def __init__(self, node):
+        self.node = node
+
+    def clobber(self):
+        out = []
+        for r in self.node.inputs + self.node.outputs:
+            mods = r[1]
+            if mods.constraint == ast.InlineAsmConstraint.SPECIFIC_REGISTER:
+                out.append(spots.registers[mods.extra])
+        return out
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
+        assembly.add_inst(asm.Inline(self.node.asm.decode()))
+
+
 class Set(ILInst):
     def __init__(self, value: ILValue, output: ILValue):
         self.value = value
@@ -638,6 +654,62 @@ class ExcOr(ILInst):
         if left != output:
             assembly.add_inst(asm.Mov(left, output))
         assembly.add_inst(asm.Xor(right, output))
+
+
+class ShiftLeft(ILInst):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+        self.left = left
+        self.right = right
+        self.output = output
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def outputs(self):
+        return [self.output]
+
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
+    def rel_spot_conf(self):
+        return {self.output: [self.right]}
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+        output = spotmap[self.output]
+
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output))
+        assembly.add_inst(asm.Shl(right, output))
+
+
+class ShiftRight(ILInst):
+    def __init__(self, left: ILValue, right: ILValue, output: ILValue):
+        self.left = left
+        self.right = right
+        self.output = output
+
+    def inputs(self):
+        return [self.left, self.right]
+
+    def outputs(self):
+        return [self.output]
+
+    def rel_spot_pref(self):
+        return {self.output: [self.left]}
+
+    def rel_spot_conf(self):
+        return {self.output: [self.right]}
+
+    def gen_asm(self, assembly: asm.ASM, spotmap, il, get_reg):
+        left = spotmap[self.left]
+        right = spotmap[self.right]
+        output = spotmap[self.output]
+
+        if left != output:
+            assembly.add_inst(asm.Mov(left, output))
+        assembly.add_inst(asm.Shr(right, output))
 
 
 class Not(ILInst):

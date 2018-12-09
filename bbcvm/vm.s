@@ -74,7 +74,15 @@ inst_jump_table_l:
 
       // 6502 Memory
       #0(mov_6502_reg_short-1),#0(mov_6502_reg_long-1),#0(mov_6502_reg_double-1),
-      #0(mov_reg_6502_short-1),#0(mov_reg_6502_long-1),#0(mov_reg_6502_double-1)
+      #0(mov_reg_6502_short-1),#0(mov_reg_6502_long-1),#0(mov_reg_6502_double-1),
+
+      // Shift left
+      #0(shl_const_reg-1),#0(shl_reg_reg-1),#0(shl_mem_reg_short-1),#0(shl_mem_reg_long-1),
+      #0(shl_mem_reg_double-1),
+
+      // Shift right
+      #0(shr_const_reg-1),#0(shr_reg_reg-1),#0(shr_mem_reg_short-1),#0(shr_mem_reg_long-1),
+      #0(shr_mem_reg_double-1)
 
 inst_jump_table_h:
 .byte #1(mov_const_reg-1),#1(mov_mem_reg_short-1),#1(mov_mem_reg_long-1),#1(mov_mem_reg_double-1),
@@ -142,7 +150,15 @@ inst_jump_table_h:
 
       // 6502 Memory
       #1(mov_6502_reg_short-1),#1(mov_6502_reg_long-1),#1(mov_6502_reg_double-1),
-      #1(mov_reg_6502_short-1),#1(mov_reg_6502_long-1),#1(mov_reg_6502_double-1)
+      #1(mov_reg_6502_short-1),#1(mov_reg_6502_long-1),#1(mov_reg_6502_double-1),
+                                                                                
+      // Shift left
+      #1(shl_const_reg-1),#1(shl_reg_reg-1),#1(shl_mem_reg_short-1),#1(shl_mem_reg_long-1),
+      #1(shl_mem_reg_double-1),
+
+      // Shift right
+      #1(shr_const_reg-1),#1(shr_reg_reg-1),#1(shr_mem_reg_short-1),#1(shr_mem_reg_long-1),
+      #1(shr_mem_reg_double-1)
 
 other_inst_jump_table_l:
 .byte #0(set_carry-1), #0(clear_carry-1), #0(return-1), #0(exit_vm-1), #0(halt_and_catch_fire-1)
@@ -617,7 +633,7 @@ rts
 
 // Load a 32 bit value from 6502 memory into a register
 mov_6502_reg_double:
-jsr mov_6503_reg_long
+jsr mov_6502_reg_long
 iny
 iny
 lda ($8a),y
@@ -635,7 +651,7 @@ sta ($8a),y
 rts
 
 // Load a 16 bit value from a register into 6502 memory
-mov_reg_mem_long:
+mov_reg_6502_long:
 jsr mov_reg_6502_short
 lda 1(_r_0),x
 iny
@@ -2067,7 +2083,7 @@ jmp clear_carry
 
 // 32 bit logical xor memory and register
 xor_mem_reg_double:
-jsr or_mem_reg_start_2
+jsr xor_mem_reg_start_2
 iny
 jsr _load_byte_temp
 eor 2(_r_0),x
@@ -2079,19 +2095,19 @@ sta 3(_r_0),x
 jsr set_sign_zero_from_reg
 jmp clear_carry
 
-shift_temp: .bytes #0, #0, #0, #0
+shift_temp: .byte #0, #0, #0, #0
 
 _shift_left:
 lda 0(shift_temp)
-jne _shift_left_1
+bne _shift_left_1
 lda 1(shift_temp)
-jne _shift_left_1
+bne _shift_left_1
 lda 2(shift_temp)
-jne _shift_left_1
+bne _shift_left_1
 lda 3(shift_temp)
-jne _shift_left_1
+bne _shift_left_1
 // Exit point
-jsr set_carry_from_reg
+jsr set_carry_status
 jsr set_sign_zero_from_reg
 rts
 _shift_left_1:
@@ -2113,6 +2129,39 @@ dec 1(shift_temp)
 _shift_left_4:
 dec 0(shift_temp)
 jmp _shift_left
+
+_shift_right:
+lda 0(shift_temp)
+bne _shift_right_1
+lda 1(shift_temp)
+bne _shift_right_1
+lda 2(shift_temp)
+bne _shift_right_1
+lda 3(shift_temp)
+bne _shift_right_1
+// Exit point
+jsr set_carry_status
+jsr set_sign_zero_from_reg
+rts
+_shift_right_1:
+lsr 3(_r_0),x
+ror 2(_r_0),x
+ror 1(_r_0),x
+ror 1(_r_0),x
+lda 0(shift_temp)
+bne _shift_right_2
+lda 1(shift_temp)
+bne _shift_right_3
+lda 2(shift_temp)
+bne _shift_right_4
+dec 3(shift_temp)
+_shift_right_2:
+dec 2(shift_temp)
+_shift_right_3:
+dec 1(shift_temp)
+_shift_right_4:
+dec 0(shift_temp)
+jmp _shift_right
 
 // Shift left register by constant
 shl_const_reg:
@@ -2161,36 +2210,90 @@ rts
 
 // 8 bit shift left memory and register
 shl_mem_reg_short:
-jsr xor_mem_reg_start
+jsr shl_mem_reg_start
 lda #0
 sta 1(shift_temp)
 sta 1(shift_temp)
 sta 1(shift_temp)
-jsr set_sign_zero_from_reg
-jmp clear_carry
+jmp _shift_left
 
 // 16 bit shift left memory and register
 shl_mem_reg_long:
 jsr shl_mem_reg_start_2
 lda #0
-sta 2(_r_0),x
-sta 3(_r_0),x
-jsr set_sign_zero_from_reg
-jmp clear_carry
+sta 2(shift_temp)
+sta 3(shift_temp)
+jmp _shift_left
 
-// 32 bit logical xor memory and register
-xor_mem_reg_double:
-jsr or_mem_reg_start_2
+// 32 bit shift left memory and register
+shl_mem_reg_double:
+jsr shl_mem_reg_start_2
 iny
 jsr _load_byte_temp
-eor 2(_r_0),x
-sta 2(_r_0),x
+sta 2(shift_temp)
 iny
 jsr _load_byte_temp
-eor 3(_r_0),x
-sta 3(_r_0),x
-jsr set_sign_zero_from_reg
-jmp clear_carry
+sta 3(shift_temp)
+jmp _shift_left
+
+// Shift right register by constant
+shr_const_reg:
+ldy #1
+jsr _load_byte_pc
+sta 0(shift_temp)
+iny
+jsr _load_byte_pc
+sta 1(shift_temp)
+iny
+jsr _load_byte_pc
+sta 2(shift_temp)
+iny
+jsr _load_byte_pc
+sta 3(shift_temp)
+jsr _shift_right
+jmp inc_pc_4
+
+// Shift right register by register
+shr_reg_reg:
+lda 0(_r_0),x
+sta 0(shift_temp)
+lda 1(_r_0),x
+sta 1(shift_temp)
+lda 2(_r_0),x
+sta 2(shift_temp)
+lda 3(_r_0),x
+sta 3(shift_temp)
+tya
+tax
+jmp _shift_right
+
+// 8 bit shift right memory and register
+shr_mem_reg_short:
+jsr shl_mem_reg_start
+lda #0
+sta 1(shift_temp)
+sta 1(shift_temp)
+sta 1(shift_temp)
+jmp _shift_right
+
+// 16 bit shift right memory and register
+shr_mem_reg_long:
+jsr shl_mem_reg_start_2
+lda #0
+sta 2(shift_temp)
+sta 3(shift_temp)
+jmp _shift_right
+
+// 32 bit shift right memory and register
+shr_mem_reg_double:
+jsr shl_mem_reg_start_2
+iny
+jsr _load_byte_temp
+sta 2(shift_temp)
+iny
+jsr _load_byte_temp
+sta 3(shift_temp)
+jmp _shift_right
 
 // Logical not register
 not_reg:

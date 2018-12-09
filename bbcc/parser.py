@@ -478,6 +478,9 @@ class Parser:
                 args = []
                 index += 1
 
+                if isinstance(cur, ast.Identifier) and cur.identifier.value == "__asm__":
+                    return self.parse_asm(index)
+
                 if self.token_is(index, RPAREM):
                     return ast.FuncCall(cur, args), index + 1
 
@@ -503,6 +506,81 @@ class Parser:
                 cur = ast.PostDecr(cur)
             else:
                 return cur, index
+
+    def parse_asm(self, index):
+        if not self.token_is(index, STRING):
+            self.error()
+        asm = self.tokens[index]
+        index += 1
+        outputs = []
+        inputs = []
+        clobbers = []
+
+        if self.token_is(index, COLON):
+            outputs, index = self.parse_asm_list(index + 1)
+            if self.token_is(index, COLON):
+                inputs, index = self.parse_asm_list(index + 1)
+                if self.token_is(index, COLON):
+                    clobbers, index = self.parse_asm_list(index + 1, False)
+
+        if not self.token_is(index, RPAREM):
+            self.error()
+        return ast.InlineAsm(asm.value, outputs, inputs, clobbers), index + 1
+
+    def parse_asm_list(self, index, parse_vars=True):
+        ops = []
+        while True:
+            if not self.token_is(index, STRING):
+                break
+            modifiers = self.tokens[index].value.decode()
+            index += 1
+            if parse_vars:
+                index = self.eat(index, LPAREM)
+                var, index = self.parse_expression(index)
+                index = self.eat(index, RPAREM)
+                modifiers = self.parse_asm_modifiers(modifiers)
+                ops.append((var, modifiers))
+            else:
+                ops.append(modifiers)
+            if self.token_is(index, COMMA):
+                index += 1
+            else:
+                break
+        return ops, index
+
+    def parse_asm_modifiers(self, modifier: str):
+        read_write = ast.InlineAsmConstraint.READ_WRITE
+        constraint = ast.InlineAsmConstraint.ANY
+        extra = None
+        i = 0
+        for i, c in enumerate(modifier):
+            if c == "=":
+                read_write = ast.InlineAsmConstraint.WRITE_ONLY
+            elif c == "+":
+                read_write = ast.InlineAsmConstraint.READ_WRITE
+            else:
+                break
+        for i, c in enumerate(modifier[i:]):
+            if c == "m":
+                constraint = ast.InlineAsmConstraint.MEMORY
+            elif c == "r":
+                i += 1
+                c = modifier[i]
+                if c.isdigit():
+                    reg_num = ""
+                    while c.isdigit():
+                        reg_num += c
+                        i += 1
+                        c = modifier[i]
+                    constraint = ast.InlineAsmConstraint.SPECIFIC_REGISTER
+                    extra = int(reg_num)
+                else:
+                    constraint = ast.InlineAsmConstraint.REGISTER
+            elif c == "i" or c == "n":
+                constraint = ast.InlineAsmConstraint.IMMEDIATE
+            elif c == "g" or c == "X":
+                constraint = ast.InlineAsmConstraint.ANY
+        return ast.InlineAsmConstraint([read_write], constraint, extra)
 
     def parse_primary(self, index):
         """Parse primary expression."""

@@ -5,5 +5,6 @@
 int main() {
     writeio(0xFE00, 12);
     writeio(0xFE01, ((SCREEN_START >> 4) - 0x74) ^ 0x20);
+    __asm__("mov6502 %0 $FE00" : : "g"(12));
 }
 

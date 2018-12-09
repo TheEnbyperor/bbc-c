@@ -477,6 +477,19 @@ class Interpreter(ast.NodeVisitor):
         self.il.add(il.ExcOr(left_val, right_val, output))
         return output
 
+    def visit_ShiftLeft(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+
+        left_val = left.val(self.il)
+        right_val = right.val(self.il)
+        left_val, right_val = self._arith_convert(left_val, right_val)
+
+        output = il.ILValue(left_val.type)
+
+        self.il.add(il.ShiftLeft(left_val, right_val, output))
+        return output
+
     def visit_Negate(self, node):
         expr = self.visit(node.expr).val(self.il)
 
@@ -908,6 +921,9 @@ class Interpreter(ast.NodeVisitor):
             value = il.ILValue(self.current_function.ctype.ret)
             self.il.register_literal_value(value, 0)
         self.il.add(il.Return(value))
+
+    def visit_InlineAsm(self, node):
+        self.il.add(il.Asm(node))
 
     def interpret(self, ast_root) -> il.IL:
         self.visit(ast_root)

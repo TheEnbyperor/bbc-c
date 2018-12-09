@@ -514,6 +514,52 @@ class Assembler:
             raise SyntaxError(f"Can't xor {node.left} and {node.right}")
 
     @setup_labels
+    def visit_Shl(self, node: ast.Or):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x72)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x71)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x73)
+            elif node.left.length == 2:
+                self.insts.append(0x74)
+            elif node.left.length == 4:
+                self.insts.append(0x75)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't shl {node.left} and {node.right}")
+
+    @setup_labels
+    def visit_Shr(self, node: ast.Or):
+        if isinstance(node.left, ast.RegisterValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x77)
+            self.get_reg_val(node.left, node.right)
+            self.loc += 1
+        elif isinstance(node.left, ast.LiteralValue) and isinstance(node.right, ast.RegisterValue):
+            self.insts.append(0x76)
+            self.get_reg_val(node.right, None)
+            self.insts.extend(struct.pack("<h", node.left.val))
+            self.loc += 3
+        elif isinstance(node.left, ast.MemoryValue) and isinstance(node.right, ast.RegisterValue):
+            if node.left.length == 1:
+                self.insts.append(0x78)
+            elif node.left.length == 2:
+                self.insts.append(0x79)
+            elif node.left.length == 4:
+                self.insts.append(0x7a)
+            self.get_mem_reg_val(node.left, node.right, 1, 2)
+            self.loc += 1
+        else:
+            raise SyntaxError(f"Can't shr {node.left} and {node.right}")
+
+    @setup_labels
     def visit_Jmp(self, node: ast.Jmp):
         if isinstance(node.value, ast.MemoryValue):
             if node.value.length != 4:
