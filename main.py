@@ -105,7 +105,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", help="Compile and assemble but do not link", action="store_true")
     parser.add_argument("-shared", help="Create a shared library", action="store_true")
     parser.add_argument("-static", help="Create a statically linked executable", action="store_true")
-    parser.add_argument("-strip", help="Strip names of internal symbols", action="store_true")
+    parser.add_argument("-strip", help="Strip names of internal symbols from executable header", action="store_true")
     parser.add_argument("-6502", help="Assemble and link (not compile) for 6502 instead of VM", action="store_true")
     parser.add_argument("files", nargs="+", help="Input files", type=str)
 

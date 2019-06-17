@@ -1,7 +1,6 @@
-#include "string.h"
+#include "stdio.h"
 
 
 int main() {
-    char a[20];
-    memcpy(a, "hello", 5);
+    printf("Hello, world!\n");
 }

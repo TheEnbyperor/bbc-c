@@ -1,10 +1,10 @@
-# 16-bit virtual machine for the 6502 - Instruction set
+# 32-bit virtual machine for the 6502 - Instruction set
 
 ## Registers
 
 There are 16 registers available R0-R15. Each register is 32-bits long. 
 
-A few registers have special purposes. Note the base pointer and return register are not enforced anywhere in the VM, they are just convention.
+A few registers have special purposes. Note the base pointer and return register are not enforced anywhere in the VM, they are merely convention.
 
 | Register | Purpose                |
 | -------- | ---------------------- |
@@ -12,9 +12,9 @@ A few registers have special purposes. Note the base pointer and return register
 | R14      | Stack pointer          |
 | R13      | Status register in LSB |
 | R12      | Base pointer           |
-| R0       | Return register        |
+| R0       | Return value register        |
 
-The status register is as such, where X means not used.
+The status register is as follows, where X means not used.
 
 |  7     |  6     |  5     |  4     |    3       |  2     |  1     | 0       |
 | :----: | :----: | :----: | :----: | :--------: | :----: | :----: | :-----: |
